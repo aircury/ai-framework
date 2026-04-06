@@ -2,7 +2,7 @@
 
 ## Framework
 
-This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).
+This project follows the SDD engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).
 
 All agents contributing to this repository MUST read and apply FRAMEWORK.md before doing any work. It is not optional and it is not advisory.
 
