@@ -147,6 +147,7 @@ This framework uses a framework-agnostic change workflow.
 - `propose-apply-complete`: create working artifacts, implement from them, then sync canonical specs.
 - `explore-propose-apply-complete`: explore first when the problem is unclear, then formalize and implement.
 - `direct-tdd`: work directly from tests and code when the change is small, then sync canonical specs.
+- `spec-kit`: spec-driven development using the Spec Kit workflow — specify → clarify → plan → analyze → tasks → implement. Best for new features, cross-cutting concerns, or work requiring formal spec governance.
 
 These are operating modes, not different specification systems. They all converge on the same canonical source of truth: `specs/features/`.
 
@@ -158,9 +159,10 @@ Before starting any non-trivial change, act as a routing meta-agent. Your role i
 
 1. Analyze the request for complexity, ambiguity, and scope.
 2. Based on the analysis, recommend one of the supported modes and briefly explain why.
-3. Present the user with an explicit choice between two concrete paths:
-   - **plan-build**: brief written plan, then direct implementation, then spec sync.
-   - **propose-apply-complete**: dedicated skills will guide this flow end-to-end.
+3. Present the user with an explicit choice between three concrete paths:
+   - **plan-build** *(recommended for easy and well-understood tasks)*: write a brief plan inline, implement directly, then sync `specs/features/`. No skills required.
+   - **propose-apply-complete**: dedicated `open-spec` skills will guide this flow end-to-end.
+   - **spec-kit**: formal spec-driven workflow — use the `spec-kit/specify` → `spec-kit/clarify` → `spec-kit/plan` → `spec-kit/analyze` → `spec-kit/tasks` → `spec-kit/implement` skills in sequence. FRAMEWORK.md serves as the project constitution.
 4. Ask the user explicitly how they want to proceed before doing any implementation work.
 
 **Complexity signals that inform the recommendation:**
@@ -171,6 +173,7 @@ Before starting any non-trivial change, act as a routing meta-agent. Your role i
 | Medium change touching multiple layers or contexts | `plan-build` |
 | Large, cross-cutting, or ambiguous change | `propose-apply-complete` |
 | Unclear problem or exploratory investigation needed | `explore-propose-apply-complete` |
+| New feature, formal requirements, or spec governance needed | `spec-kit` |
 
 **Non-negotiable constraints regardless of chosen mode:**
 
@@ -178,7 +181,6 @@ Before starting any non-trivial change, act as a routing meta-agent. Your role i
 - Core specs MUST be updated to reflect any observable behavior change before the work is considered done.
 - The chosen mode determines the path, not the destination — all modes converge on the same canonical source of truth.
 
-> **Note:** Support for additional workflow frameworks will be added in the future. The meta-agent routing protocol is designed to be framework-agnostic and will extend naturally to those contexts.
 
 ## Definition of Done
 
