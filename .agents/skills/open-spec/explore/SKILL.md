@@ -1,5 +1,5 @@
 ---
-name: sdd-explore
+name: open-spec/explore
 description: Enter explore mode - a thinking partner for exploring ideas, investigating problems, and clarifying requirements. Use when the user wants to think through something before or during a change.
 license: MIT
 compatibility: No external workflow CLI required.
@@ -192,7 +192,7 @@ You: [reads codebase]
 
 **User is stuck mid-implementation:**
 ```
-User: /sdd:explore add-auth-system
+User: open-spec/explore add-auth-system
       The OAuth integration is more complex than expected
 
 You: [reads change artifacts]
