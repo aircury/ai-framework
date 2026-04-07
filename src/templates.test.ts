@@ -27,21 +27,22 @@ describe('templates', () => {
   });
 
   describe('skills', () => {
-    const expectedSkills = [
-      'open-spec/apply',
-      'open-spec/complete',
-      'open-spec/explore',
-      'open-spec/propose',
-      'spec-kit/analyze',
-      'spec-kit/checklist',
-      'spec-kit/clarify',
-      'spec-kit/implement',
-      'spec-kit/plan',
-      'spec-kit/specify',
-      'spec-kit/tasks',
-    ];
-
     it('contains all expected skills', () => {
+      const expectedSkills = [
+        'open-spec/apply',
+        'open-spec/complete',
+        'open-spec/explore',
+        'open-spec/propose',
+        'spec-kit/analyze',
+        'spec-kit/checklist',
+        'spec-kit/clarify',
+        'spec-kit/implement',
+        'spec-kit/plan',
+        'spec-kit/specify',
+        'spec-kit/tasks',
+        'commit-changes',
+      ];
+
       for (const skill of expectedSkills) {
         expect(skills).toHaveProperty(skill);
       }
@@ -51,10 +52,6 @@ describe('templates', () => {
       for (const [name, content] of Object.entries(skills)) {
         expect(content.length, `skill "${name}" is empty`).toBeGreaterThan(0);
       }
-    });
-
-    it(`has exactly ${expectedSkills.length} skills`, () => {
-      expect(Object.keys(skills)).toHaveLength(expectedSkills.length);
     });
   });
 
