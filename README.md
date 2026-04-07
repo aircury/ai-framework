@@ -40,6 +40,29 @@ The result is an agent that knows not just *how* to work, but *what to protect* 
 
 ---
 
+## Using with Claude Code
+
+This framework follows the emerging `.agents` / `AGENTS.md` convention. Claude Code uses different names for the same concepts:
+
+| Standard convention | Claude Code equivalent |
+|---------------------|------------------------|
+| `AGENTS.md`         | `CLAUDE.md`            |
+| `.agents/`          | `.claude/`             |
+
+To configure a project for Claude Code, copy or symlink the files accordingly:
+
+```bash
+# Project root instructions
+cp AGENTS.md CLAUDE.md          # or: ln -s AGENTS.md CLAUDE.md
+
+# Skills / commands directory
+cp -r .agents/ .claude/         # or: ln -s .agents .claude
+```
+
+Everything else — workflow modes, skill groups, routing logic — works identically. The only difference is the file and directory names Claude Code looks for.
+
+---
+
 ## Skill groups
 
 | Group | Skills | Source |
