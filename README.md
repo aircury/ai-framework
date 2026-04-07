@@ -1,5 +1,7 @@
 # Aircury AI Framework
 
+[![npm](https://img.shields.io/npm/v/@aircury/ai-framework)](https://www.npmjs.com/package/@aircury/ai-framework)
+
 The Aircury AI Framework is a meta-framework for AI-assisted software engineering. It defines how AI agents should think, plan, and deliver code across all Aircury projects — enforcing architectural discipline, domain modeling standards, and a spec-driven delivery culture regardless of the workflow a team chooses.
 
 It is inspired by two open-source frameworks:
