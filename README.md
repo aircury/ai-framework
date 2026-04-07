@@ -40,26 +40,29 @@ The result is an agent that knows not just *how* to work, but *what to protect* 
 
 ---
 
-## Using with Claude Code
+## Installation
 
-This framework follows the emerging `.agents` / `AGENTS.md` convention. Claude Code uses different names for the same concepts:
-
-| Standard convention | Claude Code equivalent |
-|---------------------|------------------------|
-| `AGENTS.md`         | `CLAUDE.md`            |
-| `.agents/`          | `.claude/`             |
-
-To configure a project for Claude Code, copy or symlink the files accordingly:
+Run the installer from any project directory (or your home directory for a global setup):
 
 ```bash
-# Project root instructions
-cp AGENTS.md CLAUDE.md          # or: ln -s AGENTS.md CLAUDE.md
-
-# Skills directory
-cp -r .agents/ .claude/         # or: ln -s .agents .claude
+bunx @aircury/ai-framework
+# or
+npx @aircury/ai-framework
 ```
 
-Everything else — workflow modes, skill groups, routing logic — works identically. The only difference is the file and directory names Claude Code looks for.
+The interactive TUI will ask two questions:
+
+1. **Scope** — `Local` to configure the current project, `Global` to configure your machine.
+2. **AI tools** — select one or both of `Claude Code` and `OpenCode`.
+
+The installer writes all required configuration files (agent instructions, skills, and workflow definitions) to the right locations for each tool. If files already exist you can choose to skip them or overwrite them.
+
+### What gets installed
+
+| Scope | Claude Code | OpenCode |
+|-------|-------------|----------|
+| Local | `CLAUDE.md`, `.claude/` | `AGENTS.md`, `.opencode/` |
+| Global | `~/.claude/CLAUDE.md`, `~/.claude/` | — |
 
 ---
 
