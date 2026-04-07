@@ -55,7 +55,7 @@ To configure a project for Claude Code, copy or symlink the files accordingly:
 # Project root instructions
 cp AGENTS.md CLAUDE.md          # or: ln -s AGENTS.md CLAUDE.md
 
-# Skills / commands directory
+# Skills directory
 cp -r .agents/ .claude/         # or: ln -s .agents .claude
 ```
 
