@@ -73,7 +73,7 @@ describe('getGlobalFiles', () => {
     expect(files).toHaveLength(SKILL_COUNT);
     const home = homedir();
     for (const file of files) {
-      expect(file.path).toStartWith(join(home, '.claude', 'commands'));
+      expect(file.path).toStartWith(join(home, '.claude', 'skills'));
     }
   });
 });

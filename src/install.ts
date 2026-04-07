@@ -69,9 +69,9 @@ export function getGlobalFiles(tools: Tool[]): InstallFile[] {
   if (tools.includes('claude-code')) {
     for (const [name, content] of Object.entries(skills)) {
       files.push({
-        path: join(home, '.claude', 'commands', `${name}.md`),
+        path: join(home, '.claude', 'skills', name, 'SKILL.md'),
         content,
-        description: `/${name.replace('/', ':')} skill (global Claude Code)`,
+        description: `${name} skill (global Claude Code)`,
       });
     }
   }
