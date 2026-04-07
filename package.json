@@ -3,11 +3,17 @@
   "version": "0.1.0",
   "description": "Aircury AI Framework installer — sets up hexagonal architecture, DDD, TDD, and AI agent configs in any project",
   "bin": {
-    "ai-framework": "./src/cli.ts"
+    "ai-framework": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "start": "bun run src/cli.ts",
-    "build": "bun build src/cli.ts --compile --outfile dist/ai-framework --target bun",
+    "build": "bun build src/cli.ts --outfile dist/cli.js --target node --sourcemap=none",
     "test": "bun test"
   },
   "dependencies": {

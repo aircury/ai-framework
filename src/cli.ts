@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 import { run } from './tui';
 
 run().catch((err) => {
