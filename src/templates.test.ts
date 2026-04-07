@@ -62,6 +62,7 @@ describe('templates', () => {
     it('includes opencode frontmatter', () => {
       const output = generateOpencodeAgent();
       expect(output).toContain('---');
+      expect(output).toContain('name: Aircury Agent');
       expect(output).toContain('mode: primary');
     });
 

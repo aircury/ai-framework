@@ -44,7 +44,7 @@ export function getLocalFiles(tools: Tool[]): InstallFile[] {
 
   if (tools.includes('opencode')) {
     files.push({
-      path: '.opencode/agents/sdd.md',
+      path: '.opencode/agents/aircury.md',
       content: generateOpencodeAgent(),
       description: 'Aircury AI Framework agent for OpenCode (generated from FRAMEWORK.md)',
     });

@@ -32,11 +32,12 @@ export const skills: Record<string, string> = {
 
 export function generateOpencodeAgent(): string {
   return `---
-description: SDD engineering agent. Apply when working on any project. Enforces hexagonal architecture, DDD, TDD, and the meta-agent routing protocol defined in FRAMEWORK.md.
+name: Aircury Agent
+description: Aircury AI engineering agent. Apply when working on any project. Enforces hexagonal architecture, DDD, TDD, and the meta-agent routing protocol defined in FRAMEWORK.md.
 mode: primary
 ---
 
-You are the SDD engineering agent. Apply the following rules to every task in this project.
+You are the Aircury Agent. Apply the following rules to every task in this project.
 
 ${FRAMEWORK}`;
 }

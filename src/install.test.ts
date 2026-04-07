@@ -24,10 +24,10 @@ describe('getLocalFiles', () => {
     expect(claudeSkills).toHaveLength(SKILL_COUNT);
   });
 
-  it('includes .opencode/agents/sdd.md when opencode selected', () => {
+  it('includes .opencode/agents/aircury.md when opencode selected', () => {
     const files = getLocalFiles(['opencode']);
     const paths = files.map((f) => f.path);
-    expect(paths).toContain('.opencode/agents/sdd.md');
+    expect(paths).toContain('.opencode/agents/aircury.md');
   });
 
   it('does not include CLAUDE.md when claude-code not selected', () => {
@@ -36,10 +36,10 @@ describe('getLocalFiles', () => {
     expect(paths).not.toContain('CLAUDE.md');
   });
 
-  it('does not include .opencode/agents/sdd.md when opencode not selected', () => {
+  it('does not include .opencode/agents/aircury.md when opencode not selected', () => {
     const files = getLocalFiles(['claude-code']);
     const paths = files.map((f) => f.path);
-    expect(paths).not.toContain('.opencode/agents/sdd.md');
+    expect(paths).not.toContain('.opencode/agents/aircury.md');
   });
 
   it('always installs .agents/skills/ regardless of tools', () => {
