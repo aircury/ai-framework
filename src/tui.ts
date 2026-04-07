@@ -50,6 +50,9 @@ export async function run(): Promise<void> {
     p.log.info(`${exists ? '~' : '+'} ${label}`);
   }
 
+  const confirmed = await p.confirm({ message: 'Proceed with installation?' });
+  if (p.isCancel(confirmed) || !confirmed) return p.cancel('Cancelled.');
+
   let overwrite: 'skip' | 'overwrite' = 'skip';
   if (existingCount > 0) {
     const choice = await p.select<'skip' | 'overwrite'>({
