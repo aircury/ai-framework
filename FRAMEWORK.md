@@ -141,7 +141,6 @@ This framework uses a framework-agnostic change workflow.
 - `plan-build`: plan briefly, implement, then sync canonical specs.
 - `propose-apply-complete`: create working artifacts, implement from them, then sync canonical specs.
 - `explore-propose-apply-complete`: explore first when the problem is unclear, then formalize and implement.
-- `direct-tdd`: work directly from tests and code when the change is small, then sync canonical specs.
 - `spec-kit`: spec-driven development using the Spec Kit workflow — specify → clarify → plan → analyze → tasks → implement. Best for new features, cross-cutting concerns, or work requiring formal spec governance.
 
 These are operating modes, not different specification systems. They all converge on the same canonical source of truth: `specs/features/`.
@@ -164,7 +163,7 @@ Before starting any non-trivial change, the agent MUST act as a routing meta-age
 
 | Signal | Recommended mode |
 |--------|-----------------|
-| Small, well-understood change with clear scope | `plan-build` or `direct-tdd` |
+| Small, well-understood change with clear scope | `plan-build` |
 | Medium change touching multiple layers or contexts | `plan-build` |
 | Large, cross-cutting, or ambiguous change | `propose-apply-complete` |
 | Unclear problem or exploratory investigation needed | `explore-propose-apply-complete` |
@@ -172,6 +171,7 @@ Before starting any non-trivial change, the agent MUST act as a routing meta-age
 
 **Non-negotiable constraints regardless of chosen mode:**
 
+- TDD is mandatory in every mode. Write a failing test before any implementation.
 - Core specs in `specs/features/` MUST be read and respected before implementation begins.
 - Core specs MUST be updated to reflect any observable behavior change before the work is considered done.
 - The chosen mode determines the path, not the destination — all modes converge on the same canonical source of truth.

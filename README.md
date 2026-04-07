@@ -78,7 +78,6 @@ All skills write ephemeral working artifacts to `specs/changes/<name>/` and sync
 
 | Mode | When to use | Skills |
 |------|-------------|--------|
-| `direct-tdd` | Small, well-understood change | None |
 | `plan-build` | Easy to medium changes — the default for most tasks | None |
 | `propose-apply-complete` | Complex or cross-cutting change | `open-spec/*` |
 | `explore-propose-apply-complete` | Unclear problem requiring investigation first | `open-spec/explore`, then `open-spec/*` |
