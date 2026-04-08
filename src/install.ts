@@ -1,9 +1,9 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { homedir } from 'node:os';
-import { FRAMEWORK, AGENTS, skills, generateOpencodeAgent } from './templates';
+import { FRAMEWORK, AGENTS, skills } from './templates';
 
-export type Tool = 'claude-code' | 'opencode';
+export type Tool = 'claude-code' | 'gemini-cli';
 export type Scope = 'local' | 'global';
 
 export interface InstallFile {
@@ -42,11 +42,11 @@ export function getLocalFiles(tools: Tool[]): InstallFile[] {
     }
   }
 
-  if (tools.includes('opencode')) {
+  if (tools.includes('gemini-cli')) {
     files.push({
-      path: '.opencode/agents/aircury.md',
-      content: generateOpencodeAgent(),
-      description: 'Aircury AI Framework agent for OpenCode (generated from FRAMEWORK.md)',
+      path: 'GEMINI.md',
+      content: AGENTS,
+      description: 'Agent instructions for Gemini CLI',
     });
   }
 

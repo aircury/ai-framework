@@ -15,15 +15,23 @@ export async function run(): Promise<void> {
 
   if (p.isCancel(scope)) return p.cancel('Cancelled.');
 
-  const toolOptions: { value: Tool; label: string }[] = scope === 'global'
-    ? [{ value: 'claude-code', label: 'Claude Code' }]
+  if (scope === 'local') {
+    const universalTools = ['Amp', 'Codex', 'Cursor', 'GitHub Copilot', 'Kilo Code', 'OpenCode'];
+    p.note(
+      universalTools.join(' · '),
+      'Universal — always included via AGENTS.md + .agents/skills/',
+    );
+  }
+
+  const toolOptions: { value: Tool; label: string; hint: string }[] = scope === 'global'
+    ? [{ value: 'claude-code', label: 'Claude Code', hint: 'installs ~/.claude/skills/' }]
     : [
-        { value: 'claude-code', label: 'Claude Code' },
-        { value: 'opencode', label: 'OpenCode' },
+        { value: 'claude-code', label: 'Claude Code', hint: 'CLAUDE.md + .claude/skills/' },
+        { value: 'gemini-cli', label: 'Gemini CLI', hint: 'GEMINI.md' },
       ];
 
   const selectedTools = await p.multiselect<Tool>({
-    message: 'Which AI tools do you use?',
+    message: 'Additional tools — need tool-specific config',
     options: toolOptions,
     initialValues: toolOptions.map((o) => o.value),
   });
