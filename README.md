@@ -4,10 +4,14 @@
 
 The Aircury AI Framework is a meta-framework for AI-assisted software engineering. It defines how AI agents should think, plan, and deliver code across all Aircury projects — enforcing architectural discipline, domain modeling standards, and a spec-driven delivery culture regardless of the workflow a team chooses.
 
-It is inspired by two open-source frameworks:
+For most tasks, no workflow framework is needed at all. If a change is well-understood and clearly scoped, `plan-build` — the default mode — is sufficient: describe the task, let the agent plan and implement it. Adding structured workflows to a simple, clear task is overkill.
+
+The frameworks exist for when they are genuinely needed. Two open-source tools inform this layer:
 
 - **[OpenSpec](https://github.com/Fission-AI/OpenSpec/)** — a lightweight spec-driven development workflow built around a fast propose → apply → complete cycle.
 - **[Spec Kit](https://github.com/github/spec-kit)** — a formal specification toolkit with structured steps for requirement writing, clarification, planning, and consistency analysis.
+
+Note that the specs themselves — the living `specs/features/` records of system behavior — are independent of these frameworks. They accumulate regardless of which workflow mode produced them, and serve as the canonical source of truth whether the task went through `plan-build`, `open-spec`, or `spec-kit`.
 
 ---
 
