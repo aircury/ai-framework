@@ -1,0 +1,1 @@
+- Dependencies flow inward only: `infrastructure -> application -> domain`. Never invert.

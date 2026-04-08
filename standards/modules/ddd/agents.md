@@ -1,0 +1,1 @@
+- Keep domain modeling concerns explicit and avoid leaking infrastructure into core business logic.

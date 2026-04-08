@@ -1,4 +1,6 @@
 import * as p from '@clack/prompts';
+import { STANDARD_MODULES } from './framework';
+import type { StandardModuleId } from './framework';
 import { getLocalFiles, getGlobalFiles, checkConflicts, writeFile } from './install';
 import type { Tool, Scope } from './install';
 
@@ -38,11 +40,34 @@ export async function run(): Promise<void> {
 
   if (p.isCancel(selectedTools)) return p.cancel('Cancelled.');
 
+  let selectedModules: StandardModuleId[] = [];
+  if (scope === 'local') {
+    selectedModules = await p.multiselect<StandardModuleId>({
+      message: 'Standards modules — choose what this installation should enforce',
+      options: STANDARD_MODULES.map((module) => ({
+        value: module.id,
+        label: module.label,
+        hint: module.hint,
+      })),
+      initialValues: STANDARD_MODULES.filter((module) => module.defaultEnabled).map((module) => module.id),
+      required: false,
+    });
+
+    if (p.isCancel(selectedModules)) return p.cancel('Cancelled.');
+
+    if (selectedModules.length === 0) {
+      p.note(
+        'Only the core workflow constitution will be installed. Optional standards can be re-enabled later by reinstalling or editing .aircury/framework.config.json.',
+        'No optional standards selected',
+      );
+    }
+  }
+
   const cwd = process.cwd();
   const isGlobal = scope === 'global';
   const files = isGlobal
     ? getGlobalFiles(selectedTools)
-    : getLocalFiles(selectedTools);
+    : getLocalFiles(selectedTools, selectedModules);
 
   if (files.length === 0) {
     p.outro('Nothing to install.');

@@ -1,0 +1,7 @@
+{
+  "id": "hexagonal-architecture",
+  "label": "Hexagonal Architecture",
+  "hint": "ports and adapters around the core",
+  "description": "Requires inward dependencies and adapters around the application and domain core.",
+  "defaultEnabled": true
+}

@@ -1,17 +1,28 @@
-import FRAMEWORK from '../FRAMEWORK.md' with { type: 'text' };
-import AGENTS from '../AGENTS.md' with { type: 'text' };
+import type { StandardModuleId } from './framework';
+import { renderAgents, renderFramework } from './renderer';
 import { skills } from './skills.generated';
+
+const FRAMEWORK = renderFramework();
+const AGENTS = renderAgents();
 
 export { FRAMEWORK, AGENTS, skills };
 
-export function generateOpencodeAgent(): string {
+export function generateFramework(moduleIds?: StandardModuleId[]): string {
+  return renderFramework(moduleIds);
+}
+
+export function generateAgents(moduleIds?: StandardModuleId[]): string {
+  return renderAgents(moduleIds);
+}
+
+export function generateOpencodeAgent(moduleIds?: StandardModuleId[]): string {
   return `---
 name: Aircury Agent
-description: Aircury AI engineering agent. Apply when working on any project. Enforces hexagonal architecture, DDD, TDD, and the meta-agent routing protocol defined in FRAMEWORK.md.
+description: Aircury AI engineering agent. Apply when working on any project. Enforces the selected Aircury workflow and standards modules defined in FRAMEWORK.md.
 mode: primary
 ---
 
 You are the Aircury Agent. Apply the following rules to every task in this project.
 
-${FRAMEWORK}`;
+${generateFramework(moduleIds)}`;
 }

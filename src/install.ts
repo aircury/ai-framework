@@ -1,7 +1,9 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { homedir } from 'node:os';
-import { FRAMEWORK, AGENTS, skills } from './templates';
+import { createFrameworkProfile } from './framework';
+import type { StandardModuleId } from './framework';
+import { generateFramework, generateAgents, skills } from './templates';
 
 export type Tool = 'claude-code' | 'gemini-cli';
 export type Scope = 'local' | 'global';
@@ -12,24 +14,68 @@ export interface InstallFile {
   description: string;
 }
 
-export function getLocalFiles(tools: Tool[]): InstallFile[] {
+function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
+  const files: InstallFile[] = [
+    {
+      path: 'specs/features/README.md',
+      content: `# Living Specifications
+
+\`specs/features/\` stores the canonical, technology-agnostic description of observable system behavior.
+
+- Create one folder per capability.
+- Keep \`spec.md\` focused on requirements and scenarios.
+- Update these specs whenever observable behavior changes.
+`,
+      description: 'Living specs starter guide',
+    },
+  ];
+
+  if (moduleIds.includes('decision-records')) {
+    files.push({
+      path: 'specs/decisions/README.md',
+      content: `# Architecture Decision Records
+
+\`specs/decisions/\` stores ADRs that preserve architectural and workflow intent.
+
+- Create a new ADR when a material decision is introduced or superseded.
+- Reference the superseded ADR instead of rewriting history.
+- Read relevant ADRs before changing areas they govern.
+`,
+      description: 'ADR starter guide',
+    });
+  }
+
+  return files;
+}
+
+export function getLocalFiles(
+  tools: Tool[],
+  moduleIds?: StandardModuleId[],
+): InstallFile[] {
+  const profile = createFrameworkProfile(moduleIds);
   const files: InstallFile[] = [
     {
       path: 'FRAMEWORK.md',
-      content: FRAMEWORK,
+      content: generateFramework(profile.modules),
       description: 'Framework rules (source of truth)',
     },
     {
       path: 'AGENTS.md',
-      content: AGENTS,
+      content: generateAgents(profile.modules),
       description: 'Agent instructions (standard convention)',
     },
+    {
+      path: '.aircury/framework.config.json',
+      content: `${JSON.stringify(profile, null, 2)}\n`,
+      description: 'Installed standards profile',
+    },
+    ...getSpecsFiles(profile.modules),
   ];
 
   if (tools.includes('claude-code')) {
     files.push({
       path: 'CLAUDE.md',
-      content: AGENTS,
+      content: generateAgents(profile.modules),
       description: 'Agent instructions for Claude Code',
     });
 
@@ -45,7 +91,7 @@ export function getLocalFiles(tools: Tool[]): InstallFile[] {
   if (tools.includes('gemini-cli')) {
     files.push({
       path: 'GEMINI.md',
-      content: AGENTS,
+      content: generateAgents(profile.modules),
       description: 'Agent instructions for Gemini CLI',
     });
   }

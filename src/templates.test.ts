@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'bun:test';
-import { FRAMEWORK, AGENTS, skills, generateOpencodeAgent } from './templates';
+import { renderAgents, renderFramework } from './renderer';
+import {
+  FRAMEWORK,
+  AGENTS,
+  skills,
+  generateAgents,
+  generateFramework,
+  generateOpencodeAgent,
+} from './templates';
 
 describe('templates', () => {
   describe('FRAMEWORK', () => {
@@ -9,9 +17,13 @@ describe('templates', () => {
     });
 
     it('contains core framework sections', () => {
-      expect(FRAMEWORK).toContain('## TDD Workflow');
-      expect(FRAMEWORK).toContain('## Non-Negotiable Architecture Rules');
+      expect(FRAMEWORK).toContain('## Core Workflow Constitution');
       expect(FRAMEWORK).toContain('## Definition of Done');
+    });
+
+    it('matches the generated default profile', () => {
+      expect(generateFramework()).toBe(FRAMEWORK);
+      expect(renderFramework()).toBe(FRAMEWORK);
     });
   });
 
@@ -23,6 +35,11 @@ describe('templates', () => {
 
     it('references FRAMEWORK.md', () => {
       expect(AGENTS).toContain('FRAMEWORK.md');
+    });
+
+    it('matches the generated default profile', () => {
+      expect(generateAgents()).toBe(AGENTS);
+      expect(renderAgents()).toBe(AGENTS);
     });
   });
 
@@ -70,6 +87,30 @@ describe('templates', () => {
 
     it('is deterministic', () => {
       expect(generateOpencodeAgent()).toBe(generateOpencodeAgent());
+    });
+  });
+
+  describe('module-aware generation', () => {
+    it('adds ADR guidance only when the ADR module is enabled', () => {
+      expect(generateFramework(['decision-records'])).toContain('## Architecture Decision Records');
+      expect(generateFramework([])).not.toContain('## Architecture Decision Records');
+    });
+
+    it('adds TDD guidance only when the TDD module is enabled', () => {
+      expect(generateFramework(['tdd'])).toContain('## TDD Workflow');
+      expect(generateFramework([])).not.toContain('## TDD Workflow');
+    });
+
+    it('adds architecture rules only when architecture modules are enabled', () => {
+      expect(generateFramework(['hexagonal-architecture', 'ddd'])).toContain(
+        '## Non-Negotiable Architecture Rules',
+      );
+      expect(generateFramework([])).not.toContain('## Non-Negotiable Architecture Rules');
+    });
+
+    it('adds ADR reading instructions to AGENTS.md only when enabled', () => {
+      expect(generateAgents(['decision-records'])).toContain('specs/decisions/');
+      expect(generateAgents([])).not.toContain('specs/decisions/');
     });
   });
 });

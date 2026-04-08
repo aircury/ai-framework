@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { tmpdir } from 'node:os';
 import { getLocalFiles, getGlobalFiles, checkConflicts, writeFile } from './install';
-import { skills, FRAMEWORK, AGENTS } from './templates';
+import { skills } from './templates';
 
 const SKILL_COUNT = Object.keys(skills).length;
 
@@ -14,6 +14,7 @@ describe('getLocalFiles', () => {
     const paths = files.map((f) => f.path);
     expect(paths).toContain('FRAMEWORK.md');
     expect(paths).toContain('AGENTS.md');
+    expect(paths).toContain('.aircury/framework.config.json');
   });
 
   it('includes CLAUDE.md and .claude/commands/ skills when claude-code selected', () => {
@@ -45,7 +46,8 @@ describe('getLocalFiles', () => {
   it('GEMINI.md content matches AGENTS.md content', () => {
     const files = getLocalFiles(['gemini-cli']);
     const gemini = files.find((f) => f.path === 'GEMINI.md')!;
-    expect(gemini.content).toBe(AGENTS);
+    const agents = files.find((f) => f.path === 'AGENTS.md')!;
+    expect(gemini.content).toBe(agents.content);
   });
 
   it('always installs .agents/skills/ regardless of tools', () => {
@@ -54,10 +56,40 @@ describe('getLocalFiles', () => {
     expect(skillPaths).toHaveLength(SKILL_COUNT);
   });
 
-  it('FRAMEWORK.md content matches the template', () => {
+  it('persists the selected standards modules in a config file', () => {
+    const files = getLocalFiles([], ['decision-records', 'tdd']);
+    const config = files.find((f) => f.path === '.aircury/framework.config.json');
+    expect(config).toBeDefined();
+    expect(config!.content).toContain('"decision-records"');
+    expect(config!.content).toContain('"tdd"');
+  });
+
+  it('generates framework content from the selected modules', () => {
+    const files = getLocalFiles([], ['decision-records']);
+    const framework = files.find((f) => f.path === 'FRAMEWORK.md')!;
+    expect(framework.content).toContain('## Architecture Decision Records');
+    expect(framework.content).not.toContain('## TDD Workflow');
+    expect(framework.content).not.toContain('## Non-Negotiable Architecture Rules');
+  });
+
+  it('includes ADR instructions in AGENTS.md when the ADR module is enabled', () => {
+    const files = getLocalFiles([], ['decision-records']);
+    const agents = files.find((f) => f.path === 'AGENTS.md')!;
+    expect(agents.content).toContain('specs/decisions/');
+  });
+
+  it('omits ADR instructions when the ADR module is disabled', () => {
+    const files = getLocalFiles([], []);
+    const agents = files.find((f) => f.path === 'AGENTS.md')!;
+    expect(agents.content).not.toContain('specs/decisions/');
+  });
+
+  it('uses the full recommended profile by default', () => {
     const files = getLocalFiles([]);
-    const fw = files.find((f) => f.path === 'FRAMEWORK.md')!;
-    expect(fw.content).toBe(FRAMEWORK);
+    const framework = files.find((f) => f.path === 'FRAMEWORK.md')!;
+    expect(framework.content).toContain('## TDD Workflow');
+    expect(framework.content).toContain('## Non-Negotiable Architecture Rules');
+    expect(framework.content).toContain('## Architecture Decision Records');
   });
 
   it('CLAUDE.md content matches AGENTS.md content', () => {
@@ -65,7 +97,6 @@ describe('getLocalFiles', () => {
     const claude = files.find((f) => f.path === 'CLAUDE.md')!;
     const agents = files.find((f) => f.path === 'AGENTS.md')!;
     expect(claude.content).toBe(agents.content);
-    expect(claude.content).toBe(AGENTS);
   });
 });
 

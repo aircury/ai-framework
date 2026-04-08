@@ -1,0 +1,7 @@
+{
+  "id": "decision-records",
+  "label": "ADRs",
+  "hint": "persist architectural intent and supersession history",
+  "description": "Requires agents to capture material architectural and workflow decisions in ADRs under specs/decisions/.",
+  "defaultEnabled": true
+}

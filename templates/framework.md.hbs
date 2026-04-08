@@ -20,134 +20,18 @@ The following rules apply to every installation profile:
 
 ## Installed Standards Modules
 
-- `decision-records` — Requires agents to capture material architectural and workflow decisions in ADRs under specs/decisions/.
-- `tdd` — Requires red-green-refactor delivery with behavior-first automated tests.
-- `hexagonal-architecture` — Requires inward dependencies and adapters around the application and domain core.
-- `ddd` — Requires domain-driven modeling rules and package boundaries centered on business behavior.
+{{#if installedModules}}
+{{#each installedModules}}
+- `{{id}}` — {{description}}
+{{/each}}
+{{else}}
+No optional standards modules are enabled. The repository still uses the core workflow constitution.
+{{/if}}
 
-## Architecture Decision Records
+{{#each frameworkSections}}
+{{this}}
 
-This installation uses ADRs to preserve architectural and workflow intent over time.
-
-## ADR Rules
-
-- Store ADRs under `specs/decisions/`.
-- Create or update an ADR when a task introduces, changes, or supersedes a material architectural or workflow decision.
-- Read relevant ADRs before implementing work in an area governed by prior decisions.
-- Do not silently rewrite history when direction changes. Create a new ADR that references the superseded decision.
-
-## ADR Template
-
-```md
-# ADR-XXXX: <decision title>
-
-- Status: Proposed | Accepted | Superseded
-- Date: YYYY-MM-DD
-- Supersedes: ADR-XXXX (optional)
-
-## Context
-<why this decision is needed>
-
-## Decision
-<what was decided>
-
-## Consequences
-<tradeoffs, follow-ups, and constraints>
-```
-
-## TDD Workflow
-
-TDD is required by default for this installation profile.
-
-### Red -> Green -> Refactor
-
-Work in vertical slices:
-
-1. Write one failing test for one observable behavior.
-2. Implement the minimum code needed to pass.
-3. Refactor while keeping tests green.
-4. Repeat.
-
-Do not batch all tests first. Do not batch all implementation first.
-
-### Test Rules
-
-- Test behavior through public interfaces.
-- Prefer integration-style tests for use cases and adapters where practical.
-- Avoid testing private methods or internal implementation details.
-- Avoid brittle mocks for code you own.
-- Mock only true external boundaries or uncontrollable collaborators.
-- Each test should read like a specification of business behavior.
-
-Good targets for tests:
-
-- Use case outcomes.
-- Domain invariants.
-- Aggregate behavior.
-- Mapping between adapters and application ports.
-- Regression coverage for bugs.
-
-Weak targets:
-
-- Internal helper implementation details.
-- Framework internals.
-- Snapshot-heavy tests with low behavioral signal.
-
-## Non-Negotiable Architecture Rules
-
-### 1. Dependency Rule
-
-Dependencies must point inward only:
-
-`infrastructure -> application -> domain`
-
-Never invert this rule.
-
-Forbidden examples:
-
-- Domain code importing HTTP, ORM, UI, framework, or external SDK libraries.
-- Controllers, routes, handlers, or UI components calling repositories directly.
-- Infrastructure types leaking into domain entities or use cases.
-
-Required approach:
-
-- Domain contains business rules, invariants, entities, value objects, domain services, and domain events.
-- Application contains use cases, commands/queries, orchestration, and ports.
-- Infrastructure contains adapters for persistence, HTTP, auth providers, email, external APIs, and framework glue.
-
-### 2. Hexagonal Ports and Adapters
-
-Every external dependency must sit behind a port when it affects business behavior.
-
-Examples:
-
-- Persistence adapters implement repository ports.
-- Email delivery implements a notification or mailer port.
-- Auth providers implement authentication ports.
-- UI and HTTP handlers act as driving adapters and call use cases.
-
-Framework code is an adapter, never the core.
-
-### 3. DDD Boundaries
-
-Model behavior, not tables or screens.
-
-- Prefer aggregate-focused design over CRUD-first design.
-- Use entities when identity matters.
-- Use value objects when equality is structural and data must remain valid and immutable.
-- Repositories are per aggregate root, not per table.
-- Cross-context communication should happen through explicit application services or domain events, not hidden imports.
-
-## Domain Modeling Rules
-
-- Entities own behavior and protect invariants.
-- Value objects must be validated at creation time.
-- Domain services are allowed only when behavior does not naturally belong to an entity or value object.
-- Application services orchestrate; they do not contain core business policy when that policy belongs in the domain.
-- Domain events should use past-tense names and represent facts that already happened.
-
-Anemic domain models are not acceptable unless the problem is truly trivial.
-
+{{/each}}
 ## Coding Standards
 
 - Use explicit names that reflect the problem space.
@@ -202,9 +86,15 @@ A change is not done unless all of the following are true:
 - Naming matches the chosen problem language of the project.
 - No unnecessary abstractions or framework leakage were introduced.
 - Relevant spec in `specs/features/` reflects the current behavior.
+{{#if includesTdd}}
 - Relevant behavior is covered by tests.
+{{/if}}
+{{#if includesArchitecture}}
 - Enabled architecture boundaries still hold.
+{{/if}}
+{{#if includesDecisionRecords}}
 - Material architectural decisions are captured or superseded in `specs/decisions/`.
+{{/if}}
 
 ## Living Specifications
 

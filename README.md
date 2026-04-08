@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/@aircury/ai-framework)](https://www.npmjs.com/package/@aircury/ai-framework)
 
-The Aircury AI Framework is a meta-framework for AI-assisted software engineering. It defines how AI agents should think, plan, and deliver code across all Aircury projects — enforcing architectural discipline, domain modeling standards, and a spec-driven delivery culture regardless of the workflow a team chooses.
+The Aircury AI Framework is a meta-framework for AI-assisted software engineering. It defines how AI agents should think, plan, and deliver code across all Aircury projects while separating a shared workflow constitution from optional engineering standards modules.
 
 For most tasks, no workflow framework is needed at all. If a change is well-understood and clearly scoped, `plan-build` — the default mode — is sufficient: describe the task, let the agent plan and implement it. Adding structured workflows to a simple, clear task is overkill.
 
@@ -34,13 +34,19 @@ Used alone, each framework has a gap:
 
 ## What this framework adds
 
-Beyond routing, this framework layers in non-negotiable engineering standards that neither OpenSpec nor Spec Kit prescribe:
+Beyond routing, this framework provides two layers:
 
+- **Core workflow constitution** — meta-agent routing, living specs, and the rule that all workflow modes converge on `specs/features/`.
+- **Installable standards modules** — optional rulesets that teams can enable or disable during installation.
+
+The default profile enables:
+
+- **Architecture Decision Records (ADRs)** — agents persist material architectural and workflow decisions in `specs/decisions/` to reduce intention debt.
 - **Hexagonal Architecture** — every external dependency sits behind a port. Framework code is an adapter, never the core.
 - **Domain-Driven Design** — aggregates, value objects, entities, and domain events modeled around business behavior, not tables or screens.
-- **Test-Driven Development** — failing test before implementation, always.
-- **Living specifications** — `specs/features/` is the canonical, versioned record of system behavior. Every workflow mode — OpenSpec, Spec Kit, or direct TDD — converges on it.
-- **FRAMEWORK.md as the project constitution** — governing principles are defined once and inherited by all projects, so Spec Kit's constitution step is already satisfied from day one.
+- **Test-Driven Development** — failing test before implementation.
+
+This keeps the framework opinionated by default without forcing every team to adopt the same architectural or testing standards forever.
 
 The result is an agent that knows not just *how* to work, but *what to protect* while doing so.
 
@@ -56,19 +62,38 @@ bunx @aircury/ai-framework
 npx @aircury/ai-framework
 ```
 
-The interactive TUI will ask two questions:
+The interactive TUI will ask:
 
 1. **Scope** — `Local` to configure the current project, `Global` to configure your machine.
-2. **AI tools** — select one or both of `Claude Code` and `OpenCode`.
+2. **AI tools** — select the tool-specific integrations you want.
+3. **Standards modules** — for local installs, choose which optional standards this project should enforce.
 
-The installer writes all required configuration files (agent instructions, skills, and workflow definitions) to the right locations for each tool. If files already exist you can choose to skip them or overwrite them.
+The installer writes all required configuration files, starter spec folders, and agent instructions to the right locations for each tool. If files already exist you can choose to skip them or overwrite them.
 
 ### What gets installed
 
-| Scope | Claude Code | OpenCode |
-|-------|-------------|----------|
-| Local | `CLAUDE.md`, `.claude/` | `AGENTS.md`, `.opencode/` |
-| Global | `~/.claude/CLAUDE.md`, `~/.claude/` | — |
+| Scope | Installed outputs |
+|-------|-------------------|
+| Local | `FRAMEWORK.md`, `AGENTS.md`, `.aircury/framework.config.json`, `specs/features/README.md`, optional `specs/decisions/README.md`, `.agents/skills/`, plus selected tool-specific files |
+| Global | Tool-specific global skills only |
+
+### Standards modules
+
+Local installs persist the selected modules in `.aircury/framework.config.json`.
+Each module is a small content package with machine-readable metadata plus document fragments, and the final `FRAMEWORK.md` / `AGENTS.md` files are rendered from dedicated templates.
+
+Current built-in modules:
+
+- `decision-records`
+- `tdd`
+- `hexagonal-architecture`
+- `ddd`
+
+The installer and template generation are registry-driven, so adding a new standards module only requires:
+
+- adding its manifest and content fragments under `standards/modules/<module-id>/`
+- wiring it into the registry
+- letting the renderer compose it through the shared templates
 
 ---
 

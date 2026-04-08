@@ -1,0 +1,1 @@
+- Material architectural or workflow decisions MUST be captured or superseded in `specs/decisions/`.
