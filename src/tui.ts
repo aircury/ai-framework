@@ -36,6 +36,7 @@ export async function run(): Promise<void> {
     message: 'Additional tools — need tool-specific config',
     options: toolOptions,
     initialValues: toolOptions.map((o) => o.value),
+    required: false,
   });
 
   if (p.isCancel(selectedTools)) return p.cancel('Cancelled.');
