@@ -1,5 +1,5 @@
 ---
-name: spec-kit/specify
+name: spec-kit-specify
 description: Create a feature specification from a user description. Focuses on WHAT and WHY, never HOW. Use at the start of a spec-kit workflow.
 license: MIT
 compatibility: No external workflow CLI required.
@@ -73,7 +73,7 @@ Create a feature specification from a natural language description.
 After writing the spec, summarize:
 - Change name and file location.
 - Number of open questions (if any).
-- Next step: "Use the `spec-kit/clarify` skill to resolve open questions, or the `spec-kit/plan` skill if the spec is clear."
+- Next step: "Use the `spec-kit-clarify` skill to resolve open questions, or the `spec-kit-plan` skill if the spec is clear."
 
 **Guardrails**
 - If a change with that name already exists, ask if the user wants to continue it or create a new one.

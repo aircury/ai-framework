@@ -1,5 +1,5 @@
 ---
-name: open-spec/apply
+name: open-spec-apply
 description: Implement tasks from a working change. Use when the user wants to start implementing, continue implementation, or work through planned tasks.
 license: MIT
 compatibility: No external workflow CLI required.
@@ -21,7 +21,7 @@ Implement tasks from a working change.
    - Auto-select if only one directory exists under `specs/changes/`
    - If ambiguous, inspect available directories under `specs/changes/` and ask the user to choose
 
-   Always announce: "Using change: <name>" and how to override (e.g., `open-spec/apply <other>`).
+   Always announce: "Using change: <name>" and how to override (e.g., `open-spec-apply <other>`).
 
 2. **Read the change artifacts**
 
@@ -31,7 +31,7 @@ Implement tasks from a working change.
    - `design.md`
    - `tasks.md`
 
-   If `tasks.md` is missing, pause and ask whether to create it first with the `open-spec/propose` skill.
+   If `tasks.md` is missing, pause and ask whether to create it first with the `open-spec-propose` skill.
 
 3. **Show current progress**
 
@@ -60,7 +60,7 @@ Implement tasks from a working change.
    Display:
    - Tasks completed this session
    - Overall progress: "N/M tasks complete"
-   - If all done: suggest using the `open-spec/complete` skill to sync `specs/features/`
+   - If all done: suggest using the `open-spec-complete` skill to sync `specs/features/`
    - If paused: explain why and wait for guidance
 
 **Output During Implementation**
@@ -90,7 +90,7 @@ Working on task 4/7: <task description>
 - [x] Task 2
 ...
 
-All tasks complete! Use the `open-spec/complete` skill to sync `specs/features/` and clean up workflow artifacts.
+All tasks complete! Use the `open-spec-complete` skill to sync `specs/features/` and clean up workflow artifacts.
 ```
 
 **Output On Pause (Issue Encountered)**

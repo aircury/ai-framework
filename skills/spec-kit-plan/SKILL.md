@@ -1,5 +1,5 @@
 ---
-name: spec-kit/plan
+name: spec-kit-plan
 description: Create a technical implementation plan from a feature spec. Documents architecture, data models, and interface contracts without generating code. Run after spec-kit-clarify.
 license: MIT
 compatibility: No external workflow CLI required.
@@ -16,13 +16,13 @@ Create a technical implementation plan from a feature specification.
 
 1. **Select the change and load artifacts**
 
-   Load `specs/changes/<name>/spec.md`. If it does not exist, prompt to use the `spec-kit/specify` skill first.
+   Load `specs/changes/<name>/spec.md`. If it does not exist, prompt to use the `spec-kit-specify` skill first.
 
    Also load `specs/features/` relevant to the area being changed.
 
 2. **Research unknowns**
 
-   If the spec contains unresolved `[NEEDS CLARIFICATION]` markers, pause and suggest using the `spec-kit/clarify` skill first unless the user explicitly wants to proceed.
+   If the spec contains unresolved `[NEEDS CLARIFICATION]` markers, pause and suggest using the `spec-kit-clarify` skill first unless the user explicitly wants to proceed.
 
 3. **Write `specs/changes/<name>/plan.md`**
 
@@ -68,7 +68,7 @@ Create a technical implementation plan from a feature specification.
 After writing the plan:
 - Confirm file location.
 - Highlight any architecture decisions worth the user's attention.
-- Next step: "Use the `spec-kit/analyze` skill to validate consistency across artifacts, or the `spec-kit/tasks` skill to generate the task list."
+- Next step: "Use the `spec-kit-analyze` skill to validate consistency across artifacts, or the `spec-kit-tasks` skill to generate the task list."
 
 **Guardrails**
 - No code generation — plan only.

@@ -1,5 +1,5 @@
 ---
-name: spec-kit/checklist
+name: spec-kit-checklist
 description: Audit requirement quality across spec.md, plan.md, and tasks.md. Validates that requirements are complete, clear, measurable, and consistent — not that code works.
 license: MIT
 compatibility: No external workflow CLI required.
@@ -51,7 +51,7 @@ Audit requirement quality across change artifacts. This is a requirements linter
    Produce a summary:
    - Total items by dimension
    - High-priority gaps
-   - Items that block proceeding to the `spec-kit/plan` or `spec-kit/implement` skills
+   - Items that block proceeding to the `spec-kit-plan` or `spec-kit-implement` skills
 
 **Guardrails**
 - Never delete existing checklist items — only append.

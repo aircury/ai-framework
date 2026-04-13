@@ -1,5 +1,5 @@
 ---
-name: spec-kit/analyze
+name: spec-kit-analyze
 description: Read-only cross-artifact consistency check across spec.md, plan.md, and tasks.md. Detects gaps, conflicts, and FRAMEWORK.md violations before implementation begins.
 license: MIT
 compatibility: No external workflow CLI required.
@@ -70,8 +70,8 @@ Perform a read-only consistency analysis across all available change artifacts.
 **Output**
 
 After the analysis:
-- If CRITICAL findings exist: "Fix FRAMEWORK.md violations before proceeding. Do not use the `spec-kit/tasks` or `spec-kit/implement` skills until these are resolved."
-- If no critical findings: "Use the `spec-kit/tasks` skill to generate the implementation task list."
+- If CRITICAL findings exist: "Fix FRAMEWORK.md violations before proceeding. Do not use the `spec-kit-tasks` or `spec-kit-implement` skills until these are resolved."
+- If no critical findings: "Use the `spec-kit-tasks` skill to generate the implementation task list."
 
 **Guardrails**
 - Read-only. Never modify any file.

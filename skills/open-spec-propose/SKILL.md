@@ -1,5 +1,5 @@
 ---
-name: open-spec/propose
+name: open-spec-propose
 description: Propose a change with optional working artifacts. Use when the user wants a structured proposal with design notes, tasks, and a clear path to implementation.
 license: MIT
 compatibility: No external workflow CLI required.
@@ -15,7 +15,7 @@ I'll create a change with artifacts:
 - design.md (how)
 - tasks.md (implementation steps)
 
-When ready to implement, use the `open-spec/apply` skill
+When ready to implement, use the `open-spec-apply` skill
 
 ---
 
@@ -63,7 +63,7 @@ When ready to implement, use the `open-spec/apply` skill
    - `proposal.md` explains why the change exists.
    - `design.md` explains the intended approach and boundaries.
    - `tasks.md` contains an ordered execution plan.
-   - The change name and artifacts are specific enough that the `open-spec/apply` skill can execute them.
+   - The change name and artifacts are specific enough that the `open-spec-apply` skill can execute them.
 
 **Output**
 
@@ -71,7 +71,7 @@ After completing all artifacts, summarize:
 - Change name and location
 - List of artifacts created with brief descriptions
 - What's ready: "All artifacts created! Ready for implementation."
-- Prompt: "Use the `open-spec/apply` skill to implement. When done, use the `open-spec/complete` skill to sync `specs/features/` and clean up these ephemeral artifacts."
+- Prompt: "Use the `open-spec-apply` skill to implement. When done, use the `open-spec-complete` skill to sync `specs/features/` and clean up these ephemeral artifacts."
 
 **Guardrails**
 - Create all three core artifacts unless the user explicitly asks for less

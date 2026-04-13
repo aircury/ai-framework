@@ -1,5 +1,5 @@
 ---
-name: spec-kit/implement
+name: spec-kit-implement
 description: Execute tasks from tasks.md following TDD. Marks tasks complete as it goes. Run after spec-kit-tasks. Syncs specs/features/ on completion.
 license: MIT
 compatibility: No external workflow CLI required.
@@ -18,7 +18,7 @@ Execute the task list from tasks.md following TDD and the FRAMEWORK.md change wo
 
    Load `specs/changes/<name>/tasks.md`, `plan.md`, and `spec.md`.
 
-   If tasks.md is missing or incomplete, prompt to use the `spec-kit/tasks` skill first.
+   If tasks.md is missing or incomplete, prompt to use the `spec-kit-tasks` skill first.
 
 2. **Show current progress**
 

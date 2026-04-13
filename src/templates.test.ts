@@ -46,17 +46,17 @@ describe('templates', () => {
   describe('skills', () => {
     it('contains all expected skills', () => {
       const expectedSkills = [
-        'open-spec/apply',
-        'open-spec/complete',
-        'open-spec/explore',
-        'open-spec/propose',
-        'spec-kit/analyze',
-        'spec-kit/checklist',
-        'spec-kit/clarify',
-        'spec-kit/implement',
-        'spec-kit/plan',
-        'spec-kit/specify',
-        'spec-kit/tasks',
+        'open-spec-apply',
+        'open-spec-complete',
+        'open-spec-explore',
+        'open-spec-propose',
+        'spec-kit-analyze',
+        'spec-kit-checklist',
+        'spec-kit-clarify',
+        'spec-kit-implement',
+        'spec-kit-plan',
+        'spec-kit-specify',
+        'spec-kit-tasks',
         'commit-changes',
       ];
 

@@ -113,9 +113,9 @@ All skills write ephemeral working artifacts to `specs/changes/<name>/` and sync
 | Mode | When to use | Skills |
 |------|-------------|--------|
 | `plan-build` | Easy to medium changes — the default for most tasks | None |
-| `propose-apply-complete` | Complex or cross-cutting change | `open-spec/*` |
-| `explore-propose-apply-complete` | Unclear problem requiring investigation first | `open-spec/explore`, then `open-spec/*` |
-| `spec-kit` | New feature, formal requirements, or spec governance needed | `spec-kit/*` |
+| `propose-apply-complete` | Complex or cross-cutting change | `open-spec-propose`, `open-spec-apply`, `open-spec-complete` |
+| `explore-propose-apply-complete` | Unclear problem requiring investigation first | `open-spec-explore`, then `open-spec-propose`, `open-spec-apply`, `open-spec-complete` |
+| `spec-kit` | New feature, formal requirements, or spec governance needed | `spec-kit-specify`, `spec-kit-clarify`, `spec-kit-plan`, `spec-kit-analyze`, `spec-kit-tasks`, `spec-kit-implement`, `spec-kit-checklist` |
 
 For most day-to-day work, `plan-build` is sufficient. Reach for `open-spec` or `spec-kit` when the problem size or ambiguity warrants the extra structure.
 

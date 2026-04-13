@@ -1,5 +1,5 @@
 ---
-name: spec-kit/clarify
+name: spec-kit-clarify
 description: Resolve ambiguities in a feature spec through targeted Q&A. Run after spec-kit-specify when open questions remain. Updates spec.md incrementally.
 license: MIT
 compatibility: No external workflow CLI required.
@@ -20,7 +20,7 @@ Resolve ambiguities in a feature spec through focused, sequential questioning.
 
 2. **Load `specs/changes/<name>/spec.md`**
 
-   If it does not exist, prompt the user to use the `spec-kit/specify` skill first.
+   If it does not exist, prompt the user to use the `spec-kit-specify` skill first.
 
 3. **Scan for ambiguities**
 
@@ -53,10 +53,10 @@ Resolve ambiguities in a feature spec through focused, sequential questioning.
 After completing all questions:
 - Confirm how many ambiguities were resolved.
 - List any items deferred (still open).
-- Next step: "Use the `spec-kit/plan` skill to create the technical implementation plan."
+- Next step: "Use the `spec-kit-plan` skill to create the technical implementation plan."
 
 **Guardrails**
 - Never ask more than 5 questions.
 - Always save atomically after each answer — never batch updates.
-- If all open questions are already resolved, report that and suggest the `spec-kit/plan` skill.
+- If all open questions are already resolved, report that and suggest the `spec-kit-plan` skill.
 - Never introduce implementation details into the spec during clarification.

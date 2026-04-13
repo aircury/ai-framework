@@ -1,5 +1,5 @@
 ---
-name: open-spec/complete
+name: open-spec-complete
 description: Mark a change as complete. Syncs specs/features/ to reflect current system behavior, then cleans up optional workflow artifacts. Framework-agnostic and independent of any external spec tool.
 license: MIT
 compatibility: No external tools required.
