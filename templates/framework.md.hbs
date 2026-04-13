@@ -60,7 +60,7 @@ This framework uses a framework-agnostic change workflow.
 
 ### Supported modes
 
-- `plan-build`: plan briefly, implement, then sync canonical specs.
+- `plan-build`: complete a planning step first, then implement only after the plan is finished and the user asks to proceed.
 - `propose-apply-complete`: create working artifacts, implement from them, then sync canonical specs.
 - `explore-propose-apply-complete`: explore first when the problem is unclear, then formalize and implement.
 - `spec-kit`: spec-driven development using the Spec Kit workflow. Best for new features, cross-cutting concerns, or work requiring formal spec governance.
@@ -77,6 +77,28 @@ Before starting any non-trivial change, the agent MUST act as a routing meta-age
 2. Recommend one of the supported modes and briefly explain why.
 3. Present the user with explicit workflow choices.
 4. Ask the user how they want to proceed before doing any implementation work.
+
+### Mode execution rules
+
+Once the user selects a mode, the agent MUST follow that mode strictly. Do not merge modes, skip required steps, or silently continue into a later phase.
+
+- `plan-build`:
+  1. Plan first.
+  2. Stop after the plan and present it clearly.
+  3. Do not start building in the same step unless the user explicitly asks to continue with implementation after seeing the plan.
+- `propose-apply-complete`:
+  1. Run `open-spec-propose` first.
+  2. Only after proposal artifacts exist, run `open-spec-apply`.
+  3. After implementation is done, run `open-spec-complete`.
+  4. Do not jump directly to apply or complete if the selected workflow has not reached that step.
+- `explore-propose-apply-complete`:
+  1. Run `open-spec-explore` first.
+  2. Do not implement during explore mode.
+  3. After exploration, continue with `open-spec-propose`, then `open-spec-apply`, then `open-spec-complete` in order.
+- `spec-kit`:
+  1. Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-analyze` → `spec-kit-tasks` → `spec-kit-implement`.
+  2. `spec-kit-checklist` may be used as a review or quality gate, but it does not replace required sequence steps.
+  3. Do not skip ahead to implementation, planning, or task generation when an earlier required Spec Kit step has not been completed.
 
 ## Definition of Done
 

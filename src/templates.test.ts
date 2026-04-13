@@ -19,6 +19,8 @@ describe('templates', () => {
     it('contains core framework sections', () => {
       expect(FRAMEWORK).toContain('## Core Workflow Constitution');
       expect(FRAMEWORK).toContain('## Definition of Done');
+      expect(FRAMEWORK).toContain('## Workflow Framework');
+      expect(FRAMEWORK).toContain('### Mode execution rules');
     });
 
     it('matches the generated default profile', () => {
@@ -35,6 +37,7 @@ describe('templates', () => {
 
     it('references FRAMEWORK.md', () => {
       expect(AGENTS).toContain('FRAMEWORK.md');
+      expect(AGENTS).toContain('Selecting `plan-build` authorizes planning first, not automatic implementation.');
     });
 
     it('matches the generated default profile', () => {
