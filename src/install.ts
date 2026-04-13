@@ -1,9 +1,9 @@
+import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { homedir } from 'node:os';
 import { createFrameworkProfile } from './framework';
 import type { StandardModuleId } from './framework';
-import { generateFramework, generateAgents, skills } from './templates';
+import { generateFramework, generateAgents } from './templates';
 
 export type Tool = 'claude-code' | 'gemini-cli';
 export type Scope = 'local' | 'global';
@@ -13,6 +13,14 @@ export interface InstallFile {
   content: string;
   description: string;
 }
+
+export interface InstallCommand {
+  command: string;
+  args: string[];
+  description: string;
+}
+
+const SKILLS_SOURCE = 'aircury/ai-framework';
 
 function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
   const files: InstallFile[] = [
@@ -78,14 +86,6 @@ export function getLocalFiles(
       content: generateAgents(profile.modules),
       description: 'Agent instructions for Claude Code',
     });
-
-    for (const [name, content] of Object.entries(skills)) {
-      files.push({
-        path: `.claude/skills/${name}/SKILL.md`,
-        content,
-        description: `${name} skill for Claude Code`,
-      });
-    }
   }
 
   if (tools.includes('gemini-cli')) {
@@ -96,33 +96,59 @@ export function getLocalFiles(
     });
   }
 
-  // Always install .agents/skills/ as the canonical skill location
-  for (const [name, content] of Object.entries(skills)) {
-    files.push({
-      path: `.agents/skills/${name}/SKILL.md`,
-      content,
-      description: `${name} skill`,
-    });
-  }
-
   return files;
 }
 
 export function getGlobalFiles(tools: Tool[]): InstallFile[] {
-  const files: InstallFile[] = [];
-  const home = homedir();
+  void tools;
+  return [];
+}
 
-  if (tools.includes('claude-code')) {
-    for (const [name, content] of Object.entries(skills)) {
-      files.push({
-        path: join(home, '.claude', 'skills', name, 'SKILL.md'),
-        content,
-        description: `${name} skill (global Claude Code)`,
-      });
-    }
+function getLocalSkillAgents(tools: Tool[]): string[] {
+  const agents = new Set<string>(['universal']);
+
+  if (tools.includes('claude-code')) agents.add('claude-code');
+  if (tools.includes('gemini-cli')) agents.add('gemini-cli');
+
+  return [...agents];
+}
+
+function getGlobalSkillAgents(tools: Tool[]): string[] {
+  const agents = new Set<string>();
+
+  if (tools.includes('claude-code')) agents.add('claude-code');
+  if (tools.includes('gemini-cli')) agents.add('gemini-cli');
+
+  return [...agents];
+}
+
+function buildSkillsAddCommand(agents: string[], isGlobal: boolean): InstallCommand | null {
+  if (agents.length === 0) return null;
+
+  const args = ['-y', 'skills', 'add', SKILLS_SOURCE, '--skill', '*'];
+  for (const agent of agents) {
+    args.push('-a', agent);
   }
+  if (isGlobal) {
+    args.push('-g');
+  }
+  args.push('-y');
 
-  return files;
+  return {
+    command: 'npx',
+    args,
+    description: `Install Aircury skills via skills CLI for ${agents.join(', ')}`,
+  };
+}
+
+export function getLocalCommands(tools: Tool[]): InstallCommand[] {
+  const command = buildSkillsAddCommand(getLocalSkillAgents(tools), false);
+  return command ? [command] : [];
+}
+
+export function getGlobalCommands(tools: Tool[]): InstallCommand[] {
+  const command = buildSkillsAddCommand(getGlobalSkillAgents(tools), true);
+  return command ? [command] : [];
 }
 
 export interface ConflictResult {
@@ -141,4 +167,21 @@ export function writeFile(file: InstallFile, cwd: string, isGlobal: boolean): vo
   const fullPath = isGlobal ? file.path : join(cwd, file.path);
   mkdirSync(dirname(fullPath), { recursive: true });
   writeFileSync(fullPath, file.content, 'utf-8');
+}
+
+export function runCommand(
+  installCommand: InstallCommand,
+  cwd: string,
+): { success: boolean; stdout: string; stderr: string } {
+  const result = spawnSync(installCommand.command, installCommand.args, {
+    cwd,
+    encoding: 'utf-8',
+    stdio: 'pipe',
+  });
+
+  return {
+    success: result.status === 0,
+    stdout: result.stdout ?? '',
+    stderr: result.stderr ?? '',
+  };
 }

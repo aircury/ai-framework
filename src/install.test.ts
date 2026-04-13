@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'bun:test';
 import { existsSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { homedir } from 'node:os';
 import { tmpdir } from 'node:os';
-import { getLocalFiles, getGlobalFiles, checkConflicts, writeFile } from './install';
-import { skills } from './templates';
-
-const SKILL_COUNT = Object.keys(skills).length;
+import {
+  getLocalFiles,
+  getGlobalFiles,
+  getLocalCommands,
+  getGlobalCommands,
+  checkConflicts,
+  writeFile,
+} from './install';
 
 describe('getLocalFiles', () => {
   it('always includes FRAMEWORK.md and AGENTS.md', () => {
@@ -17,12 +20,10 @@ describe('getLocalFiles', () => {
     expect(paths).toContain('.aircury/framework.config.json');
   });
 
-  it('includes CLAUDE.md and .claude/commands/ skills when claude-code selected', () => {
+  it('includes CLAUDE.md when claude-code selected', () => {
     const files = getLocalFiles(['claude-code']);
     const paths = files.map((f) => f.path);
     expect(paths).toContain('CLAUDE.md');
-    const claudeSkills = paths.filter((p) => p.startsWith('.claude/skills/'));
-    expect(claudeSkills).toHaveLength(SKILL_COUNT);
   });
 
   it('includes GEMINI.md when gemini-cli selected', () => {
@@ -48,12 +49,6 @@ describe('getLocalFiles', () => {
     const gemini = files.find((f) => f.path === 'GEMINI.md')!;
     const agents = files.find((f) => f.path === 'AGENTS.md')!;
     expect(gemini.content).toBe(agents.content);
-  });
-
-  it('always installs .agents/skills/ regardless of tools', () => {
-    const files = getLocalFiles([]);
-    const skillPaths = files.map((f) => f.path).filter((p) => p.startsWith('.agents/skills/'));
-    expect(skillPaths).toHaveLength(SKILL_COUNT);
   });
 
   it('persists the selected standards modules in a config file', () => {
@@ -105,13 +100,63 @@ describe('getGlobalFiles', () => {
     expect(getGlobalFiles([])).toHaveLength(0);
   });
 
-  it('returns Claude Code global commands under ~/.claude/commands/', () => {
-    const files = getGlobalFiles(['claude-code']);
-    expect(files).toHaveLength(SKILL_COUNT);
-    const home = homedir();
-    for (const file of files) {
-      expect(file.path).toStartWith(join(home, '.claude', 'skills'));
-    }
+  it('does not install any global files', () => {
+    expect(getGlobalFiles(['claude-code'])).toHaveLength(0);
+  });
+});
+
+describe('getLocalCommands', () => {
+  it('installs universal skills by default for local setup', () => {
+    const commands = getLocalCommands([]);
+    expect(commands).toHaveLength(1);
+    expect(commands[0]).toEqual({
+      command: 'npx',
+      args: ['-y', 'skills', 'add', 'aircury/ai-framework', '--skill', '*', '-a', 'universal', '-y'],
+      description: 'Install Aircury skills via skills CLI for universal',
+    });
+  });
+
+  it('installs multiple selected agents in one command', () => {
+    const commands = getLocalCommands(['claude-code', 'gemini-cli']);
+    expect(commands).toHaveLength(1);
+    expect(commands[0].args).toEqual([
+      '-y',
+      'skills',
+      'add',
+      'aircury/ai-framework',
+      '--skill',
+      '*',
+      '-a',
+      'universal',
+      '-a',
+      'claude-code',
+      '-a',
+      'gemini-cli',
+      '-y',
+    ]);
+  });
+});
+
+describe('getGlobalCommands', () => {
+  it('returns empty when no global skill agents are selected', () => {
+    expect(getGlobalCommands([])).toHaveLength(0);
+  });
+
+  it('creates a global skills install command for selected agents', () => {
+    const commands = getGlobalCommands(['claude-code']);
+    expect(commands).toHaveLength(1);
+    expect(commands[0].args).toEqual([
+      '-y',
+      'skills',
+      'add',
+      'aircury/ai-framework',
+      '--skill',
+      '*',
+      '-a',
+      'claude-code',
+      '-g',
+      '-y',
+    ]);
   });
 });
 

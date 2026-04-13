@@ -68,14 +68,14 @@ The interactive TUI will ask:
 2. **AI tools** — select the tool-specific integrations you want.
 3. **Standards modules** — for local installs, choose which optional standards this project should enforce.
 
-The installer writes all required configuration files, starter spec folders, and agent instructions to the right locations for each tool. If files already exist you can choose to skip them or overwrite them.
+The installer writes all required configuration files, starter spec folders, and agent instructions to the right locations for each tool. Skills are installed through the standard `npx skills add ...` flow so they remain tracked by the skills ecosystem and can be updated later with `npx skills update`. If files already exist you can choose to skip them or overwrite them.
 
 ### What gets installed
 
 | Scope | Installed outputs |
 |-------|-------------------|
-| Local | `FRAMEWORK.md`, `AGENTS.md`, `.aircury/framework.config.json`, `specs/features/README.md`, optional `specs/decisions/README.md`, `.agents/skills/`, plus selected tool-specific files |
-| Global | Tool-specific global skills only |
+| Local | `FRAMEWORK.md`, `AGENTS.md`, `.aircury/framework.config.json`, `specs/features/README.md`, optional `specs/decisions/README.md`, plus selected tool-specific files; skills installed via `npx skills` |
+| Global | Skills installed via `npx skills` for the selected agents |
 
 ### Standards modules
 

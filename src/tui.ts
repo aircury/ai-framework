@@ -1,7 +1,15 @@
 import * as p from '@clack/prompts';
 import { STANDARD_MODULES } from './framework';
 import type { StandardModuleId } from './framework';
-import { getLocalFiles, getGlobalFiles, checkConflicts, writeFile } from './install';
+import {
+  getLocalFiles,
+  getGlobalFiles,
+  getLocalCommands,
+  getGlobalCommands,
+  checkConflicts,
+  writeFile,
+  runCommand,
+} from './install';
 import type { Tool, Scope } from './install';
 
 export async function run(): Promise<void> {
@@ -69,8 +77,11 @@ export async function run(): Promise<void> {
   const files = isGlobal
     ? getGlobalFiles(selectedTools)
     : getLocalFiles(selectedTools, selectedModules);
+  const commands = isGlobal
+    ? getGlobalCommands(selectedTools)
+    : getLocalCommands(selectedTools);
 
-  if (files.length === 0) {
+  if (files.length === 0 && commands.length === 0) {
     p.outro('Nothing to install.');
     return;
   }
@@ -78,10 +89,18 @@ export async function run(): Promise<void> {
   const conflicts = checkConflicts(files, cwd, isGlobal);
   const existingCount = conflicts.filter((c) => c.exists).length;
 
-  p.log.step(`${files.length} files to install${existingCount > 0 ? `, ${existingCount} already exist` : ''}`);
-  for (const { file, exists } of conflicts) {
-    const label = isGlobal ? file.path : file.path;
-    p.log.info(`${exists ? '~' : '+'} ${label}`);
+  if (files.length > 0) {
+    p.log.step(`${files.length} files to install${existingCount > 0 ? `, ${existingCount} already exist` : ''}`);
+    for (const { file, exists } of conflicts) {
+      p.log.info(`${exists ? '~' : '+'} ${file.path}`);
+    }
+  }
+
+  if (commands.length > 0) {
+    p.log.step(`${commands.length} skills command${commands.length > 1 ? 's' : ''} to run`);
+    for (const command of commands) {
+      p.log.info(`> ${command.command} ${command.args.join(' ')}`);
+    }
   }
 
   const confirmed = await p.confirm({ message: 'Proceed with installation?' });
@@ -106,6 +125,7 @@ export async function run(): Promise<void> {
 
   let written = 0;
   let skipped = 0;
+  let executed = 0;
 
   for (const { file, exists } of conflicts) {
     if (exists && overwrite === 'skip') {
@@ -116,10 +136,27 @@ export async function run(): Promise<void> {
     written++;
   }
 
+  for (const command of commands) {
+    const result = runCommand(command, cwd);
+    if (!result.success) {
+      spinner.stop('Installation failed.');
+
+      if (written > 0) p.log.success(`${written} file${written > 1 ? 's' : ''} written before failure`);
+      if (skipped > 0) p.log.warn(`${skipped} file${skipped > 1 ? 's' : ''} skipped (already exist)`);
+      if (result.stdout.trim()) p.log.message(result.stdout.trim());
+      if (result.stderr.trim()) p.log.error(result.stderr.trim());
+
+      throw new Error(`Failed to run: ${command.command} ${command.args.join(' ')}`);
+    }
+
+    executed++;
+  }
+
   spinner.stop('Done!');
 
   if (written > 0) p.log.success(`${written} file${written > 1 ? 's' : ''} written`);
   if (skipped > 0) p.log.warn(`${skipped} file${skipped > 1 ? 's' : ''} skipped (already exist)`);
+  if (executed > 0) p.log.success(`${executed} skills command${executed > 1 ? 's' : ''} executed`);
 
   p.outro('Aircury AI Framework ready.');
 }
