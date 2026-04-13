@@ -240,6 +240,38 @@ Produce a dedicated report of:
 ### Phase 7: Rewrite-safety summary
 Produce a rewrite boundary document explaining what MUST remain identical versus what MAY be modernized.
 
+## File output
+
+All specs MUST be written to disk as markdown files. Do not only output to the conversation.
+
+Write files to the `specs/` directory at the project root. Create it if it does not exist.
+
+### Per-concept-area files
+For each concept area, write one file:
+```
+specs/<concept-area-name>.md
+```
+Use lowercase, hyphenated names (e.g. `specs/user-management.md`, `specs/billing.md`).
+
+### Global artifact files
+| Artifact | File |
+|----------|------|
+| System concept map + use case catalog | `specs/index.md` |
+| Persistence contract dossier | `specs/persistence.md` |
+| Ambiguity and risk register | `specs/risks.md` |
+| Rewrite boundary document | `specs/rewrite-boundary.md` |
+
+### Writing strategy
+Write files progressively as you complete each phase — do not wait until all phases are done.
+After Phase 1: write `specs/index.md` with the initial concept map.
+After Phase 2–3: write each concept area file as it is completed.
+After Phase 4: write `specs/persistence.md`.
+After Phase 5: update `specs/index.md` with cross-cutting rules.
+After Phase 6: write `specs/risks.md`.
+After Phase 7: write `specs/rewrite-boundary.md`.
+
+If a file already exists, update it rather than overwriting blindly — preserve any content that is still valid and extend it.
+
 ## Output format
 
 ### Per concept area (group related concepts into one section)
@@ -406,5 +438,7 @@ Before finishing, verify that:
 8. A new team could rebuild the system — in any architecture, any language — using only this spec set.
 9. The rebuilt system could connect to the exact same production database safely.
 10. Scenarios are precise enough to directly derive test cases without reading legacy code.
+
+11. All spec files have been written to `specs/` on disk — nothing is only in the conversation.
 
 If any of these checks fail, continue refining the spec extraction before concluding.
