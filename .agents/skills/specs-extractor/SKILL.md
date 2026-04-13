@@ -14,6 +14,16 @@ Your mission is to extract what the system does, precisely and completely, expre
 
 You must behave as a forensic domain writer, not as a code analyst.
 
+## The fundamental test
+
+Before writing a single word, internalize this test and apply it to every sentence you produce:
+
+> **Could an engineer or AI agent with ZERO access to the original codebase reconstruct this system — behavior for behavior, rule for rule, field for field — using only what you have written?**
+
+If the answer is no, the spec is incomplete. Keep going.
+
+This is not aspirational. This is the minimum bar. The specs you produce are the only artifact that will exist. There will be no "let me check the code". There will be no "ask the original author". The codebase will be gone. Your specs are the system.
+
 ## Primary objective
 
 Produce a complete, precise, implementation-agnostic spec set for an already-built project, so that another AI agent or engineering team can rebuild it from scratch without needing the legacy codebase, while preserving:
@@ -25,6 +35,47 @@ Produce a complete, precise, implementation-agnostic spec set for an already-bui
 5. What it does as a consequence: side effects, notifications, background work
 6. Who is allowed to do what: authorization at every level
 7. What can go wrong: every failure case with exact behavior
+
+## Depth requirements
+
+Shallow specs are useless. A spec that says "users can be created" or "the system validates the email" does not enable a rebuild. It enables guessing.
+
+Every concept, every use case, every rule must be specified to the depth where there is nothing left to guess.
+
+**For every concept:**
+- Every field, its type, whether it is required, its default value if any, and what it means in the problem domain
+- Every state the concept can be in, with an exact definition of what each state means
+- Every transition between states: from which state, under which exact condition, to which state, and what the system does automatically as a result
+- Every invariant: a rule that must be true at all times, not just during creation
+- The exact identity rules: what uniquely identifies this concept
+
+**For every use case:**
+- Every input field: name, type, required or optional, exact validation rule, what happens on each violation
+- Every step of the main flow in exact order, including implicit steps that "obviously" happen (they are not obvious to someone rebuilding from zero)
+- Every conditional branch: if X is true, the flow diverges to Y — document it, including branches that happen rarely
+- The exact state of the system after success: which fields changed, to which values, what was created or deleted
+- Every side effect: if an email is sent, what is its trigger condition, to whom, and under what data conditions — not "an email is sent" but "the system sends a welcome email to the user's email address when the account transitions from pending to active and only if the user has no prior active account"
+- Every failure case as its own entry: the exact condition that triggers it and the exact outcome (what error, what state does NOT change, what does NOT get triggered)
+
+**For every business rule:**
+- The exact condition: not "when the order is large" but "when the order total exceeds €500"
+- The exact obligation or prohibition
+- What happens to any process that violates it
+- Whether the database enforces it, the system enforces it, or it is only inconsistently enforced (document which)
+
+**For every validation rule:**
+- The exact accepted values, formats, ranges, or lengths
+- What happens to values that are almost valid but not quite — are they rejected, coerced, or silently trimmed?
+- The exact error response when rejected
+
+**For scenarios:**
+- GIVEN must describe exact state, not general conditions
+- WHEN must include exact input values or at minimum exact types and constraints
+- THEN must name every field that changed, every field that did NOT change, every notification triggered, every background job enqueued — nothing implicit, nothing assumed
+
+A scenario that says "THEN the user is created" is not a scenario. It is a placeholder. Write: "THEN a user record exists with status=pending, email=the provided email (lowercased), created_at=current timestamp, email_verified=false, and a verification email is queued to the provided address."
+
+**When in doubt, over-specify.** A rebuilder can ignore an explicit rule they know is correct. They cannot recover a rule that was never written down.
 
 ## Output language
 
@@ -397,17 +448,19 @@ Risk levels: Critical / High / Medium / Low
 
 ## Rules for writing good specs
 
-- Be precise, not verbose
-- Use the language of the problem domain, not of the code
-- One use case per distinct actor intention
-- One business rule per distinct constraint
-- Use normative language: MUST / SHALL / MUST NOT / SHALL NOT
-- Use explicit conditions — "if the user is eligible" is not precise; state what eligible means exactly
-- Record every edge case — do not summarize
-- Never hide legacy quirks if they affect compatibility
-- Do not invent behavior
-- Do not assume intended behavior equals actual behavior
-- Scenarios must be precise enough to derive tests directly
+- **Depth over brevity.** A long, precise spec is far better than a short, vague one. Do not summarize. Do not compress. Do not assume anything is obvious.
+- Use the language of the problem domain, not of the code.
+- One use case per distinct actor intention.
+- One business rule per distinct constraint.
+- Use normative language: MUST / SHALL / MUST NOT / SHALL NOT.
+- Use explicit conditions — "if the user is eligible" is not a condition; "if the user has an active subscription and has not exceeded their monthly quota" is a condition.
+- **Every edge case is its own entry.** Do not write "handles invalid input". Write one entry per type of invalid input with its exact outcome.
+- **Implicit steps are not implicit.** If the system "obviously" lowercases an email or "obviously" generates a UUID on creation, write it down. Someone rebuilding from zero will not know what is obvious.
+- **Never summarize side effects.** Do not write "triggers notifications". Write which notification, to whom, under exactly which condition, with what data.
+- Never hide legacy quirks if they affect compatibility.
+- Do not invent behavior.
+- Do not assume intended behavior equals actual behavior.
+- Scenarios must be precise enough to derive tests directly — meaning exact field values, exact state assertions, exact negative assertions.
 
 ## Anti-goals
 
@@ -427,18 +480,32 @@ You ARE being asked to:
 
 ## Final quality gate
 
-Before finishing, verify that:
-1. Every concept has its invariants, states, transitions, and consequences fully specified.
-2. Every use case has actor, preconditions, full main flow, all failure cases, authorization, and at least one scenario per path.
-3. No class names, file names, method names, or framework terms appear anywhere in the output.
-4. No sentence says "the service does X" or "the controller handles X" — only "the system does X".
-5. The persistence contract covers every table with exact columns, types, constraints, and compatibility warnings.
-6. Every business rule states its condition, obligation, and violation outcome precisely.
-7. All inferred behavior is tagged INFERRED; all uncertainty is tagged UNCERTAIN and listed as an open question.
-8. A new team could rebuild the system — in any architecture, any language — using only this spec set.
-9. The rebuilt system could connect to the exact same production database safely.
-10. Scenarios are precise enough to directly derive test cases without reading legacy code.
+Apply the fundamental test first: could someone with ZERO access to the original codebase rebuild the entire system — behavior for behavior, rule for rule, field for field — using only the spec files? If not, stop and keep writing.
 
-11. All spec files have been written to `specs/` on disk — nothing is only in the conversation.
+Then verify every item below:
 
-If any of these checks fail, continue refining the spec extraction before concluding.
+**Completeness**
+1. Every concept is documented with every field (name, type, required, default, meaning), every state, every transition with its exact guard condition, and every invariant.
+2. Every use case is documented with every input field and its validation, every step of the main flow including implicit ones, every conditional branch, every failure case as its own entry, and every side effect with its exact trigger condition.
+3. Every business rule states its exact condition (no fuzzy language), its exact obligation, and its exact violation outcome.
+4. No scenario has a vague THEN clause. Every THEN names exactly which fields changed to which values, what was triggered, and what did NOT change.
+5. Every validation rule states the exact accepted values, formats, or ranges and the exact behavior on each type of violation.
+6. Every notification and background job has its exact trigger condition documented — not just that it exists.
+7. Every authorization rule covers all actor variants including edge cases.
+
+**Purity**
+8. No class names, file names, method names, or framework terms appear anywhere in the output.
+9. No sentence says "the service does X" or "the controller handles X" — only "the system does X".
+10. The specs are equally implementable in any language or architecture.
+
+**Persistence**
+11. The persistence contract covers every table with exact column names, types, nullability, defaults, constraints, and do-not-change warnings.
+12. The rebuilt system could connect to the exact same production database safely without any schema changes.
+
+**Evidence**
+13. All inferred behavior is tagged INFERRED. All uncertain behavior is tagged UNCERTAIN and listed in `specs/risks.md`.
+
+**Files**
+14. All spec files have been written to `specs/` on disk — nothing is only in the conversation.
+
+If any of these checks fail, continue refining before concluding. "Good enough" is not good enough. The specs replace the codebase entirely.
