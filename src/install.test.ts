@@ -126,9 +126,9 @@ describe('checkConflicts', () => {
 
   it('marks existing files as conflicting', () => {
     const dir = tmpdir();
-    // FRAMEWORK.md exists in the project root — use that as cwd
+    // templates/framework.md.hbs exists in the project root — use that as cwd
     const cwd = join(import.meta.dir, '..');
-    const files = [{ path: 'FRAMEWORK.md', content: '', description: '' }];
+    const files = [{ path: 'templates/framework.md.hbs', content: '', description: '' }];
     const results = checkConflicts(files, cwd, false);
     expect(results[0].exists).toBe(true);
   });

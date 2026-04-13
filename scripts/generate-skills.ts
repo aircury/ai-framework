@@ -10,7 +10,7 @@ import { writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const root = join(import.meta.dir, '..');
-const skillsDir = join(root, '.agents', 'skills');
+const skillsDir = join(root, 'skills');
 const outFile = join(root, 'src', 'skills.generated.ts');
 
 const glob = new Glob('**/SKILL.md');
