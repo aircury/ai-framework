@@ -10,11 +10,12 @@ All agents contributing to this repository MUST read and apply FRAMEWORK.md befo
 
 1. Read `FRAMEWORK.md` in full if you have not already done so in this session.
 2. Read the relevant specs in `specs/features/` that relate to the area you are changing.
+3. Search Airsync memory for relevant context before making decisions.
 {{#if includesDecisionRecords}}
-3. Read the relevant ADRs in `specs/decisions/` when the area is governed by prior decisions.
-4. Act as a routing meta-agent: analyze the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
+4. Read the relevant ADRs in `specs/decisions/` when the area is governed by prior decisions.
+5. Act as a routing meta-agent: analyze the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
 {{else}}
-3. Act as a routing meta-agent: analyze the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
+4. Act as a routing meta-agent: analyze the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
 {{/if}}
 
 ## Non-negotiable rules

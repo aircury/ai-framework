@@ -1,4 +1,5 @@
 // AUTO-GENERATED — do not edit manually. Run `bun run generate:skills` to update.
+import airsync from '../skills/airsync/SKILL.md' with { type: 'text' };
 import commit_changes from '../skills/commit-changes/SKILL.md' with { type: 'text' };
 import open_spec_apply from '../skills/open-spec-apply/SKILL.md' with { type: 'text' };
 import open_spec_complete from '../skills/open-spec-complete/SKILL.md' with { type: 'text' };
@@ -15,6 +16,7 @@ import specs_extractor from '../skills/specs-extractor/SKILL.md' with { type: 't
 import specs_interpreter from '../skills/specs-interpreter/SKILL.md' with { type: 'text' };
 
 export const skills: Record<string, string> = {
+  'airsync': airsync,
   'commit-changes': commit_changes,
   'open-spec-apply': open_spec_apply,
   'open-spec-complete': open_spec_complete,
