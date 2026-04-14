@@ -9,6 +9,7 @@ import {
   checkConflicts,
   writeFile,
   runCommand,
+  updateGitignore,
 } from './install';
 import type { Tool, Scope } from './install';
 
@@ -157,6 +158,15 @@ export async function run(): Promise<void> {
   if (written > 0) p.log.success(`${written} file${written > 1 ? 's' : ''} written`);
   if (skipped > 0) p.log.warn(`${skipped} file${skipped > 1 ? 's' : ''} skipped (already exist)`);
   if (executed > 0) p.log.success(`${executed} skills command${executed > 1 ? 's' : ''} executed`);
+
+  if (!isGlobal) {
+    const gitignoreResult = updateGitignore(cwd);
+    if (gitignoreResult.created) {
+      p.log.success('.gitignore created with specs/changes/ entry');
+    } else if (gitignoreResult.updated) {
+      p.log.success('.gitignore updated with specs/changes/ entry');
+    }
+  }
 
   p.outro('Aircury AI Framework ready.');
 }

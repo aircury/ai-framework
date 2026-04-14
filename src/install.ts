@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { createFrameworkProfile } from './framework';
 import type { StandardModuleId } from './framework';
@@ -184,4 +184,25 @@ export function runCommand(
     stdout: result.stdout ?? '',
     stderr: result.stderr ?? '',
   };
+}
+
+const GITIGNORE_ENTRY = '# Aircury AI Framework\nspecs/changes/';
+
+export function updateGitignore(cwd: string): { updated: boolean; created: boolean } {
+  const gitignorePath = join(cwd, '.gitignore');
+  const hasGitignore = existsSync(gitignorePath);
+
+  if (!hasGitignore) {
+    writeFileSync(gitignorePath, `${GITIGNORE_ENTRY}\n`, 'utf-8');
+    return { updated: true, created: true };
+  }
+
+  const content = readFileSync(gitignorePath, 'utf-8');
+  if (content.includes('specs/changes/')) {
+    return { updated: false, created: false };
+  }
+
+  const separator = content.endsWith('\n') ? '' : '\n';
+  writeFileSync(gitignorePath, `${content}${separator}${GITIGNORE_ENTRY}\n`, 'utf-8');
+  return { updated: true, created: false };
 }
