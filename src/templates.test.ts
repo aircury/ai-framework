@@ -115,5 +115,19 @@ describe('templates', () => {
       expect(generateAgents(['decision-records'])).toContain('specs/decisions/');
       expect(generateAgents([])).not.toContain('specs/decisions/');
     });
+
+    it('adds code style instructions to AGENTS.md only when enabled', () => {
+      expect(generateAgents(['code-style'])).toContain(
+        'Analyze `package.json` and local config files to identify the project\'s linting and formatting strategy.',
+      );
+      expect(generateAgents([])).not.toContain(
+        'Analyze `package.json` and local config files to identify the project\'s linting and formatting strategy.',
+      );
+    });
+
+    it('adds code style header to FRAMEWORK.md when enabled', () => {
+      expect(generateFramework(['code-style'])).toContain('## Code Style');
+      expect(generateFramework([])).not.toContain('## Code Style');
+    });
   });
 });

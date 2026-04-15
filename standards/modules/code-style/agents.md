@@ -1,0 +1,2 @@
+- Always check `package.json` and local config files to determine the linting/parsing strategy before making code changes.
+- Ensure all generated code passes the project's linting checks.

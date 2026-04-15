@@ -11,6 +11,7 @@ interface RendererViewModel {
   includesDecisionRecords: boolean;
   includesTdd: boolean;
   includesArchitecture: boolean;
+  includesCodeStyle: boolean;
 }
 
 const renderFrameworkTemplate = Handlebars.compile(frameworkTemplateSource, { noEscape: true });
@@ -28,6 +29,7 @@ function createViewModel(moduleIds?: StandardModuleId[]): RendererViewModel {
     includesTdd: selectedIds.has('tdd'),
     includesArchitecture:
       selectedIds.has('hexagonal-architecture') || selectedIds.has('ddd'),
+    includesCodeStyle: selectedIds.has('code-style'),
   };
 }
 

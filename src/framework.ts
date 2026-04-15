@@ -10,12 +10,16 @@ import hexagonalArchitectureManifest from '../standards/modules/hexagonal-archit
 import tddAgents from '../standards/modules/tdd/agents.md' with { type: 'text' };
 import tddFramework from '../standards/modules/tdd/framework.md' with { type: 'text' };
 import tddManifest from '../standards/modules/tdd/module.json' with { type: 'json' };
+import codeStyleAgents from '../standards/modules/code-style/agents.md' with { type: 'text' };
+import codeStyleFramework from '../standards/modules/code-style/framework.md' with { type: 'text' };
+import codeStyleManifest from '../standards/modules/code-style/module.json' with { type: 'json' };
 
 export type StandardModuleId =
   | 'decision-records'
   | 'tdd'
   | 'hexagonal-architecture'
-  | 'ddd';
+  | 'ddd'
+  | 'code-style';
 
 export interface StandardModuleManifest {
   id: StandardModuleId;
@@ -55,6 +59,11 @@ const STANDARD_MODULE_REGISTRY: Record<StandardModuleId, StandardModule> = {
     ...(dddManifest as StandardModuleManifest),
     framework: dddFramework.trim(),
     agents: dddAgents.trim(),
+  },
+  'code-style': {
+    ...(codeStyleManifest as StandardModuleManifest),
+    framework: codeStyleFramework.trim(),
+    agents: codeStyleAgents.trim(),
   },
 };
 
