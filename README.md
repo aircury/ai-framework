@@ -105,6 +105,7 @@ The installer and template generation are registry-driven, so adding a new stand
 | `open-spec` | `propose`, `apply`, `complete`, `explore` | OpenSpec |
 | `spec-kit` | `specify`, `clarify`, `plan`, `analyze`, `tasks`, `implement`, `checklist` | Spec Kit |
 | `airsync` | `airsync` | [Airsync](https://github.com/aircury/airsync) |
+| `git` | `commit-changes` | Aircury |
 
 All skills write ephemeral working artifacts to `specs/changes/<name>/` and sync canonical output to `specs/features/` on completion.
 
