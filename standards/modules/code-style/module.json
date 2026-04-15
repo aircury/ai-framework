@@ -1,0 +1,7 @@
+{
+  "id": "code-style",
+  "label": "Code Style",
+  "hint": "ESLint, Prettier, Biome, Oxlint",
+  "description": "Automatically detects and follows project-specific linting and parsing rules by analyzing package.json and config files.",
+  "defaultEnabled": true
+}
