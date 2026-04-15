@@ -15,6 +15,7 @@ The following rules apply to every installation profile:
 - `specs/features/` is canonical and versioned.
 - `specs/changes/` is optional working state and is not versioned.
 - Any workflow mode that changes observable system behavior MUST end with an update to `specs/features/`.
+- Use the `commit-changes` skill to organize working tree changes into atomic, functional, and semantic commits using the [Conventional Commits](https://www.conventionalcommits.org/) format.
 - Before starting any non-trivial change, the agent MUST act as a routing meta-agent and ask the user how to proceed.
 - Optional standards are enabled through `.aircury/framework.config.json`.
 - Agents MUST use [Airsync](https://github.com/aircury/airsync) for shared team memory. Search before making decisions and capture new learnings through the INBOX → PUBLISHED lifecycle. See the `airsync` skill for the full workflow.
@@ -54,6 +55,7 @@ For any non-trivial change:
 4. Implement inside the selected standards profile.
 5. Refactor for clarity and boundary enforcement.
 6. Run relevant verification, then broader checks.
+7. Commit changes using the `commit-changes` skill for atomic deployment.
 
 ## Workflow Framework
 
@@ -117,6 +119,9 @@ A change is not done unless all of the following are true:
 {{/if}}
 {{#if includesDecisionRecords}}
 - Material architectural decisions are captured or superseded in `specs/decisions/`.
+{{/if}}
+{{#if includesCodeStyle}}
+- The code style is consistent with the project's configured tools.
 {{/if}}
 
 ## Living Specifications

@@ -12,15 +12,17 @@ All agents contributing to this repository MUST read and apply FRAMEWORK.md befo
 2. Read the relevant specs in `specs/features/` that relate to the area you are changing.
 3. Search Airsync memory for relevant context before making decisions.
 {{#if includesDecisionRecords}}
-4. Read the relevant ADRs in `specs/decisions/` when the area is governed by prior decisions.
-5. Act as a routing meta-agent: analyze the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
-{{else}}
-4. Act as a routing meta-agent: analyze the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
+1. Read the relevant ADRs in `specs/decisions/` when the area is governed by prior decisions.
 {{/if}}
+{{#if includesCodeStyle}}
+1. Analyze `package.json` and local config files to identify the project's linting and formatting strategy.
+{{/if}}
+1. Act as a routing meta-agent: analyze the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
 
 ## Non-negotiable rules
 
 - All observable behavior changes MUST update `specs/features/` before the work is done.
+- Use the `commit-changes` skill to organize working tree changes into atomic, functional, and semantic commits using Conventional Commit format.
 - After the user selects a workflow mode, follow `FRAMEWORK.md § Mode execution rules` exactly.
 - Selecting `plan-build` authorizes planning first, not automatic implementation.
 - Selecting `spec-kit` requires following the full Spec Kit sequence in order unless the user explicitly changes modes.
