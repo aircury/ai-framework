@@ -1,0 +1,7 @@
+{
+  "id": "frontend",
+  "label": "Frontend",
+  "hint": "design tokens, component tree, and style guide",
+  "description": "Requires strict UI analysis (tokens, components, behavior) and alignment with the project's design system.",
+  "defaultEnabled": true
+}

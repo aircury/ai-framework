@@ -1,0 +1,6 @@
+- Execute the 3-phase frontend analysis (tokens, components, behavior) before any UI implementation.
+- Generate or update `frontendRules/style-guide.md` as the canonical source of truth for design.
+- Enforce `specs/features/` with visual, functional, and accessibility acceptance criteria.
+- Use existing design tokens; avoid hardcoded values or introducing new UI libraries without an ADR.
+- For legacy replication tasks: locate and fully read the referenced legacy directory before implementing. Use the legacy code as structural/behavioral reference only; apply the project's current design system for all visual output. Follow `FRAMEWORK.md § Legacy Code Replication` strictly.
+- **UI-Only Scope**: Focus exclusively on visual and structural replication. Do not implement UX flows, navigation logic, or backend/API integrations.
