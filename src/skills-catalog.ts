@@ -53,6 +53,14 @@ export const SKILL_GROUPS: SkillGroup[] = [
     defaultSelected: true,
     scopes: ['local', 'global'],
   },
+  {
+    id: 'architecture',
+    label: 'Architecture',
+    description: 'Curated external architecture guidance for DDD and hexagonal design',
+    kind: 'external',
+    defaultSelected: false,
+    scopes: ['local', 'global'],
+  },
 ];
 
 export const SKILLS: SkillDefinition[] = [
@@ -171,6 +179,15 @@ export const SKILLS: SkillDefinition[] = [
     source: 'aircury/ai-framework',
     skillName: 'commit-changes',
     groupId: 'git',
+    scopes: ['local', 'global'],
+  },
+  {
+    id: 'clean-ddd-hexagonal',
+    label: 'Clean DDD Hexagonal',
+    description: 'Apply clean DDD and hexagonal architecture boundaries to implementation work',
+    source: 'https://github.com/ccheney/robust-skills',
+    skillName: 'clean-ddd-hexagonal',
+    groupId: 'architecture',
     scopes: ['local', 'global'],
   },
 ];

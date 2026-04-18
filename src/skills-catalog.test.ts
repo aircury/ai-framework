@@ -16,6 +16,7 @@ describe('skills catalog', () => {
       'spec-kit',
       'airsync',
       'git',
+      'architecture',
     ]);
   });
 
@@ -32,6 +33,12 @@ describe('skills catalog', () => {
   it('deduplicates repeated selected groups', () => {
     expect(expandSkillGroups(['git', 'git'], 'local').map((skill) => skill.skillName)).toEqual([
       'commit-changes',
+    ]);
+  });
+
+  it('includes curated external skills when their group is selected', () => {
+    expect(expandSkillGroups(['architecture'], 'local').map((skill) => skill.skillName)).toEqual([
+      'clean-ddd-hexagonal',
     ]);
   });
 });

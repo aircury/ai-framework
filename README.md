@@ -109,6 +109,7 @@ The installer exposes grouped skill bundles and expands them into concrete `npx 
 | `spec-kit` | `specify`, `clarify`, `plan`, `analyze`, `tasks`, `implement`, `checklist` | `aircury/ai-framework` |
 | `airsync` | `airsync` | `aircury/ai-framework` |
 | `git` | `commit-changes` | `aircury/ai-framework` |
+| `architecture` | `clean-ddd-hexagonal` | `https://github.com/ccheney/robust-skills` |
 
 All skills write ephemeral working artifacts to `specs/changes/<name>/` and sync canonical output to `specs/features/` on completion.
 
