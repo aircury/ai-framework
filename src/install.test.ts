@@ -8,9 +8,18 @@ import {
   getGlobalFiles,
   getLocalCommands,
   getLocalFiles,
+  type InstallFile,
   writeFile,
 } from "./install";
 import { getDefaultSkillGroupIds } from "./skills-catalog";
+
+function getFileByPath(files: InstallFile[], path: string): InstallFile {
+  const file = files.find((entry) => entry.path === path);
+  if (!file) {
+    throw new Error(`Expected install file at ${path}`);
+  }
+  return file;
+}
 
 describe("getLocalFiles", () => {
   it("always includes FRAMEWORK.md and AGENTS.md", () => {
@@ -47,24 +56,21 @@ describe("getLocalFiles", () => {
 
   it("GEMINI.md content matches AGENTS.md content", () => {
     const files = getLocalFiles(["gemini-cli"]);
-    const gemini = files.find((f) => f.path === "GEMINI.md")!;
-    const agents = files.find((f) => f.path === "AGENTS.md")!;
+    const gemini = getFileByPath(files, "GEMINI.md");
+    const agents = getFileByPath(files, "AGENTS.md");
     expect(gemini.content).toBe(agents.content);
   });
 
   it("persists the selected standards modules in a config file", () => {
     const files = getLocalFiles([], ["decision-records", "tdd"]);
-    const config = files.find(
-      (f) => f.path === ".aircury/framework.config.json",
-    );
-    expect(config).toBeDefined();
-    expect(config!.content).toContain('"decision-records"');
-    expect(config!.content).toContain('"tdd"');
+    const config = getFileByPath(files, ".aircury/framework.config.json");
+    expect(config.content).toContain('"decision-records"');
+    expect(config.content).toContain('"tdd"');
   });
 
   it("generates framework content from the selected modules", () => {
     const files = getLocalFiles([], ["decision-records"]);
-    const framework = files.find((f) => f.path === "FRAMEWORK.md")!;
+    const framework = getFileByPath(files, "FRAMEWORK.md");
     expect(framework.content).toContain("## Architecture Decision Records");
     expect(framework.content).not.toContain("## TDD Workflow");
     expect(framework.content).not.toContain(
@@ -74,19 +80,19 @@ describe("getLocalFiles", () => {
 
   it("includes ADR instructions in AGENTS.md when the ADR module is enabled", () => {
     const files = getLocalFiles([], ["decision-records"]);
-    const agents = files.find((f) => f.path === "AGENTS.md")!;
+    const agents = getFileByPath(files, "AGENTS.md");
     expect(agents.content).toContain("specs/decisions/");
   });
 
   it("omits ADR instructions when the ADR module is disabled", () => {
     const files = getLocalFiles([], []);
-    const agents = files.find((f) => f.path === "AGENTS.md")!;
+    const agents = getFileByPath(files, "AGENTS.md");
     expect(agents.content).not.toContain("specs/decisions/");
   });
 
   it("uses the full recommended profile by default", () => {
     const files = getLocalFiles([]);
-    const framework = files.find((f) => f.path === "FRAMEWORK.md")!;
+    const framework = getFileByPath(files, "FRAMEWORK.md");
     expect(framework.content).toContain("## TDD Workflow");
     expect(framework.content).toContain("## Non-Negotiable Architecture Rules");
     expect(framework.content).toContain("## Architecture Decision Records");
@@ -94,8 +100,8 @@ describe("getLocalFiles", () => {
 
   it("CLAUDE.md content matches AGENTS.md content", () => {
     const files = getLocalFiles(["claude-code"]);
-    const claude = files.find((f) => f.path === "CLAUDE.md")!;
-    const agents = files.find((f) => f.path === "AGENTS.md")!;
+    const claude = getFileByPath(files, "CLAUDE.md");
+    const agents = getFileByPath(files, "AGENTS.md");
     expect(claude.content).toBe(agents.content);
   });
 });
@@ -209,7 +215,6 @@ describe("checkConflicts", () => {
   });
 
   it("marks existing files as conflicting", () => {
-    const dir = tmpdir();
     // templates/framework.md.hbs exists in the project root — use that as cwd
     const cwd = join(import.meta.dir, "..");
     const files = [
