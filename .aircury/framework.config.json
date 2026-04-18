@@ -1,9 +1,4 @@
 {
   "version": 1,
-  "modules": [
-    "decision-records",
-    "tdd",
-    "hexagonal-architecture",
-    "ddd"
-  ]
+  "modules": ["decision-records", "tdd", "hexagonal-architecture", "ddd"]
 }

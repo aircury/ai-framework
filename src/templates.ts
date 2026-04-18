@@ -1,10 +1,10 @@
-import type { StandardModuleId } from './framework';
-import { renderAgents, renderFramework } from './renderer';
+import type { StandardModuleId } from "./framework";
+import { renderAgents, renderFramework } from "./renderer";
 
 const FRAMEWORK = renderFramework();
 const AGENTS = renderAgents();
 
-export { FRAMEWORK, AGENTS };
+export { AGENTS, FRAMEWORK };
 
 export function generateFramework(moduleIds?: StandardModuleId[]): string {
   return renderFramework(moduleIds);

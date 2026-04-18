@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { run } from './tui';
+import { run } from "./tui";
 
 run().catch((err) => {
   console.error(err);

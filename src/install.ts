@@ -1,13 +1,13 @@
-import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { createFrameworkProfile } from './framework';
-import type { StandardModuleId } from './framework';
-import { expandSkillGroups } from './skills-catalog';
-import { generateFramework, generateAgents } from './templates';
+import { spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import type { StandardModuleId } from "./framework";
+import { createFrameworkProfile } from "./framework";
+import { expandSkillGroups } from "./skills-catalog";
+import { generateAgents, generateFramework } from "./templates";
 
-export type Tool = 'claude-code' | 'gemini-cli';
-export type Scope = 'local' | 'global';
+export type Tool = "claude-code" | "gemini-cli";
+export type Scope = "local" | "global";
 
 export interface InstallFile {
   path: string;
@@ -24,7 +24,7 @@ export interface InstallCommand {
 function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
   const files: InstallFile[] = [
     {
-      path: 'specs/features/README.md',
+      path: "specs/features/README.md",
       content: `# Living Specifications
 
 \`specs/features/\` stores the canonical, technology-agnostic description of observable system behavior.
@@ -33,13 +33,13 @@ function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
 - Keep \`spec.md\` focused on requirements and scenarios.
 - Update these specs whenever observable behavior changes.
 `,
-      description: 'Living specs starter guide',
+      description: "Living specs starter guide",
     },
   ];
 
-  if (moduleIds.includes('decision-records')) {
+  if (moduleIds.includes("decision-records")) {
     files.push({
-      path: 'specs/decisions/README.md',
+      path: "specs/decisions/README.md",
       content: `# Architecture Decision Records
 
 \`specs/decisions/\` stores ADRs that preserve architectural and workflow intent.
@@ -48,7 +48,7 @@ function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
 - Reference the superseded ADR instead of rewriting history.
 - Read relevant ADRs before changing areas they govern.
 `,
-      description: 'ADR starter guide',
+      description: "ADR starter guide",
     });
   }
 
@@ -62,36 +62,36 @@ export function getLocalFiles(
   const profile = createFrameworkProfile(moduleIds);
   const files: InstallFile[] = [
     {
-      path: 'FRAMEWORK.md',
+      path: "FRAMEWORK.md",
       content: generateFramework(profile.modules),
-      description: 'Framework rules (source of truth)',
+      description: "Framework rules (source of truth)",
     },
     {
-      path: 'AGENTS.md',
+      path: "AGENTS.md",
       content: generateAgents(profile.modules),
-      description: 'Agent instructions (standard convention)',
+      description: "Agent instructions (standard convention)",
     },
     {
-      path: '.aircury/framework.config.json',
+      path: ".aircury/framework.config.json",
       content: `${JSON.stringify(profile, null, 2)}\n`,
-      description: 'Installed standards profile',
+      description: "Installed standards profile",
     },
     ...getSpecsFiles(profile.modules),
   ];
 
-  if (tools.includes('claude-code')) {
+  if (tools.includes("claude-code")) {
     files.push({
-      path: 'CLAUDE.md',
+      path: "CLAUDE.md",
       content: generateAgents(profile.modules),
-      description: 'Agent instructions for Claude Code',
+      description: "Agent instructions for Claude Code",
     });
   }
 
-  if (tools.includes('gemini-cli')) {
+  if (tools.includes("gemini-cli")) {
     files.push({
-      path: 'GEMINI.md',
+      path: "GEMINI.md",
       content: generateAgents(profile.modules),
-      description: 'Agent instructions for Gemini CLI',
+      description: "Agent instructions for Gemini CLI",
     });
   }
 
@@ -104,10 +104,10 @@ export function getGlobalFiles(tools: Tool[]): InstallFile[] {
 }
 
 function getLocalSkillAgents(tools: Tool[]): string[] {
-  const agents = new Set<string>(['universal']);
+  const agents = new Set<string>(["universal"]);
 
-  if (tools.includes('claude-code')) agents.add('claude-code');
-  if (tools.includes('gemini-cli')) agents.add('gemini-cli');
+  if (tools.includes("claude-code")) agents.add("claude-code");
+  if (tools.includes("gemini-cli")) agents.add("gemini-cli");
 
   return [...agents];
 }
@@ -115,8 +115,8 @@ function getLocalSkillAgents(tools: Tool[]): string[] {
 function getGlobalSkillAgents(tools: Tool[]): string[] {
   const agents = new Set<string>();
 
-  if (tools.includes('claude-code')) agents.add('claude-code');
-  if (tools.includes('gemini-cli')) agents.add('gemini-cli');
+  if (tools.includes("claude-code")) agents.add("claude-code");
+  if (tools.includes("gemini-cli")) agents.add("gemini-cli");
 
   return [...agents];
 }
@@ -129,20 +129,20 @@ function buildSkillsAddCommand(
 ): InstallCommand | null {
   if (agents.length === 0 || skillNames.length === 0) return null;
 
-  const args = ['-y', 'skills', 'add', source];
+  const args = ["-y", "skills", "add", source];
   for (const skillName of skillNames) {
-    args.push('--skill', skillName);
+    args.push("--skill", skillName);
   }
   for (const agent of agents) {
-    args.push('-a', agent);
+    args.push("-a", agent);
   }
   if (isGlobal) {
-    args.push('-g');
+    args.push("-g");
   }
-  args.push('-y');
+  args.push("-y");
 
   return {
-    command: 'npx',
+    command: "npx",
     args,
     description: `Install selected skills from ${source}`,
   };
@@ -155,7 +155,7 @@ function buildSkillsCommands(
 ): InstallCommand[] {
   if (agents.length === 0) return [];
 
-  const scope: 'local' | 'global' = isGlobal ? 'global' : 'local';
+  const scope: "local" | "global" = isGlobal ? "global" : "local";
   const skills = expandSkillGroups(selectedSkillGroupIds, scope);
   const skillsBySource = new Map<string, string[]>();
 
@@ -167,16 +167,32 @@ function buildSkillsCommands(
 
   return [...skillsBySource.entries()]
     .sort(([left], [right]) => left.localeCompare(right))
-    .map(([source, skillNames]) => buildSkillsAddCommand(source, skillNames, agents, isGlobal))
+    .map(([source, skillNames]) =>
+      buildSkillsAddCommand(source, skillNames, agents, isGlobal),
+    )
     .filter((command): command is InstallCommand => command !== null);
 }
 
-export function getLocalCommands(tools: Tool[], selectedSkillGroupIds: string[]): InstallCommand[] {
-  return buildSkillsCommands(selectedSkillGroupIds, getLocalSkillAgents(tools), false);
+export function getLocalCommands(
+  tools: Tool[],
+  selectedSkillGroupIds: string[],
+): InstallCommand[] {
+  return buildSkillsCommands(
+    selectedSkillGroupIds,
+    getLocalSkillAgents(tools),
+    false,
+  );
 }
 
-export function getGlobalCommands(tools: Tool[], selectedSkillGroupIds: string[]): InstallCommand[] {
-  return buildSkillsCommands(selectedSkillGroupIds, getGlobalSkillAgents(tools), true);
+export function getGlobalCommands(
+  tools: Tool[],
+  selectedSkillGroupIds: string[],
+): InstallCommand[] {
+  return buildSkillsCommands(
+    selectedSkillGroupIds,
+    getGlobalSkillAgents(tools),
+    true,
+  );
 }
 
 export interface ConflictResult {
@@ -184,17 +200,25 @@ export interface ConflictResult {
   exists: boolean;
 }
 
-export function checkConflicts(files: InstallFile[], cwd: string, isGlobal: boolean): ConflictResult[] {
+export function checkConflicts(
+  files: InstallFile[],
+  cwd: string,
+  isGlobal: boolean,
+): ConflictResult[] {
   return files.map((file) => ({
     file,
     exists: existsSync(isGlobal ? file.path : join(cwd, file.path)),
   }));
 }
 
-export function writeFile(file: InstallFile, cwd: string, isGlobal: boolean): void {
+export function writeFile(
+  file: InstallFile,
+  cwd: string,
+  isGlobal: boolean,
+): void {
   const fullPath = isGlobal ? file.path : join(cwd, file.path);
   mkdirSync(dirname(fullPath), { recursive: true });
-  writeFileSync(fullPath, file.content, 'utf-8');
+  writeFileSync(fullPath, file.content, "utf-8");
 }
 
 export function runCommand(
@@ -203,34 +227,41 @@ export function runCommand(
 ): { success: boolean; stdout: string; stderr: string } {
   const result = spawnSync(installCommand.command, installCommand.args, {
     cwd,
-    encoding: 'utf-8',
-    stdio: 'pipe',
+    encoding: "utf-8",
+    stdio: "pipe",
   });
 
   return {
     success: result.status === 0,
-    stdout: result.stdout ?? '',
-    stderr: result.stderr ?? '',
+    stdout: result.stdout ?? "",
+    stderr: result.stderr ?? "",
   };
 }
 
-const GITIGNORE_ENTRY = '# Aircury AI Framework\nspecs/changes/';
+const GITIGNORE_ENTRY = "# Aircury AI Framework\nspecs/changes/";
 
-export function updateGitignore(cwd: string): { updated: boolean; created: boolean } {
-  const gitignorePath = join(cwd, '.gitignore');
+export function updateGitignore(cwd: string): {
+  updated: boolean;
+  created: boolean;
+} {
+  const gitignorePath = join(cwd, ".gitignore");
   const hasGitignore = existsSync(gitignorePath);
 
   if (!hasGitignore) {
-    writeFileSync(gitignorePath, `${GITIGNORE_ENTRY}\n`, 'utf-8');
+    writeFileSync(gitignorePath, `${GITIGNORE_ENTRY}\n`, "utf-8");
     return { updated: true, created: true };
   }
 
-  const content = readFileSync(gitignorePath, 'utf-8');
-  if (content.includes('specs/changes/')) {
+  const content = readFileSync(gitignorePath, "utf-8");
+  if (content.includes("specs/changes/")) {
     return { updated: false, created: false };
   }
 
-  const separator = content.endsWith('\n') ? '' : '\n';
-  writeFileSync(gitignorePath, `${content}${separator}${GITIGNORE_ENTRY}\n`, 'utf-8');
+  const separator = content.endsWith("\n") ? "" : "\n";
+  writeFileSync(
+    gitignorePath,
+    `${content}${separator}${GITIGNORE_ENTRY}\n`,
+    "utf-8",
+  );
   return { updated: true, created: false };
 }
