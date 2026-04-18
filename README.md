@@ -68,8 +68,9 @@ The interactive TUI will ask:
 1. **Scope** — `Local` to configure the current project, `Global` to configure your machine.
 2. **AI tools** — select the tool-specific integrations you want.
 3. **Standards modules** — for local installs, choose which optional standards this project should enforce.
+4. **Skill groups** — choose which grouped workflows to install through `npx skills add`.
 
-The installer writes all required configuration files, starter spec folders, and agent instructions to the right locations for each tool. Skills are installed through the standard `npx skills add ...` flow so they remain tracked by the skills ecosystem and can be updated later with `npx skills update`. If files already exist you can choose to skip them or overwrite them.
+The installer writes all required configuration files, starter spec folders, and agent instructions to the right locations for each tool. Skills are installed through the standard `npx skills add ...` flow so they remain tracked by the skills ecosystem and can be updated later with `npx skills update`. Skill installation is driven by a static catalog in `src/skills-catalog.ts`, so Aircury and curated external skills can be selected through the same interactive flow. If files already exist you can choose to skip them or overwrite them.
 
 ### What gets installed
 
@@ -100,14 +101,18 @@ The installer and template generation are registry-driven, so adding a new stand
 
 ## Skill groups
 
+The installer exposes grouped skill bundles and expands them into concrete `npx skills add <source> --skill ...` commands at install time.
+
 | Group | Skills | Source |
 |-------|--------|--------|
-| `open-spec` | `propose`, `apply`, `complete`, `explore` | OpenSpec |
-| `spec-kit` | `specify`, `clarify`, `plan`, `analyze`, `tasks`, `implement`, `checklist` | Spec Kit |
-| `airsync` | `airsync` | [Airsync](https://github.com/aircury/airsync) |
-| `git` | `commit-changes` | Aircury |
+| `open-spec` | `propose`, `apply`, `complete`, `explore` | `aircury/ai-framework` |
+| `spec-kit` | `specify`, `clarify`, `plan`, `analyze`, `tasks`, `implement`, `checklist` | `aircury/ai-framework` |
+| `airsync` | `airsync` | `aircury/ai-framework` |
+| `git` | `commit-changes` | `aircury/ai-framework` |
 
 All skills write ephemeral working artifacts to `specs/changes/<name>/` and sync canonical output to `specs/features/` on completion.
+
+Curated external skills can be added to the static catalog and will appear in the same multiselect UI alongside the built-in Aircury groups.
 
 ---
 

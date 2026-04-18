@@ -13,8 +13,7 @@
   "repository":"https://github.com/aircury/ai-framework",
   "scripts": {
     "start": "bun run src/cli.ts",
-    "generate:skills": "bun run scripts/generate-skills.ts",
-    "build": "bun run generate:skills && bun build src/cli.ts --outfile dist/cli.js --target node --sourcemap=none",
+    "build": "bun build src/cli.ts --outfile dist/cli.js --target node --sourcemap=none",
     "test": "bun test"
   },
   "dependencies": {

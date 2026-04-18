@@ -1,11 +1,10 @@
 import type { StandardModuleId } from './framework';
 import { renderAgents, renderFramework } from './renderer';
-import { skills } from './skills.generated';
 
 const FRAMEWORK = renderFramework();
 const AGENTS = renderAgents();
 
-export { FRAMEWORK, AGENTS, skills };
+export { FRAMEWORK, AGENTS };
 
 export function generateFramework(moduleIds?: StandardModuleId[]): string {
   return renderFramework(moduleIds);

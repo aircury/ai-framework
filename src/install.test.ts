@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import { existsSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { getDefaultSkillGroupIds } from './skills-catalog';
 import {
   getLocalFiles,
   getGlobalFiles,
@@ -106,18 +107,52 @@ describe('getGlobalFiles', () => {
 });
 
 describe('getLocalCommands', () => {
-  it('installs universal skills by default for local setup', () => {
-    const commands = getLocalCommands([]);
+  it('installs the default local skill groups for universal', () => {
+    const commands = getLocalCommands([], getDefaultSkillGroupIds('local'));
     expect(commands).toHaveLength(1);
     expect(commands[0]).toEqual({
       command: 'npx',
-      args: ['-y', 'skills', 'add', 'aircury/ai-framework', '--skill', '*', '-a', 'universal', '-y'],
-      description: 'Install Aircury skills via skills CLI for universal',
+      args: [
+        '-y',
+        'skills',
+        'add',
+        'aircury/ai-framework',
+        '--skill',
+        'open-spec-propose',
+        '--skill',
+        'open-spec-apply',
+        '--skill',
+        'open-spec-complete',
+        '--skill',
+        'open-spec-explore',
+        '--skill',
+        'spec-kit-specify',
+        '--skill',
+        'spec-kit-clarify',
+        '--skill',
+        'spec-kit-plan',
+        '--skill',
+        'spec-kit-analyze',
+        '--skill',
+        'spec-kit-tasks',
+        '--skill',
+        'spec-kit-implement',
+        '--skill',
+        'spec-kit-checklist',
+        '--skill',
+        'airsync',
+        '--skill',
+        'commit-changes',
+        '-a',
+        'universal',
+        '-y',
+      ],
+      description: 'Install selected skills from aircury/ai-framework',
     });
   });
 
   it('installs multiple selected agents in one command', () => {
-    const commands = getLocalCommands(['claude-code', 'gemini-cli']);
+    const commands = getLocalCommands(['claude-code', 'gemini-cli'], ['git']);
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toEqual([
       '-y',
@@ -125,7 +160,7 @@ describe('getLocalCommands', () => {
       'add',
       'aircury/ai-framework',
       '--skill',
-      '*',
+      'commit-changes',
       '-a',
       'universal',
       '-a',
@@ -139,11 +174,11 @@ describe('getLocalCommands', () => {
 
 describe('getGlobalCommands', () => {
   it('returns empty when no global skill agents are selected', () => {
-    expect(getGlobalCommands([])).toHaveLength(0);
+    expect(getGlobalCommands([], ['git'])).toHaveLength(0);
   });
 
   it('creates a global skills install command for selected agents', () => {
-    const commands = getGlobalCommands(['claude-code']);
+    const commands = getGlobalCommands(['claude-code'], ['git']);
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toEqual([
       '-y',
@@ -151,7 +186,7 @@ describe('getGlobalCommands', () => {
       'add',
       'aircury/ai-framework',
       '--skill',
-      '*',
+      'commit-changes',
       '-a',
       'claude-code',
       '-g',

@@ -3,7 +3,6 @@ import { renderAgents, renderFramework } from './renderer';
 import {
   FRAMEWORK,
   AGENTS,
-  skills,
   generateAgents,
   generateFramework,
   generateOpencodeAgent,
@@ -43,35 +42,6 @@ describe('templates', () => {
     it('matches the generated default profile', () => {
       expect(generateAgents()).toBe(AGENTS);
       expect(renderAgents()).toBe(AGENTS);
-    });
-  });
-
-  describe('skills', () => {
-    it('contains all expected skills', () => {
-      const expectedSkills = [
-        'open-spec-apply',
-        'open-spec-complete',
-        'open-spec-explore',
-        'open-spec-propose',
-        'spec-kit-analyze',
-        'spec-kit-checklist',
-        'spec-kit-clarify',
-        'spec-kit-implement',
-        'spec-kit-plan',
-        'spec-kit-specify',
-        'spec-kit-tasks',
-        'commit-changes',
-      ];
-
-      for (const skill of expectedSkills) {
-        expect(skills).toHaveProperty(skill);
-      }
-    });
-
-    it('has non-empty content for every skill', () => {
-      for (const [name, content] of Object.entries(skills)) {
-        expect(content.length, `skill "${name}" is empty`).toBeGreaterThan(0);
-      }
     });
   });
 

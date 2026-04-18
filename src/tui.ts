@@ -1,6 +1,7 @@
 import * as p from '@clack/prompts';
 import { STANDARD_MODULES } from './framework';
 import type { StandardModuleId } from './framework';
+import { expandSkillGroups, getDefaultSkillGroupIds, getSkillGroups } from './skills-catalog';
 import {
   getLocalFiles,
   getGlobalFiles,
@@ -30,7 +31,7 @@ export async function run(): Promise<void> {
     const universalTools = ['Amp', 'Codex', 'Cursor', 'GitHub Copilot', 'Kilo Code', 'OpenCode'];
     p.note(
       universalTools.join(' · '),
-      'Universal — always included via AGENTS.md + .agents/skills/',
+      'Universal agents supported through AGENTS.md and selected skills',
     );
   }
 
@@ -73,14 +74,50 @@ export async function run(): Promise<void> {
     }
   }
 
+  const skillScope = scope === 'global' ? 'global' : 'local';
+  const aircurySkillGroups = getSkillGroups(skillScope, 'aircury');
+  const externalSkillGroups = getSkillGroups(skillScope, 'external');
+  const skillGroupOptions = [
+    ...aircurySkillGroups.map((group) => ({
+      value: group.id,
+      label: group.label,
+      hint: `Aircury · ${group.description}`,
+    })),
+    ...externalSkillGroups.map((group) => ({
+      value: group.id,
+      label: group.label,
+      hint: `External · ${group.description}`,
+    })),
+  ];
+
+  let selectedSkillGroups: string[] = [];
+  if (skillGroupOptions.length > 0) {
+    selectedSkillGroups = await p.multiselect<string>({
+      message: 'Skill groups — choose which workflows to install',
+      options: skillGroupOptions,
+      initialValues: getDefaultSkillGroupIds(skillScope),
+      required: false,
+    });
+
+    if (p.isCancel(selectedSkillGroups)) return p.cancel('Cancelled.');
+
+    if (selectedSkillGroups.length === 0) {
+      p.note(
+        'No skills will be installed. You can still use the framework files and add skills later with npx skills add.',
+        'No skill groups selected',
+      );
+    }
+  }
+
   const cwd = process.cwd();
   const isGlobal = scope === 'global';
   const files = isGlobal
     ? getGlobalFiles(selectedTools)
     : getLocalFiles(selectedTools, selectedModules);
   const commands = isGlobal
-    ? getGlobalCommands(selectedTools)
-    : getLocalCommands(selectedTools);
+    ? getGlobalCommands(selectedTools, selectedSkillGroups)
+    : getLocalCommands(selectedTools, selectedSkillGroups);
+  const selectedSkills = expandSkillGroups(selectedSkillGroups, skillScope);
 
   if (files.length === 0 && commands.length === 0) {
     p.outro('Nothing to install.');
@@ -98,6 +135,14 @@ export async function run(): Promise<void> {
   }
 
   if (commands.length > 0) {
+    p.log.step(`${selectedSkillGroups.length} skill group${selectedSkillGroups.length > 1 ? 's' : ''} selected`);
+    for (const group of getSkillGroups(skillScope).filter((entry) => selectedSkillGroups.includes(entry.id))) {
+      p.log.info(`# ${group.label}`);
+    }
+    p.log.step(`${selectedSkills.length} skill${selectedSkills.length > 1 ? 's' : ''} will be installed`);
+    for (const skill of selectedSkills) {
+      p.log.info(`- ${skill.skillName} (${skill.source})`);
+    }
     p.log.step(`${commands.length} skills command${commands.length > 1 ? 's' : ''} to run`);
     for (const command of commands) {
       p.log.info(`> ${command.command} ${command.args.join(' ')}`);

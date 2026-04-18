@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { createFrameworkProfile } from './framework';
 import type { StandardModuleId } from './framework';
+import { expandSkillGroups } from './skills-catalog';
 import { generateFramework, generateAgents } from './templates';
 
 export type Tool = 'claude-code' | 'gemini-cli';
@@ -19,8 +20,6 @@ export interface InstallCommand {
   args: string[];
   description: string;
 }
-
-const SKILLS_SOURCE = 'aircury/ai-framework';
 
 function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
   const files: InstallFile[] = [
@@ -122,10 +121,18 @@ function getGlobalSkillAgents(tools: Tool[]): string[] {
   return [...agents];
 }
 
-function buildSkillsAddCommand(agents: string[], isGlobal: boolean): InstallCommand | null {
-  if (agents.length === 0) return null;
+function buildSkillsAddCommand(
+  source: string,
+  skillNames: string[],
+  agents: string[],
+  isGlobal: boolean,
+): InstallCommand | null {
+  if (agents.length === 0 || skillNames.length === 0) return null;
 
-  const args = ['-y', 'skills', 'add', SKILLS_SOURCE, '--skill', '*'];
+  const args = ['-y', 'skills', 'add', source];
+  for (const skillName of skillNames) {
+    args.push('--skill', skillName);
+  }
   for (const agent of agents) {
     args.push('-a', agent);
   }
@@ -137,18 +144,39 @@ function buildSkillsAddCommand(agents: string[], isGlobal: boolean): InstallComm
   return {
     command: 'npx',
     args,
-    description: `Install Aircury skills via skills CLI for ${agents.join(', ')}`,
+    description: `Install selected skills from ${source}`,
   };
 }
 
-export function getLocalCommands(tools: Tool[]): InstallCommand[] {
-  const command = buildSkillsAddCommand(getLocalSkillAgents(tools), false);
-  return command ? [command] : [];
+function buildSkillsCommands(
+  selectedSkillGroupIds: string[],
+  agents: string[],
+  isGlobal: boolean,
+): InstallCommand[] {
+  if (agents.length === 0) return [];
+
+  const scope: 'local' | 'global' = isGlobal ? 'global' : 'local';
+  const skills = expandSkillGroups(selectedSkillGroupIds, scope);
+  const skillsBySource = new Map<string, string[]>();
+
+  for (const skill of skills) {
+    const names = skillsBySource.get(skill.source) ?? [];
+    names.push(skill.skillName);
+    skillsBySource.set(skill.source, names);
+  }
+
+  return [...skillsBySource.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([source, skillNames]) => buildSkillsAddCommand(source, skillNames, agents, isGlobal))
+    .filter((command): command is InstallCommand => command !== null);
 }
 
-export function getGlobalCommands(tools: Tool[]): InstallCommand[] {
-  const command = buildSkillsAddCommand(getGlobalSkillAgents(tools), true);
-  return command ? [command] : [];
+export function getLocalCommands(tools: Tool[], selectedSkillGroupIds: string[]): InstallCommand[] {
+  return buildSkillsCommands(selectedSkillGroupIds, getLocalSkillAgents(tools), false);
+}
+
+export function getGlobalCommands(tools: Tool[], selectedSkillGroupIds: string[]): InstallCommand[] {
+  return buildSkillsCommands(selectedSkillGroupIds, getGlobalSkillAgents(tools), true);
 }
 
 export interface ConflictResult {
