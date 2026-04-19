@@ -1,3 +1,12 @@
+import airsyncMemoryAgents from "../standards/modules/airsync-memory/agents.md" with {
+  type: "text",
+};
+import airsyncMemoryFramework from "../standards/modules/airsync-memory/framework.md" with {
+  type: "text",
+};
+import airsyncMemoryManifest from "../standards/modules/airsync-memory/module.json" with {
+  type: "json",
+};
 import codeStyleAgents from "../standards/modules/code-style/agents.md" with {
   type: "text",
 };
@@ -49,7 +58,8 @@ export type StandardModuleId =
   | "tdd"
   | "hexagonal-architecture"
   | "ddd"
-  | "code-style";
+  | "code-style"
+  | "airsync-memory";
 
 export interface StandardModuleManifest {
   id: StandardModuleId;
@@ -94,6 +104,11 @@ const STANDARD_MODULE_REGISTRY: Record<StandardModuleId, StandardModule> = {
     ...(codeStyleManifest as StandardModuleManifest),
     framework: codeStyleFramework.trim(),
     agents: codeStyleAgents.trim(),
+  },
+  "airsync-memory": {
+    ...(airsyncMemoryManifest as StandardModuleManifest),
+    framework: airsyncMemoryFramework.trim(),
+    agents: airsyncMemoryAgents.trim(),
   },
 };
 

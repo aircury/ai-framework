@@ -16,6 +16,7 @@ interface RendererViewModel {
   includesTdd: boolean;
   includesArchitecture: boolean;
   includesCodeStyle: boolean;
+  includesAirsyncMemory: boolean;
 }
 
 const renderFrameworkTemplate = Handlebars.compile(frameworkTemplateSource, {
@@ -43,6 +44,7 @@ function createViewModel(moduleIds?: StandardModuleId[]): RendererViewModel {
     includesArchitecture:
       selectedIds.has("hexagonal-architecture") || selectedIds.has("ddd"),
     includesCodeStyle: selectedIds.has("code-style"),
+    includesAirsyncMemory: selectedIds.has("airsync-memory"),
   };
 }
 

@@ -8,16 +8,18 @@ All agents contributing to this repository MUST read and apply FRAMEWORK.md befo
 
 ## Before starting any task
 
-1. Read `FRAMEWORK.md` in full if you have not already done so in this session.
-2. Read the relevant specs in `specs/features/` that relate to the area you are changing.
-3. Search Airsync memory for relevant context before making decisions.
+- Read `FRAMEWORK.md` in full if you have not already done so in this session.
+- Read the relevant specs in `specs/features/` that relate to the area you are changing.
+{{#if includesAirsyncMemory}}
+- Search Airsync memory for relevant context before making decisions. Use `memory_search` with targeted queries about the area you are working on.
+{{/if}}
 {{#if includesDecisionRecords}}
-1. Read the relevant ADRs in `specs/decisions/` when the area is governed by prior decisions.
+- Read the relevant ADRs in `specs/decisions/` when the area is governed by prior decisions.
 {{/if}}
 {{#if includesCodeStyle}}
-1. Analyze `package.json` and local config files to identify the project's linting and formatting strategy.
+- Analyze `package.json` and local config files to identify the project's linting and formatting strategy.
 {{/if}}
-1. Act as a routing meta-agent: analyze the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
+- Act as a routing meta-agent: analyze the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
 
 ## Non-negotiable rules
 
@@ -27,6 +29,10 @@ All agents contributing to this repository MUST read and apply FRAMEWORK.md befo
 - Selecting `plan-build` authorizes planning first, not automatic implementation.
 - Selecting `spec-kit` requires following the full Spec Kit sequence in order unless the user explicitly changes modes.
 - Selecting an OpenSpec workflow requires following its named sequence in order unless the user explicitly changes modes.
+{{#if includesAirsyncMemory}}
+- Capture reusable knowledge in Airsync INBOX when you discover validated patterns, repeated pitfalls, or team conventions. Search before proposing to avoid duplicates.
+- Every ADR created or superseded MUST also be proposed to Airsync as a `note` with `scope: "team"` and tags `["adr", "ADR-XXXX"]`.
+{{/if}}
 {{#each agentRules}}
 {{this}}
 {{/each}}

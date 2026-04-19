@@ -18,8 +18,52 @@ The following rules apply to every installation profile:
 - Use the `commit-changes` skill to organize working tree changes into atomic, functional, and semantic commits using the [Conventional Commits](https://www.conventionalcommits.org/) format.
 - Before starting any non-trivial change, the agent MUST act as a routing meta-agent and ask the user how to proceed.
 - Optional standards are enabled through `.aircury/framework.config.json`.
-- Agents MUST use [Airsync](https://github.com/aircury/airsync) for shared team memory. Search before making decisions and capture new learnings through the INBOX → PUBLISHED lifecycle. See the `airsync` skill for the full workflow.
 
+{{#if includesAirsyncMemory}}
+## Airsync Memory
+
+Airsync is a collaborative memory system that preserves team knowledge across projects and sessions. It uses a three-layer lifecycle to ensure only vetted knowledge becomes searchable.
+
+### When to Search Airsync
+
+Before making decisions that could be influenced by prior team experience:
+
+- Architectural choices (patterns, module structure, boundary enforcement)
+- Workflow changes (spec handling, agent routing, delivery modes)
+- Technology selections that affect multiple components
+
+### What to Capture
+
+Capture knowledge that passes the **collaboration test**: "Would a developer on a different project benefit from this in 3 months?"
+
+**DO capture:**
+
+- Architectural decisions with rationale (ADRs dual-written as `note`)
+- Validated patterns and approaches that work across projects
+- Repeated pitfalls and how to avoid them
+- Team-wide conventions and standards
+- Mental models that explain complex systems
+
+**DO NOT capture:**
+
+- Project-specific implementation details
+- Debugging sessions without transferable lessons
+- Content already in codebase, docs, or prior memory
+- Transient observations without context
+
+### ADR Dual-Write
+
+When the `decision-records` module is enabled, every ADR created or superseded in `specs/decisions/` MUST also be proposed to Airsync as a `note` with `scope: "team"`. This ensures architectural decisions are discoverable by agents across all projects, not just the current repository.
+
+### Workflow Summary
+
+1. **Search first**: `memory_search(query="your terms")` — default searches only PUBLISHED layer
+2. **Propose to INBOX**: `memory_propose(entry={...})` — entries start in INBOX, not searchable by default
+3. **Promote when confident**: `memory_promote(memory_id)` — moves to PUBLISHED, becomes team-searchable
+
+See the `airsync` skill for the complete tool reference and quality guidelines.
+
+{{/if}}
 ## Installed Standards Modules
 
 {{#if installedModules}}
@@ -118,7 +162,10 @@ A change is not done unless all of the following are true:
 - Enabled architecture boundaries still hold.
 {{/if}}
 {{#if includesDecisionRecords}}
-- Material architectural decisions are captured or superseded in `specs/decisions/`.
+- Material architectural decisions are captured or superseded in `specs/decisions/` and proposed to Airsync.
+{{/if}}
+{{#if includesAirsyncMemory}}
+- Relevant Airsync memory has been searched and new learnings have been captured in INBOX.
 {{/if}}
 {{#if includesCodeStyle}}
 - The code style is consistent with the project's configured tools.

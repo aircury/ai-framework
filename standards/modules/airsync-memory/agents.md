@@ -1,0 +1,5 @@
+- Agents MUST search Airsync memory before making architectural or workflow decisions in areas where prior team knowledge may exist.
+- When an ADR is created or superseded in `specs/decisions/`, agents MUST also propose a corresponding entry to Airsync INBOX with `memory_kind: "note"`, `scope: "team"`, and tags including `"adr"` and the ADR number.
+- Agents MUST capture reusable knowledge in Airsync INBOX when they discover: validated patterns, repeated pitfalls with fixes, team conventions, or mental models that explain system behavior.
+- Agents MUST NOT capture project-specific implementation details, debugging sessions without transferable lessons, or content already documented elsewhere.
+- Before proposing to Airsync, agents SHOULD run `memory_search` to avoid duplicates. If similar content exists, enhance it instead of creating a new entry.

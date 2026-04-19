@@ -22,3 +22,14 @@ The installer MUST support enabling ADR governance as a configurable standards m
 #### Scenario: ADR governance is enabled during installation
 - **WHEN** the user selects the ADR module
 - **THEN** generated framework instructions include ADR creation and review rules
+
+### Requirement: Agents SHALL dual-write ADRs to Airsync memory
+The framework MUST require agents to propose every ADR created or superseded to Airsync as a team-scoped memory entry.
+
+#### Scenario: A new ADR is created
+- **WHEN** an agent creates an ADR under `specs/decisions/`
+- **THEN** the agent proposes a corresponding entry to Airsync INBOX with `memory_kind: "note"`, `scope: "team"`, and tags including `"adr"` and the ADR number
+
+#### Scenario: An existing ADR is superseded
+- **WHEN** an agent supersedes an ADR by creating a new one
+- **THEN** the agent proposes the new ADR to Airsync INBOX and archives the superseded ADR's corresponding memory if it exists
