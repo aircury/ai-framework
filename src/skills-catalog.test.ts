@@ -12,6 +12,7 @@ describe("skills catalog", () => {
       "spec-kit",
       "airsync",
       "git",
+      "architecture",
     ]);
   });
 

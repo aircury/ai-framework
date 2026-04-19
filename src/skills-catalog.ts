@@ -61,7 +61,7 @@ export const SKILL_GROUPS: SkillGroup[] = [
     description:
       "Curated external architecture guidance for DDD and hexagonal design",
     kind: "external",
-    defaultSelected: false,
+    defaultSelected: true,
     scopes: ["local", "global"],
   },
 ];

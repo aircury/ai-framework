@@ -119,7 +119,7 @@ describe("getGlobalFiles", () => {
 describe("getLocalCommands", () => {
   it("installs the default local skill groups for universal", () => {
     const commands = getLocalCommands([], getDefaultSkillGroupIds("local"));
-    expect(commands).toHaveLength(1);
+    expect(commands).toHaveLength(2);
     expect(commands[0]).toEqual({
       command: "npx",
       args: [
@@ -158,6 +158,22 @@ describe("getLocalCommands", () => {
         "-y",
       ],
       description: "Install selected skills from aircury/ai-framework",
+    });
+    expect(commands[1]).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "https://github.com/ccheney/robust-skills",
+        "--skill",
+        "clean-ddd-hexagonal",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description:
+        "Install selected skills from https://github.com/ccheney/robust-skills",
     });
   });
 
