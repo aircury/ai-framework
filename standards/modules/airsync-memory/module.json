@@ -3,5 +3,5 @@
   "label": "Airsync Memory",
   "hint": "capture decisions, learnings, and patterns in shared team memory",
   "description": "Requires agents to search Airsync before decisions and capture reusable knowledge (ADRs, patterns, pitfalls) through the INBOX → PUBLISHED lifecycle.",
-  "defaultEnabled": false
+  "defaultEnabled": true
 }
