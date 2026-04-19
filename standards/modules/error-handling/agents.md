@@ -1,0 +1,5 @@
+- Classify failures as operational errors or programmer errors before choosing a handling strategy.
+- Operational errors at system boundaries MUST be handled explicitly with safe user-facing responses and clear internal context.
+- Programmer errors and invariant violations MUST fail fast. Do not hide bugs behind generic success paths or silent recovery.
+- Prefer retries only for transient failures and only with bounded attempts, backoff, and idempotent semantics.
+- When an operation cannot complete normally, return or propagate an error shape that preserves intent, actionability, and boundary ownership.

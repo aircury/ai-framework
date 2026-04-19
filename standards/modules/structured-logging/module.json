@@ -1,0 +1,7 @@
+{
+  "id": "structured-logging",
+  "label": "Structured Logging",
+  "hint": "JSON events, correlation IDs, and safe contextual logs",
+  "description": "Requires structured logs with correlation context, consistent fields, and strict exclusion of secrets and sensitive payloads.",
+  "defaultEnabled": true
+}

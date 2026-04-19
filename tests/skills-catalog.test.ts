@@ -13,6 +13,7 @@ describe("skills catalog", () => {
       "spec-kit",
       "airsync",
       "git",
+      "resilience",
       "architecture",
     ]);
   });
@@ -23,6 +24,7 @@ describe("skills catalog", () => {
       "spec-kit",
       "airsync",
       "git",
+      "resilience",
       "architecture",
       "language",
     ]);
@@ -40,6 +42,7 @@ describe("skills catalog", () => {
       "spec-kit",
       "airsync",
       "git",
+      "resilience",
       "architecture",
       "language",
     ]);
@@ -73,6 +76,14 @@ describe("skills catalog", () => {
         (skill) => skill.skillName,
       ),
     ).toEqual(["clean-ddd-hexagonal"]);
+  });
+
+  it("includes the resilience skills when their group is selected", () => {
+    expect(
+      expandSkillGroups(["resilience"], "local").map(
+        (skill) => skill.skillName,
+      ),
+    ).toEqual(["error-handling-patterns", "logging-best-practices"]);
   });
 
   it("includes the UK business English skill when its group is selected", () => {

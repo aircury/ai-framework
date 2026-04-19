@@ -1,0 +1,5 @@
+- Emit structured logs as machine-readable events rather than ad hoc strings.
+- Include correlation identifiers and operation context in logs that describe requests, jobs, or workflow steps.
+- Prefer one context-rich completion event per meaningful operation over scattered low-signal log lines.
+- Never log secrets, tokens, credentials, full sensitive payloads, or personal data that is not required for diagnosis.
+- Keep log field names consistent across the codebase so events can be searched and correlated reliably.

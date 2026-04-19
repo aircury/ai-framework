@@ -1,0 +1,7 @@
+{
+  "id": "error-handling",
+  "label": "Error Handling",
+  "hint": "operational vs programmer errors and safe recovery",
+  "description": "Requires explicit error classification, safe user-facing failures, and recovery strategies for transient operational problems.",
+  "defaultEnabled": true
+}

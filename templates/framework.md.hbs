@@ -171,6 +171,12 @@ A change is not done unless all of the following are true:
 {{#if includesAirsyncMemory}}
 - Relevant Airsync memory has been searched and new learnings have been captured in INBOX.
 {{/if}}
+{{#if includesErrorHandling}}
+- Error paths distinguish operational failures from programmer errors and handle them accordingly.
+{{/if}}
+{{#if includesStructuredLogging}}
+- Logging is structured, correlated, and free of secrets or unnecessary sensitive data.
+{{/if}}
 {{#if includesCodeStyle}}
 - The code style is consistent with the project's configured tools.
 {{/if}}

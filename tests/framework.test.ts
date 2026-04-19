@@ -24,6 +24,12 @@ describe("framework modules", () => {
     expect(getStandardModuleById("code-style").agents).toContain(
       "check `package.json`",
     );
+    expect(getStandardModuleById("error-handling").agents).toContain(
+      "operational errors",
+    );
+    expect(getStandardModuleById("structured-logging").agents).toContain(
+      "structured logs",
+    );
   });
 
   it("uses all default-enabled modules when no explicit selection is provided", () => {

@@ -34,6 +34,15 @@ import decisionRecordsFramework from "../standards/modules/decision-records/fram
 import decisionRecordsManifest from "../standards/modules/decision-records/module.json" with {
   type: "json",
 };
+import errorHandlingAgents from "../standards/modules/error-handling/agents.md" with {
+  type: "text",
+};
+import errorHandlingFramework from "../standards/modules/error-handling/framework.md" with {
+  type: "text",
+};
+import errorHandlingManifest from "../standards/modules/error-handling/module.json" with {
+  type: "json",
+};
 import hexagonalArchitectureAgents from "../standards/modules/hexagonal-architecture/agents.md" with {
   type: "text",
 };
@@ -41,6 +50,15 @@ import hexagonalArchitectureFramework from "../standards/modules/hexagonal-archi
   type: "text",
 };
 import hexagonalArchitectureManifest from "../standards/modules/hexagonal-architecture/module.json" with {
+  type: "json",
+};
+import structuredLoggingAgents from "../standards/modules/structured-logging/agents.md" with {
+  type: "text",
+};
+import structuredLoggingFramework from "../standards/modules/structured-logging/framework.md" with {
+  type: "text",
+};
+import structuredLoggingManifest from "../standards/modules/structured-logging/module.json" with {
   type: "json",
 };
 import tddAgents from "../standards/modules/tdd/agents.md" with {
@@ -59,7 +77,9 @@ export type StandardModuleId =
   | "hexagonal-architecture"
   | "ddd"
   | "code-style"
-  | "airsync-memory";
+  | "airsync-memory"
+  | "error-handling"
+  | "structured-logging";
 
 export interface StandardModuleManifest {
   id: StandardModuleId;
@@ -112,6 +132,16 @@ const STANDARD_MODULE_REGISTRY: Record<StandardModuleId, StandardModule> = {
     ...(airsyncMemoryManifest as StandardModuleManifest),
     framework: airsyncMemoryFramework.trim(),
     agents: airsyncMemoryAgents.trim(),
+  },
+  "error-handling": {
+    ...(errorHandlingManifest as StandardModuleManifest),
+    framework: errorHandlingFramework.trim(),
+    agents: errorHandlingAgents.trim(),
+  },
+  "structured-logging": {
+    ...(structuredLoggingManifest as StandardModuleManifest),
+    framework: structuredLoggingFramework.trim(),
+    agents: structuredLoggingAgents.trim(),
   },
 };
 

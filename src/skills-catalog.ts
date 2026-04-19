@@ -56,6 +56,15 @@ export const SKILL_GROUPS: SkillGroup[] = [
     scopes: ["local", "global"],
   },
   {
+    id: "resilience",
+    label: "Resilience",
+    description:
+      "Curated external guidance for error handling and structured logging",
+    kind: "external",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+  },
+  {
     id: "architecture",
     label: "Architecture",
     description:
@@ -200,6 +209,26 @@ export const SKILLS: SkillDefinition[] = [
     source: "https://github.com/ccheney/robust-skills",
     skillName: "clean-ddd-hexagonal",
     groupId: "architecture",
+    scopes: ["local", "global"],
+  },
+  {
+    id: "error-handling-patterns",
+    label: "Error Handling Patterns",
+    description:
+      "Apply reusable error classification, response, and recovery patterns",
+    source: "https://github.com/wshobson/agents",
+    skillName: "error-handling-patterns",
+    groupId: "resilience",
+    scopes: ["local", "global"],
+  },
+  {
+    id: "logging-best-practices",
+    label: "Logging Best Practices",
+    description:
+      "Apply structured logging patterns with rich contextual diagnostic events",
+    source: "https://github.com/aj-geddes/useful-ai-prompts",
+    skillName: "logging-best-practices",
+    groupId: "resilience",
     scopes: ["local", "global"],
   },
   {

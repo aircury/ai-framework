@@ -17,6 +17,8 @@ interface RendererViewModel {
   includesArchitecture: boolean;
   includesCodeStyle: boolean;
   includesAirsyncMemory: boolean;
+  includesErrorHandling: boolean;
+  includesStructuredLogging: boolean;
   enforceBritishEnglish: boolean;
 }
 
@@ -49,6 +51,8 @@ function createViewModel(
       selectedIds.has("hexagonal-architecture") || selectedIds.has("ddd"),
     includesCodeStyle: selectedIds.has("code-style"),
     includesAirsyncMemory: selectedIds.has("airsync-memory"),
+    includesErrorHandling: selectedIds.has("error-handling"),
+    includesStructuredLogging: selectedIds.has("structured-logging"),
     enforceBritishEnglish: options?.britishEnglish ?? false,
   };
 }

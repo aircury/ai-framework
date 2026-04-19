@@ -133,7 +133,7 @@ describe("getGlobalFiles", () => {
 describe("getLocalCommands", () => {
   it("installs the default local skill groups for universal", () => {
     const commands = getLocalCommands([], getDefaultSkillGroupIds("local"));
-    expect(commands).toHaveLength(2);
+    expect(commands).toHaveLength(4);
     expect(commands[0]).toEqual({
       command: "npx",
       args: [
@@ -179,6 +179,22 @@ describe("getLocalCommands", () => {
         "-y",
         "skills",
         "add",
+        "https://github.com/aj-geddes/useful-ai-prompts",
+        "--skill",
+        "logging-best-practices",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description:
+        "Install selected skills from https://github.com/aj-geddes/useful-ai-prompts",
+    });
+    expect(commands[2]).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
         "https://github.com/ccheney/robust-skills",
         "--skill",
         "clean-ddd-hexagonal",
@@ -188,6 +204,22 @@ describe("getLocalCommands", () => {
       ],
       description:
         "Install selected skills from https://github.com/ccheney/robust-skills",
+    });
+    expect(commands[3]).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "https://github.com/wshobson/agents",
+        "--skill",
+        "error-handling-patterns",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description:
+        "Install selected skills from https://github.com/wshobson/agents",
     });
   });
 
