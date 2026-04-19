@@ -3,7 +3,7 @@ import {
   expandSkillGroups,
   getDefaultSkillGroupIds,
   getSkillGroups,
-} from "./skills-catalog";
+} from "../src/skills-catalog";
 
 describe("skills catalog", () => {
   it("preselects the Aircury groups by default", () => {

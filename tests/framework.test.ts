@@ -4,7 +4,7 @@ import {
   getStandardModuleById,
   normalizeModuleIds,
   STANDARD_MODULES,
-} from "./framework";
+} from "../src/framework";
 
 describe("framework modules", () => {
   it("has manifest-backed content for every registered module", () => {

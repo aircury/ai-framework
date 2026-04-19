@@ -1,12 +1,12 @@
 import { describe, expect, it } from "bun:test";
-import { renderAgents, renderFramework } from "./renderer";
+import { renderAgents, renderFramework } from "../src/renderer";
 import {
   AGENTS,
   FRAMEWORK,
   generateAgents,
   generateFramework,
   generateOpencodeAgent,
-} from "./templates";
+} from "../src/templates";
 
 describe("templates", () => {
   describe("FRAMEWORK", () => {

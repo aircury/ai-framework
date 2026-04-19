@@ -10,8 +10,8 @@ import {
   getLocalFiles,
   type InstallFile,
   writeFile,
-} from "./install";
-import { getDefaultSkillGroupIds } from "./skills-catalog";
+} from "../src/install";
+import { getDefaultSkillGroupIds } from "../src/skills-catalog";
 
 function getFileByPath(files: InstallFile[], path: string): InstallFile {
   const file = files.find((entry) => entry.path === path);
