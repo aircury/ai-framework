@@ -77,6 +77,9 @@ export interface StandardModule extends StandardModuleManifest {
 export interface FrameworkProfile {
   version: 1;
   modules: StandardModuleId[];
+  language?: {
+    britishEnglish: boolean;
+  };
 }
 
 const STANDARD_MODULE_REGISTRY: Record<StandardModuleId, StandardModule> = {
@@ -140,10 +143,14 @@ export function normaliseModuleIds(
 
 export function createFrameworkProfile(
   moduleIds?: StandardModuleId[],
+  options?: { britishEnglish?: boolean },
 ): FrameworkProfile {
   return {
     version: 1,
     modules: normaliseModuleIds(moduleIds),
+    language: {
+      britishEnglish: options?.britishEnglish ?? false,
+    },
   };
 }
 

@@ -23,6 +23,9 @@ All agents contributing to this repository MUST read and apply FRAMEWORK.md befo
 
 ## Non-negotiable rules
 
+{{#if enforceBritishEnglish}}
+- Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy unless an external interface requires a different spelling.
+{{/if}}
 - All observable behavior changes MUST update `specs/features/` before the work is done.
 - Use the `commit-changes` skill to organise working tree changes into atomic, functional, and semantic commits using Conventional Commit format.
 - After the user selects a workflow mode, follow `FRAMEWORK.md § Mode execution rules` exactly.

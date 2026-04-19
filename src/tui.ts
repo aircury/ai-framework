@@ -14,7 +14,7 @@ import {
 } from "./install";
 import {
   expandSkillGroups,
-  getDefaultSkillGroupIds,
+  getInitialSkillGroupIds,
   getSkillGroups,
 } from "./skills-catalog";
 
@@ -74,6 +74,7 @@ export async function run(): Promise<void> {
   if (p.isCancel(selectedTools)) return p.cancel("Cancelled.");
 
   let selectedModules: StandardModuleId[] = [];
+  let enforceBritishEnglish = false;
   if (scope === "local") {
     selectedModules = await p.multiselect<StandardModuleId>({
       message:
@@ -97,6 +98,15 @@ export async function run(): Promise<void> {
         "No optional standards selected",
       );
     }
+
+    const britishEnglish = await p.confirm({
+      message:
+        "Enforce British English in generated rules and install the UK business English skill?",
+      initialValue: false,
+    });
+
+    if (p.isCancel(britishEnglish)) return p.cancel("Cancelled.");
+    enforceBritishEnglish = britishEnglish;
   }
 
   const skillScope = scope === "global" ? "global" : "local";
@@ -120,7 +130,9 @@ export async function run(): Promise<void> {
     selectedSkillGroups = await p.multiselect<string>({
       message: "Skill groups — choose which workflows to install",
       options: skillGroupOptions,
-      initialValues: getDefaultSkillGroupIds(skillScope),
+      initialValues: getInitialSkillGroupIds(skillScope, {
+        britishEnglish: enforceBritishEnglish,
+      }),
       required: false,
     });
 
@@ -134,11 +146,17 @@ export async function run(): Promise<void> {
     }
   }
 
+  if (enforceBritishEnglish && !selectedSkillGroups.includes("language")) {
+    selectedSkillGroups = [...selectedSkillGroups, "language"];
+  }
+
   const cwd = process.cwd();
   const isGlobal = scope === "global";
   const files = isGlobal
     ? getGlobalFiles(selectedTools)
-    : getLocalFiles(selectedTools, selectedModules);
+    : getLocalFiles(selectedTools, selectedModules, {
+        britishEnglish: enforceBritishEnglish,
+      });
   const commands = isGlobal
     ? getGlobalCommands(selectedTools, selectedSkillGroups)
     : getLocalCommands(selectedTools, selectedSkillGroups);

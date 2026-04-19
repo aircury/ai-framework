@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import {
   expandSkillGroups,
   getDefaultSkillGroupIds,
+  getInitialSkillGroupIds,
   getSkillGroups,
 } from "../src/skills-catalog";
 
@@ -16,6 +17,23 @@ describe("skills catalog", () => {
     ]);
   });
 
+  it("adds the language group to initial selection when British English is enabled", () => {
+    expect(getInitialSkillGroupIds("local", { britishEnglish: true })).toEqual([
+      "open-spec",
+      "spec-kit",
+      "airsync",
+      "git",
+      "architecture",
+      "language",
+    ]);
+  });
+
+  it("keeps the default initial selection when British English is disabled", () => {
+    expect(getInitialSkillGroupIds("local", { britishEnglish: false })).toEqual(
+      getDefaultSkillGroupIds("local"),
+    );
+  });
+
   it("returns the visible groups for a scope", () => {
     expect(getSkillGroups("local").map((group) => group.id)).toEqual([
       "open-spec",
@@ -23,6 +41,7 @@ describe("skills catalog", () => {
       "airsync",
       "git",
       "architecture",
+      "language",
     ]);
   });
 
@@ -54,5 +73,11 @@ describe("skills catalog", () => {
         (skill) => skill.skillName,
       ),
     ).toEqual(["clean-ddd-hexagonal"]);
+  });
+
+  it("includes the UK business English skill when its group is selected", () => {
+    expect(
+      expandSkillGroups(["language"], "local").map((skill) => skill.skillName),
+    ).toEqual(["uk-business-english"]);
   });
 });

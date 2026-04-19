@@ -80,6 +80,10 @@ No optional standards modules are enabled. The repository still uses the core wo
 {{/each}}
 ## Coding Standards
 
+{{#if enforceBritishEnglish}}
+- Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy.
+- Prefer British English identifiers and names when introducing new code, unless an external API, tool, or established project interface requires a different spelling.
+{{/if}}
 - Use explicit names that reflect the problem space.
 - Keep functions small, cohesive, and intention-revealing.
 - Prefer immutable data and side-effect isolation.

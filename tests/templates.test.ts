@@ -109,5 +109,18 @@ describe("templates", () => {
       expect(generateFramework(["code-style"])).toContain("## Code Style");
       expect(generateFramework([])).not.toContain("## Code Style");
     });
+
+    it("adds British English guidance when enabled", () => {
+      expect(generateFramework([], { britishEnglish: true })).toContain(
+        "Use British English spelling",
+      );
+      expect(generateAgents([], { britishEnglish: true })).toContain(
+        "Use British English spelling",
+      );
+      expect(generateFramework([])).not.toContain(
+        "Use British English spelling",
+      );
+      expect(generateAgents([])).not.toContain("Use British English spelling");
+    });
   });
 });

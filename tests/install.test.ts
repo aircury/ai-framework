@@ -68,6 +68,12 @@ describe("getLocalFiles", () => {
     expect(config.content).toContain('"tdd"');
   });
 
+  it("persists the British English preference in the config file", () => {
+    const files = getLocalFiles([], undefined, { britishEnglish: true });
+    const config = getFileByPath(files, ".aircury/framework.config.json");
+    expect(config.content).toContain('"britishEnglish": true');
+  });
+
   it("generates framework content from the selected modules", () => {
     const files = getLocalFiles([], ["decision-records"]);
     const framework = getFileByPath(files, "FRAMEWORK.md");
@@ -103,6 +109,14 @@ describe("getLocalFiles", () => {
     const claude = getFileByPath(files, "CLAUDE.md");
     const agents = getFileByPath(files, "AGENTS.md");
     expect(claude.content).toBe(agents.content);
+  });
+
+  it("adds British English rules to generated agent files when enabled", () => {
+    const files = getLocalFiles([], undefined, { britishEnglish: true });
+    const framework = getFileByPath(files, "FRAMEWORK.md");
+    const agents = getFileByPath(files, "AGENTS.md");
+    expect(framework.content).toContain("Use British English spelling");
+    expect(agents.content).toContain("Use British English spelling");
   });
 });
 
@@ -195,6 +209,27 @@ describe("getLocalCommands", () => {
       "gemini-cli",
       "-y",
     ]);
+  });
+
+  it("installs the UK business English skill from its external source", () => {
+    const commands = getLocalCommands([], ["language"]);
+    expect(commands).toHaveLength(1);
+    expect(commands[0]).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "https://github.com/jezweb/claude-skills",
+        "--skill",
+        "uk-business-english",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description:
+        "Install selected skills from https://github.com/jezweb/claude-skills",
+    });
   });
 });
 

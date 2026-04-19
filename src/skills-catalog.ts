@@ -64,6 +64,14 @@ export const SKILL_GROUPS: SkillGroup[] = [
     defaultSelected: true,
     scopes: ["local", "global"],
   },
+  {
+    id: "language",
+    label: "Language",
+    description: "UK business English guidance for project communication",
+    kind: "external",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+  },
 ];
 
 export const SKILLS: SkillDefinition[] = [
@@ -194,6 +202,16 @@ export const SKILLS: SkillDefinition[] = [
     groupId: "architecture",
     scopes: ["local", "global"],
   },
+  {
+    id: "uk-business-english",
+    label: "UK Business English",
+    description:
+      "Encourage British English spelling and business writing style",
+    source: "https://github.com/jezweb/claude-skills",
+    skillName: "uk-business-english",
+    groupId: "language",
+    scopes: ["local", "global"],
+  },
 ];
 
 export function getSkillGroups(
@@ -211,6 +229,19 @@ export function getDefaultSkillGroupIds(scope: SkillScope): string[] {
   return getSkillGroups(scope)
     .filter((group) => group.defaultSelected)
     .map((group) => group.id);
+}
+
+export function getInitialSkillGroupIds(
+  scope: SkillScope,
+  options?: { britishEnglish?: boolean },
+): string[] {
+  const defaultGroupIds = getDefaultSkillGroupIds(scope);
+
+  if (!options?.britishEnglish || defaultGroupIds.includes("language")) {
+    return defaultGroupIds;
+  }
+
+  return [...defaultGroupIds, "language"];
 }
 
 export function expandSkillGroups(

@@ -17,6 +17,7 @@ interface RendererViewModel {
   includesArchitecture: boolean;
   includesCodeStyle: boolean;
   includesAirsyncMemory: boolean;
+  enforceBritishEnglish: boolean;
 }
 
 const renderFrameworkTemplate = Handlebars.compile(frameworkTemplateSource, {
@@ -26,7 +27,10 @@ const renderAgentsTemplate = Handlebars.compile(agentsTemplateSource, {
   noEscape: true,
 });
 
-function createViewModel(moduleIds?: StandardModuleId[]): RendererViewModel {
+function createViewModel(
+  moduleIds?: StandardModuleId[],
+  options?: { britishEnglish?: boolean },
+): RendererViewModel {
   const selectedModules = getSelectedStandardModules(moduleIds);
   const selectedIds = new Set(selectedModules.map((module) => module.id));
 
@@ -45,6 +49,7 @@ function createViewModel(moduleIds?: StandardModuleId[]): RendererViewModel {
       selectedIds.has("hexagonal-architecture") || selectedIds.has("ddd"),
     includesCodeStyle: selectedIds.has("code-style"),
     includesAirsyncMemory: selectedIds.has("airsync-memory"),
+    enforceBritishEnglish: options?.britishEnglish ?? false,
   };
 }
 
@@ -52,12 +57,20 @@ function trimRenderedDocument(content: string): string {
   return `${content.replace(/\n{3,}/g, "\n\n").trim()}\n`;
 }
 
-export function renderFramework(moduleIds?: StandardModuleId[]): string {
+export function renderFramework(
+  moduleIds?: StandardModuleId[],
+  options?: { britishEnglish?: boolean },
+): string {
   return trimRenderedDocument(
-    renderFrameworkTemplate(createViewModel(moduleIds)),
+    renderFrameworkTemplate(createViewModel(moduleIds, options)),
   );
 }
 
-export function renderAgents(moduleIds?: StandardModuleId[]): string {
-  return trimRenderedDocument(renderAgentsTemplate(createViewModel(moduleIds)));
+export function renderAgents(
+  moduleIds?: StandardModuleId[],
+  options?: { britishEnglish?: boolean },
+): string {
+  return trimRenderedDocument(
+    renderAgentsTemplate(createViewModel(moduleIds, options)),
+  );
 }

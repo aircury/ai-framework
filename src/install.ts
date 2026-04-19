@@ -21,6 +21,10 @@ export interface InstallCommand {
   description: string;
 }
 
+export interface InstallOptions {
+  britishEnglish?: boolean;
+}
+
 function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
   const files: InstallFile[] = [
     {
@@ -58,17 +62,20 @@ function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
 export function getLocalFiles(
   tools: Tool[],
   moduleIds?: StandardModuleId[],
+  options?: InstallOptions,
 ): InstallFile[] {
-  const profile = createFrameworkProfile(moduleIds);
+  const profile = createFrameworkProfile(moduleIds, {
+    britishEnglish: options?.britishEnglish,
+  });
   const files: InstallFile[] = [
     {
       path: "FRAMEWORK.md",
-      content: generateFramework(profile.modules),
+      content: generateFramework(profile.modules, options),
       description: "Framework rules (source of truth)",
     },
     {
       path: "AGENTS.md",
-      content: generateAgents(profile.modules),
+      content: generateAgents(profile.modules, options),
       description: "Agent instructions (standard convention)",
     },
     {
@@ -82,7 +89,7 @@ export function getLocalFiles(
   if (tools.includes("claude-code")) {
     files.push({
       path: "CLAUDE.md",
-      content: generateAgents(profile.modules),
+      content: generateAgents(profile.modules, options),
       description: "Agent instructions for Claude Code",
     });
   }
@@ -90,7 +97,7 @@ export function getLocalFiles(
   if (tools.includes("gemini-cli")) {
     files.push({
       path: "GEMINI.md",
-      content: generateAgents(profile.modules),
+      content: generateAgents(profile.modules, options),
       description: "Agent instructions for Gemini CLI",
     });
   }
