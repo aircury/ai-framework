@@ -2,6 +2,6 @@
   "id": "ddd",
   "label": "DDD",
   "hint": "domain language, aggregates, and value objects",
-  "description": "Requires domain-driven modeling rules and package boundaries centered on business behavior.",
+  "description": "Requires domain-driven modelling rules and package boundaries centred on business behaviour.",
   "defaultEnabled": true
 }

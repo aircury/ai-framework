@@ -23,7 +23,7 @@ Audit requirement quality across change artifacts. This is a requirements linter
 
 2. **Ask up to 3 clarifying questions** (skip if context is clear)
 
-   Focus on: scope, risk prioritization, audience, boundary exclusions.
+    Focus on: scope, risk prioritisation, audience, boundary exclusions.
 
 3. **Generate requirement quality checklists**
 

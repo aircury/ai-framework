@@ -55,7 +55,7 @@ Create a feature specification from a natural language description.
 
    Rules:
    - Focus on WHAT and WHY. Never describe HOW or name technologies.
-   - Maximum 3 `[NEEDS CLARIFICATION]` markers, prioritized by scope > security > UX > technical.
+    - Maximum 3 `[NEEDS CLARIFICATION]` markers, prioritised by scope > security > UX > technical.
    - Make informed, reasonable defaults for unspecified details.
    - Written for business stakeholders, not developers.
    - Align with FRAMEWORK.md governing principles.
@@ -70,7 +70,7 @@ Create a feature specification from a natural language description.
 
 **Output**
 
-After writing the spec, summarize:
+After writing the spec, summarise:
 - Change name and file location.
 - Number of open questions (if any).
 - Next step: "Use the `spec-kit-clarify` skill to resolve open questions, or the `spec-kit-plan` skill if the spec is clear."

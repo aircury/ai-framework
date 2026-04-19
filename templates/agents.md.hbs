@@ -19,14 +19,14 @@ All agents contributing to this repository MUST read and apply FRAMEWORK.md befo
 {{#if includesCodeStyle}}
 - Analyze `package.json` and local config files to identify the project's linting and formatting strategy.
 {{/if}}
-- Act as a routing meta-agent: analyze the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
+- Act as a routing meta-agent: analyse the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
 
 ## Non-negotiable rules
 
 - All observable behavior changes MUST update `specs/features/` before the work is done.
-- Use the `commit-changes` skill to organize working tree changes into atomic, functional, and semantic commits using Conventional Commit format.
+- Use the `commit-changes` skill to organise working tree changes into atomic, functional, and semantic commits using Conventional Commit format.
 - After the user selects a workflow mode, follow `FRAMEWORK.md § Mode execution rules` exactly.
-- Selecting `plan-build` authorizes planning first, not automatic implementation.
+- Selecting `plan-build` authorises planning first, not automatic implementation.
 - Selecting `spec-kit` requires following the full Spec Kit sequence in order unless the user explicitly changes modes.
 - Selecting an OpenSpec workflow requires following its named sequence in order unless the user explicitly changes modes.
 {{#if includesAirsyncMemory}}

@@ -38,11 +38,11 @@ Resolve ambiguities in a feature spec through focused, sequential questioning.
 
    Format each question as multiple-choice (2–5 options) or a short answer (≤5 words).
 
-   Only ask a question if the answer materially impacts architecture, data modeling, testing, UX, operations, or compliance.
+    Only ask a question if the answer materially impacts architecture, data modelling, testing, UX, operations, or compliance.
 
    After each answer, update `spec.md` before asking the next question.
 
-5. **Finalize**
+ 5. **Finalise**
 
    After all questions are resolved (or the 5-question limit is reached), update the spec to:
    - Remove resolved `[NEEDS CLARIFICATION]` markers.

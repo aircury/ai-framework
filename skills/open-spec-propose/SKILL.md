@@ -67,7 +67,7 @@ When ready to implement, use the `open-spec-apply` skill
 
 **Output**
 
-After completing all artifacts, summarize:
+After completing all artifacts, summarise:
 - Change name and location
 - List of artifacts created with brief descriptions
 - What's ready: "All artifacts created! Ready for implementation."

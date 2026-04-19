@@ -68,7 +68,7 @@ Create a technical implementation plan from a feature specification.
 After writing the plan:
 - Confirm file location.
 - Highlight any architecture decisions worth the user's attention.
-- Next step: "Use the `spec-kit-analyze` skill to validate consistency across artifacts, or the `spec-kit-tasks` skill to generate the task list."
+- Next step: "Use the `spec-kit-analyse` skill to validate consistency across artifacts, or the `spec-kit-tasks` skill to generate the task list."
 
 **Guardrails**
 - No code generation — plan only.

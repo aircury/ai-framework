@@ -142,7 +142,7 @@ describe("getLocalCommands", () => {
         "--skill",
         "spec-kit-plan",
         "--skill",
-        "spec-kit-analyze",
+        "spec-kit-analyse",
         "--skill",
         "spec-kit-tasks",
         "--skill",

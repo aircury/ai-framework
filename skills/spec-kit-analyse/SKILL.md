@@ -1,5 +1,5 @@
 ---
-name: spec-kit-analyze
+name: spec-kit-analyse
 description: Read-only cross-artifact consistency check across spec.md, plan.md, and tasks.md. Detects gaps, conflicts, and FRAMEWORK.md violations before implementation begins.
 license: MIT
 compatibility: No external workflow CLI required.

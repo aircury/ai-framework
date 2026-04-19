@@ -1,6 +1,6 @@
 ---
 name: commit-changes
-description: Analyzes git changed files in the workspace and makes atomic, functional, and semantic commits using conventional commits format. Use when the user asks to commit changes, create commits from staged/unstaged files, or organize working tree changes into meaningful commits.
+description: Analyses git changed files in the workspace and makes atomic, functional, and semantic commits using conventional commits format. Use when the user asks to commit changes, create commits from staged/unstaged files, or organise working tree changes into meaningful commits.
 license: MIT
 metadata:
   author: Aircury

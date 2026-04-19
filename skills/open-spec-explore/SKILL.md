@@ -8,7 +8,7 @@ metadata:
   version: "1.0"
 ---
 
-Enter explore mode. Think deeply. Visualize freely. Follow the conversation wherever it goes.
+Enter explore mode. Think deeply. Visualise freely. Follow the conversation wherever it goes.
 
 **IMPORTANT: Explore mode is for thinking, not implementing.** You may read files, search code, and investigate the codebase, but you must NEVER write code or implement features. If the user asks you to implement something, remind them to exit explore mode first and create a change proposal. You MAY create working artifacts such as proposals, designs, or tasks if the user asks.
 
@@ -49,7 +49,7 @@ Depending on what the user brings, you might:
 - Sketch tradeoffs
 - Recommend a path (if asked)
 
-**Visualize**
+**Visualise**
 ```
 ┌─────────────────────────────────────────┐
 │     Use ASCII diagrams liberally        │
@@ -84,10 +84,10 @@ At the start, quickly check what exists:
 
 ### When no change exists
 
-Think freely. When insights crystallize, you might offer:
+Think freely. When insights crystallise, you might offer:
 
 - "This feels solid enough to start a change. Want me to create a proposal?"
-- Or keep exploring - no pressure to formalize
+- Or keep exploring - no pressure to formalise
 
 ### When a change exists
 
@@ -247,7 +247,7 @@ There's no required ending. Discovery might:
 - **Just provide clarity**: User has what they need, moves on
 - **Continue later**: "We can pick this up anytime"
 
-When it feels like things are crystallizing, you might summarize:
+When it feels like things are crystallising, you might summarise:
 
 ```
 ## What We Figured Out

@@ -37,7 +37,7 @@ describe("templates", () => {
     it("references FRAMEWORK.md", () => {
       expect(AGENTS).toContain("FRAMEWORK.md");
       expect(AGENTS).toContain(
-        "Selecting `plan-build` authorizes planning first, not automatic implementation.",
+        "Selecting `plan-build` authorises planning first, not automatic implementation.",
       );
     });
 

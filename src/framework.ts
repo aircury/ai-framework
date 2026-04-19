@@ -127,7 +127,7 @@ export function getStandardModuleById(
   return STANDARD_MODULE_REGISTRY[moduleId];
 }
 
-export function normalizeModuleIds(
+export function normaliseModuleIds(
   moduleIds?: StandardModuleId[],
 ): StandardModuleId[] {
   const requested = moduleIds ?? DEFAULT_STANDARD_MODULE_IDS;
@@ -143,12 +143,12 @@ export function createFrameworkProfile(
 ): FrameworkProfile {
   return {
     version: 1,
-    modules: normalizeModuleIds(moduleIds),
+    modules: normaliseModuleIds(moduleIds),
   };
 }
 
 export function getSelectedStandardModules(
   moduleIds?: StandardModuleId[],
 ): StandardModule[] {
-  return normalizeModuleIds(moduleIds).map(getStandardModuleById);
+  return normaliseModuleIds(moduleIds).map(getStandardModuleById);
 }

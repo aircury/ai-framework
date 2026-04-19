@@ -20,16 +20,16 @@ Note that the specs themselves — the living `specs/features/` records of syste
 
 OpenSpec and Spec Kit solve different problems and operate at different levels of formality.
 
-**OpenSpec** is optimized for speed and momentum. Its `propose → apply → complete` cycle lets a developer move from idea to implementation quickly, with just enough structure to stay aligned. It is the right tool when the problem is understood and the team needs to ship.
+**OpenSpec** is optimised for speed and momentum. Its `propose → apply → complete` cycle lets a developer move from idea to implementation quickly, with just enough structure to stay aligned. It is the right tool when the problem is understood and the team needs to ship.
 
-**Spec Kit** is optimized for correctness before commitment. Its `specify → clarify → plan → analyze → tasks → implement` pipeline front-loads requirement quality and cross-artifact consistency. It prevents the expensive class of bugs that come from building the wrong thing — especially in features that cross bounded contexts or involve formal acceptance criteria.
+**Spec Kit** is optimised for correctness before commitment. Its `specify → clarify → plan → analyse → tasks → implement` pipeline front-loads requirement quality and cross-artifact consistency. It prevents the expensive class of bugs that come from building the wrong thing — especially in features that cross bounded contexts or involve formal acceptance criteria.
 
 Used alone, each framework has a gap:
 
 - OpenSpec can move too fast when the problem is still ambiguous, leading to re-work.
 - Spec Kit can feel heavy for routine changes where the solution is already clear.
 
-**The Aircury meta-framework routes between them** based on the complexity and ambiguity of the task. A well-understood fix goes straight to OpenSpec. A new cross-cutting feature goes through Spec Kit. The agent analyzes the request, recommends a path, and asks before acting.
+**The Aircury meta-framework routes between them** based on the complexity and ambiguity of the task. A well-understood fix goes straight to OpenSpec. A new cross-cutting feature goes through Spec Kit. The agent analyses the request, recommends a path, and asks before acting.
 
 ---
 
@@ -106,7 +106,7 @@ The installer exposes grouped skill bundles and expands them into concrete `npx 
 | Group | Skills | Source |
 |-------|--------|--------|
 | `open-spec` | `propose`, `apply`, `complete`, `explore` | `aircury/ai-framework` |
-| `spec-kit` | `specify`, `clarify`, `plan`, `analyze`, `tasks`, `implement`, `checklist` | `aircury/ai-framework` |
+| `spec-kit` | `specify`, `clarify`, `plan`, `analyse`, `tasks`, `implement`, `checklist` | `aircury/ai-framework` |
 | `airsync` | `airsync` | `aircury/ai-framework` |
 | `git` | `commit-changes` | `aircury/ai-framework` |
 | `architecture` | `clean-ddd-hexagonal` | `https://github.com/ccheney/robust-skills` |
@@ -124,7 +124,7 @@ Curated external skills can be added to the static catalog and will appear in th
 | `plan-build` | Easy to medium changes — the default for most tasks | None |
 | `propose-apply-complete` | Complex or cross-cutting change | `open-spec-propose`, `open-spec-apply`, `open-spec-complete` |
 | `explore-propose-apply-complete` | Unclear problem requiring investigation first | `open-spec-explore`, then `open-spec-propose`, `open-spec-apply`, `open-spec-complete` |
-| `spec-kit` | New feature, formal requirements, or spec governance needed | `spec-kit-specify`, `spec-kit-clarify`, `spec-kit-plan`, `spec-kit-analyze`, `spec-kit-tasks`, `spec-kit-implement`, `spec-kit-checklist` |
+| `spec-kit` | New feature, formal requirements, or spec governance needed | `spec-kit-specify`, `spec-kit-clarify`, `spec-kit-plan`, `spec-kit-analyse`, `spec-kit-tasks`, `spec-kit-implement`, `spec-kit-checklist` |
 
 For most day-to-day work, `plan-build` is sufficient. Reach for `open-spec` or `spec-kit` when the problem size or ambiguity warrants the extra structure.
 

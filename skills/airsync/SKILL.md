@@ -171,7 +171,7 @@ If no → don't propose.
 The system prevents duplication at two levels:
 
 ### 1. Exact Duplication (propose phase)
-- SHA-256 hash of normalized content
+- SHA-256 hash of normalised content
 - Rejects identical content within same team
 - Returns existing memory ID on conflict
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import {
   DEFAULT_STANDARD_MODULE_IDS,
   getStandardModuleById,
-  normalizeModuleIds,
+  normaliseModuleIds,
   STANDARD_MODULES,
 } from "../src/framework";
 
@@ -27,6 +27,6 @@ describe("framework modules", () => {
   });
 
   it("uses all default-enabled modules when no explicit selection is provided", () => {
-    expect(normalizeModuleIds()).toEqual(DEFAULT_STANDARD_MODULE_IDS);
+    expect(normaliseModuleIds()).toEqual(DEFAULT_STANDARD_MODULE_IDS);
   });
 });

@@ -15,7 +15,7 @@ The following rules apply to every installation profile:
 - `specs/features/` is canonical and versioned.
 - `specs/changes/` is optional working state and is not versioned.
 - Any workflow mode that changes observable system behavior MUST end with an update to `specs/features/`.
-- Use the `commit-changes` skill to organize working tree changes into atomic, functional, and semantic commits using the [Conventional Commits](https://www.conventionalcommits.org/) format.
+- Use the `commit-changes` skill to organise working tree changes into atomic, functional, and semantic commits using the [Conventional Commits](https://www.conventionalcommits.org/) format.
 - Before starting any non-trivial change, the agent MUST act as a routing meta-agent and ask the user how to proceed.
 - Optional standards are enabled through `.aircury/framework.config.json`.
 
@@ -109,14 +109,14 @@ This framework uses a framework-agnostic change workflow.
 
 - `plan-build`: complete a planning step first, then implement only after the plan is finished and the user asks to proceed.
 - `propose-apply-complete`: create working artifacts, implement from them, then sync canonical specs.
-- `explore-propose-apply-complete`: explore first when the problem is unclear, then formalize and implement.
+- `explore-propose-apply-complete`: explore first when the problem is unclear, then formalise and implement.
 - `spec-kit`: spec-driven development using the Spec Kit workflow. Best for new features, cross-cutting concerns, or work requiring formal spec governance.
 
 These are operating modes, not different specification systems. They all converge on the same canonical source of truth: `specs/features/`.
 
 ### Meta-agent routing
 
-Before starting any non-trivial change, the agent MUST act as a routing meta-agent. Its role is to analyze the request and recommend the most appropriate mode, but the user makes the final decision.
+Before starting any non-trivial change, the agent MUST act as a routing meta-agent. Its role is to analyse the request and recommend the most appropriate mode, but the user makes the final decision.
 
 **Routing protocol:**
 
@@ -143,7 +143,7 @@ Once the user selects a mode, the agent MUST follow that mode strictly. Do not m
   2. Do not implement during explore mode.
   3. After exploration, continue with `open-spec-propose`, then `open-spec-apply`, then `open-spec-complete` in order.
 - `spec-kit`:
-  1. Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-analyze` → `spec-kit-tasks` → `spec-kit-implement`.
+  1. Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-analyse` → `spec-kit-tasks` → `spec-kit-implement`.
   2. `spec-kit-checklist` may be used as a review or quality gate, but it does not replace required sequence steps.
   3. Do not skip ahead to implementation, planning, or task generation when an earlier required Spec Kit step has not been completed.
 
