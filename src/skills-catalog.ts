@@ -68,7 +68,7 @@ export const SKILL_GROUPS: SkillGroup[] = [
     id: "testing",
     label: "Testing",
     description:
-      "Curated testing guidance covering strategy, frontend tooling, and end-to-end patterns",
+      "Curated testing guidance covering frontend tooling and end-to-end patterns",
     kind: "external",
     defaultSelected: true,
     scopes: ["local", "global"],
@@ -208,16 +208,6 @@ export const SKILLS: SkillDefinition[] = [
     source: "aircury/ai-framework",
     skillName: "commit-changes",
     groupId: "git",
-    scopes: ["local", "global"],
-  },
-  {
-    id: "testing-strategies",
-    label: "Testing Strategies",
-    description:
-      "Apply practical testing strategy guidance across layers and change types",
-    source: "https://github.com/supercent-io/skills-template",
-    skillName: "testing-strategies",
-    groupId: "testing",
     scopes: ["local", "global"],
   },
   {

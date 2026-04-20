@@ -1,6 +1,9 @@
 - Testing strategy is enabled. Choose the smallest test layer that can prove the behaviour with confidence.
 - Write the failing test first when automated coverage is feasible.
+- Prefer a test pyramid with many unit tests, fewer integration tests, and only a small number of critical E2E tests.
 - Frontend code should default to Vitest for unit or component tests, Testing Library for user-facing UI behaviour, and Playwright for critical end-to-end journeys unless the repo already enforces another stack.
 - Backend code MUST include unit tests and integration tests, even when the exact framework varies by language.
+- Structure tests clearly with Given-When-Then or Arrange-Act-Assert.
 - Prefer behaviour-focused assertions through public interfaces and accessible UI queries over internal implementation checks.
+- Keep tests isolated, deterministic, and fast enough for regular local execution and CI.
 - Add or update regression coverage for every confirmed bug when automated testing is feasible.

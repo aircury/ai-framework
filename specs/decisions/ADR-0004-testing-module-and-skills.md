@@ -21,10 +21,10 @@ The `testing` module defines a practical testing pyramid with these defaults:
 - frontend defaults to `Vitest`, `Testing Library`, and `Playwright` when the repository does not already standardise another stack
 - backend services must always include unit tests and integration tests, regardless of language-specific framework choice
 - end-to-end tests are reserved for critical user journeys and production wiring, not broad duplication of lower-level coverage
+- the local module text carries the core test strategy guidance directly, so the framework does not depend on an external generic testing-strategy skill
 
 Aircury will also install a default `testing` skill group with these external skills:
 
-- `supercent-io/skills-template@testing-strategies`
 - `wshobson/agents@e2e-testing-patterns`
 - `currents-dev/playwright-best-practices-skill@playwright-best-practices`
 

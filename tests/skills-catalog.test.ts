@@ -94,11 +94,7 @@ describe("skills catalog", () => {
       expandSkillGroups(["testing"], "local").map(
         (skill) => skill.skillName,
       ),
-    ).toEqual([
-      "testing-strategies",
-      "e2e-testing-patterns",
-      "playwright-best-practices",
-    ]);
+    ).toEqual(["e2e-testing-patterns", "playwright-best-practices"]);
   });
 
   it("includes the UK business English skill when its group is selected", () => {

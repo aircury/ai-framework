@@ -22,6 +22,14 @@ Do not batch all tests first. Do not batch all implementation first.
 - Write end-to-end tests only for critical user journeys, production wiring, and regressions that cannot be trusted at lower levels alone.
 - Prefer a balanced test pyramid over a top-heavy suite of slow UI tests.
 
+Ratio guide for a healthy suite:
+
+- Unit: roughly 70%
+- Integration: roughly 20%
+- E2E: roughly 10%
+
+Treat these as steering ratios, not coverage gates.
+
 ### Frontend Defaults
 
 When the project has a frontend, prefer this default toolchain unless the repository already standardises on something else:
@@ -48,8 +56,14 @@ Language and framework-specific tools may vary by repository, but these expectat
 
 ### Test Quality Rules
 
+- Structure tests with a clear Given-When-Then or Arrange-Act-Assert flow.
+- Name tests by observable outcome, ideally in a `should ... when ...` style.
 - Prefer real collaborators inside the boundary under test and mock only true external systems or uncontrollable side effects.
+- Keep each test isolated and independent. No test may depend on another test's execution order or data.
 - Keep fixtures small and intention-revealing.
+- Prefer deterministic tests with controlled inputs, clocks, randomness, and network boundaries.
+- Avoid sleep-based timing assertions and other timeout-driven checks unless time is the behaviour under test.
 - Make regressions reproducible with a focused failing test before fixing the bug.
+- Keep the fast-feedback layer fast enough to run on every commit locally and in CI.
 - Ensure tests can run reliably in CI without hidden local prerequisites.
 - Do not ship features that only have manual verification when automated coverage is feasible.

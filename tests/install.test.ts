@@ -134,7 +134,7 @@ describe("getGlobalFiles", () => {
 describe("getLocalCommands", () => {
   it("installs the default local skill groups for universal", () => {
     const commands = getLocalCommands([], getDefaultSkillGroupIds("local"));
-    expect(commands).toHaveLength(6);
+    expect(commands).toHaveLength(5);
     expect(commands[0]).toEqual({
       command: "npx",
       args: [
@@ -223,22 +223,6 @@ describe("getLocalCommands", () => {
         "Install selected skills from https://github.com/currents-dev/playwright-best-practices-skill",
     });
     expect(commands[4]).toEqual({
-      command: "npx",
-      args: [
-        "-y",
-        "skills",
-        "add",
-        "https://github.com/supercent-io/skills-template",
-        "--skill",
-        "testing-strategies",
-        "-a",
-        "universal",
-        "-y",
-      ],
-      description:
-        "Install selected skills from https://github.com/supercent-io/skills-template",
-    });
-    expect(commands[5]).toEqual({
       command: "npx",
       args: [
         "-y",
