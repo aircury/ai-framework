@@ -121,6 +121,22 @@ describe("getLocalFiles", () => {
   });
 });
 
+describe("frontend module integration", () => {
+  it("includes frontendRules/README.md when frontend module is enabled", () => {
+    const files = getLocalFiles([], ["frontend"]);
+    const paths = files.map((f) => f.path);
+    expect(paths).toContain("frontendRules/README.md");
+  });
+
+  it("adds frontend-specific check to FRAMEWORK.md when enabled", () => {
+    const files = getLocalFiles([], ["frontend"]);
+    const framework = files.find((f) => f.path === "FRAMEWORK.md");
+    expect(framework?.content).toContain(
+      "Visual modifications align with the project design system tokens",
+    );
+  });
+});
+
 describe("getGlobalFiles", () => {
   it("returns empty array when no tools selected", () => {
     expect(getGlobalFiles([])).toHaveLength(0);

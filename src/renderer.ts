@@ -19,6 +19,7 @@ interface RendererViewModel {
   includesAirsyncMemory: boolean;
   includesErrorHandling: boolean;
   includesStructuredLogging: boolean;
+  includesFrontend: boolean;
   enforceBritishEnglish: boolean;
 }
 
@@ -53,6 +54,7 @@ function createViewModel(
     includesAirsyncMemory: selectedIds.has("airsync-memory"),
     includesErrorHandling: selectedIds.has("error-handling"),
     includesStructuredLogging: selectedIds.has("structured-logging"),
+    includesFrontend: selectedIds.has("frontend"),
     enforceBritishEnglish: options?.britishEnglish ?? false,
   };
 }
