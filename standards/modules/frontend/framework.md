@@ -4,44 +4,25 @@ Activate this module when the project has an existing frontend. Analyze the code
 
 ## 2. Analysis Pipeline
 
-Execute these three phases in order before generating or modifying any UI component.
+Execute this workflow to replicate or extend a UI module.
 
-### Phase 1 — Design Tokens Extraction
+### Phase 1 — Structural Extraction (Layout)
 
-Read the project's canonical sources directly in this priority order:
-1. Token configuration files (`tailwind.config.*`, `tokens.json`, global CSS variables, component library theme file).
-2. Most used styling files in the project (infer only if centralized configuration does not exist).
+Use the `frontend-layout-extractor` skill to analyze the source code at the target location.
 
-Never infer tokens from screenshots or rendered DOM if source code is available.
+- **Goal**: Produce a `layout.md` file that captures every field, label, and interaction with "full field parity".
+- **Constraint**: This phase must ignore all styling, focus exclusively on structure and behavior.
+- **Output**: `specs/features/<feature-name>/layout.md`.
 
-Extract these tokens obligatorily:
-- Document the color palette (primitive and semantic).
-- Document the typography scale (families, sizes, weights, line heights).
-- Document the spacing system (base scale, grid, gutters, border radii).
-- Document interaction tokens (durations, easings, state opacities).
+### Phase 2 — Visual Implementation (UI)
 
-### Phase 2 — Component Tree
+Use the `frontend-ui-generator` skill to build the interface based on the `layout.md` (found in `specs/features/<feature-name>/`) and the project's design system.
 
-Map the tree by analyzing the source code. Use as sources of truth, in this priority order: TypeScript types/interfaces, PropTypes, JSDoc comments, actual usage in the project.
 
-Analyze obligatorily:
-- **Directory Audit**: Execute a full directory audit of the target component's module (including subdirectories like `/modals` or `/forms`) to prevent missing secondary components.
-- **Event Tree Mapping**: Trace every interactive element (buttons, links) to its destination (modals, external components, forms) to ensure no sub-components are omitted.
-- **Form Data Mapping**: Extract all native form fields, expected options, and input constraints upfront.
-- Map the component hierarchy and its direct dependencies.
-- Map props, slots, and variants documented or inferrable from usage.
-- Map component states: empty, loading, error, disabled, active.
-- Map recurrent composition patterns (e.g., always use `Card > Header + Body`, never `Card` standalone).
+- **Style Guide**: Ensure `frontendRules/style-guide.md` is updated with current tokens.
+- **Implementation**: Replicate the exact structure from `layout.md` using the project's design tokens and component library.
+- **Fidelity**: Achieve full parity with the specified layout while maintaining strict consistency with the project's visual style.
 
-### Phase 3 — Behavior and Interactions
-
-Identify obligatorily:
-- Define the local state logic of components (when it opens, closes, collapses).
-- **Layout & Boundaries**: Analyze the structural layout constraints (e.g. `flex-wrap` vs `grid`, responsive breakpoints, fixed parent widths) to prevent content overflows and visual clipping.
-- Replicate the exact pattern of existing animations and transitions (Framer Motion, GSAP, pure CSS). Do not introduce another library.
-- Map the observable accessibility requirements: present ARIA roles, focus management, keyboard shortcuts.
-
-State explicitly in the specification if behavior cannot be determined from the code before proposing an implementation.
 
 ## 3. Project Style Guide
 
