@@ -61,25 +61,27 @@ import structuredLoggingFramework from "../standards/modules/structured-logging/
 import structuredLoggingManifest from "../standards/modules/structured-logging/module.json" with {
   type: "json",
 };
-import tddAgents from "../standards/modules/tdd/agents.md" with {
+import testingAgents from "../standards/modules/testing/agents.md" with {
   type: "text",
 };
-import tddFramework from "../standards/modules/tdd/framework.md" with {
+import testingFramework from "../standards/modules/testing/framework.md" with {
   type: "text",
 };
-import tddManifest from "../standards/modules/tdd/module.json" with {
+import testingManifest from "../standards/modules/testing/module.json" with {
   type: "json",
 };
-
 export type StandardModuleId =
   | "decision-records"
-  | "tdd"
   | "hexagonal-architecture"
   | "ddd"
   | "code-style"
   | "airsync-memory"
   | "error-handling"
-  | "structured-logging";
+  | "structured-logging"
+  | "testing";
+
+type StandardModuleAlias = "tdd";
+export type StandardModuleSelection = StandardModuleId | StandardModuleAlias;
 
 export interface StandardModuleManifest {
   id: StandardModuleId;
@@ -107,11 +109,6 @@ const STANDARD_MODULE_REGISTRY: Record<StandardModuleId, StandardModule> = {
     ...(decisionRecordsManifest as StandardModuleManifest),
     framework: decisionRecordsFramework.trim(),
     agents: decisionRecordsAgents.trim(),
-  },
-  tdd: {
-    ...(tddManifest as StandardModuleManifest),
-    framework: tddFramework.trim(),
-    agents: tddAgents.trim(),
   },
   "hexagonal-architecture": {
     ...(hexagonalArchitectureManifest as StandardModuleManifest),
@@ -143,6 +140,11 @@ const STANDARD_MODULE_REGISTRY: Record<StandardModuleId, StandardModule> = {
     framework: structuredLoggingFramework.trim(),
     agents: structuredLoggingAgents.trim(),
   },
+  testing: {
+    ...(testingManifest as StandardModuleManifest),
+    framework: testingFramework.trim(),
+    agents: testingAgents.trim(),
+  },
 };
 
 export const STANDARD_MODULES: StandardModule[] = Object.values(
@@ -155,16 +157,18 @@ export const DEFAULT_STANDARD_MODULE_IDS: StandardModuleId[] =
   );
 
 export function getStandardModuleById(
-  moduleId: StandardModuleId,
+  moduleId: StandardModuleSelection,
 ): StandardModule {
-  return STANDARD_MODULE_REGISTRY[moduleId];
+  return STANDARD_MODULE_REGISTRY[moduleId === "tdd" ? "testing" : moduleId];
 }
 
 export function normaliseModuleIds(
-  moduleIds?: StandardModuleId[],
+  moduleIds?: StandardModuleSelection[],
 ): StandardModuleId[] {
   const requested = moduleIds ?? DEFAULT_STANDARD_MODULE_IDS;
-  const enabled = new Set(requested);
+  const enabled = new Set(
+    requested.map((moduleId) => (moduleId === "tdd" ? "testing" : moduleId)),
+  );
 
   return STANDARD_MODULES.map((module) => module.id).filter((moduleId) =>
     enabled.has(moduleId),
@@ -172,7 +176,7 @@ export function normaliseModuleIds(
 }
 
 export function createFrameworkProfile(
-  moduleIds?: StandardModuleId[],
+  moduleIds?: StandardModuleSelection[],
   options?: { britishEnglish?: boolean },
 ): FrameworkProfile {
   return {
@@ -185,7 +189,7 @@ export function createFrameworkProfile(
 }
 
 export function getSelectedStandardModules(
-  moduleIds?: StandardModuleId[],
+  moduleIds?: StandardModuleSelection[],
 ): StandardModule[] {
   return normaliseModuleIds(moduleIds).map(getStandardModuleById);
 }

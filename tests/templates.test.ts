@@ -75,7 +75,8 @@ describe("templates", () => {
       );
     });
 
-    it("adds TDD guidance only when the TDD module is enabled", () => {
+    it("adds testing guidance only when the testing module is enabled", () => {
+      expect(generateFramework(["testing"])).toContain("## TDD Workflow");
       expect(generateFramework(["tdd"])).toContain("## TDD Workflow");
       expect(generateFramework([])).not.toContain("## TDD Workflow");
     });

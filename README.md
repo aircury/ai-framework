@@ -45,7 +45,7 @@ The default profile enables:
 - **Architecture Decision Records (ADRs)** — agents persist material architectural and workflow decisions in `specs/decisions/` to reduce intention debt.
 - **Hexagonal Architecture** — every external dependency sits behind a port. Framework code is an adapter, never the core.
 - **Domain-Driven Design** — aggregates, value objects, entities, and domain events modeled around business behavior, not tables or screens.
-- **Test-Driven Development** — failing test before implementation.
+- **Testing** — includes TDD by default, with frontend defaults for Vitest, Testing Library, and Playwright, and backend expectations for unit and integration coverage.
 
 This keeps the framework opinionated by default without forcing every team to adopt the same architectural or testing standards forever.
 
@@ -87,7 +87,7 @@ Each module is a small content package with machine-readable metadata plus docum
 Current built-in modules:
 
 - `decision-records`
-- `tdd`
+- `testing`
 - `hexagonal-architecture`
 - `ddd`
 
@@ -109,6 +109,7 @@ The installer exposes grouped skill bundles and expands them into concrete `npx 
 | `spec-kit` | `specify`, `clarify`, `plan`, `analyse`, `tasks`, `implement`, `checklist` | `aircury/ai-framework` |
 | `airsync` | `airsync` | `aircury/ai-framework` |
 | `git` | `commit-changes` | `aircury/ai-framework` |
+| `testing` | `testing-strategies`, `e2e-testing-patterns`, `playwright-best-practices` | mixed external sources |
 | `architecture` | `clean-ddd-hexagonal` | `https://github.com/ccheney/robust-skills` |
 
 All skills write ephemeral working artifacts to `specs/changes/<name>/` and sync canonical output to `specs/features/` on completion.

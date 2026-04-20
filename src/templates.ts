@@ -1,4 +1,4 @@
-import type { StandardModuleId } from "./framework";
+import type { StandardModuleSelection } from "./framework";
 import { renderAgents, renderFramework } from "./renderer";
 
 const FRAMEWORK = renderFramework();
@@ -7,21 +7,21 @@ const AGENTS = renderAgents();
 export { AGENTS, FRAMEWORK };
 
 export function generateFramework(
-  moduleIds?: StandardModuleId[],
+  moduleIds?: StandardModuleSelection[],
   options?: { britishEnglish?: boolean },
 ): string {
   return renderFramework(moduleIds, options);
 }
 
 export function generateAgents(
-  moduleIds?: StandardModuleId[],
+  moduleIds?: StandardModuleSelection[],
   options?: { britishEnglish?: boolean },
 ): string {
   return renderAgents(moduleIds, options);
 }
 
 export function generateOpencodeAgent(
-  moduleIds?: StandardModuleId[],
+  moduleIds?: StandardModuleSelection[],
   options?: { britishEnglish?: boolean },
 ): string {
   return `---

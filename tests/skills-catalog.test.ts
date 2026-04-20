@@ -14,6 +14,7 @@ describe("skills catalog", () => {
       "airsync",
       "git",
       "resilience",
+      "testing",
       "architecture",
     ]);
   });
@@ -25,6 +26,7 @@ describe("skills catalog", () => {
       "airsync",
       "git",
       "resilience",
+      "testing",
       "architecture",
       "language",
     ]);
@@ -43,6 +45,7 @@ describe("skills catalog", () => {
       "airsync",
       "git",
       "resilience",
+      "testing",
       "architecture",
       "language",
     ]);
@@ -84,6 +87,18 @@ describe("skills catalog", () => {
         (skill) => skill.skillName,
       ),
     ).toEqual(["error-handling-patterns", "logging-best-practices"]);
+  });
+
+  it("includes the testing skills when their group is selected", () => {
+    expect(
+      expandSkillGroups(["testing"], "local").map(
+        (skill) => skill.skillName,
+      ),
+    ).toEqual([
+      "testing-strategies",
+      "e2e-testing-patterns",
+      "playwright-best-practices",
+    ]);
   });
 
   it("includes the UK business English skill when its group is selected", () => {

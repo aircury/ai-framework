@@ -65,7 +65,8 @@ describe("getLocalFiles", () => {
     const files = getLocalFiles([], ["decision-records", "tdd"]);
     const config = getFileByPath(files, ".aircury/framework.config.json");
     expect(config.content).toContain('"decision-records"');
-    expect(config.content).toContain('"tdd"');
+    expect(config.content).toContain('"testing"');
+    expect(config.content).not.toContain('"tdd"');
   });
 
   it("persists the British English preference in the config file", () => {
@@ -133,7 +134,7 @@ describe("getGlobalFiles", () => {
 describe("getLocalCommands", () => {
   it("installs the default local skill groups for universal", () => {
     const commands = getLocalCommands([], getDefaultSkillGroupIds("local"));
-    expect(commands).toHaveLength(4);
+    expect(commands).toHaveLength(6);
     expect(commands[0]).toEqual({
       command: "npx",
       args: [
@@ -211,7 +212,41 @@ describe("getLocalCommands", () => {
         "-y",
         "skills",
         "add",
+        "https://github.com/currents-dev/playwright-best-practices-skill",
+        "--skill",
+        "playwright-best-practices",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description:
+        "Install selected skills from https://github.com/currents-dev/playwright-best-practices-skill",
+    });
+    expect(commands[4]).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "https://github.com/supercent-io/skills-template",
+        "--skill",
+        "testing-strategies",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description:
+        "Install selected skills from https://github.com/supercent-io/skills-template",
+    });
+    expect(commands[5]).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
         "https://github.com/wshobson/agents",
+        "--skill",
+        "e2e-testing-patterns",
         "--skill",
         "error-handling-patterns",
         "-a",

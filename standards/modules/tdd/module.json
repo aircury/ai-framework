@@ -1,7 +1,0 @@
-{
-  "id": "tdd",
-  "label": "TDD",
-  "hint": "failing test first for observable behavior",
-  "description": "Requires red-green-refactor delivery with behavior-first automated tests.",
-  "defaultEnabled": true
-}

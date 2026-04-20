@@ -5,7 +5,7 @@ import agentsTemplateSource from "../templates/agents.md.hbs" with {
 import frameworkTemplateSource from "../templates/framework.md.hbs" with {
   type: "text",
 };
-import type { StandardModule, StandardModuleId } from "./framework";
+import type { StandardModule, StandardModuleSelection } from "./framework";
 import { getSelectedStandardModules } from "./framework";
 
 interface RendererViewModel {
@@ -13,7 +13,7 @@ interface RendererViewModel {
   frameworkSections: string[];
   agentRules: string[];
   includesDecisionRecords: boolean;
-  includesTdd: boolean;
+  includesTesting: boolean;
   includesArchitecture: boolean;
   includesCodeStyle: boolean;
   includesAirsyncMemory: boolean;
@@ -30,7 +30,7 @@ const renderAgentsTemplate = Handlebars.compile(agentsTemplateSource, {
 });
 
 function createViewModel(
-  moduleIds?: StandardModuleId[],
+  moduleIds?: StandardModuleSelection[],
   options?: { britishEnglish?: boolean },
 ): RendererViewModel {
   const selectedModules = getSelectedStandardModules(moduleIds);
@@ -46,7 +46,7 @@ function createViewModel(
       .filter(Boolean),
     agentRules: selectedModules.map((module) => module.agents).filter(Boolean),
     includesDecisionRecords: selectedIds.has("decision-records"),
-    includesTdd: selectedIds.has("tdd"),
+    includesTesting: selectedIds.has("testing"),
     includesArchitecture:
       selectedIds.has("hexagonal-architecture") || selectedIds.has("ddd"),
     includesCodeStyle: selectedIds.has("code-style"),
@@ -62,7 +62,7 @@ function trimRenderedDocument(content: string): string {
 }
 
 export function renderFramework(
-  moduleIds?: StandardModuleId[],
+  moduleIds?: StandardModuleSelection[],
   options?: { britishEnglish?: boolean },
 ): string {
   return trimRenderedDocument(
@@ -71,7 +71,7 @@ export function renderFramework(
 }
 
 export function renderAgents(
-  moduleIds?: StandardModuleId[],
+  moduleIds?: StandardModuleSelection[],
   options?: { britishEnglish?: boolean },
 ): string {
   return trimRenderedDocument(

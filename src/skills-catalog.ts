@@ -65,6 +65,15 @@ export const SKILL_GROUPS: SkillGroup[] = [
     scopes: ["local", "global"],
   },
   {
+    id: "testing",
+    label: "Testing",
+    description:
+      "Curated testing guidance covering strategy, frontend tooling, and end-to-end patterns",
+    kind: "external",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+  },
+  {
     id: "architecture",
     label: "Architecture",
     description:
@@ -199,6 +208,36 @@ export const SKILLS: SkillDefinition[] = [
     source: "aircury/ai-framework",
     skillName: "commit-changes",
     groupId: "git",
+    scopes: ["local", "global"],
+  },
+  {
+    id: "testing-strategies",
+    label: "Testing Strategies",
+    description:
+      "Apply practical testing strategy guidance across layers and change types",
+    source: "https://github.com/supercent-io/skills-template",
+    skillName: "testing-strategies",
+    groupId: "testing",
+    scopes: ["local", "global"],
+  },
+  {
+    id: "e2e-testing-patterns",
+    label: "E2E Testing Patterns",
+    description:
+      "Use stable end-to-end testing patterns for critical journeys and CI execution",
+    source: "https://github.com/wshobson/agents",
+    skillName: "e2e-testing-patterns",
+    groupId: "testing",
+    scopes: ["local", "global"],
+  },
+  {
+    id: "playwright-best-practices",
+    label: "Playwright Best Practices",
+    description:
+      "Apply Playwright-specific patterns for resilient browser automation and debugging",
+    source: "https://github.com/currents-dev/playwright-best-practices-skill",
+    skillName: "playwright-best-practices",
+    groupId: "testing",
     scopes: ["local", "global"],
   },
   {

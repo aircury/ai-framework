@@ -1,0 +1,7 @@
+{
+  "id": "testing",
+  "label": "Testing",
+  "hint": "unit, integration, UI, and E2E coverage strategy",
+  "description": "Defines a practical testing pyramid with frontend defaults for Vitest, Testing Library, and Playwright plus mandatory unit and integration coverage for backend services.",
+  "defaultEnabled": true
+}

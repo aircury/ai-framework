@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import type { StandardModuleId } from "./framework";
+import type { StandardModuleId, StandardModuleSelection } from "./framework";
 import { createFrameworkProfile } from "./framework";
 import { expandSkillGroups } from "./skills-catalog";
 import { generateAgents, generateFramework } from "./templates";
@@ -61,7 +61,7 @@ function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
 
 export function getLocalFiles(
   tools: Tool[],
-  moduleIds?: StandardModuleId[],
+  moduleIds?: StandardModuleSelection[],
   options?: InstallOptions,
 ): InstallFile[] {
   const profile = createFrameworkProfile(moduleIds, {

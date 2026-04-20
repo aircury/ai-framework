@@ -18,7 +18,7 @@ describe("framework modules", () => {
     expect(getStandardModuleById("decision-records").agents).toContain(
       "specs/decisions/",
     );
-    expect(getStandardModuleById("tdd").agents).toContain(
+    expect(getStandardModuleById("testing").agents).toContain(
       "Write the failing test first",
     );
     expect(getStandardModuleById("code-style").agents).toContain(
@@ -30,9 +30,15 @@ describe("framework modules", () => {
     expect(getStandardModuleById("structured-logging").agents).toContain(
       "structured logs",
     );
+    expect(getStandardModuleById("testing").agents).toContain("Vitest");
   });
 
   it("uses all default-enabled modules when no explicit selection is provided", () => {
     expect(normaliseModuleIds()).toEqual(DEFAULT_STANDARD_MODULE_IDS);
+  });
+
+  it("maps the legacy tdd module id to testing", () => {
+    expect(normaliseModuleIds(["tdd"])).toEqual(["testing"]);
+    expect(getStandardModuleById("tdd").id).toBe("testing");
   });
 });
