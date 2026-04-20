@@ -90,7 +90,16 @@ export const SKILL_GROUPS: SkillGroup[] = [
     defaultSelected: false,
     scopes: ["local", "global"],
   },
+  {
+    id: "frontend",
+    label: "Frontend",
+    description: "Skills for UI layout extraction and implementation",
+    kind: "aircury",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+  },
 ];
+
 
 export const SKILLS: SkillDefinition[] = [
   {
@@ -270,7 +279,27 @@ export const SKILLS: SkillDefinition[] = [
     groupId: "language",
     scopes: ["local", "global"],
   },
+  {
+    id: "frontend-layout-extractor",
+    label: "Frontend Layout Extractor",
+    description:
+      "Extract structural layout and behavior from frontend code (no styles)",
+    source: "aircury/ai-framework",
+    skillName: "frontend-layout-extractor",
+    groupId: "frontend",
+    scopes: ["local", "global"],
+  },
+  {
+    id: "frontend-ui-generator",
+    label: "Frontend UI Generator",
+    description: "Generate UI implementation from layout and style guide",
+    source: "aircury/ai-framework",
+    skillName: "frontend-ui-generator",
+    groupId: "frontend",
+    scopes: ["local", "global"],
+  },
 ];
+
 
 export function getSkillGroups(
   scope: SkillScope,
