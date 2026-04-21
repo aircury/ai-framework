@@ -146,7 +146,8 @@ describe("frontend module integration", () => {
   it("includes terse-response guidance in AGENTS.md when token-efficiency is enabled", () => {
     const files = getLocalFiles([], ["token-efficiency"]);
     const agents = getFileByPath(files, "AGENTS.md");
-    expect(agents.content).toContain("Respond tersely by default");
+    expect(agents.content).toContain("Load and apply the `caveman` skill");
+    expect(agents.content).toContain("ACTIVE EVERY RESPONSE");
     expect(agents.content).toContain("stop caveman");
   });
 });
