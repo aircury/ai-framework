@@ -3,5 +3,5 @@
   "label": "Token Efficiency",
   "hint": "terse default responses through Caveman",
   "description": "Applies a terse-by-default communication style in project sessions and installs the Caveman skill for token-efficient responses.",
-  "defaultEnabled": false
+  "defaultEnabled": true
 }

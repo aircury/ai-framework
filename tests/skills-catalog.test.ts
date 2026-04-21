@@ -19,7 +19,7 @@ describe("skills catalog", () => {
     ]);
   });
 
-  it("does not preselect token-efficiency by default", () => {
+  it("keeps token-efficiency opt-in at the skill-group level by default", () => {
     expect(getDefaultSkillGroupIds("local")).not.toContain("token-efficiency");
   });
 

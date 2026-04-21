@@ -103,6 +103,7 @@ describe("getLocalFiles", () => {
     expect(framework.content).toContain("## TDD Workflow");
     expect(framework.content).toContain("## Non-Negotiable Architecture Rules");
     expect(framework.content).toContain("## Architecture Decision Records");
+    expect(framework.content).toContain("## Token Efficiency");
   });
 
   it("CLAUDE.md content matches AGENTS.md content", () => {
