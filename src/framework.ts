@@ -43,6 +43,15 @@ import errorHandlingFramework from "../standards/modules/error-handling/framewor
 import errorHandlingManifest from "../standards/modules/error-handling/module.json" with {
   type: "json",
 };
+import frontendAgents from "../standards/modules/frontend/agents.md" with {
+  type: "text",
+};
+import frontendFramework from "../standards/modules/frontend/framework.md" with {
+  type: "text",
+};
+import frontendManifest from "../standards/modules/frontend/module.json" with {
+  type: "json",
+};
 import hexagonalArchitectureAgents from "../standards/modules/hexagonal-architecture/agents.md" with {
   type: "text",
 };
@@ -72,6 +81,7 @@ import testingManifest from "../standards/modules/testing/module.json" with {
 };
 export type StandardModuleId =
   | "decision-records"
+  | "frontend"
   | "hexagonal-architecture"
   | "ddd"
   | "code-style"
@@ -134,6 +144,11 @@ const STANDARD_MODULE_REGISTRY: Record<StandardModuleId, StandardModule> = {
     ...(errorHandlingManifest as StandardModuleManifest),
     framework: errorHandlingFramework.trim(),
     agents: errorHandlingAgents.trim(),
+  },
+  frontend: {
+    ...(frontendManifest as StandardModuleManifest),
+    framework: frontendFramework.trim(),
+    agents: frontendAgents.trim(),
   },
   "structured-logging": {
     ...(structuredLoggingManifest as StandardModuleManifest),
