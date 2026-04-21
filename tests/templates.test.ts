@@ -45,7 +45,7 @@ describe("templates", () => {
     it("matches the generated default profile", () => {
       expect(generateAgents()).toBe(AGENTS);
       expect(renderAgents()).toBe(AGENTS);
-      expect(AGENTS).toContain("Respond tersely by default");
+      expect(AGENTS).toContain("Load and apply the `caveman` skill");
     });
   });
 
@@ -131,10 +131,12 @@ describe("templates", () => {
         "## Token Efficiency",
       );
       expect(generateAgents(["token-efficiency"])).toContain(
-        "Respond tersely by default",
+        "Load and apply the `caveman` skill",
       );
       expect(generateFramework([])).not.toContain("## Token Efficiency");
-      expect(generateAgents([])).not.toContain("Respond tersely by default");
+      expect(generateAgents([])).not.toContain(
+        "Load and apply the `caveman` skill",
+      );
     });
   });
 });
