@@ -102,7 +102,7 @@ export async function run(): Promise<void> {
     const britishEnglish = await p.confirm({
       message:
         "Enforce British English in generated rules and install the UK business English skill?",
-      initialValue: false,
+      initialValue: true,
     });
 
     if (p.isCancel(britishEnglish)) return p.cancel("Cancelled.");
