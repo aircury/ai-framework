@@ -25,6 +25,7 @@ describe("templates", () => {
     it("matches the generated default profile", () => {
       expect(generateFramework()).toBe(FRAMEWORK);
       expect(renderFramework()).toBe(FRAMEWORK);
+      expect(FRAMEWORK).toContain("## Token Efficiency");
     });
   });
 
@@ -44,6 +45,7 @@ describe("templates", () => {
     it("matches the generated default profile", () => {
       expect(generateAgents()).toBe(AGENTS);
       expect(renderAgents()).toBe(AGENTS);
+      expect(AGENTS).toContain("Respond tersely by default");
     });
   });
 

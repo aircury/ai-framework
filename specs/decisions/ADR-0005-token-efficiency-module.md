@@ -11,7 +11,7 @@ The framework needed an optional way to reduce response verbosity and token usag
 
 ## Decision
 
-Aircury will add a local, non-default `token-efficiency` standards module.
+Aircury will add a local, default-enabled `token-efficiency` standards module.
 
 The module will:
 
@@ -23,7 +23,7 @@ Aircury will also add a matching non-default `token-efficiency` skill group cont
 
 - `JuliusBrussee/caveman@caveman`
 
-Selecting the `token-efficiency` module will preselect that skill group during installation.
+Because the module is enabled by default for local installs, the installer will preselect that skill group during the initial local installation flow unless the user explicitly disables the module.
 
 ## Consequences
 

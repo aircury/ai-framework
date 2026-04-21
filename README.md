@@ -46,6 +46,7 @@ The default profile enables:
 - **Hexagonal Architecture** — every external dependency sits behind a port. Framework code is an adapter, never the core.
 - **Domain-Driven Design** — aggregates, value objects, entities, and domain events modeled around business behavior, not tables or screens.
 - **Testing** — includes TDD by default, with frontend defaults for Vitest, Testing Library, and Playwright, and backend expectations for unit and integration coverage.
+- **Token Efficiency** — keeps project sessions terse by default and pairs the generated rules with the `caveman` skill.
 
 This keeps the framework opinionated by default without forcing every team to adopt the same architectural or testing standards forever.
 
