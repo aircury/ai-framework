@@ -10,18 +10,25 @@ Execute this workflow to replicate or extend a UI module.
 
 Use the `frontend-layout-extractor` skill to analyze the source code at the target location.
 
-- **Goal**: Produce a `layout.md` file that captures every field, label, and interaction with "full field parity".
-- **Constraint**: This phase must ignore all styling, focus exclusively on structure and behavior.
+- **Goal**: Produce a `layout.md` file that captures every field, label, and static element with "full field parity".
+- **Constraint**: This phase must ignore all styling and complex orchestration logic.
 - **Output**: `specs/features/<feature-name>/layout.md`.
 
-### Phase 2 — Visual Implementation (UI)
+### Phase 2 — Behavioral Extraction (Experience)
 
-Use the `frontend-ui-generator` skill to build the interface based on the `layout.md` (found in `specs/features/<feature-name>/`) and the project's design system.
+Use the `frontend-experience-extractor` skill to analyze the same source code.
 
+- **Goal**: Produce an `experience.md` file that captures user flows, micro-interactions, state transitions, validation feedback, and conditional visibility or authorization logic.
+- **Constraint**: This phase focuses on "how it feels" and the behavioral logic, including who sees what and when, while `layout.md` remains the source of structural field parity.
+- **Output**: `specs/features/<feature-name>/experience.md`.
+
+### Phase 3 — Visual Implementation (UI)
+
+Use the `frontend-ui-generator` skill to build the interface based on both the `layout.md` and `experience.md` files, ensuring strict adherence to the project's design system.
 
 - **Style Guide**: Ensure `frontendRules/style-guide.md` is updated with current tokens.
-- **Implementation**: Replicate the exact structure from `layout.md` using the project's design tokens and component library.
-- **Fidelity**: Achieve full parity with the specified layout while maintaining strict consistency with the project's visual style.
+- **Implementation**: Replicate the exact structure and behavior.
+- **Fidelity**: Achieve full parity with the specified layout and experience, including role-gated rendering and field-level visibility rules, while maintaining strict consistency with the project's visual style.
 
 
 ## 3. Project Style Guide
