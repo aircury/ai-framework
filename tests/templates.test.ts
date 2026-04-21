@@ -37,7 +37,8 @@ describe("templates", () => {
 
     it("references FRAMEWORK.md", () => {
       expect(AGENTS).toContain("FRAMEWORK.md");
-      expect(AGENTS).toContain(
+      expect(AGENTS).toContain("single source of truth");
+      expect(AGENTS).not.toContain(
         "Selecting `plan-build` authorises planning first, not automatic implementation.",
       );
     });
@@ -92,20 +93,9 @@ describe("templates", () => {
       );
     });
 
-    it("adds ADR reading instructions to AGENTS.md only when enabled", () => {
-      expect(generateAgents(["decision-records"])).toContain(
-        "specs/decisions/",
-      );
-      expect(generateAgents([])).not.toContain("specs/decisions/");
-    });
-
-    it("adds code style instructions to AGENTS.md only when enabled", () => {
-      expect(generateAgents(["code-style"])).toContain(
-        "Analyze `package.json` and local config files to identify the project's linting and formatting strategy.",
-      );
-      expect(generateAgents([])).not.toContain(
-        "Analyze `package.json` and local config files to identify the project's linting and formatting strategy.",
-      );
+    it("keeps AGENTS.md stable across module selections", () => {
+      expect(generateAgents(["decision-records"])).toBe(generateAgents([]));
+      expect(generateAgents(["code-style"])).toBe(generateAgents([]));
     });
 
     it("adds code style header to FRAMEWORK.md when enabled", () => {
@@ -117,13 +107,12 @@ describe("templates", () => {
       expect(generateFramework([], { britishEnglish: true })).toContain(
         "Use British English spelling",
       );
-      expect(generateAgents([], { britishEnglish: true })).toContain(
-        "Use British English spelling",
+      expect(generateAgents([], { britishEnglish: true })).toBe(
+        generateAgents([]),
       );
       expect(generateFramework([])).not.toContain(
         "Use British English spelling",
       );
-      expect(generateAgents([])).not.toContain("Use British English spelling");
     });
 
     it("adds token-efficiency guidance only when the module is enabled", () => {

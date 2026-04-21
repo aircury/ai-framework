@@ -6,40 +6,6 @@ This project follows the Aircury engineering framework defined in [FRAMEWORK.md]
 
 All agents contributing to this repository MUST read and apply FRAMEWORK.md before doing any work. It is not optional and it is not advisory.
 
-## Before starting any task
+All framework workflow rules, delivery constraints, and enabled standards now live in `FRAMEWORK.md` as the single source of truth.
 
-- Read `FRAMEWORK.md` in full if you have not already done so in this session.
-- Read the relevant specs in `specs/features/` that relate to the area you are changing.
-{{#if includesAirsyncMemory}}
-- Search Airsync memory for relevant context before making decisions. Use `memory_search` with targeted queries about the area you are working on.
-{{/if}}
-{{#if includesDecisionRecords}}
-- Read the relevant ADRs in `specs/decisions/` when the area is governed by prior decisions.
-{{/if}}
-{{#if includesCodeStyle}}
-- Analyze `package.json` and local config files to identify the project's linting and formatting strategy.
-{{/if}}
-- Act as a routing meta-agent: analyse the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
-
-## Non-negotiable rules
-
-{{#if enforceBritishEnglish}}
-- Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy unless an external interface requires a different spelling.
-{{/if}}
-- All observable behavior changes MUST update `specs/features/` before the work is done.
-- Use the `commit-changes` skill to organise working tree changes into atomic, functional, and semantic commits using Conventional Commit format.
-- After the user selects a workflow mode, follow `FRAMEWORK.md § Mode execution rules` exactly.
-- Selecting `plan-build` authorises planning first, not automatic implementation.
-- Selecting `spec-kit` requires following the full Spec Kit sequence in order unless the user explicitly changes modes.
-- Selecting an OpenSpec workflow requires following its named sequence in order unless the user explicitly changes modes.
-{{#if includesAirsyncMemory}}
-- Capture reusable knowledge in Airsync INBOX when you discover validated patterns, repeated pitfalls, or team conventions. Search before proposing to avoid duplicates.
-- Every ADR created or superseded MUST also be proposed to Airsync as a `note` with `scope: "team"` and tags `["adr", "ADR-XXXX"]`.
-{{/if}}
-{{#each agentRules}}
-{{this}}
-{{/each}}
-
-## Definition of done
-
-A task is complete only when all conditions in `FRAMEWORK.md § Definition of Done` are satisfied. Do not mark work as done if specs are not updated.
+If this repository also has project-specific agent instructions, keep them here and treat `FRAMEWORK.md` as the governing framework layer.

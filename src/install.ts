@@ -25,6 +25,11 @@ export interface InstallOptions {
   britishEnglish?: boolean;
 }
 
+const FRAMEWORK_REFERENCE_SENTENCE =
+  "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).";
+const LEGACY_AIRCURY_AGENTS_SENTENCE =
+  "All agents contributing to this repository MUST read and apply FRAMEWORK.md before doing any work. It is not optional and it is not advisory.";
+
 function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
   const files: InstallFile[] = [
     {
@@ -238,8 +243,45 @@ export function writeFile(
   isGlobal: boolean,
 ): void {
   const fullPath = isGlobal ? file.path : join(cwd, file.path);
+  if (!isGlobal && file.path === "AGENTS.md" && existsSync(fullPath)) {
+    writeFileSync(
+      fullPath,
+      mergeFrameworkReferenceIntoAgents(
+        readFileSync(fullPath, "utf-8"),
+        file.content,
+      ),
+      "utf-8",
+    );
+    return;
+  }
+
   mkdirSync(dirname(fullPath), { recursive: true });
   writeFileSync(fullPath, file.content, "utf-8");
+}
+
+export function mergeFrameworkReferenceIntoAgents(
+  existingContent: string,
+  frameworkReference: string,
+): string {
+  const trimmedExisting = existingContent.trim();
+  const trimmedReference = frameworkReference.trim();
+
+  if (trimmedExisting.length === 0) {
+    return `${trimmedReference}\n`;
+  }
+
+  if (
+    trimmedExisting.startsWith("# AGENTS.md") &&
+    trimmedExisting.includes(LEGACY_AIRCURY_AGENTS_SENTENCE)
+  ) {
+    return `${trimmedReference}\n`;
+  }
+
+  if (trimmedExisting.includes(FRAMEWORK_REFERENCE_SENTENCE)) {
+    return `${trimmedExisting}\n`;
+  }
+
+  return `${trimmedExisting}\n\n${trimmedReference}\n`;
 }
 
 export function runCommand(

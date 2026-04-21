@@ -8,6 +8,7 @@ import {
   getGlobalFiles,
   getLocalCommands,
   getLocalFiles,
+  mergeFrameworkReferenceIntoAgents,
   type InstallFile,
   writeFile,
 } from "../src/install";
@@ -85,16 +86,14 @@ describe("getLocalFiles", () => {
     );
   });
 
-  it("includes ADR instructions in AGENTS.md when the ADR module is enabled", () => {
-    const files = getLocalFiles([], ["decision-records"]);
-    const agents = getFileByPath(files, "AGENTS.md");
-    expect(agents.content).toContain("specs/decisions/");
-  });
-
-  it("omits ADR instructions when the ADR module is disabled", () => {
-    const files = getLocalFiles([], []);
-    const agents = getFileByPath(files, "AGENTS.md");
-    expect(agents.content).not.toContain("specs/decisions/");
+  it("keeps AGENTS.md focused on the framework reference", () => {
+    const withModules = getLocalFiles([], ["decision-records", "code-style"]);
+    const withoutModules = getLocalFiles([], []);
+    const agentsWithModules = getFileByPath(withModules, "AGENTS.md");
+    const agentsWithoutModules = getFileByPath(withoutModules, "AGENTS.md");
+    expect(agentsWithModules.content).toBe(agentsWithoutModules.content);
+    expect(agentsWithModules.content).toContain("FRAMEWORK.md");
+    expect(agentsWithModules.content).toContain("single source of truth");
   });
 
   it("uses the full recommended profile by default", () => {
@@ -118,7 +117,7 @@ describe("getLocalFiles", () => {
     const framework = getFileByPath(files, "FRAMEWORK.md");
     const agents = getFileByPath(files, "AGENTS.md");
     expect(framework.content).toContain("Use British English spelling");
-    expect(agents.content).toContain("Use British English spelling");
+    expect(agents.content).not.toContain("Use British English spelling");
   });
 });
 
@@ -422,5 +421,71 @@ describe("writeFile", () => {
     expect(existsSync(join(dir, "a/b/c/deep.md"))).toBe(true);
 
     rmSync(dir, { recursive: true });
+  });
+
+  it("merges the framework reference into an existing local AGENTS.md", () => {
+    const dir = `${tmpdir()}/sdd-agents-merge-${Date.now()}`;
+    const file = getFileByPath(getLocalFiles([]), "AGENTS.md");
+
+    writeFile(
+      {
+        path: "AGENTS.md",
+        content: "# Existing\n\nProject-specific instructions.",
+        description: "",
+      },
+      dir,
+      false,
+    );
+    writeFile(file, dir, false);
+
+    const content = readFileSync(join(dir, "AGENTS.md"), "utf-8");
+    expect(content).toContain("Project-specific instructions.");
+    expect(content).toContain(
+      "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).",
+    );
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("replaces a legacy generated AGENTS.md with the new reference-only version", () => {
+    const dir = `${tmpdir()}/sdd-agents-replace-${Date.now()}`;
+    const file = getFileByPath(getLocalFiles([]), "AGENTS.md");
+
+    writeFile(
+      {
+        path: "AGENTS.md",
+        content: `# AGENTS.md\n\n## Framework\n\nThis project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).\n\nAll agents contributing to this repository MUST read and apply FRAMEWORK.md before doing any work. It is not optional and it is not advisory.\n\n## Before starting any task\n\n- Legacy content.`,
+        description: "",
+      },
+      dir,
+      false,
+    );
+    writeFile(file, dir, false);
+
+    const content = readFileSync(join(dir, "AGENTS.md"), "utf-8");
+    expect(content).toBe(file.content);
+
+    rmSync(dir, { recursive: true });
+  });
+});
+
+describe("mergeFrameworkReferenceIntoAgents", () => {
+  const frameworkReference = getFileByPath(getLocalFiles([]), "AGENTS.md").content;
+
+  it("appends the framework reference when missing", () => {
+    const merged = mergeFrameworkReferenceIntoAgents(
+      "# Existing\n\nProject-specific instructions.",
+      frameworkReference,
+    );
+
+    expect(merged).toContain("Project-specific instructions.");
+    expect(merged).toContain("single source of truth");
+  });
+
+  it("does not duplicate the framework reference when already present", () => {
+    const existing = `# Existing\n\nProject-specific instructions.\n\n${frameworkReference}`;
+    const merged = mergeFrameworkReferenceIntoAgents(existing, frameworkReference);
+
+    expect(merged).toBe(existing.endsWith("\n") ? existing : `${existing}\n`);
   });
 });

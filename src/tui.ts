@@ -232,7 +232,7 @@ export async function run(): Promise<void> {
   let executed = 0;
 
   for (const { file, exists } of conflicts) {
-    if (exists && overwrite === "skip") {
+    if (exists && overwrite === "skip" && !(!isGlobal && file.path === "AGENTS.md")) {
       skipped++;
       continue;
     }
