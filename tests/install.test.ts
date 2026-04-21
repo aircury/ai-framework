@@ -122,10 +122,10 @@ describe("getLocalFiles", () => {
 });
 
 describe("frontend module integration", () => {
-  it("includes frontendRules/README.md when frontend module is enabled", () => {
+  it("includes specs/ui/README.md when frontend module is enabled", () => {
     const files = getLocalFiles([], ["frontend"]);
     const paths = files.map((f) => f.path);
-    expect(paths).toContain("frontendRules/README.md");
+    expect(paths).toContain("specs/ui/README.md");
   });
 
   it("adds frontend-specific check to FRAMEWORK.md when enabled", () => {
@@ -136,18 +136,18 @@ describe("frontend module integration", () => {
     );
   });
 
-  it("includes experience extractor in AGENTS.md when frontend is enabled", () => {
+  it("includes experience extractor in FRAMEWORK.md when frontend is enabled", () => {
     const files = getLocalFiles([], ["frontend"]);
-    const agents = getFileByPath(files, "AGENTS.md");
-    expect(agents.content).toContain("frontend-experience-extractor");
+    const framework = getFileByPath(files, "FRAMEWORK.md");
+    expect(framework.content).toContain("frontend-experience-extractor");
   });
 
-  it("includes terse-response guidance in AGENTS.md when token-efficiency is enabled", () => {
+  it("includes terse-response guidance in FRAMEWORK.md when token-efficiency is enabled", () => {
     const files = getLocalFiles([], ["token-efficiency"]);
-    const agents = getFileByPath(files, "AGENTS.md");
-    expect(agents.content).toContain("Load and apply the `caveman` skill");
-    expect(agents.content).toContain("ACTIVE EVERY RESPONSE");
-    expect(agents.content).toContain("stop caveman");
+    const framework = getFileByPath(files, "FRAMEWORK.md");
+    expect(framework.content).toContain("Load and apply the `caveman` skill");
+    expect(framework.content).toContain("ACTIVE EVERY RESPONSE");
+    expect(framework.content).toContain("stop caveman");
   });
 });
 

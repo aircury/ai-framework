@@ -63,10 +63,10 @@ function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
 
   if (moduleIds.includes("frontend")) {
     files.push({
-      path: "frontendRules/README.md",
+      path: "specs/ui/README.md",
       content: `# Frontend Design System
 
-This directory contains the project's living style guide and design tokens.
+\`specs/ui/\` stores the project's living style guide and UI design tokens.
 
 - \`style-guide.md\`: The canonical source of truth for design tokens and UI patterns.
 - Update the style guide whenever new tokens or patterns are identified.

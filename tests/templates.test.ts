@@ -46,7 +46,7 @@ describe("templates", () => {
     it("matches the generated default profile", () => {
       expect(generateAgents()).toBe(AGENTS);
       expect(renderAgents()).toBe(AGENTS);
-      expect(AGENTS).toContain("Load and apply the `caveman` skill");
+      expect(AGENTS).not.toContain("Load and apply the `caveman` skill");
     });
   });
 
@@ -119,11 +119,11 @@ describe("templates", () => {
       expect(generateFramework(["token-efficiency"])).toContain(
         "## Token Efficiency",
       );
-      expect(generateAgents(["token-efficiency"])).toContain(
+      expect(generateFramework(["token-efficiency"])).toContain(
         "Load and apply the `caveman` skill",
       );
       expect(generateFramework([])).not.toContain("## Token Efficiency");
-      expect(generateAgents([])).not.toContain(
+      expect(generateFramework([])).not.toContain(
         "Load and apply the `caveman` skill",
       );
     });

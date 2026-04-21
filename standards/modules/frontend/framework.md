@@ -26,14 +26,14 @@ Use the `frontend-experience-extractor` skill to analyze the same source code.
 
 Use the `frontend-ui-generator` skill to build the interface based on both the `layout.md` and `experience.md` files, ensuring strict adherence to the project's design system.
 
-- **Style Guide**: Ensure `frontendRules/style-guide.md` is updated with current tokens.
+- **Style Guide**: Ensure `specs/ui/style-guide.md` is updated with current tokens.
 - **Implementation**: Replicate the exact structure and behavior.
 - **Fidelity**: Achieve full parity with the specified layout and experience, including role-gated rendering and field-level visibility rules, while maintaining strict consistency with the project's visual style.
 
 
 ## 3. Project Style Guide
 
-Generate or automatically update the `frontendRules/style-guide.md` file after completing the three analysis phases. This file is the absolute design source of truth for the project.
+Generate or automatically update the `specs/ui/style-guide.md` file after completing the three analysis phases. This file is the absolute design source of truth for the project.
 
 - Generate the file automatically from the analysis. Do not write it by hand.
 - Update the file whenever you detect new tokens or unrecorded patterns.
@@ -72,13 +72,13 @@ The spec must strictly follow this format:
 - API: Define props with name, type, default value, and requirement status.
 - Variants: Define an exhaustive list detailing what changes visually in each variant.
 - States: Define what happens visually and functionally in every possible state.
-- Tokens used: Explicitly reference tokens from `frontendRules/style-guide.md`. Do not use hardcoded values.
+- Tokens used: Explicitly reference tokens from `specs/ui/style-guide.md`. Do not use hardcoded values.
 - Acceptance criteria: Define at least one visual, one functional, and one accessibility criterion. Specs without acceptance criteria are invalid.
 - Out of scope: Explicitly declare what is excluded to prevent scope creep.
 
 ## 5. Implementation Rules
 
-- Use exclusively tokens from `frontendRules/style-guide.md` in generated code. Do not introduce hardcoded values for color, typography, or spacing.
+- Use exclusively tokens from `specs/ui/style-guide.md` in generated code. Do not introduce hardcoded values for color, typography, or spacing.
 - Extend existing component libraries (MUI, shadcn, Radix) by following their customization patterns. Do not rewrite their components from scratch.
 - Propose the complete API in the spec before writing code if a component does not exist in the project.
 - Create new animations using the library already present in the project. Write an ADR to introduce a new animation library.
@@ -88,7 +88,7 @@ The spec must strictly follow this format:
 
 | Task | Flow |
 |---|---|
-| Initial frontend project analysis (onboarding) | Execute the 3 phases + generate `frontendRules/style-guide.md` before any other task |
+| Initial frontend project analysis (onboarding) | Execute the 3 phases + generate `specs/ui/style-guide.md` before any other task |
 | Small visual modification on existing component | Plan-Build (token analysis is still mandatory) |
 | New isolated well-specified component | OpenSpec |
 | New design system or significant UI refactor | Spec Kit |
