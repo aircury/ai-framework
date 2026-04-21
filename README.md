@@ -90,6 +90,7 @@ Current built-in modules:
 - `testing`
 - `hexagonal-architecture`
 - `ddd`
+- `token-efficiency`
 
 The installer and template generation are registry-driven, so adding a new standards module only requires:
 
@@ -111,10 +112,13 @@ The installer exposes grouped skill bundles and expands them into concrete `npx 
 | `git` | `commit-changes` | `aircury/ai-framework` |
 | `testing` | `e2e-testing-patterns`, `playwright-best-practices` | mixed external sources |
 | `architecture` | `clean-ddd-hexagonal` | `https://github.com/ccheney/robust-skills` |
+| `token-efficiency` | `caveman` | `https://github.com/juliusbrussee/caveman` |
 
 All skills write ephemeral working artifacts to `specs/changes/<name>/` and sync canonical output to `specs/features/` on completion.
 
 Curated external skills can be added to the static catalog and will appear in the same multiselect UI alongside the built-in Aircury groups.
+
+When the local `token-efficiency` standards module is enabled, the installer also preselects the `token-efficiency` skill group and adds project rules that keep sessions terse by default. This is intentionally project-scoped: it uses generated agent instruction files plus the `caveman` skill, and does not install any global shell hooks.
 
 ---
 

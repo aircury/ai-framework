@@ -31,6 +31,9 @@ describe("framework modules", () => {
       "structured logs",
     );
     expect(getStandardModuleById("testing").agents).toContain("Vitest");
+    expect(getStandardModuleById("token-efficiency").agents).toContain(
+      "Respond tersely by default",
+    );
   });
 
   it("uses all default-enabled modules when no explicit selection is provided", () => {

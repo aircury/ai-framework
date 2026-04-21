@@ -1,5 +1,6 @@
 export type SkillGroupKind = "aircury" | "external";
 export type SkillScope = "local" | "global";
+
 import type { StandardModuleId } from "./framework";
 
 export interface SkillGroup {
@@ -99,8 +100,16 @@ export const SKILL_GROUPS: SkillGroup[] = [
     defaultSelected: false,
     scopes: ["local", "global"],
   },
+  {
+    id: "token-efficiency",
+    label: "Token Efficiency",
+    description:
+      "Caveman terse-response skill for token-efficient project sessions",
+    kind: "external",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+  },
 ];
-
 
 export const SKILLS: SkillDefinition[] = [
   {
@@ -293,7 +302,8 @@ export const SKILLS: SkillDefinition[] = [
   {
     id: "frontend-experience-extractor",
     label: "Frontend Experience Extractor",
-    description: "Extract behavioral UX, flows, and micro-interactions from frontend code",
+    description:
+      "Extract behavioral UX, flows, and micro-interactions from frontend code",
     source: "aircury/ai-framework",
     skillName: "frontend-experience-extractor",
     groupId: "frontend",
@@ -308,8 +318,17 @@ export const SKILLS: SkillDefinition[] = [
     groupId: "frontend",
     scopes: ["local", "global"],
   },
+  {
+    id: "caveman",
+    label: "Caveman",
+    description:
+      "Respond tersely by default while preserving technical accuracy",
+    source: "https://github.com/juliusbrussee/caveman",
+    skillName: "caveman",
+    groupId: "token-efficiency",
+    scopes: ["local", "global"],
+  },
 ];
-
 
 export function getSkillGroups(
   scope: SkillScope,
@@ -338,8 +357,18 @@ export function getInitialSkillGroupIds(
     selected = [...selected, "language"];
   }
 
-  if (options?.moduleIds?.includes("frontend") && !selected.includes("frontend")) {
+  if (
+    options?.moduleIds?.includes("frontend") &&
+    !selected.includes("frontend")
+  ) {
     selected = [...selected, "frontend"];
+  }
+
+  if (
+    options?.moduleIds?.includes("token-efficiency") &&
+    !selected.includes("token-efficiency")
+  ) {
+    selected = [...selected, "token-efficiency"];
   }
 
   return selected;

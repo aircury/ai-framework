@@ -19,6 +19,10 @@ describe("skills catalog", () => {
     ]);
   });
 
+  it("does not preselect token-efficiency by default", () => {
+    expect(getDefaultSkillGroupIds("local")).not.toContain("token-efficiency");
+  });
+
   it("adds the language group to initial selection when British English is enabled", () => {
     expect(getInitialSkillGroupIds("local", { britishEnglish: true })).toEqual([
       "open-spec",
@@ -39,10 +43,9 @@ describe("skills catalog", () => {
   });
 
   it("adds the frontend group when the frontend module is enabled", () => {
-    expect(getInitialSkillGroupIds("local", { moduleIds: ["frontend"] })).toEqual([
-      ...getDefaultSkillGroupIds("local"),
-      "frontend",
-    ]);
+    expect(
+      getInitialSkillGroupIds("local", { moduleIds: ["frontend"] }),
+    ).toEqual([...getDefaultSkillGroupIds("local"), "frontend"]);
   });
 
   it("combines British English and frontend module pre-selections", () => {
@@ -52,6 +55,12 @@ describe("skills catalog", () => {
         moduleIds: ["frontend"],
       }),
     ).toEqual([...getDefaultSkillGroupIds("local"), "language", "frontend"]);
+  });
+
+  it("adds the token-efficiency group when the module is enabled", () => {
+    expect(
+      getInitialSkillGroupIds("local", { moduleIds: ["token-efficiency"] }),
+    ).toEqual([...getDefaultSkillGroupIds("local"), "token-efficiency"]);
   });
 
   it("returns the visible groups for a scope", () => {
@@ -65,6 +74,7 @@ describe("skills catalog", () => {
       "architecture",
       "language",
       "frontend",
+      "token-efficiency",
     ]);
   });
 
@@ -108,9 +118,7 @@ describe("skills catalog", () => {
 
   it("includes the testing skills when their group is selected", () => {
     expect(
-      expandSkillGroups(["testing"], "local").map(
-        (skill) => skill.skillName,
-      ),
+      expandSkillGroups(["testing"], "local").map((skill) => skill.skillName),
     ).toEqual(["e2e-testing-patterns", "playwright-best-practices"]);
   });
 
@@ -128,5 +136,13 @@ describe("skills catalog", () => {
       "frontend-experience-extractor",
       "frontend-ui-generator",
     ]);
+  });
+
+  it("includes caveman when the token-efficiency group is selected", () => {
+    expect(
+      expandSkillGroups(["token-efficiency"], "local").map(
+        (skill) => skill.skillName,
+      ),
+    ).toEqual(["caveman"]);
   });
 });
