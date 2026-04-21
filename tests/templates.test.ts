@@ -123,5 +123,16 @@ describe("templates", () => {
       );
       expect(generateAgents([])).not.toContain("Use British English spelling");
     });
+
+    it("adds token-efficiency guidance only when the module is enabled", () => {
+      expect(generateFramework(["token-efficiency"])).toContain(
+        "## Token Efficiency",
+      );
+      expect(generateAgents(["token-efficiency"])).toContain(
+        "Respond tersely by default",
+      );
+      expect(generateFramework([])).not.toContain("## Token Efficiency");
+      expect(generateAgents([])).not.toContain("Respond tersely by default");
+    });
   });
 });

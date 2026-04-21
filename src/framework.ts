@@ -79,6 +79,15 @@ import testingFramework from "../standards/modules/testing/framework.md" with {
 import testingManifest from "../standards/modules/testing/module.json" with {
   type: "json",
 };
+import tokenEfficiencyAgents from "../standards/modules/token-efficiency/agents.md" with {
+  type: "text",
+};
+import tokenEfficiencyFramework from "../standards/modules/token-efficiency/framework.md" with {
+  type: "text",
+};
+import tokenEfficiencyManifest from "../standards/modules/token-efficiency/module.json" with {
+  type: "json",
+};
 export type StandardModuleId =
   | "decision-records"
   | "frontend"
@@ -88,7 +97,8 @@ export type StandardModuleId =
   | "airsync-memory"
   | "error-handling"
   | "structured-logging"
-  | "testing";
+  | "testing"
+  | "token-efficiency";
 
 type StandardModuleAlias = "tdd";
 export type StandardModuleSelection = StandardModuleId | StandardModuleAlias;
@@ -154,6 +164,11 @@ const STANDARD_MODULE_REGISTRY: Record<StandardModuleId, StandardModule> = {
     ...(structuredLoggingManifest as StandardModuleManifest),
     framework: structuredLoggingFramework.trim(),
     agents: structuredLoggingAgents.trim(),
+  },
+  "token-efficiency": {
+    ...(tokenEfficiencyManifest as StandardModuleManifest),
+    framework: tokenEfficiencyFramework.trim(),
+    agents: tokenEfficiencyAgents.trim(),
   },
   testing: {
     ...(testingManifest as StandardModuleManifest),

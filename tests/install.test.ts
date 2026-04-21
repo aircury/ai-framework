@@ -141,6 +141,13 @@ describe("frontend module integration", () => {
     const agents = getFileByPath(files, "AGENTS.md");
     expect(agents.content).toContain("frontend-experience-extractor");
   });
+
+  it("includes terse-response guidance in AGENTS.md when token-efficiency is enabled", () => {
+    const files = getLocalFiles([], ["token-efficiency"]);
+    const agents = getFileByPath(files, "AGENTS.md");
+    expect(agents.content).toContain("Respond tersely by default");
+    expect(agents.content).toContain("stop caveman");
+  });
 });
 
 describe("getGlobalFiles", () => {
@@ -302,6 +309,27 @@ describe("getLocalCommands", () => {
       ],
       description:
         "Install selected skills from https://github.com/jezweb/claude-skills",
+    });
+  });
+
+  it("installs the caveman skill from its external source", () => {
+    const commands = getLocalCommands([], ["token-efficiency"]);
+    expect(commands).toHaveLength(1);
+    expect(commands[0]).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "https://github.com/juliusbrussee/caveman",
+        "--skill",
+        "caveman",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description:
+        "Install selected skills from https://github.com/juliusbrussee/caveman",
     });
   });
 });
