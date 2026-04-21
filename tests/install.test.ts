@@ -135,6 +135,12 @@ describe("frontend module integration", () => {
       "Visual modifications align with the project design system tokens",
     );
   });
+
+  it("includes experience extractor in AGENTS.md when frontend is enabled", () => {
+    const files = getLocalFiles([], ["frontend"]);
+    const agents = getFileByPath(files, "AGENTS.md");
+    expect(agents.content).toContain("frontend-experience-extractor");
+  });
 });
 
 describe("getGlobalFiles", () => {

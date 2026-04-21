@@ -38,6 +38,22 @@ describe("skills catalog", () => {
     );
   });
 
+  it("adds the frontend group when the frontend module is enabled", () => {
+    expect(getInitialSkillGroupIds("local", { moduleIds: ["frontend"] })).toEqual([
+      ...getDefaultSkillGroupIds("local"),
+      "frontend",
+    ]);
+  });
+
+  it("combines British English and frontend module pre-selections", () => {
+    expect(
+      getInitialSkillGroupIds("local", {
+        britishEnglish: true,
+        moduleIds: ["frontend"],
+      }),
+    ).toEqual([...getDefaultSkillGroupIds("local"), "language", "frontend"]);
+  });
+
   it("returns the visible groups for a scope", () => {
     expect(getSkillGroups("local").map((group) => group.id)).toEqual([
       "open-spec",
@@ -48,6 +64,7 @@ describe("skills catalog", () => {
       "testing",
       "architecture",
       "language",
+      "frontend",
     ]);
   });
 
@@ -101,5 +118,15 @@ describe("skills catalog", () => {
     expect(
       expandSkillGroups(["language"], "local").map((skill) => skill.skillName),
     ).toEqual(["uk-business-english"]);
+  });
+
+  it("includes the frontend skills when their group is selected", () => {
+    expect(
+      expandSkillGroups(["frontend"], "local").map((skill) => skill.skillName),
+    ).toEqual([
+      "frontend-layout-extractor",
+      "frontend-experience-extractor",
+      "frontend-ui-generator",
+    ]);
   });
 });

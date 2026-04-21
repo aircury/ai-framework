@@ -1,5 +1,6 @@
 export type SkillGroupKind = "aircury" | "external";
 export type SkillScope = "local" | "global";
+import type { StandardModuleId } from "./framework";
 
 export interface SkillGroup {
   id: string;
@@ -290,6 +291,15 @@ export const SKILLS: SkillDefinition[] = [
     scopes: ["local", "global"],
   },
   {
+    id: "frontend-experience-extractor",
+    label: "Frontend Experience Extractor",
+    description: "Extract behavioral UX, flows, and micro-interactions from frontend code",
+    source: "aircury/ai-framework",
+    skillName: "frontend-experience-extractor",
+    groupId: "frontend",
+    scopes: ["local", "global"],
+  },
+  {
     id: "frontend-ui-generator",
     label: "Frontend UI Generator",
     description: "Generate UI implementation from layout and style guide",
@@ -320,15 +330,19 @@ export function getDefaultSkillGroupIds(scope: SkillScope): string[] {
 
 export function getInitialSkillGroupIds(
   scope: SkillScope,
-  options?: { britishEnglish?: boolean },
+  options?: { britishEnglish?: boolean; moduleIds?: StandardModuleId[] },
 ): string[] {
-  const defaultGroupIds = getDefaultSkillGroupIds(scope);
+  let selected = getDefaultSkillGroupIds(scope);
 
-  if (!options?.britishEnglish || defaultGroupIds.includes("language")) {
-    return defaultGroupIds;
+  if (options?.britishEnglish && !selected.includes("language")) {
+    selected = [...selected, "language"];
   }
 
-  return [...defaultGroupIds, "language"];
+  if (options?.moduleIds?.includes("frontend") && !selected.includes("frontend")) {
+    selected = [...selected, "frontend"];
+  }
+
+  return selected;
 }
 
 export function expandSkillGroups(

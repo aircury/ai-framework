@@ -73,7 +73,7 @@ export async function run(): Promise<void> {
 
   if (p.isCancel(selectedTools)) return p.cancel("Cancelled.");
 
-  let selectedModules: StandardModuleId[] = [];
+  let selectedModules: StandardModuleId[] | symbol = [];
   let enforceBritishEnglish = false;
   if (scope === "local") {
     selectedModules = await p.multiselect<StandardModuleId>({
@@ -125,13 +125,14 @@ export async function run(): Promise<void> {
     })),
   ];
 
-  let selectedSkillGroups: string[] = [];
+  let selectedSkillGroups: string[] | symbol = [];
   if (skillGroupOptions.length > 0) {
     selectedSkillGroups = await p.multiselect<string>({
       message: "Skill groups — choose which workflows to install",
       options: skillGroupOptions,
       initialValues: getInitialSkillGroupIds(skillScope, {
         britishEnglish: enforceBritishEnglish,
+        moduleIds: selectedModules,
       }),
       required: false,
     });
