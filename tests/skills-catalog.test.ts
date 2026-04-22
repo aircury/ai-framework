@@ -74,6 +74,7 @@ describe("skills catalog", () => {
       "architecture",
       "language",
       "frontend",
+      "specs",
       "token-efficiency",
     ]);
   });
@@ -136,6 +137,12 @@ describe("skills catalog", () => {
       "frontend-experience-extractor",
       "frontend-ui-generator",
     ]);
+  });
+
+  it("includes the specs skills when their group is selected", () => {
+    expect(
+      expandSkillGroups(["specs"], "local").map((skill) => skill.skillName),
+    ).toEqual(["specs-extractor", "specs-interpreter"]);
   });
 
   it("includes caveman when the token-efficiency group is selected", () => {
