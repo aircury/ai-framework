@@ -16,6 +16,7 @@ Aircury will add a local, default-enabled `token-efficiency` standards module.
 The module will:
 
 - add project rules that make agent responses terse by default while preserving full technical accuracy
+- start each new local project session in `caveman full`
 - keep the behavior project-scoped through generated agent instruction files
 - allow users to disable the terse style in-session with `stop caveman` or `normal mode`
 
