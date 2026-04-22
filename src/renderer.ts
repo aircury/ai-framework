@@ -5,11 +5,11 @@ import agentsTemplateSource from "../templates/agents.md.hbs" with {
 import frameworkTemplateSource from "../templates/framework.md.hbs" with {
   type: "text",
 };
-import type { StandardModule, StandardModuleSelection } from "./framework";
-import { getSelectedStandardModules } from "./framework";
+import type { CapabilityId, CapabilityManifest } from "./capabilities";
+import { getSelectedCapabilities } from "./capabilities";
 
 interface RendererViewModel {
-  installedModules: Pick<StandardModule, "id" | "description">[];
+  installedModules: Pick<CapabilityManifest, "id" | "description">[];
   frameworkSections: string[];
   agentRules: string[];
   includesDecisionRecords: boolean;
@@ -32,21 +32,25 @@ const renderAgentsTemplate = Handlebars.compile(agentsTemplateSource, {
 });
 
 function createViewModel(
-  moduleIds?: StandardModuleSelection[],
+  capabilityIds?: CapabilityId[],
   options?: { britishEnglish?: boolean },
 ): RendererViewModel {
-  const selectedModules = getSelectedStandardModules(moduleIds);
-  const selectedIds = new Set(selectedModules.map((module) => module.id));
+  const selectedCapabilities = getSelectedCapabilities(capabilityIds, "local");
+  const selectedIds = new Set(
+    selectedCapabilities.map((capability) => capability.id),
+  );
 
   return {
-    installedModules: selectedModules.map(({ id, description }) => ({
+    installedModules: selectedCapabilities.map(({ id, description }) => ({
       id,
       description,
     })),
-    frameworkSections: selectedModules
-      .map((module) => module.framework)
+    frameworkSections: selectedCapabilities
+      .map((capability) => capability.framework)
       .filter(Boolean),
-    agentRules: selectedModules.map((module) => module.agents).filter(Boolean),
+    agentRules: selectedCapabilities
+      .map((capability) => capability.agents)
+      .filter(Boolean),
     includesDecisionRecords: selectedIds.has("decision-records"),
     includesTesting: selectedIds.has("testing"),
     includesArchitecture:
@@ -66,19 +70,19 @@ function trimRenderedDocument(content: string): string {
 }
 
 export function renderFramework(
-  moduleIds?: StandardModuleSelection[],
+  capabilityIds?: CapabilityId[],
   options?: { britishEnglish?: boolean },
 ): string {
   return trimRenderedDocument(
-    renderFrameworkTemplate(createViewModel(moduleIds, options)),
+    renderFrameworkTemplate(createViewModel(capabilityIds, options)),
   );
 }
 
 export function renderAgents(
-  moduleIds?: StandardModuleSelection[],
+  capabilityIds?: CapabilityId[],
   options?: { britishEnglish?: boolean },
 ): string {
   return trimRenderedDocument(
-    renderAgentsTemplate(createViewModel(moduleIds, options)),
+    renderAgentsTemplate(createViewModel(capabilityIds, options)),
   );
 }

@@ -64,14 +64,14 @@ When the `decision-records` module is enabled, every ADR created or superseded i
 See the `airsync` skill for the complete tool reference and quality guidelines.
 
 {{/if}}
-## Installed Standards Modules
+## Installed Capabilities
 
 {{#if installedModules}}
 {{#each installedModules}}
 - `{{id}}` — {{description}}
 {{/each}}
 {{else}}
-No optional standards modules are enabled. The repository still uses the core workflow constitution.
+No optional capabilities are enabled. The repository still uses the core workflow constitution.
 {{/if}}
 
 {{#each frameworkSections}}
@@ -246,7 +246,7 @@ Use RFC 2119 language. Do not include implementation details, technology names, 
 Before finishing work, verify:
 
 - Is the chosen behavior reflected in `specs/features/`?
-- Is the code aligned with the enabled standards modules?
+- Is the code aligned with the enabled capabilities?
 - Are tradeoffs explicit enough that a future agent can continue safely?
 - Would this change still make sense if infrastructure or tooling changed?
 

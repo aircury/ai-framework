@@ -1,13 +1,17 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import type { StandardModuleId, StandardModuleSelection } from "./framework";
-import { createFrameworkProfile } from "./framework";
-import { expandSkillGroups } from "./skills-catalog";
+import {
+  type CapabilityId,
+  type CapabilityScope,
+  createCapabilityProfile,
+  getCapabilityFiles,
+  getCapabilitySkills,
+} from "./capabilities";
 import { generateAgents, generateFramework } from "./templates";
 
 export type Tool = "claude-code" | "gemini-cli";
-export type Scope = "local" | "global";
+export type Scope = CapabilityScope;
 
 export interface InstallFile {
   path: string;
@@ -30,8 +34,8 @@ const FRAMEWORK_REFERENCE_SENTENCE =
 const LEGACY_AIRCURY_AGENTS_SENTENCE =
   "All agents contributing to this repository MUST read and apply FRAMEWORK.md before doing any work. It is not optional and it is not advisory.";
 
-function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
-  const files: InstallFile[] = [
+function getBaseFiles(): InstallFile[] {
+  return [
     {
       path: "specs/features/README.md",
       content: `# Living Specifications
@@ -45,70 +49,40 @@ function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
       description: "Living specs starter guide",
     },
   ];
-
-  if (moduleIds.includes("decision-records")) {
-    files.push({
-      path: "specs/decisions/README.md",
-      content: `# Architecture Decision Records
-
-\`specs/decisions/\` stores ADRs that preserve architectural and workflow intent.
-
-- Create a new ADR when a material decision is introduced or superseded.
-- Reference the superseded ADR instead of rewriting history.
-- Read relevant ADRs before changing areas they govern.
-`,
-      description: "ADR starter guide",
-    });
-  }
-
-  if (moduleIds.includes("frontend")) {
-    files.push({
-      path: "specs/ui/README.md",
-      content: `# Frontend Design System
-
-\`specs/ui/\` stores the project's living style guide and UI design tokens.
-
-- \`style-guide.md\`: The canonical source of truth for design tokens and UI patterns.
-- Update the style guide whenever new tokens or patterns are identified.
-`,
-      description: "Frontend design system starter guide",
-    });
-  }
-
-  return files;
 }
 
 export function getLocalFiles(
   tools: Tool[],
-  moduleIds?: StandardModuleSelection[],
+  capabilityIds?: CapabilityId[],
   options?: InstallOptions,
 ): InstallFile[] {
-  const profile = createFrameworkProfile(moduleIds, {
+  const profile = createCapabilityProfile(capabilityIds, {
     britishEnglish: options?.britishEnglish,
   });
   const files: InstallFile[] = [
     {
       path: "FRAMEWORK.md",
-      content: generateFramework(profile.modules, options),
+      content: generateFramework(profile.capabilities, options),
       description: "Framework rules (source of truth)",
     },
     {
       path: "AGENTS.md",
-      content: generateAgents(profile.modules, options),
+      content: generateAgents(profile.capabilities, options),
       description: "Agent instructions (standard convention)",
     },
     {
       path: ".aircury/framework.config.json",
       content: `${JSON.stringify(profile, null, 2)}\n`,
-      description: "Installed standards profile",
+      description: "Installed capability profile",
     },
-    ...getSpecsFiles(profile.modules),
+    ...getBaseFiles(),
+    ...getCapabilityFiles(profile.capabilities, "local"),
   ];
 
   if (tools.includes("claude-code")) {
     files.push({
       path: "CLAUDE.md",
-      content: generateAgents(profile.modules, options),
+      content: generateAgents(profile.capabilities, options),
       description: "Agent instructions for Claude Code",
     });
   }
@@ -116,7 +90,7 @@ export function getLocalFiles(
   if (tools.includes("gemini-cli")) {
     files.push({
       path: "GEMINI.md",
-      content: generateAgents(profile.modules, options),
+      content: generateAgents(profile.capabilities, options),
       description: "Agent instructions for Gemini CLI",
     });
   }
@@ -174,15 +148,15 @@ function buildSkillsAddCommand(
   };
 }
 
-function buildSkillsCommands(
-  selectedSkillGroupIds: string[],
+function buildCapabilityCommands(
+  selectedCapabilityIds: CapabilityId[],
   agents: string[],
+  scope: CapabilityScope,
   isGlobal: boolean,
 ): InstallCommand[] {
   if (agents.length === 0) return [];
 
-  const scope: "local" | "global" = isGlobal ? "global" : "local";
-  const skills = expandSkillGroups(selectedSkillGroupIds, scope);
+  const skills = getCapabilitySkills(selectedCapabilityIds, scope);
   const skillsBySource = new Map<string, string[]>();
 
   for (const skill of skills) {
@@ -201,22 +175,24 @@ function buildSkillsCommands(
 
 export function getLocalCommands(
   tools: Tool[],
-  selectedSkillGroupIds: string[],
+  capabilityIds: CapabilityId[],
 ): InstallCommand[] {
-  return buildSkillsCommands(
-    selectedSkillGroupIds,
+  return buildCapabilityCommands(
+    capabilityIds,
     getLocalSkillAgents(tools),
+    "local",
     false,
   );
 }
 
 export function getGlobalCommands(
   tools: Tool[],
-  selectedSkillGroupIds: string[],
+  capabilityIds: CapabilityId[],
 ): InstallCommand[] {
-  return buildSkillsCommands(
-    selectedSkillGroupIds,
+  return buildCapabilityCommands(
+    capabilityIds,
     getGlobalSkillAgents(tools),
+    "global",
     true,
   );
 }

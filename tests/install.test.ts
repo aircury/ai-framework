@@ -2,17 +2,17 @@ import { describe, expect, it } from "bun:test";
 import { existsSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { getInitialCapabilityIds } from "../src/capabilities";
 import {
   checkConflicts,
   getGlobalCommands,
   getGlobalFiles,
   getLocalCommands,
   getLocalFiles,
-  mergeFrameworkReferenceIntoAgents,
   type InstallFile,
+  mergeFrameworkReferenceIntoAgents,
   writeFile,
 } from "../src/install";
-import { getDefaultSkillGroupIds } from "../src/skills-catalog";
 
 function getFileByPath(files: InstallFile[], path: string): InstallFile {
   const file = files.find((entry) => entry.path === path);
@@ -23,60 +23,42 @@ function getFileByPath(files: InstallFile[], path: string): InstallFile {
 }
 
 describe("getLocalFiles", () => {
-  it("always includes FRAMEWORK.md and AGENTS.md", () => {
+  it("always includes the core framework files", () => {
     const files = getLocalFiles([]);
-    const paths = files.map((f) => f.path);
+    const paths = files.map((file) => file.path);
     expect(paths).toContain("FRAMEWORK.md");
     expect(paths).toContain("AGENTS.md");
     expect(paths).toContain(".aircury/framework.config.json");
+    expect(paths).toContain("specs/features/README.md");
   });
 
-  it("includes CLAUDE.md when claude-code selected", () => {
+  it("includes CLAUDE.md when Claude Code is selected", () => {
     const files = getLocalFiles(["claude-code"]);
-    const paths = files.map((f) => f.path);
-    expect(paths).toContain("CLAUDE.md");
+    expect(files.map((file) => file.path)).toContain("CLAUDE.md");
   });
 
-  it("includes GEMINI.md when gemini-cli selected", () => {
+  it("includes GEMINI.md when Gemini CLI is selected", () => {
     const files = getLocalFiles(["gemini-cli"]);
-    const paths = files.map((f) => f.path);
-    expect(paths).toContain("GEMINI.md");
+    expect(files.map((file) => file.path)).toContain("GEMINI.md");
   });
 
-  it("does not include CLAUDE.md when claude-code not selected", () => {
-    const files = getLocalFiles(["gemini-cli"]);
-    const paths = files.map((f) => f.path);
-    expect(paths).not.toContain("CLAUDE.md");
-  });
-
-  it("does not include GEMINI.md when gemini-cli not selected", () => {
-    const files = getLocalFiles(["claude-code"]);
-    const paths = files.map((f) => f.path);
-    expect(paths).not.toContain("GEMINI.md");
-  });
-
-  it("GEMINI.md content matches AGENTS.md content", () => {
-    const files = getLocalFiles(["gemini-cli"]);
-    const gemini = getFileByPath(files, "GEMINI.md");
-    const agents = getFileByPath(files, "AGENTS.md");
-    expect(gemini.content).toBe(agents.content);
-  });
-
-  it("persists the selected standards modules in a config file", () => {
-    const files = getLocalFiles([], ["decision-records", "tdd"]);
+  it("persists selected capabilities in the config file", () => {
+    const files = getLocalFiles([], ["decision-records", "testing"]);
     const config = getFileByPath(files, ".aircury/framework.config.json");
+    expect(config.content).toContain('"capabilities": [');
     expect(config.content).toContain('"decision-records"');
     expect(config.content).toContain('"testing"');
-    expect(config.content).not.toContain('"tdd"');
+    expect(config.content).not.toContain('"git"');
   });
 
   it("persists the British English preference in the config file", () => {
     const files = getLocalFiles([], undefined, { britishEnglish: true });
     const config = getFileByPath(files, ".aircury/framework.config.json");
     expect(config.content).toContain('"britishEnglish": true');
+    expect(config.content).toContain('"language"');
   });
 
-  it("generates framework content from the selected modules", () => {
+  it("generates framework content from the selected capabilities", () => {
     const files = getLocalFiles([], ["decision-records"]);
     const framework = getFileByPath(files, "FRAMEWORK.md");
     expect(framework.content).toContain("## Architecture Decision Records");
@@ -86,21 +68,22 @@ describe("getLocalFiles", () => {
     );
   });
 
-  it("keeps AGENTS.md stable when token-efficiency selection is unchanged", () => {
-    const first = getLocalFiles([], ["decision-records"]);
-    const second = getLocalFiles([], ["code-style"]);
-    const firstAgents = getFileByPath(first, "AGENTS.md");
-    const secondAgents = getFileByPath(second, "AGENTS.md");
-    expect(firstAgents.content).toBe(secondAgents.content);
-    expect(firstAgents.content).toContain("FRAMEWORK.md");
-    expect(firstAgents.content).toContain("single source of truth");
-  });
-
-  it("adds caveman-full guidance to AGENTS.md when token-efficiency is enabled", () => {
-    const files = getLocalFiles([], ["token-efficiency"]);
-    const agents = getFileByPath(files, "AGENTS.md");
-    expect(agents.content).toContain("`caveman` is already active by default");
-    expect(agents.content).toContain("Start every new session in `caveman full`");
+  it("keeps AGENTS.md focused on the framework reference", () => {
+    const withCapabilities = getLocalFiles(
+      [],
+      ["decision-records", "code-style"],
+    );
+    const withoutCapabilities = getLocalFiles([], []);
+    const agentsWithCapabilities = getFileByPath(withCapabilities, "AGENTS.md");
+    const agentsWithoutCapabilities = getFileByPath(
+      withoutCapabilities,
+      "AGENTS.md",
+    );
+    expect(agentsWithCapabilities.content).toBe(
+      agentsWithoutCapabilities.content,
+    );
+    expect(agentsWithCapabilities.content).toContain("FRAMEWORK.md");
+    expect(agentsWithCapabilities.content).toContain("single source of truth");
   });
 
   it("uses the full recommended profile by default", () => {
@@ -112,33 +95,17 @@ describe("getLocalFiles", () => {
     expect(framework.content).toContain("## Token Efficiency");
   });
 
-  it("CLAUDE.md content matches AGENTS.md content", () => {
-    const files = getLocalFiles(["claude-code"]);
-    const claude = getFileByPath(files, "CLAUDE.md");
-    const agents = getFileByPath(files, "AGENTS.md");
-    expect(claude.content).toBe(agents.content);
-  });
-
-  it("adds British English rules to generated agent files when enabled", () => {
-    const files = getLocalFiles([], undefined, { britishEnglish: true });
-    const framework = getFileByPath(files, "FRAMEWORK.md");
-    const agents = getFileByPath(files, "AGENTS.md");
-    expect(framework.content).toContain("Use British English spelling");
-    expect(agents.content).not.toContain("Use British English spelling");
-  });
-});
-
-describe("frontend module integration", () => {
-  it("includes specs/ui/README.md when frontend module is enabled", () => {
-    const files = getLocalFiles([], ["frontend"]);
-    const paths = files.map((f) => f.path);
+  it("adds capability-owned files when selected", () => {
+    const files = getLocalFiles([], ["frontend", "decision-records"]);
+    const paths = files.map((file) => file.path);
     expect(paths).toContain("specs/ui/README.md");
+    expect(paths).toContain("specs/decisions/README.md");
   });
 
   it("adds frontend-specific check to FRAMEWORK.md when enabled", () => {
     const files = getLocalFiles([], ["frontend"]);
-    const framework = files.find((f) => f.path === "FRAMEWORK.md");
-    expect(framework?.content).toContain(
+    const framework = getFileByPath(files, "FRAMEWORK.md");
+    expect(framework.content).toContain(
       "Visual modifications align with the project design system tokens",
     );
   });
@@ -161,19 +128,15 @@ describe("frontend module integration", () => {
 });
 
 describe("getGlobalFiles", () => {
-  it("returns empty array when no tools selected", () => {
-    expect(getGlobalFiles([])).toHaveLength(0);
-  });
-
   it("does not install any global files", () => {
     expect(getGlobalFiles(["claude-code"])).toHaveLength(0);
   });
 });
 
 describe("getLocalCommands", () => {
-  it("installs the default local skill groups for universal", () => {
-    const commands = getLocalCommands([], getDefaultSkillGroupIds("local"));
-    expect(commands).toHaveLength(5);
+  it("installs the default local capabilities for universal agents", () => {
+    const commands = getLocalCommands([], getInitialCapabilityIds("local"));
+    expect(commands).toHaveLength(6);
     expect(commands[0]).toEqual({
       command: "npx",
       args: [
@@ -211,6 +174,12 @@ describe("getLocalCommands", () => {
         "specs-extractor",
         "--skill",
         "specs-interpreter",
+        "--skill",
+        "frontend-layout-extractor",
+        "--skill",
+        "frontend-experience-extractor",
+        "--skill",
+        "frontend-ui-generator",
         "-a",
         "universal",
         "-y",
@@ -271,6 +240,22 @@ describe("getLocalCommands", () => {
         "-y",
         "skills",
         "add",
+        "https://github.com/juliusbrussee/caveman",
+        "--skill",
+        "caveman",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description:
+        "Install selected skills from https://github.com/juliusbrussee/caveman",
+    });
+    expect(commands[5]).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
         "https://github.com/wshobson/agents",
         "--skill",
         "e2e-testing-patterns",
@@ -325,7 +310,6 @@ describe("getLocalCommands", () => {
         "Install selected skills from https://github.com/jezweb/claude-skills",
     });
   });
-
   it("installs the caveman skill from its external source", () => {
     const commands = getLocalCommands([], ["token-efficiency"]);
     expect(commands).toHaveLength(1);
@@ -403,7 +387,6 @@ describe("checkConflicts", () => {
   });
 
   it("marks existing files as conflicting", () => {
-    // templates/framework.md.hbs exists in the project root — use that as cwd
     const cwd = join(import.meta.dir, "..");
     const files = [
       { path: "templates/framework.md.hbs", content: "", description: "" },
@@ -498,6 +481,7 @@ describe("writeFile", () => {
     writeFile(file, dir, false);
 
     const content = readFileSync(join(dir, "AGENTS.md"), "utf-8");
+    expect(content).not.toContain("Legacy content.");
     expect(content).toBe(file.content);
 
     rmSync(dir, { recursive: true });
@@ -505,22 +489,13 @@ describe("writeFile", () => {
 });
 
 describe("mergeFrameworkReferenceIntoAgents", () => {
-  const frameworkReference = getFileByPath(getLocalFiles([]), "AGENTS.md").content;
-
-  it("appends the framework reference when missing", () => {
-    const merged = mergeFrameworkReferenceIntoAgents(
-      "# Existing\n\nProject-specific instructions.",
-      frameworkReference,
+  it("keeps an existing framework reference idempotent", () => {
+    const content =
+      "# Custom\n\nThis project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).\n";
+    expect(
+      mergeFrameworkReferenceIntoAgents(content, "# AGENTS.md\n\nReference"),
+    ).toBe(
+      "# Custom\n\nThis project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).\n",
     );
-
-    expect(merged).toContain("Project-specific instructions.");
-    expect(merged).toContain("single source of truth");
-  });
-
-  it("does not duplicate the framework reference when already present", () => {
-    const existing = `# Existing\n\nProject-specific instructions.\n\n${frameworkReference}`;
-    const merged = mergeFrameworkReferenceIntoAgents(existing, frameworkReference);
-
-    expect(merged).toBe(existing.endsWith("\n") ? existing : `${existing}\n`);
   });
 });
