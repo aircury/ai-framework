@@ -118,6 +118,8 @@ The installer exposes grouped skill bundles and expands them into concrete `npx 
 
 All skills write ephemeral working artifacts to `specs/changes/<name>/` and sync canonical output to `specs/features/` on completion.
 
+The default local and global skill selections include the `specs` group, so fresh installs also add `specs-extractor` and `specs-interpreter` unless the user explicitly deselects them.
+
 Curated external skills can be added to the static catalog and will appear in the same multiselect UI alongside the built-in Aircury groups.
 
 When the local `token-efficiency` standards module is enabled, the installer also preselects the `token-efficiency` skill group and adds project rules that keep sessions terse by default. This is intentionally project-scoped: it uses generated agent instruction files plus the `caveman` skill, and does not install any global shell hooks.
