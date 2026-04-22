@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/@aircury/ai-framework)](https://www.npmjs.com/package/@aircury/ai-framework)
 
-The Aircury AI Framework is a meta-framework for AI-assisted software engineering. It defines how AI agents should think, plan, and deliver code across all Aircury projects while separating a shared workflow constitution from optional engineering standards modules.
+The Aircury AI Framework is a meta-framework for AI-assisted software engineering. It defines how AI agents should think, plan, and deliver code across all Aircury projects while separating a shared workflow constitution from installable capabilities.
 
 For most tasks, no workflow framework is needed at all. If a change is well-understood and clearly scoped, `plan-build` — the default mode — is sufficient: describe the task, let the agent plan and implement it. Adding structured workflows to a simple, clear task is overkill.
 
@@ -38,7 +38,7 @@ Used alone, each framework has a gap:
 Beyond routing, this framework provides two layers:
 
 - **Core workflow constitution** — meta-agent routing, living specs, and the rule that all workflow modes converge on `specs/features/`.
-- **Installable standards modules** — optional rulesets that teams can enable or disable during installation.
+- **Installable capabilities** — selectable bundles that can add project rules, starter files, and installable skills.
 
 The default profile enables:
 
@@ -56,7 +56,7 @@ The result is an agent that knows not just *how* to work, but *what to protect* 
 
 ## Installation
 
-Run the installer from any project directory. The global mode installs skills globally for supported agents; the local mode installs repository files plus project-scoped skills:
+Run the installer from any project directory (or your home directory for a global setup):
 
 ```bash
 bunx @aircury/ai-framework
@@ -66,73 +66,71 @@ npx @aircury/ai-framework
 
 The interactive TUI will ask:
 
-1. **Scope** — `Local` to install project files and project-scoped skills, `Global` to install skills globally for `universal` plus any selected agent-specific integrations.
-2. **AI tools** — select the tool-specific integrations you want. In global mode these are optional extra agent targets on top of `universal`.
-3. **Standards modules** — for local installs, choose which optional standards this project should enforce.
-4. **Skill groups** — choose which grouped workflows to install through `npx skills add`.
+1. **Scope** — `Local` to configure the current project, `Global` to configure your machine.
+2. **AI tools** — select the tool-specific integrations you want.
+3. **Language preference** — for local installs, optionally enforce British English and include the language capability.
+4. **Capabilities** — choose the workflows and standards this installation should include.
 
-For local installs, the installer writes all required configuration files, starter spec folders, and agent instructions to the project root. Global installs do not write framework files; they only install the selected skills through the standard `npx skills add ... -g` flow so they remain tracked by the skills ecosystem and can be updated later with `npx skills update`. Skill installation is driven by a static catalog in `src/skills-catalog.ts`, so Aircury and curated external skills can be selected through the same interactive flow. If local files already exist you can choose to skip them or overwrite them.
+The installer writes all required configuration files, starter spec folders, and agent instructions to the right locations for each tool. Skills are installed through the standard `npx skills add ...` flow so they remain tracked by the skills ecosystem and can be updated later with `npx skills update`. Capability installation is driven by a single catalog in `src/capabilities.ts`, so project rules and installable skills are selected through the same flow. If files already exist you can choose to skip them or overwrite them.
 
 ### What gets installed
 
 | Scope | Installed outputs |
 |-------|-------------------|
 | Local | `FRAMEWORK.md`, `AGENTS.md`, `.aircury/framework.config.json`, `specs/features/README.md`, optional `specs/decisions/README.md`, plus selected tool-specific files; skills installed via `npx skills` |
-| Global | Skills installed globally via `npx skills add ... -g` for `universal` plus any selected agent-specific integrations |
+| Global | Skills installed via `npx skills` for the selected agents |
 
-### Standards modules
+### Capabilities
 
-Local installs persist the selected modules in `.aircury/framework.config.json`.
-Each module is a small content package with machine-readable metadata plus document fragments, and the final `FRAMEWORK.md` / `AGENTS.md` files are rendered from dedicated templates.
+Local installs persist the selected capabilities in `.aircury/framework.config.json`.
+Each capability can contribute machine-readable metadata, framework and agent content, starter files, and installable skills. The final `FRAMEWORK.md` and `AGENTS.md` files are rendered from dedicated templates.
 
-The context hierarchy is intentional:
+Representative built-in capabilities:
 
-- `AGENTS.md` is the short session bootstrap checklist.
-- `FRAMEWORK.md` contains the governing workflow and standards rules.
-- `specs/features/` is the canonical source of behavioral truth.
-- `specs/decisions/` records governing architectural intent.
-- `specs/ui/` holds frontend design-system references when the frontend module is enabled.
-- Skills are execution helpers, not the source of truth.
-
-Current built-in modules:
-
+- `open-spec`
+- `spec-kit`
+- `airsync`
+- `git`
 - `decision-records`
 - `testing`
 - `hexagonal-architecture`
 - `ddd`
+- `frontend`
 - `token-efficiency`
+- `resilience`
 
-The installer and template generation are registry-driven, so adding a new standards module only requires:
+The installer and template generation are registry-driven, so adding a new capability only requires:
 
-- adding its manifest and content fragments under `standards/modules/<module-id>/`
-- wiring it into the registry
-- letting the renderer compose it through the shared templates
+- defining it in `src/capabilities.ts`
+- adding any content fragments and starter files it needs
+- letting the renderer and installer compose it through the shared plan
 
 ---
 
-## Skill groups
+## Capability Model
 
-The installer exposes grouped skill bundles and expands them into concrete `npx skills add <source> --skill ...` commands at install time.
+Each capability can do one or more of the following:
 
-| Group | Skills | Source |
-|-------|--------|--------|
-| `open-spec` | `propose`, `apply`, `complete`, `explore` | `aircury/ai-framework` |
-| `spec-kit` | `specify`, `clarify`, `plan`, `analyse`, `tasks`, `implement`, `checklist` | `aircury/ai-framework` |
-| `airsync` | `airsync` | `aircury/ai-framework` |
-| `git` | `commit-changes` | `aircury/ai-framework` |
-| `testing` | `e2e-testing-patterns`, `playwright-best-practices` | mixed external sources |
-| `architecture` | `clean-ddd-hexagonal` | `https://github.com/ccheney/robust-skills` |
-| `specs` | `specs-extractor`, `specs-interpreter` | `aircury/ai-framework` |
-| `token-efficiency` | `caveman` | `https://github.com/juliusbrussee/caveman` |
+- add sections to `FRAMEWORK.md`
+- add rules to `AGENTS.md`
+- create starter files such as `specs/ui/README.md`
+- install one or more skills through `npx skills add <source> --skill ...`
+
+Examples:
+
+- `frontend` adds frontend-specific rules, writes `specs/ui/README.md`, and installs `frontend-layout-extractor`, `frontend-experience-extractor`, and `frontend-ui-generator`.
+- `token-efficiency` adds terse-response rules and installs `caveman`.
+- `architecture` installs `clean-ddd-hexagonal` from `https://github.com/ccheney/robust-skills`.
+- `specs` installs `specs-extractor` and `specs-interpreter` from `aircury/ai-framework`.
+- `open-spec` and `spec-kit` are workflow capabilities that mainly install skills rather than change project files directly.
 
 All skills write ephemeral working artifacts to `specs/changes/<name>/` and sync canonical output to `specs/features/` on completion.
 
-The default local and global skill selections include the `specs` group, so fresh installs also add `specs-extractor` and `specs-interpreter` unless the user explicitly deselects them.
+The default local and global capability selections include `specs`, so fresh installs also add `specs-extractor` and `specs-interpreter` unless the user explicitly deselects that capability.
 
-Curated external skills can be added to the static catalog and will appear in the same multiselect UI alongside the built-in Aircury groups.
+Curated external skills can be added to the capability catalog and will appear in the same multiselect flow alongside built-in Aircury capabilities.
 
-When the local `token-efficiency` standards module is enabled, the installer also preselects the `token-efficiency` skill group and adds project rules that make `caveman` available without enabling it automatically. To activate terse mode for the current session, the user can explicitly say `caveman full`. This is intentionally project-scoped: it uses generated agent instruction files plus the `caveman` skill, and does not install any global shell hooks.
-
+When the local `token-efficiency` capability is enabled, the installer also adds project rules that start each new session in `caveman full` while keeping responses terse by default. This is intentionally project-scoped: it uses generated agent instruction files plus the `caveman` skill, and does not install any global shell hooks.
 ---
 
 ## Supported workflow modes
