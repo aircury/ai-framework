@@ -32,7 +32,7 @@ describe("framework modules", () => {
     );
     expect(getStandardModuleById("testing").agents).toContain("Vitest");
     expect(getStandardModuleById("token-efficiency").agents).toContain(
-      "Load and apply the `caveman` skill",
+      "Load and apply the `caveman` skill in `full` mode",
     );
   });
 

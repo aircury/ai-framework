@@ -122,7 +122,7 @@ The default local and global skill selections include the `specs` group, so fres
 
 Curated external skills can be added to the static catalog and will appear in the same multiselect UI alongside the built-in Aircury groups.
 
-When the local `token-efficiency` standards module is enabled, the installer also preselects the `token-efficiency` skill group and adds project rules that keep sessions terse by default. This is intentionally project-scoped: it uses generated agent instruction files plus the `caveman` skill, and does not install any global shell hooks.
+When the local `token-efficiency` standards module is enabled, the installer also preselects the `token-efficiency` skill group and adds project rules that start each new session in `caveman full` while keeping responses terse by default. This is intentionally project-scoped: it uses generated agent instruction files plus the `caveman` skill, and does not install any global shell hooks.
 
 ---
 

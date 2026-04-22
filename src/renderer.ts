@@ -20,6 +20,7 @@ interface RendererViewModel {
   includesErrorHandling: boolean;
   includesStructuredLogging: boolean;
   includesFrontend: boolean;
+  includesTokenEfficiency: boolean;
   enforceBritishEnglish: boolean;
 }
 
@@ -55,6 +56,7 @@ function createViewModel(
     includesErrorHandling: selectedIds.has("error-handling"),
     includesStructuredLogging: selectedIds.has("structured-logging"),
     includesFrontend: selectedIds.has("frontend"),
+    includesTokenEfficiency: selectedIds.has("token-efficiency"),
     enforceBritishEnglish: options?.britishEnglish ?? false,
   };
 }

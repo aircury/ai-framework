@@ -86,14 +86,21 @@ describe("getLocalFiles", () => {
     );
   });
 
-  it("keeps AGENTS.md focused on the framework reference", () => {
-    const withModules = getLocalFiles([], ["decision-records", "code-style"]);
-    const withoutModules = getLocalFiles([], []);
-    const agentsWithModules = getFileByPath(withModules, "AGENTS.md");
-    const agentsWithoutModules = getFileByPath(withoutModules, "AGENTS.md");
-    expect(agentsWithModules.content).toBe(agentsWithoutModules.content);
-    expect(agentsWithModules.content).toContain("FRAMEWORK.md");
-    expect(agentsWithModules.content).toContain("single source of truth");
+  it("keeps AGENTS.md stable when token-efficiency selection is unchanged", () => {
+    const first = getLocalFiles([], ["decision-records"]);
+    const second = getLocalFiles([], ["code-style"]);
+    const firstAgents = getFileByPath(first, "AGENTS.md");
+    const secondAgents = getFileByPath(second, "AGENTS.md");
+    expect(firstAgents.content).toBe(secondAgents.content);
+    expect(firstAgents.content).toContain("FRAMEWORK.md");
+    expect(firstAgents.content).toContain("single source of truth");
+  });
+
+  it("adds caveman-full guidance to AGENTS.md when token-efficiency is enabled", () => {
+    const files = getLocalFiles([], ["token-efficiency"]);
+    const agents = getFileByPath(files, "AGENTS.md");
+    expect(agents.content).toContain("`caveman` is already active by default");
+    expect(agents.content).toContain("Start every new session in `caveman full`");
   });
 
   it("uses the full recommended profile by default", () => {
@@ -145,7 +152,9 @@ describe("frontend module integration", () => {
   it("includes terse-response guidance in FRAMEWORK.md when token-efficiency is enabled", () => {
     const files = getLocalFiles([], ["token-efficiency"]);
     const framework = getFileByPath(files, "FRAMEWORK.md");
-    expect(framework.content).toContain("Load and apply the `caveman` skill");
+    expect(framework.content).toContain(
+      "Load and apply the `caveman` skill in `full` mode",
+    );
     expect(framework.content).toContain("ACTIVE EVERY RESPONSE");
     expect(framework.content).toContain("stop caveman");
   });
