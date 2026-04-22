@@ -333,6 +333,28 @@ describe("getLocalCommands", () => {
         "Install selected skills from https://github.com/juliusbrussee/caveman",
     });
   });
+
+  it("installs the specs skills from the Aircury source", () => {
+    const commands = getLocalCommands([], ["specs"]);
+    expect(commands).toHaveLength(1);
+    expect(commands[0]).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "aircury/ai-framework",
+        "--skill",
+        "specs-extractor",
+        "--skill",
+        "specs-interpreter",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description: "Install selected skills from aircury/ai-framework",
+    });
+  });
 });
 
 describe("getGlobalCommands", () => {

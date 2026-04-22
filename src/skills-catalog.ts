@@ -101,6 +101,15 @@ export const SKILL_GROUPS: SkillGroup[] = [
     scopes: ["local", "global"],
   },
   {
+    id: "specs",
+    label: "Specs",
+    description:
+      "Skills for extracting authoritative specs and designing re-implementations from them",
+    kind: "aircury",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+  },
+  {
     id: "token-efficiency",
     label: "Token Efficiency",
     description:
@@ -316,6 +325,26 @@ export const SKILLS: SkillDefinition[] = [
     source: "aircury/ai-framework",
     skillName: "frontend-ui-generator",
     groupId: "frontend",
+    scopes: ["local", "global"],
+  },
+  {
+    id: "specs-extractor",
+    label: "Specs Extractor",
+    description:
+      "Extract exact, behavior-first specifications from an existing codebase",
+    source: "aircury/ai-framework",
+    skillName: "specs-extractor",
+    groupId: "specs",
+    scopes: ["local", "global"],
+  },
+  {
+    id: "specs-interpreter",
+    label: "Specs Interpreter",
+    description:
+      "Interpret authoritative specs and help design a new implementation collaboratively",
+    source: "aircury/ai-framework",
+    skillName: "specs-interpreter",
+    groupId: "specs",
     scopes: ["local", "global"],
   },
   {

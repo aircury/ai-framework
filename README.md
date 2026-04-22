@@ -113,6 +113,7 @@ The installer exposes grouped skill bundles and expands them into concrete `npx 
 | `git` | `commit-changes` | `aircury/ai-framework` |
 | `testing` | `e2e-testing-patterns`, `playwright-best-practices` | mixed external sources |
 | `architecture` | `clean-ddd-hexagonal` | `https://github.com/ccheney/robust-skills` |
+| `specs` | `specs-extractor`, `specs-interpreter` | `aircury/ai-framework` |
 | `token-efficiency` | `caveman` | `https://github.com/juliusbrussee/caveman` |
 
 All skills write ephemeral working artifacts to `specs/changes/<name>/` and sync canonical output to `specs/features/` on completion.
