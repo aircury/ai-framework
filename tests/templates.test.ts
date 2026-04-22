@@ -17,7 +17,6 @@ describe("templates", () => {
 
     it("contains core framework sections", () => {
       expect(FRAMEWORK).toContain("## Core Workflow Constitution");
-      expect(FRAMEWORK).toContain("## Agent Operating Rules");
       expect(FRAMEWORK).toContain("## Definition of Done");
       expect(FRAMEWORK).toContain("## Workflow Framework");
       expect(FRAMEWORK).toContain("### Mode execution rules");
@@ -27,9 +26,6 @@ describe("templates", () => {
       expect(generateFramework()).toBe(FRAMEWORK);
       expect(renderFramework()).toBe(FRAMEWORK);
       expect(FRAMEWORK).toContain("## Token Efficiency");
-      expect(FRAMEWORK.indexOf("## Agent Operating Rules")).toBeLessThan(
-        FRAMEWORK.indexOf("## Installed Standards Modules"),
-      );
     });
   });
 
@@ -41,10 +37,7 @@ describe("templates", () => {
 
     it("references FRAMEWORK.md", () => {
       expect(AGENTS).toContain("FRAMEWORK.md");
-      expect(AGENTS).toContain("## Session Checklist");
-      expect(AGENTS).toContain("## Context Hierarchy");
-      expect(AGENTS).toContain("specs/features/");
-      expect(AGENTS).toContain("workflow mode");
+      expect(AGENTS).toContain("single source of truth");
       expect(AGENTS).not.toContain(
         "Selecting `plan-build` authorises planning first, not automatic implementation.",
       );
@@ -53,10 +46,8 @@ describe("templates", () => {
     it("matches the generated default profile", () => {
       expect(generateAgents()).toBe(AGENTS);
       expect(renderAgents()).toBe(AGENTS);
-      expect(AGENTS).toContain(
-        "the `caveman` skill is available but not enabled automatically",
-      );
-      expect(AGENTS).toContain("activate it explicitly with `caveman full`");
+      expect(AGENTS).toContain("`caveman` is already active by default");
+      expect(AGENTS).toContain("Start every new session in `caveman full`");
     });
   });
 
@@ -78,8 +69,8 @@ describe("templates", () => {
     });
   });
 
-  describe("module-aware generation", () => {
-    it("adds ADR guidance only when the ADR module is enabled", () => {
+  describe("capability-aware generation", () => {
+    it("adds ADR guidance only when the ADR capability is enabled", () => {
       expect(generateFramework(["decision-records"])).toContain(
         "## Architecture Decision Records",
       );
@@ -88,13 +79,12 @@ describe("templates", () => {
       );
     });
 
-    it("adds testing guidance only when the testing module is enabled", () => {
+    it("adds testing guidance only when the testing capability is enabled", () => {
       expect(generateFramework(["testing"])).toContain("## TDD Workflow");
-      expect(generateFramework(["tdd"])).toContain("## TDD Workflow");
       expect(generateFramework([])).not.toContain("## TDD Workflow");
     });
 
-    it("adds architecture rules only when architecture modules are enabled", () => {
+    it("adds architecture rules only when architecture capabilities are enabled", () => {
       expect(generateFramework(["hexagonal-architecture", "ddd"])).toContain(
         "## Non-Negotiable Architecture Rules",
       );
@@ -103,25 +93,9 @@ describe("templates", () => {
       );
     });
 
-    it("keeps AGENTS.md stable across non-token-efficiency module selections", () => {
-      expect(generateAgents(["decision-records"])).toBe(
-        generateAgents(["code-style"]),
-      );
-      expect(generateAgents(["decision-records", "frontend"])).toBe(
-        generateAgents(["code-style", "frontend"]),
-      );
-    });
-
-    it("adds token-efficiency guidance to AGENTS.md only when the module is enabled", () => {
-      expect(generateAgents(["token-efficiency"])).toContain(
-        "activate it explicitly with `caveman full`",
-      );
-      expect(generateAgents()).toContain(
-        "activate it explicitly with `caveman full`",
-      );
-      expect(generateAgents(["decision-records"])).not.toContain(
-        "activate it explicitly with `caveman full`",
-      );
+    it("keeps AGENTS.md stable across capability selections", () => {
+      expect(generateAgents(["decision-records"])).toBe(generateAgents([]));
+      expect(generateAgents(["code-style"])).toBe(generateAgents([]));
     });
 
     it("adds code style header to FRAMEWORK.md when enabled", () => {
@@ -141,16 +115,16 @@ describe("templates", () => {
       );
     });
 
-    it("adds token-efficiency guidance only when the module is enabled", () => {
+    it("adds token-efficiency guidance only when the capability is enabled", () => {
       expect(generateFramework(["token-efficiency"])).toContain(
         "## Token Efficiency",
       );
       expect(generateFramework(["token-efficiency"])).toContain(
-        "activate `caveman` explicitly with `caveman full`",
+        "Load and apply the `caveman` skill in `full` mode",
       );
       expect(generateFramework([])).not.toContain("## Token Efficiency");
       expect(generateFramework([])).not.toContain(
-        "activate `caveman` explicitly with `caveman full`",
+        "Load and apply the `caveman` skill in `full` mode",
       );
     });
   });

@@ -1,6 +1,13 @@
 import * as p from "@clack/prompts";
-import type { StandardModuleId } from "./framework";
-import { STANDARD_MODULES } from "./framework";
+import {
+  CAPABILITIES,
+  type CapabilityCategory,
+  type CapabilityId,
+  getCapabilities,
+  getCapabilitySkills,
+  getInitialCapabilityIds,
+  resolveCapabilityIds,
+} from "./capabilities";
 import type { Scope, Tool } from "./install";
 import {
   checkConflicts,
@@ -12,24 +19,28 @@ import {
   updateGitignore,
   writeFile,
 } from "./install";
-import {
-  expandSkillGroups,
-  getSkillGroups,
-  resolveSkillGroupIds,
-} from "./skills-catalog";
+
+function getCategoryTag(category: CapabilityCategory): string {
+  switch (category) {
+    case "workflow":
+      return "Workflow";
+    case "engineering":
+      return "Engineering";
+    case "frontend":
+      return "Frontend";
+    case "communication":
+      return "Communication";
+  }
+}
 
 export async function run(): Promise<void> {
   p.intro("Aircury AI Framework Installer");
 
   const scope = await p.select<Scope>({
-    message: "What do you want to install?",
+    message: "What do you want to configure?",
     options: [
       { value: "local", label: "Local", hint: "configure this project" },
-      {
-        value: "global",
-        label: "Global",
-        hint: "install skills for this machine",
-      },
+      { value: "global", label: "Global", hint: "configure this machine" },
     ],
   });
 
@@ -46,7 +57,7 @@ export async function run(): Promise<void> {
     ];
     p.note(
       universalTools.join(" · "),
-      "Universal agents supported through AGENTS.md and selected skills",
+      "Universal agents supported through AGENTS.md and selected capabilities",
     );
   }
 
@@ -56,7 +67,7 @@ export async function run(): Promise<void> {
           {
             value: "claude-code",
             label: "Claude Code",
-            hint: "installs global Claude skills",
+            hint: "installs ~/.claude/skills/",
           },
         ]
       : [
@@ -69,87 +80,104 @@ export async function run(): Promise<void> {
         ];
 
   const selectedTools = await p.multiselect<Tool>({
-    message:
-      scope === "global"
-        ? "Additional agent integrations — also install global agent-specific skills"
-        : "Additional tools — need tool-specific config",
+    message: "Additional tools",
     options: toolOptions,
-    initialValues: scope === "global" ? [] : toolOptions.map((o) => o.value),
+    initialValues: toolOptions.map((option) => option.value),
     required: false,
   });
 
   if (p.isCancel(selectedTools)) return p.cancel("Cancelled.");
 
-  let selectedModules: StandardModuleId[] | symbol = [];
   let enforceBritishEnglish = false;
+  if (scope === "local") {
+    const britishEnglish = await p.confirm({
+      message:
+        "Use British English in generated rules and include the language capability?",
+      initialValue: true,
+    });
 
-  selectedModules = await p.multiselect<StandardModuleId>({
-    message:
-      scope === "global"
-        ? "Capabilities — choose which global skill sets to install"
-        : "Capabilities — choose what this installation should enforce",
-    options: STANDARD_MODULES.map((module) => ({
-      value: module.id,
-      label: module.label,
-      hint: module.hint,
+    if (p.isCancel(britishEnglish)) return p.cancel("Cancelled.");
+    enforceBritishEnglish = britishEnglish;
+  }
+
+  const availableCapabilities = getCapabilities(scope);
+  const selectedCapabilities = await p.multiselect<CapabilityId>({
+    message: "Capabilities",
+    options: availableCapabilities.map((capability) => ({
+      value: capability.id,
+      label: `[${getCategoryTag(capability.category)}] ${capability.label}`,
+      hint: capability.hint,
     })),
-    initialValues: STANDARD_MODULES.filter(
-      (module) => module.defaultEnabled,
-    ).map((module) => module.id),
+    initialValues: getInitialCapabilityIds(scope, {
+      britishEnglish: enforceBritishEnglish,
+    }),
     required: false,
   });
 
-  if (p.isCancel(selectedModules)) return p.cancel("Cancelled.");
+  if (p.isCancel(selectedCapabilities)) return p.cancel("Cancelled.");
 
-  if (selectedModules.length === 0) {
+  const resolvedCapabilities = resolveCapabilityIds(
+    enforceBritishEnglish && !selectedCapabilities.includes("language")
+      ? [...selectedCapabilities, "language"]
+      : selectedCapabilities,
+  ).filter((capabilityId) =>
+    availableCapabilities.some((capability) => capability.id === capabilityId),
+  );
+
+  const implicitCapabilities = resolvedCapabilities.filter(
+    (capabilityId) => !selectedCapabilities.includes(capabilityId),
+  );
+
+  if (resolvedCapabilities.length === 0) {
     p.note(
-      scope === "global"
-        ? "Only the core workflow skills will be installed globally."
-        : "Only the core workflow constitution and skills will be installed. Optional capabilities can be re-enabled later by reinstalling or editing .aircury/framework.config.json.",
-      "No optional capabilities selected",
+      "Only the core framework files will be installed. You can enable capabilities later by rerunning the installer.",
+      "No capabilities selected",
     );
   }
-
-  const britishEnglish = await p.confirm({
-    message:
-      scope === "global"
-        ? "Install the UK business English skill globally?"
-        : "Enforce British English in generated rules and install the UK business English skill?",
-    initialValue: true,
-  });
-
-  if (p.isCancel(britishEnglish)) return p.cancel("Cancelled.");
-  enforceBritishEnglish = britishEnglish;
-
-  const skillScope = scope === "global" ? "global" : "local";
-  const selectedSkillGroups = resolveSkillGroupIds(skillScope, {
-    britishEnglish: enforceBritishEnglish,
-    moduleIds: selectedModules,
-  });
 
   const cwd = process.cwd();
   const isGlobal = scope === "global";
   const files = isGlobal
     ? getGlobalFiles(selectedTools)
-    : getLocalFiles(selectedTools, selectedModules, {
+    : getLocalFiles(selectedTools, resolvedCapabilities, {
         britishEnglish: enforceBritishEnglish,
       });
   const commands = isGlobal
-    ? getGlobalCommands(selectedTools, selectedModules, {
-        britishEnglish: enforceBritishEnglish,
-      })
-    : getLocalCommands(selectedTools, selectedModules, {
-        britishEnglish: enforceBritishEnglish,
-      });
-  const selectedSkills = expandSkillGroups(selectedSkillGroups, skillScope);
+    ? getGlobalCommands(selectedTools, resolvedCapabilities)
+    : getLocalCommands(selectedTools, resolvedCapabilities);
+  const selectedSkills = getCapabilitySkills(resolvedCapabilities, scope);
+  const selectedCapabilityEntries = CAPABILITIES.filter((capability) =>
+    resolvedCapabilities.includes(capability.id),
+  );
 
   if (files.length === 0 && commands.length === 0) {
     p.outro("Nothing to install.");
     return;
   }
 
+  if (selectedCapabilityEntries.length > 0) {
+    p.log.step(
+      `${selectedCapabilityEntries.length} capabilit${selectedCapabilityEntries.length === 1 ? "y" : "ies"} selected`,
+    );
+    for (const capability of selectedCapabilityEntries) {
+      p.log.info(
+        `${capability.label} (${getCategoryTag(capability.category).toLowerCase()})`,
+      );
+    }
+  }
+
+  if (implicitCapabilities.length > 0) {
+    p.log.step("Automatically included capabilities");
+    for (const capabilityId of implicitCapabilities) {
+      const capability = selectedCapabilityEntries.find(
+        (entry) => entry.id === capabilityId,
+      );
+      if (capability) p.log.info(`+ ${capability.label}`);
+    }
+  }
+
   const conflicts = checkConflicts(files, cwd, isGlobal);
-  const existingCount = conflicts.filter((c) => c.exists).length;
+  const existingCount = conflicts.filter((conflict) => conflict.exists).length;
 
   if (files.length > 0) {
     p.log.step(
@@ -160,23 +188,18 @@ export async function run(): Promise<void> {
     }
   }
 
-  if (commands.length > 0) {
-    p.log.step(
-      `${selectedSkillGroups.length} skill group${selectedSkillGroups.length > 1 ? "s" : ""} derived from selected capabilities`,
-    );
-    for (const group of getSkillGroups(skillScope).filter((entry) =>
-      selectedSkillGroups.includes(entry.id),
-    )) {
-      p.log.info(`# ${group.label}`);
-    }
+  if (selectedSkills.length > 0) {
     p.log.step(
       `${selectedSkills.length} skill${selectedSkills.length > 1 ? "s" : ""} will be installed`,
     );
     for (const skill of selectedSkills) {
       p.log.info(`- ${skill.skillName} (${skill.source})`);
     }
+  }
+
+  if (commands.length > 0) {
     p.log.step(
-      `${commands.length} skills command${commands.length > 1 ? "s" : ""} to run`,
+      `${commands.length} install command${commands.length > 1 ? "s" : ""} to run`,
     );
     for (const command of commands) {
       p.log.info(`> ${command.command} ${command.args.join(" ")}`);
@@ -258,7 +281,7 @@ export async function run(): Promise<void> {
     );
   if (executed > 0)
     p.log.success(
-      `${executed} skills command${executed > 1 ? "s" : ""} executed`,
+      `${executed} install command${executed > 1 ? "s" : ""} executed`,
     );
 
   if (!isGlobal) {

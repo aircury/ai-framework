@@ -1,25 +1,17 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import type { StandardModuleId, StandardModuleSelection } from "./framework";
-import { createFrameworkProfile, normaliseModuleIds } from "./framework";
-import decisionsReadme from "./install-content/specs/decisions/README.md" with {
-  type: "text",
-};
-import featuresReadme from "./install-content/specs/features/README.md" with {
-  type: "text",
-};
-import frontendWorkflow from "./install-content/specs/ui/frontend-workflow.md" with {
-  type: "text",
-};
-import uiReadme from "./install-content/specs/ui/README.md" with {
-  type: "text",
-};
-import { expandSkillGroups, resolveSkillGroupIds } from "./skills-catalog";
+import {
+  type CapabilityId,
+  type CapabilityScope,
+  createCapabilityProfile,
+  getCapabilityFiles,
+  getCapabilitySkills,
+} from "./capabilities";
 import { generateAgents, generateFramework } from "./templates";
 
 export type Tool = "claude-code" | "gemini-cli";
-export type Scope = "local" | "global";
+export type Scope = CapabilityScope;
 
 export interface InstallFile {
   path: string;
@@ -37,74 +29,60 @@ export interface InstallOptions {
   britishEnglish?: boolean;
 }
 
-const CURRENT_AIRCURY_AGENTS_MARKER = "## Session Checklist";
+const FRAMEWORK_REFERENCE_SENTENCE =
+  "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).";
 const LEGACY_AIRCURY_AGENTS_SENTENCE =
   "All agents contributing to this repository MUST read and apply FRAMEWORK.md before doing any work. It is not optional and it is not advisory.";
 
-function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
-  const files: InstallFile[] = [
+function getBaseFiles(): InstallFile[] {
+  return [
     {
       path: "specs/features/README.md",
-      content: featuresReadme,
+      content: `# Living Specifications
+
+\`specs/features/\` stores the canonical, technology-agnostic description of observable system behavior.
+
+- Create one folder per capability.
+- Keep \`spec.md\` focused on requirements and scenarios.
+- Update these specs whenever observable behavior changes.
+`,
       description: "Living specs starter guide",
     },
   ];
-
-  if (moduleIds.includes("decision-records")) {
-    files.push({
-      path: "specs/decisions/README.md",
-      content: decisionsReadme,
-      description: "ADR starter guide",
-    });
-  }
-
-  if (moduleIds.includes("frontend")) {
-    files.push({
-      path: "specs/ui/README.md",
-      content: uiReadme,
-      description: "Frontend design system starter guide",
-    });
-    files.push({
-      path: "specs/ui/frontend-workflow.md",
-      content: frontendWorkflow,
-      description: "Frontend workflow reference",
-    });
-  }
-
-  return files;
 }
 
 export function getLocalFiles(
   tools: Tool[],
-  moduleIds?: StandardModuleSelection[],
+  capabilityIds?: CapabilityId[],
   options?: InstallOptions,
 ): InstallFile[] {
-  const profile = createFrameworkProfile(moduleIds, {
+  const profile = createCapabilityProfile(capabilityIds, {
     britishEnglish: options?.britishEnglish,
   });
   const files: InstallFile[] = [
     {
       path: "FRAMEWORK.md",
-      content: generateFramework(profile.modules, options),
+      content: generateFramework(profile.capabilities, options),
       description: "Framework rules (source of truth)",
     },
     {
       path: "AGENTS.md",
-      content: generateAgents(profile.modules, options),
+      content: generateAgents(profile.capabilities, options),
       description: "Agent instructions (standard convention)",
     },
     {
       path: ".aircury/framework.config.json",
       content: `${JSON.stringify(profile, null, 2)}\n`,
-      description: "Installed standards profile",
+      description: "Installed capability profile",
     },
-    ...getSpecsFiles(profile.modules),
+    ...getBaseFiles(),
+    ...getCapabilityFiles(profile.capabilities, "local"),
   ];
 
   if (tools.includes("claude-code")) {
     files.push({
       path: "CLAUDE.md",
-      content: generateAgents(profile.modules, options),
+      content: generateAgents(profile.capabilities, options),
       description: "Agent instructions for Claude Code",
     });
   }
@@ -112,7 +90,7 @@ export function getLocalFiles(
   if (tools.includes("gemini-cli")) {
     files.push({
       path: "GEMINI.md",
-      content: generateAgents(profile.modules, options),
+      content: generateAgents(profile.capabilities, options),
       description: "Agent instructions for Gemini CLI",
     });
   }
@@ -135,7 +113,7 @@ function getLocalSkillAgents(tools: Tool[]): string[] {
 }
 
 function getGlobalSkillAgents(tools: Tool[]): string[] {
-  const agents = new Set<string>(["universal"]);
+  const agents = new Set<string>();
 
   if (tools.includes("claude-code")) agents.add("claude-code");
   if (tools.includes("gemini-cli")) agents.add("gemini-cli");
@@ -170,15 +148,15 @@ function buildSkillsAddCommand(
   };
 }
 
-function buildSkillsCommands(
-  selectedSkillGroupIds: string[],
+function buildCapabilityCommands(
+  selectedCapabilityIds: CapabilityId[],
   agents: string[],
+  scope: CapabilityScope,
   isGlobal: boolean,
 ): InstallCommand[] {
   if (agents.length === 0) return [];
 
-  const scope: "local" | "global" = isGlobal ? "global" : "local";
-  const skills = expandSkillGroups(selectedSkillGroupIds, scope);
+  const skills = getCapabilitySkills(selectedCapabilityIds, scope);
   const skillsBySource = new Map<string, string[]>();
 
   for (const skill of skills) {
@@ -197,34 +175,24 @@ function buildSkillsCommands(
 
 export function getLocalCommands(
   tools: Tool[],
-  moduleIds?: StandardModuleSelection[],
-  options?: InstallOptions,
+  capabilityIds: CapabilityId[],
 ): InstallCommand[] {
-  const resolvedSkillGroupIds = resolveSkillGroupIds("local", {
-    britishEnglish: options?.britishEnglish,
-    moduleIds: normaliseModuleIds(moduleIds),
-  });
-
-  return buildSkillsCommands(
-    resolvedSkillGroupIds,
+  return buildCapabilityCommands(
+    capabilityIds,
     getLocalSkillAgents(tools),
+    "local",
     false,
   );
 }
 
 export function getGlobalCommands(
   tools: Tool[],
-  moduleIds?: StandardModuleSelection[],
-  options?: InstallOptions,
+  capabilityIds: CapabilityId[],
 ): InstallCommand[] {
-  const resolvedSkillGroupIds = resolveSkillGroupIds("global", {
-    britishEnglish: options?.britishEnglish,
-    moduleIds: normaliseModuleIds(moduleIds),
-  });
-
-  return buildSkillsCommands(
-    resolvedSkillGroupIds,
+  return buildCapabilityCommands(
+    capabilityIds,
     getGlobalSkillAgents(tools),
+    "global",
     true,
   );
 }
@@ -285,7 +253,7 @@ export function mergeFrameworkReferenceIntoAgents(
     return `${trimmedReference}\n`;
   }
 
-  if (trimmedExisting.includes(CURRENT_AIRCURY_AGENTS_MARKER)) {
+  if (trimmedExisting.includes(FRAMEWORK_REFERENCE_SENTENCE)) {
     return `${trimmedExisting}\n`;
   }
 
