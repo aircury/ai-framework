@@ -16,6 +16,7 @@ describe("skills catalog", () => {
       "resilience",
       "testing",
       "architecture",
+      "specs",
     ]);
   });
 
@@ -32,6 +33,7 @@ describe("skills catalog", () => {
       "resilience",
       "testing",
       "architecture",
+      "specs",
       "language",
     ]);
   });

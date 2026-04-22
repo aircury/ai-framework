@@ -106,7 +106,7 @@ export const SKILL_GROUPS: SkillGroup[] = [
     description:
       "Skills for extracting authoritative specs and designing re-implementations from them",
     kind: "aircury",
-    defaultSelected: false,
+    defaultSelected: true,
     scopes: ["local", "global"],
   },
   {
