@@ -18,6 +18,27 @@ import {
   getSkillGroups,
 } from "./skills-catalog";
 
+export function parseGlobalAgentIds(value: string): string[] {
+  return value
+    .split(",")
+    .map((agent) => agent.trim())
+    .filter(Boolean);
+}
+
+export function validateGlobalAgentIds(value: string): string | undefined {
+  const agents = parseGlobalAgentIds(value);
+
+  if (agents.length === 0) {
+    return "Enter at least one agent id.";
+  }
+
+  if (agents.some((agent) => agent.toLowerCase() === "none")) {
+    return "Use real agent ids only. Remove 'none'.";
+  }
+
+  return undefined;
+}
+
 export async function run(): Promise<void> {
   p.intro("Aircury AI Framework Installer");
 
@@ -73,26 +94,12 @@ export async function run(): Promise<void> {
       message: "Global agent ids — comma separated",
       placeholder: "claude-code, opencode, cursor",
       initialValue: "claude-code, opencode",
-      validate(value) {
-        const agents = value
-          .split(",")
-          .map((agent) => agent.trim())
-          .filter(Boolean);
-
-        if (agents.length === 0) {
-          return "Enter at least one agent id.";
-        }
-
-        return undefined;
-      },
+      validate: validateGlobalAgentIds,
     });
 
     if (p.isCancel(globalAgents)) return p.cancel("Cancelled.");
 
-    selectedGlobalAgents = globalAgents
-      .split(",")
-      .map((agent) => agent.trim())
-      .filter(Boolean);
+    selectedGlobalAgents = parseGlobalAgentIds(globalAgents);
   } else {
     const localTools = await p.multiselect<Tool>({
       message: "Additional tools — need tool-specific config",
