@@ -6,7 +6,7 @@ import { createFrameworkProfile } from "./framework";
 import { expandSkillGroups } from "./skills-catalog";
 import { generateAgents, generateFramework } from "./templates";
 
-export type Tool = "claude-code" | "gemini-cli";
+export type Tool = "claude-code" | "gemini-cli" | "opencode";
 export type Scope = "local" | "global";
 
 export interface InstallFile {
@@ -134,17 +134,13 @@ function getLocalSkillAgents(tools: Tool[]): string[] {
 
   if (tools.includes("claude-code")) agents.add("claude-code");
   if (tools.includes("gemini-cli")) agents.add("gemini-cli");
+  if (tools.includes("opencode")) agents.add("opencode");
 
   return [...agents];
 }
 
-function getGlobalSkillAgents(tools: Tool[]): string[] {
-  const agents = new Set<string>();
-
-  if (tools.includes("claude-code")) agents.add("claude-code");
-  if (tools.includes("gemini-cli")) agents.add("gemini-cli");
-
-  return [...agents];
+function getGlobalSkillAgents(agentIds: string[]): string[] {
+  return [...new Set(agentIds.map((agent) => agent.trim()).filter(Boolean))];
 }
 
 function buildSkillsAddCommand(
@@ -211,12 +207,12 @@ export function getLocalCommands(
 }
 
 export function getGlobalCommands(
-  tools: Tool[],
+  agentIds: string[],
   selectedSkillGroupIds: string[],
 ): InstallCommand[] {
   return buildSkillsCommands(
     selectedSkillGroupIds,
-    getGlobalSkillAgents(tools),
+    getGlobalSkillAgents(agentIds),
     true,
   );
 }

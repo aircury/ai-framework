@@ -286,7 +286,10 @@ describe("getLocalCommands", () => {
   });
 
   it("installs multiple selected agents in one command", () => {
-    const commands = getLocalCommands(["claude-code", "gemini-cli"], ["git"]);
+    const commands = getLocalCommands(
+      ["claude-code", "gemini-cli", "opencode"],
+      ["git"],
+    );
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toEqual([
       "-y",
@@ -301,6 +304,8 @@ describe("getLocalCommands", () => {
       "claude-code",
       "-a",
       "gemini-cli",
+      "-a",
+      "opencode",
       "-y",
     ]);
   });
@@ -387,6 +392,23 @@ describe("getGlobalCommands", () => {
       "commit-changes",
       "-a",
       "claude-code",
+      "-g",
+      "-y",
+    ]);
+  });
+
+  it("creates a global skills install command for OpenCode", () => {
+    const commands = getGlobalCommands(["opencode"], ["git"]);
+    expect(commands).toHaveLength(1);
+    expect(commands[0].args).toEqual([
+      "-y",
+      "skills",
+      "add",
+      "aircury/ai-framework",
+      "--skill",
+      "commit-changes",
+      "-a",
+      "opencode",
       "-g",
       "-y",
     ]);

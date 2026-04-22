@@ -46,32 +46,64 @@ export async function run(): Promise<void> {
     );
   }
 
-  const toolOptions: { value: Tool; label: string; hint: string }[] =
-    scope === "global"
-      ? [
-          {
-            value: "claude-code",
-            label: "Claude Code",
-            hint: "installs ~/.claude/skills/",
-          },
-        ]
-      : [
-          {
-            value: "claude-code",
-            label: "Claude Code",
-            hint: "CLAUDE.md + .claude/skills/",
-          },
-          { value: "gemini-cli", label: "Gemini CLI", hint: "GEMINI.md" },
-        ];
+  const toolOptions: { value: Tool; label: string; hint: string }[] = [
+    {
+      value: "claude-code",
+      label: "Claude Code",
+      hint: "CLAUDE.md + .claude/skills/",
+    },
+    { value: "gemini-cli", label: "Gemini CLI", hint: "GEMINI.md" },
+    {
+      value: "opencode",
+      label: "OpenCode",
+      hint: "installs OpenCode-targeted skills",
+    },
+  ];
 
-  const selectedTools = await p.multiselect<Tool>({
-    message: "Additional tools — need tool-specific config",
-    options: toolOptions,
-    initialValues: toolOptions.map((o) => o.value),
-    required: false,
-  });
+  let selectedTools: Tool[] = [];
+  let selectedGlobalAgents: string[] = [];
 
-  if (p.isCancel(selectedTools)) return p.cancel("Cancelled.");
+  if (scope === "global") {
+    p.note(
+      "Examples: claude-code, opencode, cursor, codex",
+      "Enter any agent ids supported by npx skills",
+    );
+
+    const globalAgents = await p.text({
+      message: "Global agent ids — comma separated",
+      placeholder: "claude-code, opencode, cursor",
+      initialValue: "claude-code, opencode",
+      validate(value) {
+        const agents = value
+          .split(",")
+          .map((agent) => agent.trim())
+          .filter(Boolean);
+
+        if (agents.length === 0) {
+          return "Enter at least one agent id.";
+        }
+
+        return undefined;
+      },
+    });
+
+    if (p.isCancel(globalAgents)) return p.cancel("Cancelled.");
+
+    selectedGlobalAgents = globalAgents
+      .split(",")
+      .map((agent) => agent.trim())
+      .filter(Boolean);
+  } else {
+    const localTools = await p.multiselect<Tool>({
+      message: "Additional tools — need tool-specific config",
+      options: toolOptions,
+      initialValues: toolOptions.map((o) => o.value),
+      required: false,
+    });
+
+    if (p.isCancel(localTools)) return p.cancel("Cancelled.");
+    selectedTools = localTools;
+  }
 
   let selectedModules: StandardModuleId[] | symbol = [];
   let enforceBritishEnglish = false;
@@ -154,12 +186,12 @@ export async function run(): Promise<void> {
   const cwd = process.cwd();
   const isGlobal = scope === "global";
   const files = isGlobal
-    ? getGlobalFiles(selectedTools)
+    ? getGlobalFiles([])
     : getLocalFiles(selectedTools, selectedModules, {
         britishEnglish: enforceBritishEnglish,
       });
   const commands = isGlobal
-    ? getGlobalCommands(selectedTools, selectedSkillGroups)
+    ? getGlobalCommands(selectedGlobalAgents, selectedSkillGroups)
     : getLocalCommands(selectedTools, selectedSkillGroups);
   const selectedSkills = expandSkillGroups(selectedSkillGroups, skillScope);
 
