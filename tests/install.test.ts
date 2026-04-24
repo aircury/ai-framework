@@ -139,6 +139,12 @@ describe("frontend module integration", () => {
     expect(paths).toContain("specs/ui/README.md");
   });
 
+  it("includes a frontend workflow reference when frontend module is enabled", () => {
+    const files = getLocalFiles([], ["frontend"]);
+    const paths = files.map((f) => f.path);
+    expect(paths).toContain("specs/ui/frontend-workflow.md");
+  });
+
   it("adds frontend-specific check to FRAMEWORK.md when enabled", () => {
     const files = getLocalFiles([], ["frontend"]);
     const framework = files.find((f) => f.path === "FRAMEWORK.md");
