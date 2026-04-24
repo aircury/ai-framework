@@ -1,16 +1,23 @@
 # AGENTS.md
 
-## Framework
+## Session Checklist
 
-This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).
+- Read `FRAMEWORK.md` once at the start of the session.
+- Read the relevant spec in `specs/features/` before changing observable behavior.
+- Read the relevant ADRs in `specs/decisions/` before changing areas governed by prior decisions.
+- For any non-trivial change, recommend a workflow mode and ask the user how to proceed before implementing.
+- Do not finish an observable behavior change without updating `specs/features/`.
 
-All agents contributing to this repository MUST read and apply FRAMEWORK.md before doing any work. It is not optional and it is not advisory.
+## Context Hierarchy
 
-All framework workflow rules, delivery constraints, and enabled standards now live in `FRAMEWORK.md` as the single source of truth.
+- `FRAMEWORK.md` is the governing rule set.
+- `specs/features/` is the canonical source of behavioral truth.
+- `specs/decisions/` records governing architectural intent.
+- This file is only the short operational entrypoint for future sessions.
+
+Keep any extra project-specific instructions here so future sessions can recover context quickly without duplicating `FRAMEWORK.md`.
 
 {{#if includesTokenEfficiency}}
-For this project, `caveman` is already active by default. Start every new session in `caveman full`; do not wait for the user to request `caveman mode`, `/caveman`, or another trigger phrase. Only disable it if the user says `stop caveman` or `normal mode`.
+For this project, the `caveman` skill is available but not enabled automatically. If you want terse responses for the current session, activate it explicitly with `caveman full`. If the user says `stop caveman` or `normal mode`, disable the terse style for the rest of the session.
 
 {{/if}}
-
-If this repository also has project-specific agent instructions, keep them here and treat `FRAMEWORK.md` as the governing framework layer.

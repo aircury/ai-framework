@@ -17,6 +17,7 @@ describe("templates", () => {
 
     it("contains core framework sections", () => {
       expect(FRAMEWORK).toContain("## Core Workflow Constitution");
+      expect(FRAMEWORK).toContain("## Agent Operating Rules");
       expect(FRAMEWORK).toContain("## Definition of Done");
       expect(FRAMEWORK).toContain("## Workflow Framework");
       expect(FRAMEWORK).toContain("### Mode execution rules");
@@ -26,6 +27,9 @@ describe("templates", () => {
       expect(generateFramework()).toBe(FRAMEWORK);
       expect(renderFramework()).toBe(FRAMEWORK);
       expect(FRAMEWORK).toContain("## Token Efficiency");
+      expect(FRAMEWORK.indexOf("## Agent Operating Rules")).toBeLessThan(
+        FRAMEWORK.indexOf("## Installed Standards Modules"),
+      );
     });
   });
 
@@ -37,7 +41,10 @@ describe("templates", () => {
 
     it("references FRAMEWORK.md", () => {
       expect(AGENTS).toContain("FRAMEWORK.md");
-      expect(AGENTS).toContain("single source of truth");
+      expect(AGENTS).toContain("## Session Checklist");
+      expect(AGENTS).toContain("## Context Hierarchy");
+      expect(AGENTS).toContain("specs/features/");
+      expect(AGENTS).toContain("workflow mode");
       expect(AGENTS).not.toContain(
         "Selecting `plan-build` authorises planning first, not automatic implementation.",
       );
@@ -46,8 +53,8 @@ describe("templates", () => {
     it("matches the generated default profile", () => {
       expect(generateAgents()).toBe(AGENTS);
       expect(renderAgents()).toBe(AGENTS);
-      expect(AGENTS).toContain("`caveman` is already active by default");
-      expect(AGENTS).toContain("Start every new session in `caveman full`");
+      expect(AGENTS).toContain("the `caveman` skill is available but not enabled automatically");
+      expect(AGENTS).toContain("activate it explicitly with `caveman full`");
     });
   });
 
@@ -105,13 +112,13 @@ describe("templates", () => {
 
     it("adds token-efficiency guidance to AGENTS.md only when the module is enabled", () => {
       expect(generateAgents(["token-efficiency"])).toContain(
-        "Start every new session in `caveman full`",
+        "activate it explicitly with `caveman full`",
       );
       expect(generateAgents()).toContain(
-        "Start every new session in `caveman full`",
+        "activate it explicitly with `caveman full`",
       );
       expect(generateAgents(["decision-records"])).not.toContain(
-        "Start every new session in `caveman full`",
+        "activate it explicitly with `caveman full`",
       );
     });
 
@@ -137,11 +144,11 @@ describe("templates", () => {
         "## Token Efficiency",
       );
       expect(generateFramework(["token-efficiency"])).toContain(
-        "Load and apply the `caveman` skill in `full` mode",
+        "activate `caveman` explicitly with `caveman full`",
       );
       expect(generateFramework([])).not.toContain("## Token Efficiency");
       expect(generateFramework([])).not.toContain(
-        "Load and apply the `caveman` skill in `full` mode",
+        "activate `caveman` explicitly with `caveman full`",
       );
     });
   });

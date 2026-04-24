@@ -56,7 +56,7 @@ The result is an agent that knows not just *how* to work, but *what to protect* 
 
 ## Installation
 
-Run the installer from any project directory (or your home directory for a global setup):
+Run the installer from any project directory. The global mode installs skills globally for supported agents; the local mode installs repository files plus project-scoped skills:
 
 ```bash
 bunx @aircury/ai-framework
@@ -66,24 +66,32 @@ npx @aircury/ai-framework
 
 The interactive TUI will ask:
 
-1. **Scope** — `Local` to configure the current project, `Global` to configure your machine.
-2. **AI tools** — select the tool-specific integrations you want.
+1. **Scope** — `Local` to install project files and project-scoped skills, `Global` to install skills globally for `universal` plus any selected agent-specific integrations.
+2. **AI tools** — select the tool-specific integrations you want. In global mode these are optional extra agent targets on top of `universal`.
 3. **Standards modules** — for local installs, choose which optional standards this project should enforce.
 4. **Skill groups** — choose which grouped workflows to install through `npx skills add`.
 
-The installer writes all required configuration files, starter spec folders, and agent instructions to the right locations for each tool. Skills are installed through the standard `npx skills add ...` flow so they remain tracked by the skills ecosystem and can be updated later with `npx skills update`. Skill installation is driven by a static catalog in `src/skills-catalog.ts`, so Aircury and curated external skills can be selected through the same interactive flow. If files already exist you can choose to skip them or overwrite them.
+For local installs, the installer writes all required configuration files, starter spec folders, and agent instructions to the project root. Global installs do not write framework files; they only install the selected skills through the standard `npx skills add ... -g` flow so they remain tracked by the skills ecosystem and can be updated later with `npx skills update`. Skill installation is driven by a static catalog in `src/skills-catalog.ts`, so Aircury and curated external skills can be selected through the same interactive flow. If local files already exist you can choose to skip them or overwrite them.
 
 ### What gets installed
 
 | Scope | Installed outputs |
 |-------|-------------------|
 | Local | `FRAMEWORK.md`, `AGENTS.md`, `.aircury/framework.config.json`, `specs/features/README.md`, optional `specs/decisions/README.md`, plus selected tool-specific files; skills installed via `npx skills` |
-| Global | Skills installed via `npx skills` for the selected agents |
+| Global | Skills installed globally via `npx skills add ... -g` for `universal` plus any selected agent-specific integrations |
 
 ### Standards modules
 
 Local installs persist the selected modules in `.aircury/framework.config.json`.
 Each module is a small content package with machine-readable metadata plus document fragments, and the final `FRAMEWORK.md` / `AGENTS.md` files are rendered from dedicated templates.
+
+The context hierarchy is intentional:
+
+- `AGENTS.md` is the short session bootstrap checklist.
+- `FRAMEWORK.md` contains the governing workflow and standards rules.
+- `specs/features/` is the canonical source of behavioral truth.
+- `specs/decisions/` records governing architectural intent.
+- Skills are execution helpers, not the source of truth.
 
 Current built-in modules:
 
@@ -122,7 +130,7 @@ The default local and global skill selections include the `specs` group, so fres
 
 Curated external skills can be added to the static catalog and will appear in the same multiselect UI alongside the built-in Aircury groups.
 
-When the local `token-efficiency` standards module is enabled, the installer also preselects the `token-efficiency` skill group and adds project rules that start each new session in `caveman full` while keeping responses terse by default. This is intentionally project-scoped: it uses generated agent instruction files plus the `caveman` skill, and does not install any global shell hooks.
+When the local `token-efficiency` standards module is enabled, the installer also preselects the `token-efficiency` skill group and adds project rules that make `caveman` available without enabling it automatically. To activate terse mode for the current session, the user can explicitly say `caveman full`. This is intentionally project-scoped: it uses generated agent instruction files plus the `caveman` skill, and does not install any global shell hooks.
 
 ---
 

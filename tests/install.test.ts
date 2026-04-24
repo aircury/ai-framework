@@ -93,14 +93,18 @@ describe("getLocalFiles", () => {
     const secondAgents = getFileByPath(second, "AGENTS.md");
     expect(firstAgents.content).toBe(secondAgents.content);
     expect(firstAgents.content).toContain("FRAMEWORK.md");
-    expect(firstAgents.content).toContain("single source of truth");
+    expect(firstAgents.content).toContain("## Session Checklist");
   });
 
   it("adds caveman-full guidance to AGENTS.md when token-efficiency is enabled", () => {
     const files = getLocalFiles([], ["token-efficiency"]);
     const agents = getFileByPath(files, "AGENTS.md");
-    expect(agents.content).toContain("`caveman` is already active by default");
-    expect(agents.content).toContain("Start every new session in `caveman full`");
+    expect(agents.content).toContain(
+      "the `caveman` skill is available but not enabled automatically",
+    );
+    expect(agents.content).toContain(
+      "activate it explicitly with `caveman full`",
+    );
   });
 
   it("uses the full recommended profile by default", () => {
@@ -153,9 +157,8 @@ describe("frontend module integration", () => {
     const files = getLocalFiles([], ["token-efficiency"]);
     const framework = getFileByPath(files, "FRAMEWORK.md");
     expect(framework.content).toContain(
-      "Load and apply the `caveman` skill in `full` mode",
+      "activate `caveman` explicitly with `caveman full`",
     );
-    expect(framework.content).toContain("ACTIVE EVERY RESPONSE");
     expect(framework.content).toContain("stop caveman");
   });
 });
@@ -490,9 +493,7 @@ describe("writeFile", () => {
 
     const content = readFileSync(join(dir, "AGENTS.md"), "utf-8");
     expect(content).toContain("Project-specific instructions.");
-    expect(content).toContain(
-      "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).",
-    );
+    expect(content).toContain("## Session Checklist");
 
     rmSync(dir, { recursive: true });
   });
@@ -529,7 +530,7 @@ describe("mergeFrameworkReferenceIntoAgents", () => {
     );
 
     expect(merged).toContain("Project-specific instructions.");
-    expect(merged).toContain("single source of truth");
+    expect(merged).toContain("## Session Checklist");
   });
 
   it("does not duplicate the framework reference when already present", () => {
