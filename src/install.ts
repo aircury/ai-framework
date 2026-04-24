@@ -139,7 +139,7 @@ function getLocalSkillAgents(tools: Tool[]): string[] {
 }
 
 function getGlobalSkillAgents(tools: Tool[]): string[] {
-  const agents = new Set<string>();
+  const agents = new Set<string>(["universal"]);
 
   if (tools.includes("claude-code")) agents.add("claude-code");
   if (tools.includes("gemini-cli")) agents.add("gemini-cli");
