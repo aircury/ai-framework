@@ -1,5 +1,6 @@
-- Load and apply the `caveman` skill in `full` mode at the start of every new session in this project.
-- ACTIVE EVERY RESPONSE: respond tersely by default while preserving full technical accuracy.
+- The `caveman` skill is available for this project, but it is not enabled automatically.
+- If you want terse responses for the current session, activate it explicitly with `caveman full`.
+- When `caveman` is active, respond tersely while preserving full technical accuracy.
 - Remove filler, pleasantries, and unnecessary hedging unless the user explicitly asks for more detail.
 - Prefer short, direct phrasing with fragments when the meaning stays precise.
 - Keep code, commands, commit messages, and other project artifacts in their normal readable form unless the user explicitly asks for compressed output there too.

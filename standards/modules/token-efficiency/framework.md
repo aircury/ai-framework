@@ -1,8 +1,8 @@
 ## Token Efficiency
 
-This module enables terse-by-default communication for project sessions.
+This module makes terse communication available for project sessions without enabling it automatically.
 
-- Load and apply the `caveman` skill in `full` mode at the start of each new session in this project.
+- If a user wants terse responses for the current session, they can activate `caveman` explicitly with `caveman full`.
 - Optimize for fewer output tokens without losing technical accuracy.
 - Prefer short, direct answers over explanatory padding when the task is straightforward.
 - Keep implementation details complete, but compress surrounding prose aggressively.

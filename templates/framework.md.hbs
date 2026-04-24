@@ -19,92 +19,6 @@ The following rules apply to every installation profile:
 - Before starting any non-trivial change, the agent MUST act as a routing meta-agent and ask the user how to proceed.
 - Optional standards are enabled through `.aircury/framework.config.json`.
 
-{{#if includesAirsyncMemory}}
-## Airsync Memory
-
-Airsync is a collaborative memory system that preserves team knowledge across projects and sessions. It uses a three-layer lifecycle to ensure only vetted knowledge becomes searchable.
-
-### When to Search Airsync
-
-Before making decisions that could be influenced by prior team experience:
-
-- Architectural choices (patterns, module structure, boundary enforcement)
-- Workflow changes (spec handling, agent routing, delivery modes)
-- Technology selections that affect multiple components
-
-### What to Capture
-
-Capture knowledge that passes the **collaboration test**: "Would a developer on a different project benefit from this in 3 months?"
-
-**DO capture:**
-
-- Architectural decisions with rationale (ADRs dual-written as `note`)
-- Validated patterns and approaches that work across projects
-- Repeated pitfalls and how to avoid them
-- Team-wide conventions and standards
-- Mental models that explain complex systems
-
-**DO NOT capture:**
-
-- Project-specific implementation details
-- Debugging sessions without transferable lessons
-- Content already in codebase, docs, or prior memory
-- Transient observations without context
-
-### ADR Dual-Write
-
-When the `decision-records` module is enabled, every ADR created or superseded in `specs/decisions/` MUST also be proposed to Airsync as a `note` with `scope: "team"`. This ensures architectural decisions are discoverable by agents across all projects, not just the current repository.
-
-### Workflow Summary
-
-1. **Search first**: `memory_search(query="your terms")` — default searches only PUBLISHED layer
-2. **Propose to INBOX**: `memory_propose(entry={...})` — entries start in INBOX, not searchable by default
-3. **Promote when confident**: `memory_promote(memory_id)` — moves to PUBLISHED, becomes team-searchable
-
-See the `airsync` skill for the complete tool reference and quality guidelines.
-
-{{/if}}
-## Installed Standards Modules
-
-{{#if installedModules}}
-{{#each installedModules}}
-- `{{id}}` — {{description}}
-{{/each}}
-{{else}}
-No optional standards modules are enabled. The repository still uses the core workflow constitution.
-{{/if}}
-
-{{#each frameworkSections}}
-{{this}}
-
-{{/each}}
-## Coding Standards
-
-{{#if enforceBritishEnglish}}
-- Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy.
-- Prefer British English identifiers and names when introducing new code, unless an external API, tool, or established project interface requires a different spelling.
-{{/if}}
-- Use explicit names that reflect the problem space.
-- Keep functions small, cohesive, and intention-revealing.
-- Prefer immutable data and side-effect isolation.
-- Fail with clear errors and documented tradeoffs.
-- Avoid boolean flag arguments when a richer type or explicit method is clearer.
-- Prefer composition over inheritance.
-- Keep modules deep: small public surface, meaningful internal behavior.
-- Remove dead code and speculative abstractions.
-
-## Change Workflow
-
-For any non-trivial change:
-
-1. Identify the affected capability and observable behavior.
-2. Define or confirm the public behavior.
-3. Choose the workflow mode with the user through meta-agent routing.
-4. Implement inside the selected standards profile.
-5. Refactor for clarity and boundary enforcement.
-6. Run relevant verification, then broader checks.
-7. Commit changes using the `commit-changes` skill for atomic deployment.
-
 ## Agent Operating Rules
 
 Before starting any task:
@@ -120,7 +34,7 @@ Before starting any task:
 {{#if includesCodeStyle}}
 - Analyze `package.json` and local config files to identify the project's linting and formatting strategy.
 {{/if}}
-- Act as a routing meta-agent: analyse the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
+- Act as a routing meta-agent: analyse the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything.
 
 While executing work:
 
@@ -128,7 +42,6 @@ While executing work:
 - Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy unless an external interface requires a different spelling.
 {{/if}}
 - All observable behavior changes MUST update `specs/features/` before the work is done.
-- Use the `commit-changes` skill to organise working tree changes into atomic, functional, and semantic commits using Conventional Commit format.
 - After the user selects a workflow mode, follow `FRAMEWORK.md § Mode execution rules` exactly.
 - Selecting `plan-build` authorises planning first, not automatic implementation.
 - Selecting `spec-kit` requires following the full Spec Kit sequence in order unless the user explicitly changes modes.
@@ -152,7 +65,7 @@ This framework uses a framework-agnostic change workflow.
 - `explore-propose-apply-complete`: explore first when the problem is unclear, then formalise and implement.
 - `spec-kit`: spec-driven development using the Spec Kit workflow. Best for new features, cross-cutting concerns, or work requiring formal spec governance.
 
-These are operating modes, not different specification systems. They all converge on the same canonical source of truth: `specs/features/`.
+These are operating modes, not different specification systems.
 
 ### Meta-agent routing
 
@@ -220,6 +133,56 @@ A change is not done unless all of the following are true:
 - Visual modifications align with the project design system tokens in `specs/ui/style-guide.md`.
 {{/if}}
 
+## Installed Standards Modules
+
+{{#if installedModules}}
+{{#each installedModules}}
+- `{{id}}` — {{description}}
+{{/each}}
+{{else}}
+No optional standards modules are enabled. The repository still uses the core workflow constitution.
+{{/if}}
+
+{{#each frameworkSections}}
+{{this}}
+
+{{/each}}
+
+{{#if includesAirsyncMemory}}
+## Airsync Memory
+
+Airsync is a collaborative memory system that preserves team knowledge across projects and sessions.
+
+- Search Airsync before making architectural, workflow, or cross-cutting technology decisions.
+- Capture knowledge that would help a developer on another project in a few months.
+- Do not store transient debugging notes or project-specific implementation trivia.
+- When the `decision-records` module is enabled, every ADR created or superseded in `specs/decisions/` MUST also be proposed to Airsync as a `note` with `scope: "team"`.
+
+Workflow summary:
+
+1. `memory_search(...)`
+2. `memory_propose(...)`
+3. `memory_promote(...)` when confident
+
+See the `airsync` skill for the full workflow and tool reference.
+
+{{/if}}
+
+## Coding Standards
+
+{{#if enforceBritishEnglish}}
+- Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy.
+- Prefer British English identifiers and names when introducing new code, unless an external API, tool, or established project interface requires a different spelling.
+{{/if}}
+- Use explicit names that reflect the problem space.
+- Keep functions small, cohesive, and intention-revealing.
+- Prefer immutable data and side-effect isolation.
+- Fail with clear errors and documented tradeoffs.
+- Avoid boolean flag arguments when a richer type or explicit method is clearer.
+- Prefer composition over inheritance.
+- Keep modules deep: small public surface, meaningful internal behavior.
+- Remove dead code and speculative abstractions.
+
 ## Living Specifications
 
 `specs/features/` is the authoritative, technology-agnostic description of what the system does. It is not a planning artifact. It is a permanent record of system behavior.
@@ -240,23 +203,3 @@ Every observable behavior change to the codebase MUST update `specs/features/` b
 ```
 
 Use RFC 2119 language. Do not include implementation details, technology names, or framework references. Specs describe behavior, not code.
-
-## Review Checklist
-
-Before finishing work, verify:
-
-- Is the chosen behavior reflected in `specs/features/`?
-- Is the code aligned with the enabled standards modules?
-- Are tradeoffs explicit enough that a future agent can continue safely?
-- Would this change still make sense if infrastructure or tooling changed?
-
-If the answer to any of these is "no", the change is not ready.
-
-## Default Agent Behavior
-
-When contributing:
-
-- Start by identifying the capability or boundary you are changing.
-- Prefer existing package and boundary structure over creating ad hoc modules.
-- Keep docs, specs, tests, and implementation aligned.
-- If forced to choose, protect clarity of intent first and adapt tools around it.

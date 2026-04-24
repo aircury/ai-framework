@@ -25,8 +25,7 @@ export interface InstallOptions {
   britishEnglish?: boolean;
 }
 
-const FRAMEWORK_REFERENCE_SENTENCE =
-  "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).";
+const CURRENT_AIRCURY_AGENTS_MARKER = "## Session Checklist";
 const LEGACY_AIRCURY_AGENTS_SENTENCE =
   "All agents contributing to this repository MUST read and apply FRAMEWORK.md before doing any work. It is not optional and it is not advisory.";
 
@@ -277,7 +276,7 @@ export function mergeFrameworkReferenceIntoAgents(
     return `${trimmedReference}\n`;
   }
 
-  if (trimmedExisting.includes(FRAMEWORK_REFERENCE_SENTENCE)) {
+  if (trimmedExisting.includes(CURRENT_AIRCURY_AGENTS_MARKER)) {
     return `${trimmedExisting}\n`;
   }
 
