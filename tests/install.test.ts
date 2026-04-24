@@ -371,8 +371,21 @@ describe("getLocalCommands", () => {
 });
 
 describe("getGlobalCommands", () => {
-  it("returns empty when no global skill agents are selected", () => {
-    expect(getGlobalCommands([], ["git"])).toHaveLength(0);
+  it("installs global skills for universal by default", () => {
+    const commands = getGlobalCommands([], ["git"]);
+    expect(commands).toHaveLength(1);
+    expect(commands[0].args).toEqual([
+      "-y",
+      "skills",
+      "add",
+      "aircury/ai-framework",
+      "--skill",
+      "commit-changes",
+      "-a",
+      "universal",
+      "-g",
+      "-y",
+    ]);
   });
 
   it("creates a global skills install command for selected agents", () => {
@@ -385,6 +398,8 @@ describe("getGlobalCommands", () => {
       "aircury/ai-framework",
       "--skill",
       "commit-changes",
+      "-a",
+      "universal",
       "-a",
       "claude-code",
       "-g",

@@ -22,10 +22,14 @@ export async function run(): Promise<void> {
   p.intro("Aircury AI Framework Installer");
 
   const scope = await p.select<Scope>({
-    message: "What do you want to configure?",
+    message: "What do you want to install?",
     options: [
       { value: "local", label: "Local", hint: "configure this project" },
-      { value: "global", label: "Global", hint: "configure this machine" },
+      {
+        value: "global",
+        label: "Global",
+        hint: "install skills for this machine",
+      },
     ],
   });
 
@@ -52,7 +56,7 @@ export async function run(): Promise<void> {
           {
             value: "claude-code",
             label: "Claude Code",
-            hint: "installs ~/.claude/skills/",
+            hint: "installs global Claude skills",
           },
         ]
       : [
@@ -65,9 +69,12 @@ export async function run(): Promise<void> {
         ];
 
   const selectedTools = await p.multiselect<Tool>({
-    message: "Additional tools — need tool-specific config",
+    message:
+      scope === "global"
+        ? "Additional agent integrations — also install global agent-specific skills"
+        : "Additional tools — need tool-specific config",
     options: toolOptions,
-    initialValues: toolOptions.map((o) => o.value),
+    initialValues: scope === "global" ? [] : toolOptions.map((o) => o.value),
     required: false,
   });
 
