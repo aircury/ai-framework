@@ -91,6 +91,7 @@ The context hierarchy is intentional:
 - `FRAMEWORK.md` contains the governing workflow and standards rules.
 - `specs/features/` is the canonical source of behavioral truth.
 - `specs/decisions/` records governing architectural intent.
+- `specs/ui/` holds frontend design-system references when the frontend module is enabled.
 - Skills are execution helpers, not the source of truth.
 
 Current built-in modules:
