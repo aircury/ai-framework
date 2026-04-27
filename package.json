@@ -13,6 +13,7 @@
   "repository": "https://github.com/aircury/ai-framework",
   "scripts": {
     "start": "bun run src/cli.ts",
+    "legacy-specs": "bun run src/legacy-spec-orchestrator.ts",
     "build": "bun build src/cli.ts --outfile dist/cli.js --target node --sourcemap=none",
     "test": "bun test",
     "lint": "biome check --fix",

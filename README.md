@@ -68,8 +68,9 @@ The interactive TUI will ask:
 
 1. **Scope** — `Local` to install project files and project-scoped skills, `Global` to install skills globally for `universal` plus any selected agent-specific integrations.
 2. **AI tools** — select the tool-specific integrations you want. In global mode these are optional extra agent targets on top of `universal`.
-3. **Standards modules** — for local installs, choose which optional standards this project should enforce.
-4. **Skill groups** — choose which grouped workflows to install through `npx skills add`.
+3. **Local installation profile** — for local installs, choose between the full framework or `Spec extraction only` for a minimal reverse-engineering setup.
+4. **Standards modules** — for the full local profile, choose which optional standards this project should enforce.
+5. **Skill groups** — choose which grouped workflows to install through `npx skills add`.
 
 For local installs, the installer writes all required configuration files, starter spec folders, and agent instructions to the project root. Global installs do not write framework files; they only install the selected skills through the standard `npx skills add ... -g` flow so they remain tracked by the skills ecosystem and can be updated later with `npx skills update`. Skill installation is driven by a static catalog in `src/skills-catalog.ts`, so Aircury and curated external skills can be selected through the same interactive flow. If local files already exist you can choose to skip them or overwrite them.
 
@@ -79,6 +80,8 @@ For local installs, the installer writes all required configuration files, start
 |-------|-------------------|
 | Local | `FRAMEWORK.md`, `AGENTS.md`, `.aircury/framework.config.json`, `specs/features/README.md`, optional `specs/decisions/README.md`, plus selected tool-specific files; skills installed via `npx skills` |
 | Global | Skills installed globally via `npx skills add ... -g` for `universal` plus any selected agent-specific integrations |
+
+For legacy reverse-engineering work, the local `Spec extraction only` profile keeps the install intentionally small: no optional standards modules, no extra tool files by default, the `specs` skill group preselected, and an installable project-local orchestrator at `.aircury/bin/legacy-spec-orchestrator.mjs`.
 
 ### Standards modules
 

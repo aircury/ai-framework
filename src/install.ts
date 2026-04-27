@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import installContentSource from "./install-content.md" with { type: "text" };
 import type { StandardModuleId, StandardModuleSelection } from "./framework";
+import { renderInstallableLegacySpecOrchestrator } from "./installable-legacy-spec-orchestrator";
 import { createFrameworkProfile } from "./framework";
 import { expandSkillGroups } from "./skills-catalog";
 import { generateAgents, generateFramework } from "./templates";
@@ -24,6 +25,7 @@ export interface InstallCommand {
 
 export interface InstallOptions {
   britishEnglish?: boolean;
+  installProfile?: "full" | "spec-extraction";
 }
 
 const CURRENT_AIRCURY_AGENTS_MARKER = "## Session Checklist";
@@ -80,6 +82,21 @@ function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
   return files;
 }
 
+function getSpecExtractionFiles(): InstallFile[] {
+  return [
+    {
+      path: ".aircury/bin/legacy-spec-orchestrator.mjs",
+      content: renderInstallableLegacySpecOrchestrator(),
+      description: "Installable legacy specs orchestrator",
+    },
+    {
+      path: ".aircury/bin/README.md",
+      content: getInstallContentByPath(".aircury/bin/README.md"),
+      description: "Spec extraction tooling usage guide",
+    },
+  ];
+}
+
 export function getLocalFiles(
   tools: Tool[],
   moduleIds?: StandardModuleSelection[],
@@ -105,6 +122,9 @@ export function getLocalFiles(
       description: "Installed standards profile",
     },
     ...getSpecsFiles(profile.modules),
+    ...(options?.installProfile === "spec-extraction"
+      ? getSpecExtractionFiles()
+      : []),
   ];
 
   if (tools.includes("claude-code")) {

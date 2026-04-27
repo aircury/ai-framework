@@ -31,6 +31,38 @@ describe("getLocalFiles", () => {
     expect(paths).toContain(".aircury/framework.config.json");
   });
 
+  it("includes the installable orchestrator for the spec-extraction profile", () => {
+    const files = getLocalFiles([], [], { installProfile: "spec-extraction" });
+    const paths = files.map((f) => f.path);
+    expect(paths).toContain(".aircury/bin/legacy-spec-orchestrator.mjs");
+    expect(paths).toContain(".aircury/bin/README.md");
+  });
+
+  it("does not include the installable orchestrator for the full profile", () => {
+    const files = getLocalFiles([], [], { installProfile: "full" });
+    const paths = files.map((f) => f.path);
+    expect(paths).not.toContain(".aircury/bin/legacy-spec-orchestrator.mjs");
+  });
+
+  it("writes a node-executable orchestrator artifact", () => {
+    const files = getLocalFiles([], [], { installProfile: "spec-extraction" });
+    const orchestrator = getFileByPath(
+      files,
+      ".aircury/bin/legacy-spec-orchestrator.mjs",
+    );
+    expect(orchestrator.content).toContain("#!/usr/bin/env node");
+    expect(orchestrator.content).toContain("OPENAI_API_KEY is required");
+    expect(orchestrator.content).toContain("runLegacySpecOrchestrator");
+    expect(orchestrator.content).toContain(
+      "Could an engineer or AI agent with ZERO access to the original codebase",
+    );
+    expect(orchestrator.content).toContain(
+      "The database is assumed to remain EXACTLY the same",
+    );
+    expect(orchestrator.content).toContain("evidence_bundle");
+    expect(orchestrator.content).toContain("Expanded evidence bundle");
+  });
+
   it("includes CLAUDE.md when claude-code selected", () => {
     const files = getLocalFiles(["claude-code"]);
     const paths = files.map((f) => f.path);
@@ -312,6 +344,28 @@ describe("getLocalCommands", () => {
       "gemini-cli",
       "-y",
     ]);
+  });
+
+  it("installs only the specs skills when the specs group is selected alone", () => {
+    const commands = getLocalCommands([], ["specs"]);
+    expect(commands).toHaveLength(1);
+    expect(commands[0]).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "aircury/ai-framework",
+        "--skill",
+        "specs-extractor",
+        "--skill",
+        "specs-interpreter",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description: "Install selected skills from aircury/ai-framework",
+    });
   });
 
   it("installs the UK business English skill from its external source", () => {

@@ -1,5 +1,6 @@
 export type SkillGroupKind = "aircury" | "external";
 export type SkillScope = "local" | "global";
+export type SkillSelectionPreset = "default" | "spec-extraction";
 
 import type { StandardModuleId } from "./framework";
 
@@ -378,9 +379,16 @@ export function getDefaultSkillGroupIds(scope: SkillScope): string[] {
 
 export function getInitialSkillGroupIds(
   scope: SkillScope,
-  options?: { britishEnglish?: boolean; moduleIds?: StandardModuleId[] },
+  options?: {
+    britishEnglish?: boolean;
+    moduleIds?: StandardModuleId[];
+    preset?: SkillSelectionPreset;
+  },
 ): string[] {
-  let selected = getDefaultSkillGroupIds(scope);
+  let selected =
+    options?.preset === "spec-extraction"
+      ? ["specs"]
+      : getDefaultSkillGroupIds(scope);
 
   if (options?.britishEnglish && !selected.includes("language")) {
     selected = [...selected, "language"];

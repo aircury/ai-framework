@@ -74,3 +74,30 @@ For each meaningful UI change, the corresponding feature spec should capture:
 - Do not invent design tokens, spacing scales, or composition patterns that are not supported by the existing frontend.
 - Do not use hardcoded values when an equivalent token or shared primitive already exists.
 - Do not introduce a new UI dependency such as an icon, animation, or component library without an ADR.
+
+<!-- FILE: .aircury/bin/README.md -->
+# Aircury Spec Extraction Tools
+
+This directory contains the installable legacy spec extraction orchestrator.
+
+## Run
+
+From the project root:
+
+```bash
+node .aircury/bin/legacy-spec-orchestrator.mjs
+```
+
+## Options
+
+- `--project-root <path>`: project to analyse. Defaults to the current directory.
+- `--output-root <path>`: output directory for generated specs. Defaults to `specs/`.
+- `--db-schema <path>`: optional database schema path relative to the project root.
+- `--model <name>`: OpenAI model name. Defaults to `OPENAI_MODEL` or `gpt-5.4`.
+- `--retries <n>`: retries for structured agents. Defaults to `3`.
+
+## Environment
+
+- `OPENAI_API_KEY` is required.
+- `OPENAI_BASE_URL` is optional.
+- `OPENAI_MODEL` is optional.

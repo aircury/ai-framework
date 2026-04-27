@@ -16,7 +16,10 @@ import {
   expandSkillGroups,
   getInitialSkillGroupIds,
   getSkillGroups,
+  type SkillSelectionPreset,
 } from "./skills-catalog";
+
+type LocalInstallProfile = "full" | "spec-extraction";
 
 export async function run(): Promise<void> {
   p.intro("Aircury AI Framework Installer");
@@ -50,6 +53,29 @@ export async function run(): Promise<void> {
     );
   }
 
+  let localInstallProfile: LocalInstallProfile = "full";
+  if (scope === "local") {
+    const selectedProfile = await p.select<LocalInstallProfile>({
+      message: "Local installation profile",
+      options: [
+        {
+          value: "spec-extraction",
+          label: "Spec extraction only",
+          hint: "core framework + specs skills only",
+        },
+        {
+          value: "full",
+          label: "Full framework",
+          hint: "standard local Aircury installation",
+        },
+      ],
+      initialValue: "spec-extraction",
+    });
+
+    if (p.isCancel(selectedProfile)) return p.cancel("Cancelled.");
+    localInstallProfile = selectedProfile;
+  }
+
   const toolOptions: { value: Tool; label: string; hint: string }[] =
     scope === "global"
       ? [
@@ -74,7 +100,10 @@ export async function run(): Promise<void> {
         ? "Additional agent integrations — also install global agent-specific skills"
         : "Additional tools — need tool-specific config",
     options: toolOptions,
-    initialValues: scope === "global" ? [] : toolOptions.map((o) => o.value),
+    initialValues:
+      scope === "global" || localInstallProfile === "spec-extraction"
+        ? []
+        : toolOptions.map((o) => o.value),
     required: false,
   });
 
@@ -83,40 +112,50 @@ export async function run(): Promise<void> {
   let selectedModules: StandardModuleId[] | symbol = [];
   let enforceBritishEnglish = false;
   if (scope === "local") {
-    selectedModules = await p.multiselect<StandardModuleId>({
-      message:
-        "Standards modules — choose what this installation should enforce",
-      options: STANDARD_MODULES.map((module) => ({
-        value: module.id,
-        label: module.label,
-        hint: module.hint,
-      })),
-      initialValues: STANDARD_MODULES.filter(
-        (module) => module.defaultEnabled,
-      ).map((module) => module.id),
-      required: false,
-    });
-
-    if (p.isCancel(selectedModules)) return p.cancel("Cancelled.");
-
-    if (selectedModules.length === 0) {
+    if (localInstallProfile === "spec-extraction") {
+      selectedModules = [];
       p.note(
-        "Only the core workflow constitution will be installed. Optional standards can be re-enabled later by reinstalling or editing .aircury/framework.config.json.",
-        "No optional standards selected",
+        "This profile installs only the core local framework files plus the specs skill group. Optional standards and extra workflows are left out.",
+        "Minimal local install",
       );
+    } else {
+      selectedModules = await p.multiselect<StandardModuleId>({
+        message:
+          "Standards modules — choose what this installation should enforce",
+        options: STANDARD_MODULES.map((module) => ({
+          value: module.id,
+          label: module.label,
+          hint: module.hint,
+        })),
+        initialValues: STANDARD_MODULES.filter(
+          (module) => module.defaultEnabled,
+        ).map((module) => module.id),
+        required: false,
+      });
+
+      if (p.isCancel(selectedModules)) return p.cancel("Cancelled.");
+
+      if (selectedModules.length === 0) {
+        p.note(
+          "Only the core workflow constitution will be installed. Optional standards can be re-enabled later by reinstalling or editing .aircury/framework.config.json.",
+          "No optional standards selected",
+        );
+      }
+
+      const britishEnglish = await p.confirm({
+        message:
+          "Enforce British English in generated rules and install the UK business English skill?",
+        initialValue: true,
+      });
+
+      if (p.isCancel(britishEnglish)) return p.cancel("Cancelled.");
+      enforceBritishEnglish = britishEnglish;
     }
-
-    const britishEnglish = await p.confirm({
-      message:
-        "Enforce British English in generated rules and install the UK business English skill?",
-      initialValue: true,
-    });
-
-    if (p.isCancel(britishEnglish)) return p.cancel("Cancelled.");
-    enforceBritishEnglish = britishEnglish;
   }
 
   const skillScope = scope === "global" ? "global" : "local";
+  const skillPreset: SkillSelectionPreset =
+    localInstallProfile === "spec-extraction" ? "spec-extraction" : "default";
   const aircurySkillGroups = getSkillGroups(skillScope, "aircury");
   const externalSkillGroups = getSkillGroups(skillScope, "external");
   const skillGroupOptions = [
@@ -140,6 +179,7 @@ export async function run(): Promise<void> {
       initialValues: getInitialSkillGroupIds(skillScope, {
         britishEnglish: enforceBritishEnglish,
         moduleIds: selectedModules,
+        preset: skillPreset,
       }),
       required: false,
     });
@@ -164,6 +204,7 @@ export async function run(): Promise<void> {
     ? getGlobalFiles(selectedTools)
     : getLocalFiles(selectedTools, selectedModules, {
         britishEnglish: enforceBritishEnglish,
+        installProfile: localInstallProfile,
       });
   const commands = isGlobal
     ? getGlobalCommands(selectedTools, selectedSkillGroups)

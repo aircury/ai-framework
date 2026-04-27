@@ -44,6 +44,12 @@ describe("skills catalog", () => {
     );
   });
 
+  it("preselects only the specs group for the spec-extraction preset", () => {
+    expect(
+      getInitialSkillGroupIds("local", { preset: "spec-extraction" }),
+    ).toEqual(["specs"]);
+  });
+
   it("adds the frontend group when the frontend module is enabled", () => {
     expect(
       getInitialSkillGroupIds("local", { moduleIds: ["frontend"] }),
