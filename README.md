@@ -4,6 +4,8 @@
 
 The Aircury AI Framework is a meta-framework for AI-assisted software engineering. It defines how AI agents should think, plan, and deliver code across all Aircury projects while separating a shared workflow constitution from optional engineering standards modules.
 
+For an operator-focused manual built around concrete workflows and use cases, see [`docs/framework-playbook.md`](docs/framework-playbook.md).
+
 For most tasks, no workflow framework is needed at all. If a change is well-understood and clearly scoped, `plan-build` — the default mode — is sufficient: describe the task, let the agent plan and implement it. Adding structured workflows to a simple, clear task is overkill.
 
 The frameworks exist for when they are genuinely needed. Three open-source tools inform this layer:
