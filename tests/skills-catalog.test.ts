@@ -20,6 +20,20 @@ describe("skills catalog", () => {
     ]);
   });
 
+  it("preselects the language group by default for global installs", () => {
+    expect(getDefaultSkillGroupIds("global")).toEqual([
+      "open-spec",
+      "spec-kit",
+      "airsync",
+      "git",
+      "resilience",
+      "testing",
+      "architecture",
+      "specs",
+      "language",
+    ]);
+  });
+
   it("keeps token-efficiency opt-in at the skill-group level by default", () => {
     expect(getDefaultSkillGroupIds("local")).not.toContain("token-efficiency");
   });

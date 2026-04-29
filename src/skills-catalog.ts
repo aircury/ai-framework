@@ -371,9 +371,15 @@ export function getSkillGroups(
 }
 
 export function getDefaultSkillGroupIds(scope: SkillScope): string[] {
-  return getSkillGroups(scope)
+  let selected = getSkillGroups(scope)
     .filter((group) => group.defaultSelected)
     .map((group) => group.id);
+
+  if (scope === "global" && !selected.includes("language")) {
+    selected = [...selected, "language"];
+  }
+
+  return selected;
 }
 
 export function getInitialSkillGroupIds(
