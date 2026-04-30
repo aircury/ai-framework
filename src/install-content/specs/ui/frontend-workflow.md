@@ -6,13 +6,14 @@ Use this reference when a frontend task is substantial enough that the short rul
 
 1. Run `frontend-layout-extractor` and save the result to `specs/features/<feature-name>/layout.md`.
 2. Run `frontend-experience-extractor` and save the result to `specs/features/<feature-name>/experience.md`.
-3. Generate or update `specs/ui/style-guide.md` from the analyzed frontend.
-4. Run `frontend-ui-generator` using `layout.md`, `experience.md`, and the current style guide.
+3. Run `frontend-style-extractor` on the target frontend and generate or update `specs/ui/style-guide.md` from the existing design system.
+4. Run `frontend-ui-generator` using `layout.md`, `experience.md`, and the extracted style guide.
 5. Update the canonical feature spec in `specs/features/` before finishing the task.
 
 ## Fidelity rules
 
 - Match the existing product structure, behavior, and visual language before introducing new patterns.
+- Use `frontend-style-extractor` to search the codebase for reusable design tokens, shared primitives, and repeated composition patterns before writing new UI code.
 - Prefer project tokens and existing component primitives over hardcoded values.
 - Treat `layout.md` as the structural source of truth and `experience.md` as the behavioral source of truth.
 - Extend the component libraries already used by the project instead of reimplementing them from scratch.
@@ -44,6 +45,7 @@ For each meaningful UI change, the corresponding feature spec should capture:
 ## Restrictions
 
 - Do not skip extraction phases because the task appears small.
+- Do not skip the `frontend-style-extractor` phase even when `specs/ui/style-guide.md` does not exist yet.
 - Do not invent design tokens, spacing scales, or composition patterns that are not supported by the existing frontend.
 - Do not use hardcoded values when an equivalent token or shared primitive already exists.
 - Do not introduce a new UI dependency such as an icon, animation, or component library without an ADR.

@@ -35,6 +35,32 @@ export interface InstallOptions {
 type SkillsRunner = "npx" | "bunx";
 let cachedSkillsRunner: SkillsRunner | null = null;
 
+const AIRCURY_SKILLS_SOURCE = "aircury/ai-framework";
+
+function getLocalAircurySkillsSource(): string | null {
+  const root = join(import.meta.dir, "..");
+
+  if (existsSync(join(root, "src")) && existsSync(join(root, "skills"))) {
+    return root;
+  }
+
+  return null;
+}
+
+export function getAircurySkillsSource(): string {
+  return (
+    process.env.AIRCURY_SKILLS_SOURCE?.trim() ||
+    getLocalAircurySkillsSource() ||
+    AIRCURY_SKILLS_SOURCE
+  );
+}
+
+function resolveSkillSource(source: string): string {
+  if (source !== AIRCURY_SKILLS_SOURCE) return source;
+
+  return getAircurySkillsSource();
+}
+
 const FRAMEWORK_REFERENCE_SENTENCE =
   "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).";
 
@@ -127,7 +153,8 @@ function buildSkillsAddCommand(
   if (agents.length === 0 || skillNames.length === 0) return null;
 
   const command = getSkillsRunner();
-  const args = ["-y", "skills", "add", source];
+  const resolvedSource = resolveSkillSource(source);
+  const args = ["-y", "skills", "add", resolvedSource];
   for (const skillName of skillNames) {
     args.push("--skill", skillName);
   }
@@ -142,7 +169,7 @@ function buildSkillsAddCommand(
   return {
     command,
     args,
-    description: `Install selected skills from ${source}`,
+    description: `Install selected skills from ${resolvedSource}`,
   };
 }
 

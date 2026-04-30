@@ -18,13 +18,35 @@ Use the `frontend-layout-extractor` skill to analyze the source code at the targ
 
 Use the `frontend-experience-extractor` skill to analyze the same source code.
 
+- Replicate and extend the existing UI with fidelity to the real project design system.
+- Treat `layout.md` as the structural source of truth and `experience.md` as the behavioral source of truth.
+- Use `frontend-style-extractor` to search the codebase for the real reusable tokens, primitives, and composition patterns before writing UI code.
+- Use tokens from `specs/ui/style-guide.md` instead of hardcoded color, typography, or spacing values.
+- Extend the component libraries already present in the project instead of rewriting them from scratch.
+- Detect the correct reusable component path before creating shared UI files.
+- Add an ADR before introducing a new UI dependency such as an animation, component, or icon library.
+- Keep `specs/ui/style-guide.md` current when analysis discovers new tokens or patterns.
+
 - **Goal**: Produce an `experience.md` file that captures user flows, micro-interactions, state transitions, validation feedback, and conditional visibility or authorization logic.
 - **Constraint**: This phase focuses on "how it feels" and the behavioral logic, including who sees what and when, while `layout.md` remains the source of structural field parity.
 - **Output**: `specs/features/<feature-name>/experience.md`.
 
-### Phase 3 — Visual Implementation (UI)
+### Phase 3 — Design System Extraction (Style)
 
-Use the `frontend-ui-generator` skill to build the interface based on both the `layout.md` and `experience.md` files, ensuring strict adherence to the project's design system.
+Use the `frontend-style-extractor` skill on the target frontend to generate or update `specs/ui/style-guide.md` from the existing design system.
+
+- **Goal**: Identify reusable design tokens, shared primitives, composition patterns, and visual conventions already present in the project.
+- **Constraint**: Do not invent tokens or infer visual rules that are not supported by the existing frontend.
+- **Output**: `specs/ui/style-guide.md`.
+
+### Phase 4 — Visual Implementation (UI)
+
+- Do not skip the layout or experience extraction phases because the task looks small.
+- Do not skip the `frontend-style-extractor` phase even when `specs/ui/style-guide.md` does not exist yet.
+- Do not invent design tokens or composition patterns that are not supported by the existing frontend.
+- Do not finish a UI task without acceptance criteria and the relevant spec updates in `specs/features/`.
+
+Use the `frontend-ui-generator` skill to build the interface based on `layout.md`, `experience.md`, and the extracted `style-guide.md`, ensuring strict adherence to the project's design system.
 
 - **Style Guide**: Ensure `specs/ui/style-guide.md` is updated with current tokens.
 - **Implementation**: Replicate the exact structure and behavior.

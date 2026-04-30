@@ -78,6 +78,7 @@ describe("capabilities", () => {
       "clean-ddd-hexagonal",
       "frontend-layout-extractor",
       "frontend-experience-extractor",
+      "frontend-style-extractor",
       "frontend-ui-generator",
       "specs-extractor",
       "specs-interpreter",
