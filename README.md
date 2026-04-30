@@ -4,59 +4,41 @@
 
 The Aircury AI Framework is a meta-framework for AI-assisted software engineering. It defines how AI agents should think, plan, and deliver code across all Aircury projects while separating a shared workflow constitution from installable capabilities.
 
-For an operator-focused manual built around concrete workflows and use cases, see [`docs/framework-playbook.md`](docs/framework-playbook.md).
+The framework combines a small core workflow constitution with installable standards modules. The canonical source of truth for behavior is always `specs/features/`, regardless of whether a task uses `plan-build`, OpenSpec, Spec Kit, or a direct implementation flow.
 
-For most tasks, no workflow framework is needed at all. If a change is well-understood and clearly scoped, `plan-build` — the default mode — is sufficient: describe the task, let the agent plan and implement it. Adding structured workflows to a simple, clear task is overkill.
+## Why Aircury
 
-The frameworks exist for when they are genuinely needed. Three open-source tools inform this layer:
+Most AI coding setups are either too loose or too heavy. A plain agent can move fast, but it usually forgets project rules, skips documentation, and leaves no durable behavior record. A formal workflow can improve discipline, but it can also make small changes unnecessarily slow.
 
-- **[OpenSpec](https://github.com/Fission-AI/OpenSpec/)** — a lightweight spec-driven development workflow built around a fast propose → apply → complete cycle.
-- **[Spec Kit](https://github.com/github/spec-kit)** — a formal specification toolkit with structured steps for requirement writing, clarification, planning, and consistency analysis.
-- **[Airsync](https://github.com/aircury/airsync)** — a collaborative memory system for AI agents and teams with a three-layer knowledge lifecycle (INBOX → PUBLISHED → ARCHIVED) that ensures only vetted, high-quality knowledge reaches the shared team memory.
+Aircury sits between those extremes. It gives agents a routing layer that chooses the right level of structure for the task:
 
-Note that the specs themselves — the living `specs/features/` records of system behavior — are independent of these frameworks. They accumulate regardless of which workflow mode produced them, and serve as the canonical source of truth whether the task went through `plan-build`, `open-spec`, or `spec-kit`.
+- Use `plan-build` for clear day-to-day changes.
+- Use OpenSpec when a change needs proposal, implementation, and completion artifacts.
+- Use Spec Kit when requirements need formal clarification and planning before code.
+- Always converge on `specs/features/` so behavior knowledge survives beyond the current chat.
 
----
+## What This Framework Adds
 
-## Why combine them?
+Aircury is not just a collection of prompts. It installs a project operating system for AI-assisted delivery:
 
-OpenSpec and Spec Kit solve different problems and operate at different levels of formality.
+- **One source of truth**: observable behavior is captured in `specs/features/`, independent of the workflow that produced it.
+- **Workflow routing**: agents recommend the lightest safe mode instead of forcing every task through the same process.
+- **Project-scoped rules**: generated `FRAMEWORK.md` and `AGENTS.md` make standards explicit for every future AI session.
+- **Composable standards**: teams can enable ADRs, DDD, hexagonal architecture, testing, frontend, logging, error handling, memory, and token-efficiency modules.
+- **Skill wiring**: curated skill groups are installed through `npx skills add`, so workflows are executable rather than only documented.
+- **Reduced intention debt**: ADRs, specs, and optional Airsync memory preserve why decisions were made, not just what code changed.
 
-**OpenSpec** is optimised for speed and momentum. Its `propose → apply → complete` cycle lets a developer move from idea to implementation quickly, with just enough structure to stay aligned. It is the right tool when the problem is understood and the team needs to ship.
+The result is a setup where agents know how to work, what to protect, when to ask for structure, and where to leave durable project knowledge.
 
-**Spec Kit** is optimised for correctness before commitment. Its `specify → clarify → plan → analyse → tasks → implement` pipeline front-loads requirement quality and cross-artifact consistency. It prevents the expensive class of bugs that come from building the wrong thing — especially in features that cross bounded contexts or involve formal acceptance criteria.
+## Documentation
 
-Used alone, each framework has a gap:
+| Document | Purpose |
+|---|---|
+| [`docs/implementation.md`](docs/implementation.md) | How the installer works, what it writes, and how to implement the framework in a project. |
+| [`docs/playbook.md`](docs/playbook.md) | Practical examples for choosing workflow modes and using the installed skills. |
+| [`docs/contribution.md`](docs/contribution.md) | How to contribute modules, templates, skills, and the download/install wiring. |
 
-- OpenSpec can move too fast when the problem is still ambiguous, leading to re-work.
-- Spec Kit can feel heavy for routine changes where the solution is already clear.
-
-**The Aircury meta-framework routes between them** based on the complexity and ambiguity of the task. A well-understood fix goes straight to OpenSpec. A new cross-cutting feature goes through Spec Kit. The agent analyses the request, recommends a path, and asks before acting.
-
----
-
-## What this framework adds
-
-Beyond routing, this framework provides two layers:
-
-- **Core workflow constitution** — meta-agent routing, living specs, and the rule that all workflow modes converge on `specs/features/`.
-- **Installable capabilities** — selectable bundles that can add project rules, starter files, and installable skills.
-
-The default profile enables:
-
-- **Architecture Decision Records (ADRs)** — agents persist material architectural and workflow decisions in `specs/decisions/` to reduce intention debt.
-- **Hexagonal Architecture** — every external dependency sits behind a port. Framework code is an adapter, never the core.
-- **Domain-Driven Design** — aggregates, value objects, entities, and domain events modeled around business behavior, not tables or screens.
-- **Testing** — includes TDD by default, with frontend defaults for Vitest, Testing Library, and Playwright, and backend expectations for unit and integration coverage.
-- **Token Efficiency** — keeps project sessions terse by default and pairs the generated rules with the `caveman` skill.
-
-This keeps the framework opinionated by default without forcing every team to adopt the same architectural or testing standards forever.
-
-The result is an agent that knows not just *how* to work, but *what to protect* while doing so.
-
----
-
-## Installation
+## Quick Install
 
 Run the installer from any project directory (or your home directory for a global setup):
 
@@ -66,7 +48,7 @@ bunx @aircury/ai-framework
 npx @aircury/ai-framework
 ```
 
-The interactive TUI will ask:
+The TUI asks for:
 
 1. **Scope** — `Local` to configure the current project, `Global` to configure your machine.
 2. **AI tools** — select the tool-specific integrations you want.
@@ -75,12 +57,14 @@ The interactive TUI will ask:
 
 The installer writes all required configuration files, starter spec folders, and agent instructions to the right locations for each tool. Skills are installed through the standard `npx skills add ...` flow so they remain tracked by the skills ecosystem and can be updated later with `npx skills update`. Capability installation is driven by a single catalog in `src/capabilities.ts`, so project rules and installable skills are selected through the same flow. If files already exist you can choose to skip them or overwrite them.
 
-### What gets installed
+## What It Installs
 
-| Scope | Installed outputs |
-|-------|-------------------|
-| Local | `FRAMEWORK.md`, `AGENTS.md`, `.aircury/framework.config.json`, `specs/features/README.md`, optional `specs/decisions/README.md`, plus selected tool-specific files; skills installed via `npx skills` |
-| Global | Skills installed via `npx skills` for the selected agents |
+| Scope | Outputs |
+|---|---|
+| Local | `FRAMEWORK.md`, `AGENTS.md`, `.aircury/framework.config.json`, starter `specs/` folders, optional tool files, selected skills, and a `.gitignore` entry for `specs/changes/`. |
+| Global | Selected skills for the chosen global agent integrations. |
+
+## Core Concepts
 
 ### Capabilities
 
@@ -147,3 +131,7 @@ When the local `token-efficiency` capability is enabled, the installer also adds
 For most day-to-day work, `plan-build` is sufficient. Reach for `open-spec` or `spec-kit` when the problem size or ambiguity warrants the extra structure.
 
 The agent recommends a mode and asks before starting. The user always decides.
+
+See [`docs/playbook.md`](docs/playbook.md) for concrete prompts and examples.
+
+Use [`docs/contribution.md`](docs/contribution.md) before adding modules, skills, or installer wiring.
