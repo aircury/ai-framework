@@ -126,3 +126,7 @@ If conflicts are found, the user chooses:
 - `Overwrite all`: replace generated files with the new rendered content.
 
 The installer never deletes project code.
+
+## Next Step
+
+For practical workflow examples and real use cases, see [`playbook.md`](playbook.md).
