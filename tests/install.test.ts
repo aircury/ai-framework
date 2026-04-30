@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   checkConflicts,
+  getAircurySkillsSource,
   getGlobalCommands,
   getGlobalFiles,
   getLocalCommands,
@@ -21,6 +22,9 @@ function getFileByPath(files: InstallFile[], path: string): InstallFile {
   }
   return file;
 }
+
+const aircurySkillsSource = getAircurySkillsSource();
+const aircurySkillsDescription = `Install selected skills from ${aircurySkillsSource}`;
 
 describe("getLocalFiles", () => {
   it("always includes FRAMEWORK.md and AGENTS.md", () => {
@@ -145,11 +149,22 @@ describe("frontend module integration", () => {
     expect(paths).toContain("specs/ui/frontend-workflow.md");
   });
 
+  it("requires searching the existing design system in the frontend workflow", () => {
+    const files = getLocalFiles([], ["frontend"]);
+    const workflow = getFileByPath(files, "specs/ui/frontend-workflow.md");
+    expect(workflow.content).toContain(
+      "Run `frontend-style-extractor` on the target frontend",
+    );
+  });
+
   it("adds frontend-specific check to FRAMEWORK.md when enabled", () => {
     const files = getLocalFiles([], ["frontend"]);
     const framework = files.find((f) => f.path === "FRAMEWORK.md");
     expect(framework?.content).toContain(
       "Visual modifications align with the project design system tokens",
+    );
+    expect(framework?.content).toContain(
+      "extracted from the existing frontend with `frontend-style-extractor`",
     );
   });
 
@@ -157,6 +172,7 @@ describe("frontend module integration", () => {
     const files = getLocalFiles([], ["frontend"]);
     const framework = getFileByPath(files, "FRAMEWORK.md");
     expect(framework.content).toContain("frontend-experience-extractor");
+    expect(framework.content).toContain("frontend-style-extractor");
   });
 
   it("includes terse-response guidance in FRAMEWORK.md when token-efficiency is enabled", () => {
@@ -189,7 +205,7 @@ describe("getLocalCommands", () => {
         "-y",
         "skills",
         "add",
-        "aircury/ai-framework",
+        aircurySkillsSource,
         "--skill",
         "open-spec-propose",
         "--skill",
@@ -217,6 +233,14 @@ describe("getLocalCommands", () => {
         "--skill",
         "commit-changes",
         "--skill",
+        "frontend-layout-extractor",
+        "--skill",
+        "frontend-experience-extractor",
+        "--skill",
+        "frontend-style-extractor",
+        "--skill",
+        "frontend-ui-generator",
+        "--skill",
         "specs-extractor",
         "--skill",
         "specs-interpreter",
@@ -224,7 +248,7 @@ describe("getLocalCommands", () => {
         "universal",
         "-y",
       ],
-      description: "Install selected skills from aircury/ai-framework",
+      description: aircurySkillsDescription,
     });
     expect(commands[1]).toEqual({
       command: "npx",
@@ -301,7 +325,7 @@ describe("getLocalCommands", () => {
       "-y",
       "skills",
       "add",
-      "aircury/ai-framework",
+      aircurySkillsSource,
       "--skill",
       "commit-changes",
       "-a",
@@ -365,7 +389,7 @@ describe("getLocalCommands", () => {
         "-y",
         "skills",
         "add",
-        "aircury/ai-framework",
+        aircurySkillsSource,
         "--skill",
         "specs-extractor",
         "--skill",
@@ -374,7 +398,33 @@ describe("getLocalCommands", () => {
         "universal",
         "-y",
       ],
-      description: "Install selected skills from aircury/ai-framework",
+      description: aircurySkillsDescription,
+    });
+  });
+
+  it("installs the frontend skills from the Aircury source", () => {
+    const commands = getLocalCommands([], ["frontend"]);
+    expect(commands).toHaveLength(1);
+    expect(commands[0]).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        aircurySkillsSource,
+        "--skill",
+        "frontend-layout-extractor",
+        "--skill",
+        "frontend-experience-extractor",
+        "--skill",
+        "frontend-style-extractor",
+        "--skill",
+        "frontend-ui-generator",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description: aircurySkillsDescription,
     });
   });
 });
@@ -387,7 +437,7 @@ describe("getGlobalCommands", () => {
       "-y",
       "skills",
       "add",
-      "aircury/ai-framework",
+      aircurySkillsSource,
       "--skill",
       "commit-changes",
       "-a",
@@ -404,7 +454,7 @@ describe("getGlobalCommands", () => {
       "-y",
       "skills",
       "add",
-      "aircury/ai-framework",
+      aircurySkillsSource,
       "--skill",
       "commit-changes",
       "-a",
@@ -414,6 +464,33 @@ describe("getGlobalCommands", () => {
       "-g",
       "-y",
     ]);
+  });
+
+  it("installs the frontend skills globally from the Aircury source", () => {
+    const commands = getGlobalCommands([], ["frontend"]);
+    expect(commands).toHaveLength(1);
+    expect(commands[0]).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        aircurySkillsSource,
+        "--skill",
+        "frontend-layout-extractor",
+        "--skill",
+        "frontend-experience-extractor",
+        "--skill",
+        "frontend-style-extractor",
+        "--skill",
+        "frontend-ui-generator",
+        "-a",
+        "universal",
+        "-g",
+        "-y",
+      ],
+      description: aircurySkillsDescription,
+    });
   });
 });
 

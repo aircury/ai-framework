@@ -28,6 +28,31 @@ export interface InstallOptions {
 const CURRENT_AIRCURY_AGENTS_MARKER = "## Session Checklist";
 const LEGACY_AIRCURY_AGENTS_SENTENCE =
   "All agents contributing to this repository MUST read and apply FRAMEWORK.md before doing any work. It is not optional and it is not advisory.";
+const AIRCURY_SKILLS_SOURCE = "aircury/ai-framework";
+
+function getLocalAircurySkillsSource(): string | null {
+  const root = join(import.meta.dir, "..");
+
+  if (existsSync(join(root, "src")) && existsSync(join(root, "skills"))) {
+    return root;
+  }
+
+  return null;
+}
+
+export function getAircurySkillsSource(): string {
+  return (
+    process.env.AIRCURY_SKILLS_SOURCE?.trim() ||
+    getLocalAircurySkillsSource() ||
+    AIRCURY_SKILLS_SOURCE
+  );
+}
+
+function resolveSkillSource(source: string): string {
+  if (source !== AIRCURY_SKILLS_SOURCE) return source;
+
+  return getAircurySkillsSource();
+}
 
 function getSpecsFiles(moduleIds: StandardModuleId[]): InstallFile[] {
   const files: InstallFile[] = [
@@ -82,13 +107,14 @@ Use this reference when a frontend task is substantial enough that the short rul
 
 1. Run \`frontend-layout-extractor\` and save the result to \`specs/features/<feature-name>/layout.md\`.
 2. Run \`frontend-experience-extractor\` and save the result to \`specs/features/<feature-name>/experience.md\`.
-3. Generate or update \`specs/ui/style-guide.md\` from the analyzed frontend.
-4. Run \`frontend-ui-generator\` using \`layout.md\`, \`experience.md\`, and the current style guide.
+3. Run \`frontend-style-extractor\` on the target frontend and generate or update \`specs/ui/style-guide.md\` from the existing design system.
+4. Run \`frontend-ui-generator\` using \`layout.md\`, \`experience.md\`, and the extracted style guide.
 5. Update the canonical feature spec in \`specs/features/\` before finishing the task.
 
 ## Fidelity rules
 
 - Match the existing product structure, behavior, and visual language before introducing new patterns.
+- Use \`frontend-style-extractor\` to search the codebase for reusable design tokens, shared primitives, and repeated composition patterns before writing new UI code.
 - Prefer project tokens and existing component primitives over hardcoded values.
 - Treat \`layout.md\` as the structural source of truth and \`experience.md\` as the behavioral source of truth.
 - Extend the component libraries already used by the project instead of reimplementing them from scratch.
@@ -120,6 +146,7 @@ For each meaningful UI change, the corresponding feature spec should capture:
 ## Restrictions
 
 - Do not skip extraction phases because the task appears small.
+- Do not skip the \`frontend-style-extractor\` phase even when \`specs/ui/style-guide.md\` does not exist yet.
 - Do not invent design tokens, spacing scales, or composition patterns that are not supported by the existing frontend.
 - Do not use hardcoded values when an equivalent token or shared primitive already exists.
 - Do not introduce a new UI dependency such as an icon, animation, or component library without an ADR.
@@ -208,7 +235,8 @@ function buildSkillsAddCommand(
 ): InstallCommand | null {
   if (agents.length === 0 || skillNames.length === 0) return null;
 
-  const args = ["-y", "skills", "add", source];
+  const resolvedSource = resolveSkillSource(source);
+  const args = ["-y", "skills", "add", resolvedSource];
   for (const skillName of skillNames) {
     args.push("--skill", skillName);
   }
@@ -223,7 +251,7 @@ function buildSkillsAddCommand(
   return {
     command: "npx",
     args,
-    description: `Install selected skills from ${source}`,
+    description: `Install selected skills from ${resolvedSource}`,
   };
 }
 

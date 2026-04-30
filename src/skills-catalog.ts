@@ -97,7 +97,7 @@ export const SKILL_GROUPS: SkillGroup[] = [
     label: "Frontend",
     description: "Skills for UI layout extraction and implementation",
     kind: "aircury",
-    defaultSelected: false,
+    defaultSelected: true,
     scopes: ["local", "global"],
   },
   {
@@ -319,9 +319,20 @@ export const SKILLS: SkillDefinition[] = [
     scopes: ["local", "global"],
   },
   {
+    id: "frontend-style-extractor",
+    label: "Frontend Style Extractor",
+    description:
+      "Extract the existing app design system into a reusable style guide",
+    source: "aircury/ai-framework",
+    skillName: "frontend-style-extractor",
+    groupId: "frontend",
+    scopes: ["local", "global"],
+  },
+  {
     id: "frontend-ui-generator",
     label: "Frontend UI Generator",
-    description: "Generate UI implementation from layout and style guide",
+    description:
+      "Generate UI implementation from extracted layout, behavior, and design-system guidance",
     source: "aircury/ai-framework",
     skillName: "frontend-ui-generator",
     groupId: "frontend",

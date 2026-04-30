@@ -8,8 +8,8 @@ For substantial frontend work, read `specs/ui/frontend-workflow.md` before imple
 
 1. Run `frontend-layout-extractor` to produce `specs/features/<feature-name>/layout.md`.
 2. Run `frontend-experience-extractor` to produce `specs/features/<feature-name>/experience.md`.
-3. Run `frontend-ui-generator` using both specs.
-4. Generate or update `specs/ui/style-guide.md` from the analysis before finishing the task.
+3. Run `frontend-style-extractor` on the target frontend to generate or update `specs/ui/style-guide.md` from the existing design system.
+4. Run `frontend-ui-generator` using both specs and the extracted style guide.
 
 ### Required outputs
 
@@ -21,6 +21,7 @@ For substantial frontend work, read `specs/ui/frontend-workflow.md` before imple
 
 - Replicate and extend the existing UI with fidelity to the real project design system.
 - Treat `layout.md` as the structural source of truth and `experience.md` as the behavioral source of truth.
+- Use `frontend-style-extractor` to search the codebase for the real reusable tokens, primitives, and composition patterns before writing UI code.
 - Use tokens from `specs/ui/style-guide.md` instead of hardcoded color, typography, or spacing values.
 - Extend the component libraries already present in the project instead of rewriting them from scratch.
 - Detect the correct reusable component path before creating shared UI files.
@@ -30,6 +31,7 @@ For substantial frontend work, read `specs/ui/frontend-workflow.md` before imple
 ### Restrictions
 
 - Do not skip the layout or experience extraction phases because the task looks small.
+- Do not skip the `frontend-style-extractor` phase even when `specs/ui/style-guide.md` does not exist yet.
 - Do not invent design tokens or composition patterns that are not supported by the existing frontend.
 - Do not finish a UI task without acceptance criteria and the relevant spec updates in `specs/features/`.
 

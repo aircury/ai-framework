@@ -101,6 +101,15 @@ describe("templates", () => {
       );
     });
 
+    it("adds design-system search guidance when the frontend module is enabled", () => {
+      expect(generateFramework(["frontend"])).toContain(
+        "extracted from the existing frontend with `frontend-style-extractor`",
+      );
+      expect(generateFramework(["frontend"])).toContain(
+        "Run `frontend-style-extractor` on the target frontend",
+      );
+    });
+
     it("keeps AGENTS.md stable across non-token-efficiency module selections", () => {
       expect(generateAgents(["decision-records"])).toBe(
         generateAgents(["code-style"]),

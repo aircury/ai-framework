@@ -16,6 +16,7 @@ describe("skills catalog", () => {
       "resilience",
       "testing",
       "architecture",
+      "frontend",
       "specs",
     ]);
   });
@@ -29,6 +30,7 @@ describe("skills catalog", () => {
       "resilience",
       "testing",
       "architecture",
+      "frontend",
       "specs",
       "language",
     ]);
@@ -47,6 +49,7 @@ describe("skills catalog", () => {
       "resilience",
       "testing",
       "architecture",
+      "frontend",
       "specs",
       "language",
     ]);
@@ -58,10 +61,10 @@ describe("skills catalog", () => {
     );
   });
 
-  it("adds the frontend group when the frontend module is enabled", () => {
+  it("keeps the frontend group selected when the frontend module is enabled", () => {
     expect(
       getInitialSkillGroupIds("local", { moduleIds: ["frontend"] }),
-    ).toEqual([...getDefaultSkillGroupIds("local"), "frontend"]);
+    ).toEqual(getDefaultSkillGroupIds("local"));
   });
 
   it("combines British English and frontend module pre-selections", () => {
@@ -70,7 +73,7 @@ describe("skills catalog", () => {
         britishEnglish: true,
         moduleIds: ["frontend"],
       }),
-    ).toEqual([...getDefaultSkillGroupIds("local"), "language", "frontend"]);
+    ).toEqual([...getDefaultSkillGroupIds("local"), "language"]);
   });
 
   it("adds the token-efficiency group when the module is enabled", () => {
@@ -151,6 +154,7 @@ describe("skills catalog", () => {
     ).toEqual([
       "frontend-layout-extractor",
       "frontend-experience-extractor",
+      "frontend-style-extractor",
       "frontend-ui-generator",
     ]);
   });
