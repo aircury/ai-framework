@@ -8,11 +8,10 @@ import {
   getGlobalFiles,
   getLocalCommands,
   getLocalFiles,
-  mergeFrameworkReferenceIntoAgents,
   type InstallFile,
+  mergeFrameworkReferenceIntoAgents,
   writeFile,
 } from "../src/install";
-import { getDefaultSkillGroupIds } from "../src/skills-catalog";
 
 function getFileByPath(files: InstallFile[], path: string): InstallFile {
   const file = files.find((entry) => entry.path === path);
@@ -20,6 +19,17 @@ function getFileByPath(files: InstallFile[], path: string): InstallFile {
     throw new Error(`Expected install file at ${path}`);
   }
   return file;
+}
+
+function getCommandBySource(
+  commands: ReturnType<typeof getLocalCommands>,
+  source: string,
+) {
+  const command = commands.find((entry) => entry.args.includes(source));
+  if (!command) {
+    throw new Error(`Expected install command for ${source}`);
+  }
+  return command;
 }
 
 describe("getLocalFiles", () => {
@@ -180,122 +190,50 @@ describe("getGlobalFiles", () => {
 });
 
 describe("getLocalCommands", () => {
-  it("installs the default local skill groups for universal", () => {
-    const commands = getLocalCommands([], getDefaultSkillGroupIds("local"));
-    expect(commands).toHaveLength(5);
-    expect(commands[0]).toEqual({
-      command: "npx",
-      args: [
-        "-y",
-        "skills",
-        "add",
-        "aircury/ai-framework",
-        "--skill",
-        "open-spec-propose",
-        "--skill",
-        "open-spec-apply",
-        "--skill",
-        "open-spec-complete",
-        "--skill",
-        "open-spec-explore",
-        "--skill",
-        "spec-kit-specify",
-        "--skill",
-        "spec-kit-clarify",
-        "--skill",
-        "spec-kit-plan",
-        "--skill",
-        "spec-kit-analyse",
-        "--skill",
-        "spec-kit-tasks",
-        "--skill",
-        "spec-kit-implement",
-        "--skill",
-        "spec-kit-checklist",
-        "--skill",
-        "airsync",
-        "--skill",
-        "commit-changes",
-        "--skill",
-        "specs-extractor",
-        "--skill",
-        "specs-interpreter",
-        "-a",
-        "universal",
-        "-y",
-      ],
-      description: "Install selected skills from aircury/ai-framework",
-    });
-    expect(commands[1]).toEqual({
-      command: "npx",
-      args: [
-        "-y",
-        "skills",
-        "add",
+  it("installs the skills derived from the default capabilities for universal", () => {
+    const commands = getLocalCommands([]);
+
+    expect(commands).toHaveLength(6);
+    const aircury = getCommandBySource(commands, "aircury/ai-framework");
+    expect(aircury.args).toContain("open-spec-propose");
+    expect(aircury.args).toContain("spec-kit-specify");
+    expect(aircury.args).toContain("airsync");
+    expect(aircury.args).toContain("commit-changes");
+    expect(aircury.args).toContain("frontend-layout-extractor");
+    expect(aircury.args).toContain("specs-extractor");
+    expect(
+      getCommandBySource(
+        commands,
         "https://github.com/aj-geddes/useful-ai-prompts",
-        "--skill",
-        "logging-best-practices",
-        "-a",
-        "universal",
-        "-y",
-      ],
-      description:
-        "Install selected skills from https://github.com/aj-geddes/useful-ai-prompts",
-    });
-    expect(commands[2]).toEqual({
-      command: "npx",
-      args: [
-        "-y",
-        "skills",
-        "add",
-        "https://github.com/ccheney/robust-skills",
-        "--skill",
-        "clean-ddd-hexagonal",
-        "-a",
-        "universal",
-        "-y",
-      ],
-      description:
-        "Install selected skills from https://github.com/ccheney/robust-skills",
-    });
-    expect(commands[3]).toEqual({
-      command: "npx",
-      args: [
-        "-y",
-        "skills",
-        "add",
+      ).args,
+    ).toContain("logging-best-practices");
+    expect(
+      getCommandBySource(commands, "https://github.com/ccheney/robust-skills")
+        .args,
+    ).toContain("clean-ddd-hexagonal");
+    expect(
+      getCommandBySource(
+        commands,
         "https://github.com/currents-dev/playwright-best-practices-skill",
-        "--skill",
-        "playwright-best-practices",
-        "-a",
-        "universal",
-        "-y",
-      ],
-      description:
-        "Install selected skills from https://github.com/currents-dev/playwright-best-practices-skill",
-    });
-    expect(commands[4]).toEqual({
-      command: "npx",
-      args: [
-        "-y",
-        "skills",
-        "add",
-        "https://github.com/wshobson/agents",
-        "--skill",
-        "e2e-testing-patterns",
-        "--skill",
-        "error-handling-patterns",
-        "-a",
-        "universal",
-        "-y",
-      ],
-      description:
-        "Install selected skills from https://github.com/wshobson/agents",
-    });
+      ).args,
+    ).toContain("playwright-best-practices");
+    expect(
+      getCommandBySource(commands, "https://github.com/juliusbrussee/caveman")
+        .args,
+    ).toContain("caveman");
+    expect(
+      getCommandBySource(commands, "https://github.com/wshobson/agents").args,
+    ).toContain("error-handling-patterns");
+    expect(
+      getCommandBySource(commands, "https://github.com/wshobson/agents").args,
+    ).toContain("e2e-testing-patterns");
   });
 
-  it("installs multiple selected agents in one command", () => {
-    const commands = getLocalCommands(["claude-code", "gemini-cli"], ["git"]);
+  it("installs multiple selected agents in each derived command", () => {
+    const commands = getLocalCommands(
+      ["claude-code", "gemini-cli"],
+      ["decision-records"],
+    );
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toEqual([
       "-y",
@@ -303,7 +241,35 @@ describe("getLocalCommands", () => {
       "add",
       "aircury/ai-framework",
       "--skill",
+      "open-spec-propose",
+      "--skill",
+      "open-spec-apply",
+      "--skill",
+      "open-spec-complete",
+      "--skill",
+      "open-spec-explore",
+      "--skill",
+      "spec-kit-specify",
+      "--skill",
+      "spec-kit-clarify",
+      "--skill",
+      "spec-kit-plan",
+      "--skill",
+      "spec-kit-analyse",
+      "--skill",
+      "spec-kit-tasks",
+      "--skill",
+      "spec-kit-implement",
+      "--skill",
+      "spec-kit-checklist",
+      "--skill",
+      "airsync",
+      "--skill",
       "commit-changes",
+      "--skill",
+      "specs-extractor",
+      "--skill",
+      "specs-interpreter",
       "-a",
       "universal",
       "-a",
@@ -315,105 +281,60 @@ describe("getLocalCommands", () => {
   });
 
   it("installs the UK business English skill from its external source", () => {
-    const commands = getLocalCommands([], ["language"]);
-    expect(commands).toHaveLength(1);
-    expect(commands[0]).toEqual({
-      command: "npx",
-      args: [
-        "-y",
-        "skills",
-        "add",
-        "https://github.com/jezweb/claude-skills",
-        "--skill",
-        "uk-business-english",
-        "-a",
-        "universal",
-        "-y",
-      ],
-      description:
-        "Install selected skills from https://github.com/jezweb/claude-skills",
-    });
+    const commands = getLocalCommands([], [], { britishEnglish: true });
+    expect(
+      getCommandBySource(commands, "https://github.com/jezweb/claude-skills")
+        .args,
+    ).toContain("uk-business-english");
   });
 
-  it("installs the caveman skill from its external source", () => {
+  it("installs the caveman skill when token-efficiency capability is selected", () => {
     const commands = getLocalCommands([], ["token-efficiency"]);
-    expect(commands).toHaveLength(1);
-    expect(commands[0]).toEqual({
-      command: "npx",
-      args: [
-        "-y",
-        "skills",
-        "add",
-        "https://github.com/juliusbrussee/caveman",
-        "--skill",
-        "caveman",
-        "-a",
-        "universal",
-        "-y",
-      ],
-      description:
-        "Install selected skills from https://github.com/juliusbrussee/caveman",
-    });
+    expect(
+      getCommandBySource(commands, "https://github.com/juliusbrussee/caveman")
+        .args,
+    ).toContain("caveman");
+  });
+
+  it("installs capability-required skills without a separate skill selection", () => {
+    const commands = getLocalCommands([], ["frontend", "token-efficiency"]);
+
+    expect(commands).toHaveLength(2);
+    expect(commands[0].args).toContain("commit-changes");
+    expect(commands[0].args).toContain("frontend-layout-extractor");
+    expect(commands[0].args).toContain("frontend-experience-extractor");
+    expect(commands[0].args).toContain("frontend-ui-generator");
+    expect(commands[1].args).toContain("caveman");
   });
 
   it("installs the specs skills from the Aircury source", () => {
-    const commands = getLocalCommands([], ["specs"]);
+    const commands = getLocalCommands([], []);
     expect(commands).toHaveLength(1);
-    expect(commands[0]).toEqual({
-      command: "npx",
-      args: [
-        "-y",
-        "skills",
-        "add",
-        "aircury/ai-framework",
-        "--skill",
-        "specs-extractor",
-        "--skill",
-        "specs-interpreter",
-        "-a",
-        "universal",
-        "-y",
-      ],
-      description: "Install selected skills from aircury/ai-framework",
-    });
+    expect(commands[0].args).toContain("specs-extractor");
+    expect(commands[0].args).toContain("specs-interpreter");
   });
 });
 
 describe("getGlobalCommands", () => {
-  it("installs global skills for universal by default", () => {
-    const commands = getGlobalCommands([], ["git"]);
-    expect(commands).toHaveLength(1);
-    expect(commands[0].args).toEqual([
-      "-y",
-      "skills",
-      "add",
-      "aircury/ai-framework",
-      "--skill",
-      "commit-changes",
-      "-a",
-      "universal",
+  it("installs global skills for universal from selected capabilities", () => {
+    const commands = getGlobalCommands([], ["token-efficiency"]);
+    expect(commands).toHaveLength(2);
+    expect(getCommandBySource(commands, "aircury/ai-framework").args).toContain(
       "-g",
-      "-y",
-    ]);
+    );
+    expect(
+      getCommandBySource(commands, "https://github.com/juliusbrussee/caveman")
+        .args,
+    ).toContain("caveman");
   });
 
   it("creates a global skills install command for selected agents", () => {
-    const commands = getGlobalCommands(["claude-code"], ["git"]);
+    const commands = getGlobalCommands(["claude-code"], []);
     expect(commands).toHaveLength(1);
-    expect(commands[0].args).toEqual([
-      "-y",
-      "skills",
-      "add",
-      "aircury/ai-framework",
-      "--skill",
-      "commit-changes",
-      "-a",
-      "universal",
-      "-a",
-      "claude-code",
-      "-g",
-      "-y",
-    ]);
+    expect(commands[0].args).toContain("-a");
+    expect(commands[0].args).toContain("universal");
+    expect(commands[0].args).toContain("claude-code");
+    expect(commands[0].args).toContain("-g");
   });
 });
 
@@ -527,7 +448,10 @@ describe("writeFile", () => {
 });
 
 describe("mergeFrameworkReferenceIntoAgents", () => {
-  const frameworkReference = getFileByPath(getLocalFiles([]), "AGENTS.md").content;
+  const frameworkReference = getFileByPath(
+    getLocalFiles([]),
+    "AGENTS.md",
+  ).content;
 
   it("appends the framework reference when missing", () => {
     const merged = mergeFrameworkReferenceIntoAgents(
@@ -541,7 +465,10 @@ describe("mergeFrameworkReferenceIntoAgents", () => {
 
   it("does not duplicate the framework reference when already present", () => {
     const existing = `# Existing\n\nProject-specific instructions.\n\n${frameworkReference}`;
-    const merged = mergeFrameworkReferenceIntoAgents(existing, frameworkReference);
+    const merged = mergeFrameworkReferenceIntoAgents(
+      existing,
+      frameworkReference,
+    );
 
     expect(merged).toBe(existing.endsWith("\n") ? existing : `${existing}\n`);
   });

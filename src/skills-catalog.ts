@@ -8,7 +8,6 @@ export interface SkillGroup {
   label: string;
   description: string;
   kind: SkillGroupKind;
-  defaultSelected: boolean;
   scopes: SkillScope[];
 }
 
@@ -22,6 +21,22 @@ export interface SkillDefinition {
   scopes: SkillScope[];
 }
 
+export const REQUIRED_SKILL_GROUPS_BY_MODULE: Partial<
+  Record<StandardModuleId, string[]>
+> = {
+  "airsync-memory": ["airsync"],
+  ddd: ["architecture"],
+  "decision-records": ["airsync"],
+  "error-handling": ["resilience"],
+  frontend: ["frontend"],
+  "hexagonal-architecture": ["architecture"],
+  "structured-logging": ["resilience"],
+  testing: ["testing"],
+  "token-efficiency": ["token-efficiency"],
+};
+
+export const CORE_SKILL_GROUP_IDS = ["open-spec", "spec-kit", "git", "specs"];
+
 export const SKILL_GROUPS: SkillGroup[] = [
   {
     id: "open-spec",
@@ -29,7 +44,6 @@ export const SKILL_GROUPS: SkillGroup[] = [
     description:
       "Structured propose/apply/complete workflow for complex changes",
     kind: "aircury",
-    defaultSelected: true,
     scopes: ["local", "global"],
   },
   {
@@ -38,7 +52,6 @@ export const SKILL_GROUPS: SkillGroup[] = [
     description:
       "Formal specification workflow for feature definition and delivery",
     kind: "aircury",
-    defaultSelected: true,
     scopes: ["local", "global"],
   },
   {
@@ -46,7 +59,6 @@ export const SKILL_GROUPS: SkillGroup[] = [
     label: "Airsync",
     description: "Collaborative memory workflow for reusable team knowledge",
     kind: "aircury",
-    defaultSelected: true,
     scopes: ["local", "global"],
   },
   {
@@ -54,7 +66,6 @@ export const SKILL_GROUPS: SkillGroup[] = [
     label: "Git",
     description: "Focused git workflow helpers for atomic commits",
     kind: "aircury",
-    defaultSelected: true,
     scopes: ["local", "global"],
   },
   {
@@ -63,7 +74,6 @@ export const SKILL_GROUPS: SkillGroup[] = [
     description:
       "Curated external guidance for error handling and structured logging",
     kind: "external",
-    defaultSelected: true,
     scopes: ["local", "global"],
   },
   {
@@ -72,7 +82,6 @@ export const SKILL_GROUPS: SkillGroup[] = [
     description:
       "Curated testing guidance covering frontend tooling and end-to-end patterns",
     kind: "external",
-    defaultSelected: true,
     scopes: ["local", "global"],
   },
   {
@@ -81,7 +90,6 @@ export const SKILL_GROUPS: SkillGroup[] = [
     description:
       "Curated external architecture guidance for DDD and hexagonal design",
     kind: "external",
-    defaultSelected: true,
     scopes: ["local", "global"],
   },
   {
@@ -89,7 +97,6 @@ export const SKILL_GROUPS: SkillGroup[] = [
     label: "Language",
     description: "UK business English guidance for project communication",
     kind: "external",
-    defaultSelected: false,
     scopes: ["local", "global"],
   },
   {
@@ -97,7 +104,6 @@ export const SKILL_GROUPS: SkillGroup[] = [
     label: "Frontend",
     description: "Skills for UI layout extraction and implementation",
     kind: "aircury",
-    defaultSelected: false,
     scopes: ["local", "global"],
   },
   {
@@ -106,7 +112,6 @@ export const SKILL_GROUPS: SkillGroup[] = [
     description:
       "Skills for extracting authoritative specs and designing re-implementations from them",
     kind: "aircury",
-    defaultSelected: true,
     scopes: ["local", "global"],
   },
   {
@@ -115,7 +120,6 @@ export const SKILL_GROUPS: SkillGroup[] = [
     description:
       "Caveman terse-response skill for token-efficient project sessions",
     kind: "external",
-    defaultSelected: false,
     scopes: ["local", "global"],
   },
 ];
@@ -371,42 +375,51 @@ export function getSkillGroups(
 }
 
 export function getDefaultSkillGroupIds(scope: SkillScope): string[] {
-  let selected = getSkillGroups(scope)
-    .filter((group) => group.defaultSelected)
-    .map((group) => group.id);
-
-  if (scope === "global" && !selected.includes("language")) {
-    selected = [...selected, "language"];
-  }
-
-  return selected;
+  return resolveSkillGroupIds(scope, {
+    moduleIds: [],
+  });
 }
 
-export function getInitialSkillGroupIds(
+export function getRequiredSkillGroupIdsForModules(
+  moduleIds?: StandardModuleId[],
+): string[] {
+  const required = new Set<string>();
+
+  for (const moduleId of moduleIds ?? []) {
+    for (const groupId of REQUIRED_SKILL_GROUPS_BY_MODULE[moduleId] ?? []) {
+      required.add(groupId);
+    }
+  }
+
+  return [...required];
+}
+
+export function resolveSkillGroupIds(
   scope: SkillScope,
   options?: { britishEnglish?: boolean; moduleIds?: StandardModuleId[] },
 ): string[] {
-  let selected = getDefaultSkillGroupIds(scope);
+  const availableGroupIds = new Set(
+    getSkillGroups(scope).map((group) => group.id),
+  );
+  const selected = new Set<string>();
 
-  if (options?.britishEnglish && !selected.includes("language")) {
-    selected = [...selected, "language"];
+  for (const groupId of CORE_SKILL_GROUP_IDS) {
+    if (availableGroupIds.has(groupId)) selected.add(groupId);
   }
 
-  if (
-    options?.moduleIds?.includes("frontend") &&
-    !selected.includes("frontend")
-  ) {
-    selected = [...selected, "frontend"];
+  if (options?.britishEnglish && availableGroupIds.has("language")) {
+    selected.add("language");
   }
 
-  if (
-    options?.moduleIds?.includes("token-efficiency") &&
-    !selected.includes("token-efficiency")
-  ) {
-    selected = [...selected, "token-efficiency"];
+  for (const groupId of getRequiredSkillGroupIdsForModules(
+    options?.moduleIds,
+  )) {
+    if (availableGroupIds.has(groupId)) selected.add(groupId);
   }
 
-  return selected;
+  return getSkillGroups(scope)
+    .map((group) => group.id)
+    .filter((groupId) => selected.has(groupId));
 }
 
 export function expandSkillGroups(

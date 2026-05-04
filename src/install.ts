@@ -2,8 +2,8 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import type { StandardModuleId, StandardModuleSelection } from "./framework";
-import { createFrameworkProfile } from "./framework";
-import { expandSkillGroups } from "./skills-catalog";
+import { createFrameworkProfile, normaliseModuleIds } from "./framework";
+import { expandSkillGroups, resolveSkillGroupIds } from "./skills-catalog";
 import { generateAgents, generateFramework } from "./templates";
 
 export type Tool = "claude-code" | "gemini-cli";
@@ -254,10 +254,16 @@ function buildSkillsCommands(
 
 export function getLocalCommands(
   tools: Tool[],
-  selectedSkillGroupIds: string[],
+  moduleIds?: StandardModuleSelection[],
+  options?: InstallOptions,
 ): InstallCommand[] {
+  const resolvedSkillGroupIds = resolveSkillGroupIds("local", {
+    britishEnglish: options?.britishEnglish,
+    moduleIds: normaliseModuleIds(moduleIds),
+  });
+
   return buildSkillsCommands(
-    selectedSkillGroupIds,
+    resolvedSkillGroupIds,
     getLocalSkillAgents(tools),
     false,
   );
@@ -265,10 +271,16 @@ export function getLocalCommands(
 
 export function getGlobalCommands(
   tools: Tool[],
-  selectedSkillGroupIds: string[],
+  moduleIds?: StandardModuleSelection[],
+  options?: InstallOptions,
 ): InstallCommand[] {
+  const resolvedSkillGroupIds = resolveSkillGroupIds("global", {
+    britishEnglish: options?.britishEnglish,
+    moduleIds: normaliseModuleIds(moduleIds),
+  });
+
   return buildSkillsCommands(
-    selectedSkillGroupIds,
+    resolvedSkillGroupIds,
     getGlobalSkillAgents(tools),
     true,
   );

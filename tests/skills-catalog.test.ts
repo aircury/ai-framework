@@ -2,81 +2,99 @@ import { describe, expect, it } from "bun:test";
 import {
   expandSkillGroups,
   getDefaultSkillGroupIds,
-  getInitialSkillGroupIds,
+  getRequiredSkillGroupIdsForModules,
   getSkillGroups,
+  resolveSkillGroupIds,
 } from "../src/skills-catalog";
 
 describe("skills catalog", () => {
-  it("preselects the Aircury groups by default", () => {
+  it("installs the core workflow skill groups by default", () => {
     expect(getDefaultSkillGroupIds("local")).toEqual([
       "open-spec",
       "spec-kit",
-      "airsync",
       "git",
-      "resilience",
-      "testing",
-      "architecture",
       "specs",
     ]);
   });
 
-  it("preselects the language group by default for global installs", () => {
-    expect(getDefaultSkillGroupIds("global")).toEqual([
-      "open-spec",
-      "spec-kit",
-      "airsync",
-      "git",
-      "resilience",
-      "testing",
-      "architecture",
-      "specs",
-      "language",
-    ]);
-  });
-
-  it("keeps token-efficiency opt-in at the skill-group level by default", () => {
+  it("does not install capability skills without selected capabilities", () => {
     expect(getDefaultSkillGroupIds("local")).not.toContain("token-efficiency");
+    expect(getDefaultSkillGroupIds("local")).not.toContain("frontend");
+    expect(getDefaultSkillGroupIds("local")).not.toContain("testing");
   });
 
-  it("adds the language group to initial selection when British English is enabled", () => {
-    expect(getInitialSkillGroupIds("local", { britishEnglish: true })).toEqual([
+  it("adds the language group when British English is enabled", () => {
+    expect(resolveSkillGroupIds("local", { britishEnglish: true })).toEqual([
       "open-spec",
       "spec-kit",
-      "airsync",
       "git",
-      "resilience",
-      "testing",
-      "architecture",
-      "specs",
       "language",
+      "specs",
     ]);
   });
 
-  it("keeps the default initial selection when British English is disabled", () => {
-    expect(getInitialSkillGroupIds("local", { britishEnglish: false })).toEqual(
+  it("keeps the default skill groups when British English is disabled", () => {
+    expect(resolveSkillGroupIds("local", { britishEnglish: false })).toEqual(
       getDefaultSkillGroupIds("local"),
     );
   });
 
-  it("adds the frontend group when the frontend module is enabled", () => {
-    expect(
-      getInitialSkillGroupIds("local", { moduleIds: ["frontend"] }),
-    ).toEqual([...getDefaultSkillGroupIds("local"), "frontend"]);
+  it("derives the frontend group when the frontend capability is enabled", () => {
+    expect(resolveSkillGroupIds("local", { moduleIds: ["frontend"] })).toEqual([
+      "open-spec",
+      "spec-kit",
+      "git",
+      "frontend",
+      "specs",
+    ]);
   });
 
-  it("combines British English and frontend module pre-selections", () => {
+  it("combines British English and capability-derived groups", () => {
     expect(
-      getInitialSkillGroupIds("local", {
+      resolveSkillGroupIds("local", {
         britishEnglish: true,
         moduleIds: ["frontend"],
       }),
-    ).toEqual([...getDefaultSkillGroupIds("local"), "language", "frontend"]);
+    ).toEqual([
+      "open-spec",
+      "spec-kit",
+      "git",
+      "language",
+      "frontend",
+      "specs",
+    ]);
   });
 
-  it("adds the token-efficiency group when the module is enabled", () => {
+  it("derives the token-efficiency group when the capability is enabled", () => {
     expect(
-      getInitialSkillGroupIds("local", { moduleIds: ["token-efficiency"] }),
+      resolveSkillGroupIds("local", { moduleIds: ["token-efficiency"] }),
     ).toEqual([...getDefaultSkillGroupIds("local"), "token-efficiency"]);
+  });
+
+  it("declares required skill groups for modules that have companion skills", () => {
+    expect(
+      getRequiredSkillGroupIdsForModules([
+        "decision-records",
+        "frontend",
+        "testing",
+        "token-efficiency",
+      ]),
+    ).toEqual(["airsync", "frontend", "testing", "token-efficiency"]);
+  });
+
+  it("derives module-required skill groups without accepting manual skill selection", () => {
+    expect(
+      resolveSkillGroupIds("local", {
+        moduleIds: ["frontend", "token-efficiency"],
+      }),
+    ).toEqual([
+      "open-spec",
+      "spec-kit",
+      "git",
+      "frontend",
+      "specs",
+      "token-efficiency",
+    ]);
   });
 
   it("returns the visible groups for a scope", () => {

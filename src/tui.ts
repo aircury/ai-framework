@@ -14,8 +14,8 @@ import {
 } from "./install";
 import {
   expandSkillGroups,
-  getInitialSkillGroupIds,
   getSkillGroups,
+  resolveSkillGroupIds,
 } from "./skills-catalog";
 
 export async function run(): Promise<void> {
@@ -82,81 +82,50 @@ export async function run(): Promise<void> {
 
   let selectedModules: StandardModuleId[] | symbol = [];
   let enforceBritishEnglish = false;
-  if (scope === "local") {
-    selectedModules = await p.multiselect<StandardModuleId>({
-      message:
-        "Standards modules — choose what this installation should enforce",
-      options: STANDARD_MODULES.map((module) => ({
-        value: module.id,
-        label: module.label,
-        hint: module.hint,
-      })),
-      initialValues: STANDARD_MODULES.filter(
-        (module) => module.defaultEnabled,
-      ).map((module) => module.id),
-      required: false,
-    });
 
-    if (p.isCancel(selectedModules)) return p.cancel("Cancelled.");
+  selectedModules = await p.multiselect<StandardModuleId>({
+    message:
+      scope === "global"
+        ? "Capabilities — choose which global skill sets to install"
+        : "Capabilities — choose what this installation should enforce",
+    options: STANDARD_MODULES.map((module) => ({
+      value: module.id,
+      label: module.label,
+      hint: module.hint,
+    })),
+    initialValues: STANDARD_MODULES.filter(
+      (module) => module.defaultEnabled,
+    ).map((module) => module.id),
+    required: false,
+  });
 
-    if (selectedModules.length === 0) {
-      p.note(
-        "Only the core workflow constitution will be installed. Optional standards can be re-enabled later by reinstalling or editing .aircury/framework.config.json.",
-        "No optional standards selected",
-      );
-    }
+  if (p.isCancel(selectedModules)) return p.cancel("Cancelled.");
 
-    const britishEnglish = await p.confirm({
-      message:
-        "Enforce British English in generated rules and install the UK business English skill?",
-      initialValue: true,
-    });
-
-    if (p.isCancel(britishEnglish)) return p.cancel("Cancelled.");
-    enforceBritishEnglish = britishEnglish;
+  if (selectedModules.length === 0) {
+    p.note(
+      scope === "global"
+        ? "Only the core workflow skills will be installed globally."
+        : "Only the core workflow constitution and skills will be installed. Optional capabilities can be re-enabled later by reinstalling or editing .aircury/framework.config.json.",
+      "No optional capabilities selected",
+    );
   }
+
+  const britishEnglish = await p.confirm({
+    message:
+      scope === "global"
+        ? "Install the UK business English skill globally?"
+        : "Enforce British English in generated rules and install the UK business English skill?",
+    initialValue: true,
+  });
+
+  if (p.isCancel(britishEnglish)) return p.cancel("Cancelled.");
+  enforceBritishEnglish = britishEnglish;
 
   const skillScope = scope === "global" ? "global" : "local";
-  const aircurySkillGroups = getSkillGroups(skillScope, "aircury");
-  const externalSkillGroups = getSkillGroups(skillScope, "external");
-  const skillGroupOptions = [
-    ...aircurySkillGroups.map((group) => ({
-      value: group.id,
-      label: group.label,
-      hint: `Aircury · ${group.description}`,
-    })),
-    ...externalSkillGroups.map((group) => ({
-      value: group.id,
-      label: group.label,
-      hint: `External · ${group.description}`,
-    })),
-  ];
-
-  let selectedSkillGroups: string[] | symbol = [];
-  if (skillGroupOptions.length > 0) {
-    selectedSkillGroups = await p.multiselect<string>({
-      message: "Skill groups — choose which workflows to install",
-      options: skillGroupOptions,
-      initialValues: getInitialSkillGroupIds(skillScope, {
-        britishEnglish: enforceBritishEnglish,
-        moduleIds: selectedModules,
-      }),
-      required: false,
-    });
-
-    if (p.isCancel(selectedSkillGroups)) return p.cancel("Cancelled.");
-
-    if (selectedSkillGroups.length === 0) {
-      p.note(
-        "No skills will be installed. You can still use the framework files and add skills later with npx skills add.",
-        "No skill groups selected",
-      );
-    }
-  }
-
-  if (enforceBritishEnglish && !selectedSkillGroups.includes("language")) {
-    selectedSkillGroups = [...selectedSkillGroups, "language"];
-  }
+  const selectedSkillGroups = resolveSkillGroupIds(skillScope, {
+    britishEnglish: enforceBritishEnglish,
+    moduleIds: selectedModules,
+  });
 
   const cwd = process.cwd();
   const isGlobal = scope === "global";
@@ -166,8 +135,12 @@ export async function run(): Promise<void> {
         britishEnglish: enforceBritishEnglish,
       });
   const commands = isGlobal
-    ? getGlobalCommands(selectedTools, selectedSkillGroups)
-    : getLocalCommands(selectedTools, selectedSkillGroups);
+    ? getGlobalCommands(selectedTools, selectedModules, {
+        britishEnglish: enforceBritishEnglish,
+      })
+    : getLocalCommands(selectedTools, selectedModules, {
+        britishEnglish: enforceBritishEnglish,
+      });
   const selectedSkills = expandSkillGroups(selectedSkillGroups, skillScope);
 
   if (files.length === 0 && commands.length === 0) {
@@ -189,7 +162,7 @@ export async function run(): Promise<void> {
 
   if (commands.length > 0) {
     p.log.step(
-      `${selectedSkillGroups.length} skill group${selectedSkillGroups.length > 1 ? "s" : ""} selected`,
+      `${selectedSkillGroups.length} skill group${selectedSkillGroups.length > 1 ? "s" : ""} derived from selected capabilities`,
     );
     for (const group of getSkillGroups(skillScope).filter((entry) =>
       selectedSkillGroups.includes(entry.id),
@@ -239,7 +212,11 @@ export async function run(): Promise<void> {
   let executed = 0;
 
   for (const { file, exists } of conflicts) {
-    if (exists && overwrite === "skip" && !(!isGlobal && file.path === "AGENTS.md")) {
+    if (
+      exists &&
+      overwrite === "skip" &&
+      !(!isGlobal && file.path === "AGENTS.md")
+    ) {
       skipped++;
       continue;
     }
