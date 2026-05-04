@@ -191,7 +191,7 @@ If `airsync-memory` is also enabled, the generated framework requires proposing 
 - `specs/changes/` is temporary working state and should not be committed.
 - Behavior changes must end with updated canonical specs.
 - `AGENTS.md` is the quick entrypoint; `FRAMEWORK.md` is the governing document.
-- Enabled standards modules are project rules, not suggestions.
+- Enabled capabilities are project rules, not suggestions.
 - Do not skip required workflow steps once a mode is selected.
 
 ## Common Questions

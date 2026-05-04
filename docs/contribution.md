@@ -39,8 +39,7 @@ If you only changed templates, modules, generated files, or skill wiring, this l
 |---|---|
 | `src/tui.ts` | Interactive installer flow. |
 | `src/install.ts` | File generation, conflict handling, skill command construction, and `.gitignore` update. |
-| `src/framework.ts` | Standards module registry and profile creation. |
-| `src/skills-catalog.ts` | Skill groups, skill definitions, default selections, and group expansion. |
+| `src/capabilities.ts` | Capability registry, generated content wiring, skill definitions, default selections, and profile creation. |
 | `src/renderer.ts` | Template rendering and computed template flags. |
 | `templates/` | Handlebars templates for generated `FRAMEWORK.md` and `AGENTS.md`. |
 | `standards/modules/` | Installable standards modules. |
@@ -67,73 +66,71 @@ Example `module.json`:
 }
 ```
 
-Then wire it into `src/framework.ts`:
+Then wire it into `src/capabilities.ts`:
 
 1. Import the three module files.
-2. Add the id to `StandardModuleId`.
-3. Add the module to `STANDARD_MODULE_REGISTRY`.
-4. Add template flags only if the templates need conditional behavior beyond normal section rendering.
+2. Add the id to `ContentCapabilityId`.
+3. Add the module to `CONTENT_CAPABILITIES`.
+4. Add the id to `CAPABILITY_ORDER`.
+5. Add template flags only if the templates need conditional behavior beyond normal section rendering.
 
-If the module needs starter files, update `getSpecsFiles()` in `src/install.ts`.
+If the module needs starter files, add them through the capability's `files` array in `src/capabilities.ts`.
 
 ## Add Or Change Generated Files
 
-Generated local files come from `getLocalFiles()` in `src/install.ts`.
+Generated local files come from `getLocalFiles()` in `src/install.ts`. Base files are defined there, and capability-specific files are contributed by the selected capability manifests in `src/capabilities.ts`.
 
 When adding a generated file:
 
 1. Add an `InstallFile` entry with `path`, `content`, and `description`.
-2. Decide whether it applies to every local install, selected tools, or selected modules.
+2. Decide whether it applies to every local install, selected tools, or selected capabilities.
 3. Ensure conflict behavior is safe when the file already exists.
-4. Update `docs/implementation.md` if users need to know about the output.
+4. Add template flags only if the templates need conditional behavior beyond normal section rendering.
+5. Update `docs/implementation.md` if users need to know about the output.
 
 Avoid overwriting user-authored files unless the installer has asked for confirmation.
 
 ## Add A Skill
 
-Skills are installed through the external `skills` CLI. Aircury only defines groups and desired install commands.
+Skills are installed through the external `skills` CLI. Aircury only defines capability manifests and desired install commands.
 
 To add an Aircury skill from this repo:
 
 1. Add the skill folder under `skills/<skill-name>/` with its `SKILL.md`.
-2. Add a `SkillDefinition` in `src/skills-catalog.ts`.
+2. Add a skill entry to the relevant capability in `src/capabilities.ts`.
 3. Use `source: "aircury/ai-framework"`.
-4. Assign it to an existing or new `groupId`.
-5. Add or update tests if catalog behavior changes.
+4. Set the supported `scopes`.
+5. Add or update tests if capability behavior changes.
 
 To add an external skill:
 
-1. Add a `SkillDefinition` with the external repository URL in `source`.
+1. Add a skill entry with the external repository URL in `source`.
 2. Set the upstream skill name in `skillName`.
-3. Mark the group `kind` as `external` if creating a new group.
+3. Set the supported `scopes`.
 
 ## Wire Download And Installation
 
-The installer downloads skills by running generated `npx skills add` commands. The wiring lives in `src/skills-catalog.ts` and `src/install.ts`.
+The installer downloads skills by running generated `npx skills add` commands. The wiring lives in `src/capabilities.ts` and `src/install.ts`.
 
-Add or update a `SkillGroup` when users should be able to select a bundle in the TUI:
+Add or update a `CapabilityManifest` when users should be able to select a bundle in the TUI:
 
 ```ts
 {
   id: "example",
   label: "Example",
   description: "Short description shown in the installer",
-  kind: "aircury",
+  category: "workflow",
   defaultSelected: false,
   scopes: ["local", "global"],
 }
 ```
 
-Add each concrete skill as a `SkillDefinition`:
+Add concrete skills through the capability's `skills` array:
 
 ```ts
 {
-  id: "example-skill",
-  label: "Example Skill",
-  description: "What the skill helps agents do",
   source: "aircury/ai-framework",
   skillName: "example-skill",
-  groupId: "example",
   scopes: ["local", "global"],
 }
 ```
@@ -148,15 +145,13 @@ If multiple selected skills share a source, the installer groups them into one c
 
 For global installs, the generated command includes `-g` and targets only selected global agents.
 
-## Auto-Select Skill Groups
+## Auto-Select Capabilities
 
-Use `getInitialSkillGroupIds()` in `src/skills-catalog.ts` when a skill group should be preselected because of another installer choice.
+Use `getInitialCapabilityIds()` or `resolveCapabilityIds()` in `src/capabilities.ts` when a capability should be preselected or implied because of another installer choice.
 
-Current examples:
+Current example:
 
 - British English enables `language`.
-- The `frontend` module enables the `frontend` skill group.
-- The `token-efficiency` module enables the `token-efficiency` skill group.
 
 ## Update Templates
 
