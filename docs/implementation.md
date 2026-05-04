@@ -46,9 +46,9 @@ Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and Open
 
 ## Capabilities
 
-Capabilities are defined in `src/capabilities.ts`. A capability can contribute generated framework content, generated files, installable skills, or any combination of those.
+Capabilities are defined in `src/capabilities.ts`. A capability is the unit users select in the installer. Each capability can contribute generated framework content, generated files, installable skills, or any combination of those.
 
-Content capabilities use module fragments from `standards/modules/<module-id>/` and are composed into generated framework files.
+Some capabilities compose internal standard modules from `standards/modules/<module-id>/`. Those modules are implementation details, not separate installer choices.
 
 Each content module contains:
 
@@ -56,29 +56,23 @@ Each content module contains:
 - `framework.md`: rules added to `FRAMEWORK.md`.
 - `agents.md`: concise operating instructions added to agent rules.
 
-The current built-in module ids are:
-
-- `decision-records`
-- `frontend`
-- `hexagonal-architecture`
-- `ddd`
-- `code-style`
-- `airsync-memory`
-- `error-handling`
-- `structured-logging`
-- `testing`
-- `token-efficiency`
-
-Workflow and skill-only capabilities are also defined in `src/capabilities.ts`:
+The current built-in capabilities are:
 
 - `open-spec`
 - `spec-kit`
 - `airsync`
 - `git`
 - `architecture`
+- `decision-records`
+- `testing`
+- `code-style`
+- `frontend`
+- `token-efficiency`
 - `resilience`
 - `specs`
 - `language`
+
+For example, `architecture` includes the DDD and hexagonal architecture standard modules plus the curated `clean-ddd-hexagonal` skill. `testing` includes testing rules plus Playwright and E2E skills. `resilience` includes error-handling and structured-logging rules plus related skills.
 
 The installer stores the selected capability ids in `.aircury/framework.config.json`. Re-run the installer or edit the profile and regenerate files if project standards need to change.
 
@@ -110,12 +104,7 @@ Default selected capabilities are:
 - `git`
 - `resilience`
 - `testing`
-- `hexagonal-architecture`
-- `ddd`
 - `code-style`
-- `airsync-memory`
-- `error-handling`
-- `structured-logging`
 - `frontend`
 - `token-efficiency`
 - `architecture`
