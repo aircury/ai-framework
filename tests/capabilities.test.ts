@@ -105,6 +105,11 @@ describe("capabilities", () => {
         content: expect.any(String),
         description: "Frontend design system starter guide",
       },
+      {
+        path: "specs/ui/frontend-workflow.md",
+        content: expect.any(String),
+        description: "Frontend workflow reference",
+      },
     ]);
   });
 

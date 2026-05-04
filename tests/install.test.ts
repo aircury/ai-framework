@@ -185,10 +185,7 @@ describe("getLocalCommands", () => {
   });
 
   it("installs multiple selected agents in each derived command", () => {
-    const commands = getLocalCommands(
-      ["claude-code", "gemini-cli"],
-      ["decision-records"],
-    );
+    const commands = getLocalCommands(["claude-code", "gemini-cli"], ["git"]);
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toEqual([
       "-y",
@@ -196,35 +193,7 @@ describe("getLocalCommands", () => {
       "add",
       "aircury/ai-framework",
       "--skill",
-      "open-spec-propose",
-      "--skill",
-      "open-spec-apply",
-      "--skill",
-      "open-spec-complete",
-      "--skill",
-      "open-spec-explore",
-      "--skill",
-      "spec-kit-specify",
-      "--skill",
-      "spec-kit-clarify",
-      "--skill",
-      "spec-kit-plan",
-      "--skill",
-      "spec-kit-analyse",
-      "--skill",
-      "spec-kit-tasks",
-      "--skill",
-      "spec-kit-implement",
-      "--skill",
-      "spec-kit-checklist",
-      "--skill",
-      "airsync",
-      "--skill",
       "commit-changes",
-      "--skill",
-      "specs-extractor",
-      "--skill",
-      "specs-interpreter",
       "-a",
       "universal",
       "-a",
@@ -255,7 +224,6 @@ describe("getLocalCommands", () => {
     const commands = getLocalCommands([], ["frontend", "token-efficiency"]);
 
     expect(commands).toHaveLength(2);
-    expect(commands[0].args).toContain("commit-changes");
     expect(commands[0].args).toContain("frontend-layout-extractor");
     expect(commands[0].args).toContain("frontend-experience-extractor");
     expect(commands[0].args).toContain("frontend-ui-generator");
@@ -272,19 +240,18 @@ describe("getLocalCommands", () => {
 
 describe("getGlobalCommands", () => {
   it("installs global skills for universal from selected capabilities", () => {
-    const commands = getGlobalCommands([], ["token-efficiency"]);
-    expect(commands).toHaveLength(2);
+    const commands = getGlobalCommands([], ["git"]);
+    expect(commands).toHaveLength(1);
     expect(getCommandBySource(commands, "aircury/ai-framework").args).toContain(
       "-g",
     );
-    expect(
-      getCommandBySource(commands, "https://github.com/juliusbrussee/caveman")
-        .args,
-    ).toContain("caveman");
+    expect(getCommandBySource(commands, "aircury/ai-framework").args).toContain(
+      "commit-changes",
+    );
   });
 
   it("creates a global skills install command for selected agents", () => {
-    const commands = getGlobalCommands(["claude-code"], []);
+    const commands = getGlobalCommands(["claude-code"], ["git"]);
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toContain("-a");
     expect(commands[0].args).toContain("universal");
@@ -427,7 +394,7 @@ describe("mergeFrameworkReferenceIntoAgents", () => {
     );
 
     expect(merged).toContain("Project-specific instructions.");
-    expect(merged).toContain("## Session Checklist");
+    expect(merged).toContain("FRAMEWORK.md");
   });
 
   it("does not duplicate the framework reference when already present", () => {
