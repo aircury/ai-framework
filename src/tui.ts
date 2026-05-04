@@ -80,9 +80,13 @@ export async function run(): Promise<void> {
         ];
 
   const selectedTools = await p.multiselect<Tool>({
-    message: "Additional tools",
+    message:
+      scope === "global"
+        ? "Additional agent integrations — also install global agent-specific skills"
+        : "Additional tools",
     options: toolOptions,
-    initialValues: toolOptions.map((option) => option.value),
+    initialValues:
+      scope === "global" ? [] : toolOptions.map((option) => option.value),
     required: false,
   });
 
