@@ -8,6 +8,9 @@ import {
   getCapabilityFiles,
   getCapabilitySkills,
 } from "./capabilities";
+import featuresReadme from "./install-content/specs/features/README.md" with {
+  type: "text",
+};
 import { generateAgents, generateFramework } from "./templates";
 
 export type Tool = "claude-code" | "gemini-cli";
@@ -38,14 +41,7 @@ function getBaseFiles(): InstallFile[] {
   return [
     {
       path: "specs/features/README.md",
-      content: `# Living Specifications
-
-\`specs/features/\` stores the canonical, technology-agnostic description of observable system behavior.
-
-- Create one folder per capability.
-- Keep \`spec.md\` focused on requirements and scenarios.
-- Update these specs whenever observable behavior changes.
-`,
+      content: featuresReadme,
       description: "Living specs starter guide",
     },
   ];
