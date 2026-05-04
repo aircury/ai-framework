@@ -31,6 +31,10 @@ const renderAgentsTemplate = Handlebars.compile(agentsTemplateSource, {
   noEscape: true,
 });
 
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
 function createViewModel(
   capabilityIds?: CapabilityId[],
   options?: { britishEnglish?: boolean },
@@ -47,10 +51,10 @@ function createViewModel(
     })),
     frameworkSections: selectedCapabilities
       .map((capability) => capability.framework)
-      .filter(Boolean),
+      .filter(isString),
     agentRules: selectedCapabilities
       .map((capability) => capability.agents)
-      .filter(Boolean),
+      .filter(isString),
     includesDecisionRecords: selectedIds.has("decision-records"),
     includesTesting: selectedIds.has("testing"),
     includesArchitecture:

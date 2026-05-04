@@ -52,15 +52,6 @@ import frontendFramework from "../standards/modules/frontend/framework.md" with 
 import frontendManifest from "../standards/modules/frontend/module.json" with {
   type: "json",
 };
-import decisionsReadme from "./install-content/specs/decisions/README.md" with {
-  type: "text",
-};
-import frontendWorkflow from "./install-content/specs/ui/frontend-workflow.md" with {
-  type: "text",
-};
-import uiReadme from "./install-content/specs/ui/README.md" with {
-  type: "text",
-};
 import hexagonalArchitectureAgents from "../standards/modules/hexagonal-architecture/agents.md" with {
   type: "text",
 };
@@ -96,6 +87,15 @@ import tokenEfficiencyFramework from "../standards/modules/token-efficiency/fram
 };
 import tokenEfficiencyManifest from "../standards/modules/token-efficiency/module.json" with {
   type: "json",
+};
+import decisionsReadme from "./install-content/specs/decisions/README.md" with {
+  type: "text",
+};
+import frontendWorkflow from "./install-content/specs/ui/frontend-workflow.md" with {
+  type: "text",
+};
+import uiReadme from "./install-content/specs/ui/README.md" with {
+  type: "text",
 };
 
 export type CapabilityScope = "local" | "global";
