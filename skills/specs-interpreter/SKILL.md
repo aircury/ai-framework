@@ -21,6 +21,30 @@ The user is the designer of the new implementation direction.
 
 Your role is to collaborate with the user, explore options, surface tradeoffs, and help converge on a strong implementation approach.
 
+## Canonical spec source
+
+The authoritative behavior source is:
+
+```text
+specs/features/<capability-name>/spec.md
+```
+
+Each canonical feature spec should be made of:
+
+```markdown
+### Requirement: <observable system behavior stated as a declarative obligation>
+The system MUST/SHALL <precise behavior, rule, or contract>.
+
+#### Scenario: <specific observable case>
+- **WHEN** <actor/system trigger, exact input, exact state, or exact condition>
+- **THEN** <complete observable result: changed state, unchanged state, output, error, side effects>
+- **AND** <additional precise assertion when needed>
+```
+
+Treat `specs/index.md`, `specs/persistence.md`, `specs/risks.md`, `specs/rewrite-boundary.md`, ADRs, diagrams, and notes as supporting context only. They may clarify or constrain, but they do not replace missing `Requirement` and `Scenario` coverage in `specs/features/`.
+
+If the provided spec set is mostly narrative, use-case prose, concept catalogs, or implementation notes, stop before architecture design and convert the gap into a spec-hardening task. Do not design from vague prose as if it were an authoritative contract.
+
 ---
 
 ## Core Mission
@@ -198,6 +222,45 @@ If the user does not answer, propose sensible defaults and continue, but make it
 
 Follow this workflow.
 
+## Phase 0: Validate Spec Fitness
+
+Before designing or implementing anything, inspect `specs/features/` and verify that each capability has precise requirements and `WHEN` / `THEN` scenarios.
+
+For each capability, check:
+- every meaningful behavior is expressed as `### Requirement`
+- every requirement has at least one `#### Scenario`
+- every scenario uses `- **WHEN**` and `- **THEN**`
+- every `WHEN` names an exact trigger, actor/system initiator, input, state, or condition
+- every `THEN` names exact observable output, persisted state changes, state that remains unchanged where relevant, errors, side effects, and absent side effects
+- every failure, validation, authorisation, state-transition, and integration variant has its own scenario
+- every operation, workflow, state transition, integration event, scheduled task, and invariant has coverage for happy path, input contract, output contract, persistence, authorisation, state rules, failure modes, side effects, concurrency/idempotency, configuration, time behavior, compatibility quirks, and evidence
+- every applicable coverage gap is represented in `specs/risks.md`
+- no scenario relies on vague outcomes such as "is processed", "works", "is created", "handles the request", or "returns success" without exact observable details
+
+When the user explicitly authorises subagents, the agent runtime supports them, and the spec set spans multiple capabilities, invoke one subagent per bounded context or capability group. Require each subagent to return:
+
+```markdown
+## Covered Requirements
+| Requirement | Scenarios | Confidence |
+|-------------|-----------|------------|
+
+## Coverage Matrix Result
+| Capability | Covered Cells | Missing Cells | Risk Entries |
+|------------|---------------|---------------|--------------|
+
+## Missing or Weak Scenarios
+| Requirement | Problem | Required Fix |
+|-------------|---------|--------------|
+
+## Compatibility Risks
+| Contract | Risk | Evidence |
+|----------|------|----------|
+```
+
+The lead agent MUST reconcile these results into a single spec fitness assessment before continuing.
+
+If any critical behavior is not expressed in precise `WHEN` / `THEN` form, recommend running or re-running `specs-extractor` for the affected bounded contexts. If the user asks you to proceed anyway, clearly mark every implementation assumption that comes from weak specs.
+
 ## Phase 1: Digest the Specs
 
 First, deeply analyse the provided specs.
@@ -207,7 +270,8 @@ Produce:
 ### A. System Summary
 Summarise:
 
-- concept areas (as defined in the specs)
+- capability areas from `specs/features/`
+- concept areas that are explicitly evidenced by those feature specs
 - key use cases per area
 - actors
 - external contracts
@@ -219,7 +283,7 @@ Summarise:
 ### B. Constraint Map
 Separate clearly:
 
-- fixed constraints from specs
+- fixed constraints from canonical `specs/features/`
 - non-negotiable contracts (DB schema, external API contracts)
 - open technical decisions
 - risky ambiguities
@@ -528,7 +592,7 @@ Do NOT:
 
 For every major slice, maintain a clear chain such as:
 
-spec use case / business rule -> validation approach -> implementation unit -> infrastructure wiring
+`specs/features/<capability>/spec.md` requirement and scenario -> validation approach -> implementation unit -> infrastructure wiring
 
 This must remain understandable to other engineers and future AI agents.
 
@@ -557,14 +621,15 @@ If not, refine before proceeding.
 
 When invoked, begin by doing the following:
 
-1. Summarize the spec set
-2. Identify non-negotiable contracts (DB schema is always one)
-3. Identify open technical choices
-4. Present relevant architecture and stack options
-5. Discuss tradeoffs with the user
-6. Help converge on a target direction
-7. Draft the first implementation slices
-8. Only then move into coding or scaffolding, unless the user explicitly asks to scaffold immediately
+1. Validate that `specs/features/` contains precise `Requirement` and `WHEN` / `THEN` scenario coverage
+2. Summarize the spec set
+3. Identify non-negotiable contracts (DB schema is always one)
+4. Identify open technical choices
+5. Present relevant architecture and stack options
+6. Discuss tradeoffs with the user
+7. Help converge on a target direction
+8. Draft the first implementation slices
+9. Only then move into coding or scaffolding, unless the user explicitly asks to scaffold immediately
 
 ---
 

@@ -10,9 +10,33 @@ metadata:
 You are a senior specification-extraction agent specialised in reverse-engineering existing software systems into exact, behaviour-first specifications.
 
 Your mission is NOT to redesign the system.
-Your mission is to extract what the system does, precisely and completely, expressed as domain concepts, use cases, and business rules — so the system can later be re-implemented in any architecture without ambiguity.
+Your mission is to extract what the system does, precisely and completely, as canonical feature specifications under `specs/features/` — so the system can later be re-implemented in any architecture without ambiguity.
 
 You must behave as a forensic domain writer, not as a code analyst.
+
+## Canonical output contract
+
+The primary output of this skill is the canonical living spec set:
+
+```text
+specs/features/<capability-name>/spec.md
+```
+
+Each `spec.md` MUST use this structure:
+
+```markdown
+### Requirement: <observable system behavior stated as a declarative obligation>
+The system MUST/SHALL <precise behavior, rule, or contract>.
+
+#### Scenario: <specific observable case>
+- **WHEN** <actor/system trigger, exact input, exact state, or exact condition>
+- **THEN** <complete observable result: changed state, unchanged state, output, error, side effects>
+- **AND** <additional precise assertion when needed>
+```
+
+The feature specs are the deliverable. Supporting inventories, notes, diagrams, and reports are allowed only when they help verify the feature specs; they MUST NOT replace or dominate the feature specs.
+
+Do not write narrative documentation when a `Requirement` or `Scenario` is possible. Prefer more precise scenarios over explanatory paragraphs.
 
 ## The fundamental test
 
@@ -69,9 +93,11 @@ Every concept, every use case, every rule must be specified to the depth where t
 - The exact error response when rejected
 
 **For scenarios:**
-- GIVEN must describe exact state, not general conditions
-- WHEN must include exact input values or at minimum exact types and constraints
-- THEN must name every field that changed, every field that did NOT change, every notification triggered, every background job enqueued — nothing implicit, nothing assumed
+- Use the repository's canonical `WHEN` / `THEN` format.
+- Put state and preconditions inside `WHEN` when possible.
+- Add `AND` lines only for additional observable assertions.
+- `WHEN` must include exact input values or at minimum exact types and constraints.
+- `THEN` must name every field that changed, every field that did NOT change, every notification triggered, every background job enqueued — nothing implicit, nothing assumed.
 
 A scenario that says "THEN the user is created" is not a scenario. It is a placeholder. Write: "THEN a user record exists with status=pending, email=the provided email (lowercased), created_at=current timestamp, email_verified=false, and a verification email is queued to the provided address."
 
@@ -239,6 +265,89 @@ For each use case or triggered consequence, identify:
 
 ## Required workflow
 
+### Phase 0: Extraction partitioning
+Before extracting detailed specs, partition the legacy project into bounded extraction units.
+
+Prefer bounded contexts or capability areas. If the domain boundaries are not yet clear, partition by cohesive file groups using these signals:
+- route/API areas
+- database tables and migrations
+- domain terminology
+- permissions/policies
+- background jobs and event handlers
+- external integrations
+- frontend flows that map to a user capability
+
+For each bounded extraction unit, record:
+- capability name for `specs/features/<capability-name>/spec.md`
+- source files inspected
+- database tables or external contracts touched
+- use cases expected in that unit
+- unresolved dependencies on other units
+
+When the user explicitly authorises subagents and the agent runtime supports them, invoke one subagent per bounded context or per cohesive file group. Give each subagent a narrow source scope and require this output:
+
+```markdown
+## Candidate Requirements
+### Requirement: ...
+#### Scenario: ...
+- **WHEN** ...
+- **THEN** ...
+
+## Evidence
+| Statement | Evidence Level | Source |
+|-----------|----------------|--------|
+
+## Coverage Matrix
+| Operation / Rule | Covered Areas | Missing Areas | Risk Entry |
+|------------------|---------------|---------------|------------|
+
+## Gaps
+| Gap | Why it matters |
+|-----|----------------|
+```
+
+For high-risk or broad bounded contexts, use specialised subagents instead of only one general extractor:
+- **Domain behaviour extractor:** use cases, state transitions, invariants, calculations, lifecycle rules.
+- **API contract extractor:** routes, request payloads, response payloads, status codes, headers, error shapes, pagination, filtering, sorting, idempotency.
+- **Persistence contract extractor:** tables, columns, constraints, defaults, indexes, foreign keys, enum encodings, soft deletes, timestamps, audit fields, legacy values.
+- **Authorisation and visibility extractor:** authentication requirements, role checks, ownership/tenant scoping, field-level visibility, admin overrides.
+- **Validation and error extractor:** accepted values, coercion, trimming, format rules, conditional requirements, exact rejection behavior.
+- **Side-effect and async extractor:** notifications, jobs, events, webhooks, retries, scheduled work, external calls, transaction boundaries.
+- **Frontend behaviour extractor:** user-visible flows, form behavior, UI-only validation, required backend behavior implied by screens.
+
+The lead agent MUST combine these lenses into one canonical feature spec per capability. If specialised findings conflict, document the contradiction in `specs/risks.md` and write only VERIFIED behavior into canonical `specs/features/` unless the uncertainty is explicitly marked in the scenario.
+
+The lead agent MUST merge, deduplicate, and reconcile subagent outputs before writing canonical specs. Do not paste subagent analysis into `specs/features/`; convert it into clean requirements and scenarios.
+
+### Phase 0.5: Mandatory coverage matrix
+Before considering any bounded context complete, build a coverage matrix for every discovered operation, workflow, state transition, integration event, scheduled task, and business invariant.
+
+Every row MUST be backed by scenarios in `specs/features/<capability-name>/spec.md`.
+
+| Coverage area | Required extraction |
+|---------------|---------------------|
+| Happy path | Exact actor/system trigger, required pre-state, exact inputs, resulting state, response/output, and side effects. |
+| Input contract | Every field name, type, required/optional status, default, accepted values, format, range, length, normalisation, coercion, trimming, and rejection case. |
+| Output contract | Exact response shape, status code, headers, rendered state, exported file shape, event payload, or visible UI result. |
+| Persistence writes | Every created, updated, deleted, soft-deleted, restored, derived, or audit record; exact field values and unchanged fields. |
+| Persistence reads | Filtering, sorting, pagination, visibility scoping, default scopes, tenant/account ownership, legacy value handling, and missing-record behavior. |
+| Database enforcement | Which constraints are guaranteed by the database and which are enforced only by application behavior. |
+| Authorisation | Unauthenticated, wrong role, wrong owner/tenant, valid actor, admin override, and field-level visibility variants. |
+| State rules | Every allowed transition, rejected transition, automatic transition, invariant, terminal state, and state encoding. |
+| Failure modes | Validation failures, missing dependencies, external service failures, timeouts, duplicate requests, stale state, conflicts, and partial failure behavior. |
+| Side effects | Notifications, jobs, events, webhooks, audit entries, cache invalidation, external calls, and side effects that MUST NOT occur on failure. |
+| Concurrency and idempotency | Duplicate submissions, retries, race conditions, uniqueness conflicts, locks, transaction boundaries, and replay behavior. |
+| Configuration and environment | Feature flags, environment toggles, tenant settings, time zones, locale/currency behavior, and production-only behavior. |
+| Time behavior | Timestamp source, expiry windows, grace periods, scheduled execution, business-day rules, ordering, and clock-sensitive edge cases. |
+| Compatibility quirks | Legacy field names, unusual encodings, inconsistent historical data, deprecated-but-supported values, and do-not-change behavior. |
+| Evidence | VERIFIED, INFERRED, or UNCERTAIN tag for each behavior, with the source signal that supports it. |
+
+If a coverage area does not apply, write an explicit `Not applicable` entry in the supporting extraction notes with the reason. Do not silently skip it.
+
+If a coverage area applies but cannot be fully verified, write the missing behavior to `specs/risks.md` and mark the related scenario or requirement as INFERRED or UNCERTAIN.
+
+The legacy code is considered dispensable only when every applicable matrix cell for every bounded context is represented by precise scenarios or by an explicit risk entry.
+
 ### Phase 1: Concept inventory
 Build a map of all core concepts in the system:
 - their names and responsibilities
@@ -297,14 +406,28 @@ All specs MUST be written to disk as markdown files. Do not only output to the c
 
 Write files to the `specs/` directory at the project root. Create it if it does not exist.
 
-### Per-concept-area files
-For each concept area, write one file:
+### Canonical feature files
+For each capability or bounded context, write one canonical feature file:
 ```
-specs/<concept-area-name>.md
+specs/features/<capability-name>/spec.md
 ```
-Use lowercase, hyphenated names (e.g. `specs/user-management.md`, `specs/billing.md`).
+Use lowercase, hyphenated names (e.g. `specs/features/user-management/spec.md`, `specs/features/billing/spec.md`).
 
-### Global artifact files
+Every canonical feature file MUST primarily contain `Requirement` blocks and `Scenario` blocks in the repository's existing format. Avoid long descriptive sections.
+
+Use this exact shape:
+
+```markdown
+### Requirement: <system behavior as a declarative statement>
+The system MUST <precise required behavior>.
+
+#### Scenario: <observable outcome or edge case>
+- **WHEN** <exact trigger, state, actor, and inputs>
+- **THEN** <exact observable response, state changes, non-changes, errors, and side effects>
+- **AND** <additional assertion, only when needed>
+```
+
+### Supporting artifact files
 | Artifact | File |
 |----------|------|
 | System concept map + use case catalog | `specs/index.md` |
@@ -312,10 +435,12 @@ Use lowercase, hyphenated names (e.g. `specs/user-management.md`, `specs/billing
 | Ambiguity and risk register | `specs/risks.md` |
 | Rewrite boundary document | `specs/rewrite-boundary.md` |
 
+Supporting files MUST be concise and traceable. They exist to support the canonical feature specs, not to become the main specification format.
+
 ### Writing strategy
 Write files progressively as you complete each phase — do not wait until all phases are done.
 After Phase 1: write `specs/index.md` with the initial concept map.
-After Phase 2–3: write each concept area file as it is completed.
+After Phase 2–3: write each canonical feature file as it is completed.
 After Phase 4: write `specs/persistence.md`.
 After Phase 5: update `specs/index.md` with cross-cutting rules.
 After Phase 6: write `specs/risks.md`.
@@ -325,103 +450,43 @@ If a file already exists, update it rather than overwriting blindly — preserve
 
 ## Output format
 
-### Per concept area (group related concepts into one section)
+### Canonical feature spec format
 
+The canonical feature files MUST avoid use-case templates, long concept narratives, and prose-heavy sections. Convert all findings into requirements and directly testable scenarios.
+
+For every distinct use case, write:
+
+```markdown
+### Requirement: <actor/system SHALL be able to...>
+The system MUST <complete behavior including relevant validation, authorisation, persistence, and side effects>.
+
+#### Scenario: <happy path>
+- **WHEN** <actor/system performs action with exact inputs while exact preconditions hold>
+- **THEN** <resulting persisted fields, response/output, side effects, and unchanged data>
+
+#### Scenario: <failure or edge case>
+- **WHEN** <exact invalid/edge condition occurs>
+- **THEN** <exact error/outcome, state that remains unchanged, and side effects that do not occur>
 ```
-# <Concept Area Name>
 
-## Purpose
-What this area is responsible for. One paragraph maximum.
+For every invariant or business rule, write:
 
-## Concepts
+```markdown
+### Requirement: <rule name as observable obligation>
+The system MUST <enforce the rule under exact conditions>.
 
-### <Concept Name>
-**Identity:** how it is uniquely identified
-**Data:**
-| Field | Type | Meaning |
-|-------|------|---------|
+#### Scenario: <rule is satisfied>
+- **WHEN** <operation or state would satisfy the rule>
+- **THEN** <exact accepted outcome>
 
-**States:** (if stateful)
-| State | Meaning |
-|-------|---------|
-
-**Transitions:**
-| From | Trigger | To | Condition |
-|------|---------|----|-----------|
-
-**Invariants:**
-- The system MUST always ensure [rule] regardless of how state changes.
-- ...
-
-**Notable consequences of state change:**
-- When [transition occurs]: [what the system does automatically]
-
-## Use Cases
-
-### Use Case: <Verb Noun>
-- **Actor:** who or what initiates this
-- **Preconditions:** what must be true
-- **Input:**
-  | Field | Type | Required | Validation |
-  |-------|------|----------|-----------|
-- **Main flow:**
-  1. step in plain language
-  2. ...
-- **Alternative flows:**
-  - IF [condition]: [what happens instead]
-- **Postconditions:** exact state of the domain after success
-- **Triggered consequences:** [notifications, jobs, external calls — exact conditions]
-- **Authorisation:** who is allowed and under which conditions
-- **Failure cases:**
-  | Condition | Outcome |
-  |-----------|---------|
-
-#### Scenarios
-##### Scenario: <descriptive name>
-- GIVEN [precise precondition]
-- WHEN [precise action with exact inputs]
-- THEN [precise observable outcome — which data changed, to what value, what was triggered]
-- AND [additional precise assertions]
-
-Write one scenario per: happy path, each notable edge case, each failure case, each authorisation variant.
-Scenarios must be precise enough to derive test cases directly.
-Never write vague THEN clauses. Write exactly what state changed, what did not change, what was triggered.
-
-## Business Rules
-
-### Rule: <Name>
-**Applies when:** [condition]
-**The system MUST:** [precise obligation]
-**Violation outcome:** [what happens]
-**Evidence:** VERIFIED / INFERRED / UNCERTAIN
-
-## Validation Rules
-| Field / Context | Rule | Behavior on violation |
-|-----------------|------|-----------------------|
-
-## Authorisation Rules
-| Actor | Operation | Condition | Result |
-|-------|-----------|-----------|--------|
-
-## Side Effects
-| Trigger | Consequence | Condition |
-|---------|-------------|-----------|
-
-## Errors and Failure Modes
-| Trigger | Error | System response | State change |
-|---------|-------|-----------------|--------------|
-
-## Notes on Evidence
-- VERIFIED: ...
-- INFERRED: ...
-- UNCERTAIN: ...
-
-## Open Questions / Gaps
-Only include unresolved items that truly require confirmation before reimplementation.
-
-## Compatibility Constraints
-Explicit list of what a rewrite MUST preserve exactly in this area.
+#### Scenario: <rule is violated>
+- **WHEN** <operation or state would violate the rule>
+- **THEN** <exact rejection, error, unchanged state, and absent side effects>
 ```
+
+For every persistence or external contract that affects compatibility, write a requirement in the relevant capability spec. Keep full table/column catalogs in `specs/persistence.md`, but make the behaviorally relevant contract visible in `specs/features/<capability>/spec.md`.
+
+Write one scenario per: happy path, each notable edge case, each failure case, each authorisation variant, each state transition, each side effect trigger, each compatibility-sensitive persistence behavior.
 
 ### Mandatory global artifacts
 
@@ -448,6 +513,7 @@ Risk levels: Critical / High / Medium / Low
 
 ## Rules for writing good specs
 
+- **Specs over prose.** A precise set of requirements and scenarios is better than a long explanatory document. Do not summarize behavior in paragraphs when you can specify it as `WHEN` / `THEN`.
 - **Depth over brevity.** A long, precise spec is far better than a short, vague one. Do not summarize. Do not compress. Do not assume anything is obvious.
 - Use the language of the problem domain, not of the code.
 - One use case per distinct actor intention.
@@ -461,6 +527,7 @@ Risk levels: Critical / High / Medium / Low
 - Do not invent behavior.
 - Do not assume intended behavior equals actual behavior.
 - Scenarios must be precise enough to derive tests directly — meaning exact field values, exact state assertions, exact negative assertions.
+- Every `THEN` MUST include observable state, output, error, or side effect. A `THEN` that only says an action "succeeds", "is handled", "is processed", or "is created" fails the quality gate.
 
 ## Anti-goals
 
@@ -473,7 +540,7 @@ You are NOT being asked to:
 - create aspirational documentation
 
 You ARE being asked to:
-- define what the system knows, what it does, and what rules it enforces
+- define what the system knows, what it does, and what rules it enforces as canonical `specs/features/` requirements and scenarios
 - define every operation in full behavioral detail
 - make the implementation replaceable
 - expose ambiguities before a rewrite begins
@@ -492,20 +559,25 @@ Then verify every item below:
 5. Every validation rule states the exact accepted values, formats, or ranges and the exact behavior on each type of violation.
 6. Every notification and background job has its exact trigger condition documented — not just that it exists.
 7. Every authorisation rule covers all actor variants including edge cases.
+8. Every operation, workflow, transition, integration event, scheduled task, and invariant has a completed mandatory coverage matrix.
+9. Every applicable coverage matrix cell maps to one or more canonical scenarios, and every non-applicable cell has an explicit reason.
+10. Every unverified applicable coverage matrix cell appears in `specs/risks.md` with risk level and evidence.
 
 **Purity**
-8. No class names, file names, method names, or framework terms appear anywhere in the output.
-9. No sentence says "the service does X" or "the controller handles X" — only "the system does X".
-10. The specs are equally implementable in any language or architecture.
+11. No class names, file names, method names, or framework terms appear anywhere in the output.
+12. No sentence says "the service does X" or "the controller handles X" — only "the system does X".
+13. The specs are equally implementable in any language or architecture.
 
 **Persistence**
-11. The persistence contract covers every table with exact column names, types, nullability, defaults, constraints, and do-not-change warnings.
-12. The rebuilt system could connect to the exact same production database safely without any schema changes.
+14. The persistence contract covers every table with exact column names, types, nullability, defaults, constraints, and do-not-change warnings.
+15. The rebuilt system could connect to the exact same production database safely without any schema changes.
 
 **Evidence**
-13. All inferred behavior is tagged INFERRED. All uncertain behavior is tagged UNCERTAIN and listed in `specs/risks.md`.
+16. All inferred behavior is tagged INFERRED. All uncertain behavior is tagged UNCERTAIN and listed in `specs/risks.md`.
 
 **Files**
-14. All spec files have been written to `specs/` on disk — nothing is only in the conversation.
+17. Every capability has a canonical `specs/features/<capability-name>/spec.md` file.
+18. Supporting files under `specs/` exist only to provide index, persistence, risk, and rewrite-boundary traceability.
+19. Nothing required for reimplementation exists only in the conversation.
 
 If any of these checks fail, continue refining before concluding. "Good enough" is not good enough. The specs replace the codebase entirely.
