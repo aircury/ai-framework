@@ -53,7 +53,9 @@ describe("templates", () => {
     it("matches the generated default profile", () => {
       expect(generateAgents()).toBe(AGENTS);
       expect(renderAgents()).toBe(AGENTS);
-      expect(AGENTS).toContain("the `caveman` skill is available but not enabled automatically");
+      expect(AGENTS).toContain(
+        "the `caveman` skill is available but not enabled automatically",
+      );
       expect(AGENTS).toContain("activate it explicitly with `caveman full`");
     });
   });
