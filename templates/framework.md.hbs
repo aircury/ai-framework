@@ -19,55 +19,10 @@ The following rules apply to every installation profile:
 - Before starting any non-trivial change, the agent MUST act as a routing meta-agent and ask the user how to proceed.
 - Optional standards are enabled through `.aircury/framework.config.json`.
 
-{{#if includesAirsyncMemory}}
-## Airsync Memory
-
-Airsync is a collaborative memory system that preserves team knowledge across projects and sessions. It uses a three-layer lifecycle to ensure only vetted knowledge becomes searchable.
-
-### When to Search Airsync
-
-Before making decisions that could be influenced by prior team experience:
-
-- Architectural choices (patterns, module structure, boundary enforcement)
-- Workflow changes (spec handling, agent routing, delivery modes)
-- Technology selections that affect multiple components
-
-### What to Capture
-
-Capture knowledge that passes the **collaboration test**: "Would a developer on a different project benefit from this in 3 months?"
-
-**DO capture:**
-
-- Architectural decisions with rationale (ADRs dual-written as `note`)
-- Validated patterns and approaches that work across projects
-- Repeated pitfalls and how to avoid them
-- Team-wide conventions and standards
-- Mental models that explain complex systems
-
-**DO NOT capture:**
-
-- Project-specific implementation details
-- Debugging sessions without transferable lessons
-- Content already in codebase, docs, or prior memory
-- Transient observations without context
-
-### ADR Dual-Write
-
-When the `decision-records` module is enabled, every ADR created or superseded in `specs/decisions/` MUST also be proposed to Airsync as a `note` with `scope: "team"`. This ensures architectural decisions are discoverable by agents across all projects, not just the current repository.
-
-### Workflow Summary
-
-1. **Search first**: `memory_search(query="your terms")` — default searches only PUBLISHED layer
-2. **Propose to INBOX**: `memory_propose(entry={...})` — entries start in INBOX, not searchable by default
-3. **Promote when confident**: `memory_promote(memory_id)` — moves to PUBLISHED, becomes team-searchable
-
-See the `airsync` skill for the complete tool reference and quality guidelines.
-
-{{/if}}
 ## Installed Capabilities
 
-{{#if installedModules}}
-{{#each installedModules}}
+{{#if installedCapabilities}}
+{{#each installedCapabilities}}
 - `{{id}}` — {{description}}
 {{/each}}
 {{else}}

@@ -34,8 +34,6 @@ export interface InstallOptions {
 
 const FRAMEWORK_REFERENCE_SENTENCE =
   "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).";
-const LEGACY_AIRCURY_AGENTS_SENTENCE =
-  "All agents contributing to this repository MUST read and apply FRAMEWORK.md before doing any work. It is not optional and it is not advisory.";
 
 function getBaseFiles(): InstallFile[] {
   return [
@@ -239,13 +237,6 @@ export function mergeFrameworkReferenceIntoAgents(
   const trimmedReference = frameworkReference.trim();
 
   if (trimmedExisting.length === 0) {
-    return `${trimmedReference}\n`;
-  }
-
-  if (
-    trimmedExisting.startsWith("# AGENTS.md") &&
-    trimmedExisting.includes(LEGACY_AIRCURY_AGENTS_SENTENCE)
-  ) {
     return `${trimmedReference}\n`;
   }
 

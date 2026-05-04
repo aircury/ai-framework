@@ -347,28 +347,6 @@ describe("writeFile", () => {
 
     rmSync(dir, { recursive: true });
   });
-
-  it("replaces a legacy generated AGENTS.md with the new reference-only version", () => {
-    const dir = `${tmpdir()}/sdd-agents-replace-${Date.now()}`;
-    const file = getFileByPath(getLocalFiles([]), "AGENTS.md");
-
-    writeFile(
-      {
-        path: "AGENTS.md",
-        content: `# AGENTS.md\n\n## Framework\n\nThis project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).\n\nAll agents contributing to this repository MUST read and apply FRAMEWORK.md before doing any work. It is not optional and it is not advisory.\n\n## Before starting any task\n\n- Legacy content.`,
-        description: "",
-      },
-      dir,
-      false,
-    );
-    writeFile(file, dir, false);
-
-    const content = readFileSync(join(dir, "AGENTS.md"), "utf-8");
-    expect(content).not.toContain("Legacy content.");
-    expect(content).toBe(file.content);
-
-    rmSync(dir, { recursive: true });
-  });
 });
 
 describe("mergeFrameworkReferenceIntoAgents", () => {
