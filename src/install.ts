@@ -32,6 +32,9 @@ export interface InstallOptions {
   britishEnglish?: boolean;
 }
 
+type SkillsRunner = "npx" | "bunx";
+let cachedSkillsRunner: SkillsRunner | null = null;
+
 const FRAMEWORK_REFERENCE_SENTENCE =
   "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).";
 
@@ -123,6 +126,7 @@ function buildSkillsAddCommand(
 ): InstallCommand | null {
   if (agents.length === 0 || skillNames.length === 0) return null;
 
+  const command = getSkillsRunner();
   const args = ["-y", "skills", "add", source];
   for (const skillName of skillNames) {
     args.push("--skill", skillName);
@@ -136,10 +140,28 @@ function buildSkillsAddCommand(
   args.push("-y");
 
   return {
-    command: "npx",
+    command,
     args,
     description: `Install selected skills from ${source}`,
   };
+}
+
+function commandExists(command: string): boolean {
+  const result = spawnSync(command, ["--version"], {
+    encoding: "utf-8",
+    stdio: "ignore",
+  });
+  return !result.error && result.status === 0;
+}
+
+export function getSkillsRunner(): SkillsRunner {
+  if (cachedSkillsRunner) return cachedSkillsRunner;
+  if (commandExists("npx")) {
+    cachedSkillsRunner = "npx";
+    return cachedSkillsRunner;
+  }
+  cachedSkillsRunner = "bunx";
+  return cachedSkillsRunner;
 }
 
 function buildCapabilityCommands(
@@ -260,7 +282,7 @@ export function runCommand(
   return {
     success: result.status === 0,
     stdout: result.stdout ?? "",
-    stderr: result.stderr ?? "",
+    stderr: result.stderr || result.error?.message || "",
   };
 }
 

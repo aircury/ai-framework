@@ -32,7 +32,7 @@ The TUI asks for:
 3. **Language preference** — for local installs, optionally enforce British English and include the language capability.
 4. **Capabilities** — choose the workflows and standards this installation should include.
 
-If files already exist, the installer asks whether to skip or overwrite them. Skills are installed through `npx skills add ...` so they can be updated later with the skills ecosystem.
+If files already exist, the installer asks whether to skip or overwrite them. Skills are installed through the skills ecosystem with `npx` or `bunx`, so they can be updated later.
 
 ## What It Installs
 
