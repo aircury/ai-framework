@@ -69,12 +69,12 @@ Example `module.json`:
 Then wire it into `src/capabilities.ts`:
 
 1. Import the three module files.
-2. Add the id to `ContentCapabilityId`.
-3. Add the module to `CONTENT_CAPABILITIES`.
-4. Add the id to `CAPABILITY_ORDER`.
+2. Add the id to `StandardModuleId`.
+3. Add the module to `STANDARD_MODULES`.
+4. Add the module id to the owning capability's `modules` list.
 5. Add template flags only if the templates need conditional behavior beyond normal section rendering.
 
-If the module needs starter files, add them through the capability's `files` array in `src/capabilities.ts`.
+If the module needs starter files, attach them to the standard module. The owning capability will contribute those files when selected.
 
 ## Add Or Change Generated Files
 
@@ -112,7 +112,7 @@ To add an external skill:
 
 The installer downloads skills by running generated `npx skills add` commands. The wiring lives in `src/capabilities.ts` and `src/install.ts`.
 
-Add or update a `CapabilityManifest` when users should be able to select a bundle in the TUI:
+Add or update a `CapabilityManifest` when users should be able to select a capability in the TUI:
 
 ```ts
 {

@@ -111,7 +111,7 @@ Output: reviewed and consolidated specs in `specs/features/`.
 Use this when behavior is frozen but implementation can change.
 
 ```text
-Rewrite this Express service using NestJS from the specs in specs/features/. Keep public API behavior and database compatibility identical unless I approve a contract change.
+Rewrite this Express service using NestJS from the specs in specs/features/. Keep public API behavior and database contracts identical unless I approve a contract change.
 ```
 
 Recommended skill: `specs-interpreter`.
@@ -143,12 +143,12 @@ Expected artifacts:
 - `specs/features/<feature>/experience.md`
 - `specs/ui/style-guide.md`
 
-### Restyle A Legacy App Into A New Design System
+### Restyle An Existing App Into A New Design System
 
-Use this when a legacy app has behavior and structure worth preserving, but the visual language must be rebuilt using the current project's design system.
+Use this when an existing app has behavior and structure worth preserving, but the visual language must be rebuilt using the current project's design system.
 
 ```text
-Restyle this legacy screen using the design system from the current app. Extract layout and experience from the legacy implementation, extract the design system from the current project, then implement the screen with the new visual language while preserving behavior.
+Restyle this existing screen using the design system from the current app. Extract layout and experience from the existing implementation, extract the design system from the current project, then implement the screen with the new visual language while preserving behavior.
 ```
 
 Recommended skills:
@@ -159,17 +159,17 @@ Recommended skills:
 
 Expected flow:
 
-1. Extract `layout.md` from the legacy screen to capture structure, hierarchy, and content slots.
-2. Extract `experience.md` from the legacy screen to capture behavior, states, flows, and micro-interactions.
-3. Extract or update `specs/ui/style-guide.md` from the current non-legacy project so the target design system is explicit.
-4. Implement the restyled UI with `frontend-ui-generator`, using the legacy `layout.md` and `experience.md` as behavioral constraints and `specs/ui/style-guide.md` as the visual source of truth.
+1. Extract `layout.md` from the existing screen to capture structure, hierarchy, and content slots.
+2. Extract `experience.md` from the existing screen to capture behavior, states, flows, and micro-interactions.
+3. Extract or update `specs/ui/style-guide.md` from the current project so the target design system is explicit.
+4. Implement the restyled UI with `frontend-ui-generator`, using the extracted `layout.md` and `experience.md` as behavioral constraints and `specs/ui/style-guide.md` as the visual source of truth.
 
 Expected artifacts:
 
-- `specs/features/<feature>/layout.md` from the legacy implementation.
-- `specs/features/<feature>/experience.md` from the legacy implementation.
+- `specs/features/<feature>/layout.md` from the existing implementation.
+- `specs/features/<feature>/experience.md` from the existing implementation.
 - `specs/ui/style-guide.md` from the target project.
-- Restyled UI code that preserves legacy behavior but follows the current design system.
+- Restyled UI code that preserves existing behavior but follows the current design system.
 
 ### Record An Architectural Decision
 
@@ -183,7 +183,7 @@ Required module: `decision-records`.
 
 Output: `specs/decisions/ADR-XXXX-*.md`.
 
-If `airsync-memory` is also enabled, the generated framework requires proposing reusable ADR knowledge to Airsync INBOX.
+If `airsync` is also enabled, the generated framework requires proposing reusable ADR knowledge to Airsync INBOX.
 
 ## Non-Negotiable Rules
 
