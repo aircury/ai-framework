@@ -238,6 +238,25 @@ export async function run(): Promise<void> {
   let skipped = 0;
   let executed = 0;
 
+  for (const command of commands) {
+    const result = runCommand(command, cwd);
+    if (!result.success) {
+      spinner.stop("Installation failed.");
+
+      p.log.warn(
+        "No project files were written because skill installation failed.",
+      );
+      if (result.stdout.trim()) p.log.message(result.stdout.trim());
+      if (result.stderr.trim()) p.log.error(result.stderr.trim());
+
+      throw new Error(
+        `Failed to run: ${command.command} ${command.args.join(" ")}`,
+      );
+    }
+
+    executed++;
+  }
+
   for (const { file, exists } of conflicts) {
     if (
       exists &&
@@ -249,30 +268,6 @@ export async function run(): Promise<void> {
     }
     writeFile(file, cwd, isGlobal);
     written++;
-  }
-
-  for (const command of commands) {
-    const result = runCommand(command, cwd);
-    if (!result.success) {
-      spinner.stop("Installation failed.");
-
-      if (written > 0)
-        p.log.success(
-          `${written} file${written > 1 ? "s" : ""} written before failure`,
-        );
-      if (skipped > 0)
-        p.log.warn(
-          `${skipped} file${skipped > 1 ? "s" : ""} skipped (already exist)`,
-        );
-      if (result.stdout.trim()) p.log.message(result.stdout.trim());
-      if (result.stderr.trim()) p.log.error(result.stderr.trim());
-
-      throw new Error(
-        `Failed to run: ${command.command} ${command.args.join(" ")}`,
-      );
-    }
-
-    executed++;
   }
 
   spinner.stop("Done!");

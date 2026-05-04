@@ -11,6 +11,7 @@ import {
   getLocalFiles,
   type InstallFile,
   mergeFrameworkReferenceIntoAgents,
+  runCommand,
   writeFile,
 } from "../src/install";
 
@@ -257,6 +258,22 @@ describe("getGlobalCommands", () => {
     expect(commands[0].args).toContain("universal");
     expect(commands[0].args).toContain("claude-code");
     expect(commands[0].args).toContain("-g");
+  });
+});
+
+describe("runCommand", () => {
+  it("reports spawn errors when the command cannot be found", () => {
+    const result = runCommand(
+      {
+        command: "aircury-missing-command",
+        args: ["--version"],
+        description: "missing command",
+      },
+      import.meta.dir,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.stderr).toContain("aircury-missing-command");
   });
 });
 

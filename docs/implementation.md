@@ -78,20 +78,20 @@ The installer stores the selected capability ids in `.aircury/framework.config.j
 
 ## Skill Installation
 
-Installable skills are defined on capabilities in `src/capabilities.ts`. The installer expands selected capabilities into individual skills and groups them by source before running `npx skills add`.
+Installable skills are defined on capabilities in `src/capabilities.ts`. The installer expands selected capabilities into individual skills and groups them by source before running `skills add` through `npx` when available, or `bunx` otherwise.
 
 Local skill commands include the `universal` agent and any selected tool-specific agents. Global skill commands target only selected global tools.
 
 The generated command shape is:
 
 ```bash
-npx -y skills add <source> --skill <skill-name> -a <agent> -y
+<npx|bunx> -y skills add <source> --skill <skill-name> -a <agent> -y
 ```
 
 Global installs also add `-g`:
 
 ```bash
-npx -y skills add <source> --skill <skill-name> -a <agent> -g -y
+<npx|bunx> -y skills add <source> --skill <skill-name> -a <agent> -g -y
 ```
 
 ## Default Capabilities
