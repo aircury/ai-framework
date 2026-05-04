@@ -105,29 +105,32 @@ export type CapabilityCategory =
   | "frontend"
   | "communication";
 
-type ContentCapabilityId =
+type StandardModuleId =
   | "decision-records"
-  | "frontend"
   | "hexagonal-architecture"
   | "ddd"
   | "code-style"
   | "airsync-memory"
   | "error-handling"
   | "structured-logging"
+  | "frontend"
   | "testing"
   | "token-efficiency";
 
-type WorkflowCapabilityId =
+export type CapabilityId =
   | "open-spec"
   | "spec-kit"
   | "airsync"
   | "git"
   | "architecture"
+  | "decision-records"
+  | "testing"
+  | "code-style"
+  | "frontend"
+  | "token-efficiency"
   | "resilience"
   | "specs"
   | "language";
-
-export type CapabilityId = ContentCapabilityId | WorkflowCapabilityId;
 
 export interface CapabilitySkill {
   source: string;
@@ -149,11 +152,11 @@ export interface CapabilityManifest {
   category: CapabilityCategory;
   defaultSelected: boolean;
   scopes: CapabilityScope[];
+  modules?: StandardModuleId[];
   framework?: string;
   agents?: string;
   files?: CapabilityFile[];
   skills?: CapabilitySkill[];
-  implies?: CapabilityId[];
 }
 
 export interface CapabilityProfile {
@@ -164,118 +167,328 @@ export interface CapabilityProfile {
   };
 }
 
-interface ContentManifest {
-  id: ContentCapabilityId;
+interface StandardManifest {
+  id: StandardModuleId;
   label: string;
   hint: string;
   description: string;
   defaultEnabled: boolean;
 }
 
-function fromContentManifest(
-  manifest: ContentManifest,
-  category: CapabilityCategory,
-  scopes: CapabilityScope[],
-): Pick<
-  CapabilityManifest,
-  | "id"
-  | "label"
-  | "hint"
-  | "description"
-  | "defaultSelected"
-  | "category"
-  | "scopes"
-> {
+interface StandardModule {
+  id: StandardModuleId;
+  description: string;
+  framework: string;
+  agents: string;
+  files?: CapabilityFile[];
+}
+
+function createStandardModule(
+  manifest: StandardManifest,
+  framework: string,
+  agents: string,
+  files?: CapabilityFile[],
+): StandardModule {
   return {
     id: manifest.id,
-    label: manifest.label,
-    hint: manifest.hint,
     description: manifest.description,
-    defaultSelected: manifest.defaultEnabled,
-    category,
-    scopes,
+    framework: framework.trim(),
+    agents: agents.trim(),
+    files,
   };
 }
 
-const CONTENT_CAPABILITIES: Record<ContentCapabilityId, CapabilityManifest> = {
+const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
   "decision-records": {
-    ...fromContentManifest(
-      decisionRecordsManifest as ContentManifest,
-      "engineering",
-      ["local"],
+    ...createStandardModule(
+      decisionRecordsManifest as StandardManifest,
+      decisionRecordsFramework,
+      decisionRecordsAgents,
+      [
+        {
+          path: "specs/decisions/README.md",
+          content: decisionsReadme,
+          description: "ADR starter guide",
+        },
+      ],
     ),
-    framework: decisionRecordsFramework.trim(),
-    agents: decisionRecordsAgents.trim(),
-    files: [
-      {
-        path: "specs/decisions/README.md",
-        content: decisionsReadme,
-        description: "ADR starter guide",
-      },
-    ],
   },
   "hexagonal-architecture": {
-    ...fromContentManifest(
-      hexagonalArchitectureManifest as ContentManifest,
-      "engineering",
-      ["local"],
+    ...createStandardModule(
+      hexagonalArchitectureManifest as StandardManifest,
+      hexagonalArchitectureFramework,
+      hexagonalArchitectureAgents,
     ),
-    framework: hexagonalArchitectureFramework.trim(),
-    agents: hexagonalArchitectureAgents.trim(),
   },
   ddd: {
-    ...fromContentManifest(dddManifest as ContentManifest, "engineering", [
-      "local",
-    ]),
-    framework: dddFramework.trim(),
-    agents: dddAgents.trim(),
+    ...createStandardModule(
+      dddManifest as StandardManifest,
+      dddFramework,
+      dddAgents,
+    ),
   },
   "code-style": {
-    ...fromContentManifest(
-      codeStyleManifest as ContentManifest,
-      "engineering",
-      ["local"],
+    ...createStandardModule(
+      codeStyleManifest as StandardManifest,
+      codeStyleFramework,
+      codeStyleAgents,
     ),
-    framework: codeStyleFramework.trim(),
-    agents: codeStyleAgents.trim(),
   },
   "airsync-memory": {
-    ...fromContentManifest(
-      airsyncMemoryManifest as ContentManifest,
-      "engineering",
-      ["local"],
+    ...createStandardModule(
+      airsyncMemoryManifest as StandardManifest,
+      airsyncMemoryFramework,
+      airsyncMemoryAgents,
     ),
-    framework: airsyncMemoryFramework.trim(),
-    agents: airsyncMemoryAgents.trim(),
   },
   "error-handling": {
-    ...fromContentManifest(
-      errorHandlingManifest as ContentManifest,
-      "engineering",
-      ["local"],
+    ...createStandardModule(
+      errorHandlingManifest as StandardManifest,
+      errorHandlingFramework,
+      errorHandlingAgents,
     ),
-    framework: errorHandlingFramework.trim(),
-    agents: errorHandlingAgents.trim(),
+  },
+  "structured-logging": {
+    ...createStandardModule(
+      structuredLoggingManifest as StandardManifest,
+      structuredLoggingFramework,
+      structuredLoggingAgents,
+    ),
   },
   frontend: {
-    ...fromContentManifest(frontendManifest as ContentManifest, "frontend", [
-      "local",
-      "global",
-    ]),
-    framework: frontendFramework.trim(),
-    agents: frontendAgents.trim(),
-    files: [
+    ...createStandardModule(
+      frontendManifest as StandardManifest,
+      frontendFramework,
+      frontendAgents,
+      [
+        {
+          path: "specs/ui/README.md",
+          content: uiReadme,
+          description: "Frontend design system starter guide",
+        },
+        {
+          path: "specs/ui/frontend-workflow.md",
+          content: frontendWorkflow,
+          description: "Frontend workflow reference",
+        },
+      ],
+    ),
+  },
+  testing: {
+    ...createStandardModule(
+      testingManifest as StandardManifest,
+      testingFramework,
+      testingAgents,
+    ),
+  },
+  "token-efficiency": {
+    ...createStandardModule(
+      tokenEfficiencyManifest as StandardManifest,
+      tokenEfficiencyFramework,
+      tokenEfficiencyAgents,
+    ),
+  },
+};
+
+function composeModules(
+  moduleIds: StandardModuleId[],
+): Pick<CapabilityManifest, "modules" | "framework" | "agents" | "files"> {
+  const modules = moduleIds.map((moduleId) => STANDARD_MODULES[moduleId]);
+  return {
+    modules: moduleIds,
+    framework: modules.map((module) => module.framework).join("\n\n"),
+    agents: modules.map((module) => module.agents).join("\n\n"),
+    files: modules.flatMap((module) => module.files ?? []),
+  };
+}
+
+const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
+  "open-spec": {
+    id: "open-spec",
+    label: "OpenSpec",
+    hint: "structured propose/apply/complete workflow",
+    description:
+      "Structured propose/apply/complete workflow for complex changes",
+    category: "workflow",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+    skills: [
       {
-        path: "specs/ui/README.md",
-        content: uiReadme,
-        description: "Frontend design system starter guide",
+        source: "aircury/ai-framework",
+        skillName: "open-spec-propose",
+        scopes: ["local", "global"],
       },
       {
-        path: "specs/ui/frontend-workflow.md",
-        content: frontendWorkflow,
-        description: "Frontend workflow reference",
+        source: "aircury/ai-framework",
+        skillName: "open-spec-apply",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
+        skillName: "open-spec-complete",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
+        skillName: "open-spec-explore",
+        scopes: ["local", "global"],
       },
     ],
+  },
+  "spec-kit": {
+    id: "spec-kit",
+    label: "Spec Kit",
+    hint: "formal specification workflow",
+    description:
+      "Formal specification workflow for feature definition and delivery",
+    category: "workflow",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "spec-kit-specify",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
+        skillName: "spec-kit-clarify",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
+        skillName: "spec-kit-plan",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
+        skillName: "spec-kit-analyse",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
+        skillName: "spec-kit-tasks",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
+        skillName: "spec-kit-implement",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
+        skillName: "spec-kit-checklist",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
+  airsync: {
+    id: "airsync",
+    label: "Airsync",
+    hint: "collaborative memory workflow and shared memory rules",
+    description: "Collaborative memory workflow with project Airsync rules",
+    category: "workflow",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+    ...composeModules(["airsync-memory"]),
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "airsync",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
+  git: {
+    id: "git",
+    label: "Git",
+    hint: "atomic commit workflow helpers",
+    description: "Focused git workflow helpers for atomic commits",
+    category: "workflow",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "commit-changes",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
+  architecture: {
+    id: "architecture",
+    label: "Architecture",
+    hint: "DDD, hexagonal architecture, and curated architecture skills",
+    description:
+      "DDD and hexagonal architecture standards with curated architecture skills",
+    category: "engineering",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+    ...composeModules(["hexagonal-architecture", "ddd"]),
+    skills: [
+      {
+        source: "https://github.com/ccheney/robust-skills",
+        skillName: "clean-ddd-hexagonal",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
+  "decision-records": {
+    id: "decision-records",
+    label: "ADRs",
+    hint: "persist architectural intent and supersession history",
+    description:
+      "Requires agents to capture material architectural and workflow decisions in ADRs under specs/decisions/.",
+    category: "engineering",
+    defaultSelected: true,
+    scopes: ["local"],
+    ...composeModules(["decision-records"]),
+  },
+  testing: {
+    id: "testing",
+    label: "Testing",
+    hint: "unit, integration, UI, and E2E coverage strategy",
+    description:
+      "Testing standards plus curated Playwright and E2E testing skills",
+    category: "engineering",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+    ...composeModules(["testing"]),
+    skills: [
+      {
+        source:
+          "https://github.com/currents-dev/playwright-best-practices-skill",
+        skillName: "playwright-best-practices",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "https://github.com/wshobson/agents",
+        skillName: "e2e-testing-patterns",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
+  "code-style": {
+    id: "code-style",
+    label: "Code Style",
+    hint: "ESLint, Prettier, Biome, Oxlint",
+    description:
+      "Automatically detects and follows project-specific linting and parsing rules by analysing package.json and config files.",
+    category: "engineering",
+    defaultSelected: true,
+    scopes: ["local"],
+    ...composeModules(["code-style"]),
+  },
+  frontend: {
+    id: "frontend",
+    label: "Frontend",
+    hint: "design tokens, component tree, style guide, and frontend skills",
+    description:
+      "Frontend standards with layout, experience, and UI generation skills",
+    category: "frontend",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+    ...composeModules(["frontend"]),
     skills: [
       {
         source: "aircury/ai-framework",
@@ -294,43 +507,16 @@ const CONTENT_CAPABILITIES: Record<ContentCapabilityId, CapabilityManifest> = {
       },
     ],
   },
-  "structured-logging": {
-    ...fromContentManifest(
-      structuredLoggingManifest as ContentManifest,
-      "engineering",
-      ["local"],
-    ),
-    framework: structuredLoggingFramework.trim(),
-    agents: structuredLoggingAgents.trim(),
-  },
-  testing: {
-    ...fromContentManifest(testingManifest as ContentManifest, "engineering", [
-      "local",
-    ]),
-    framework: testingFramework.trim(),
-    agents: testingAgents.trim(),
-    skills: [
-      {
-        source:
-          "https://github.com/currents-dev/playwright-best-practices-skill",
-        skillName: "playwright-best-practices",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "https://github.com/wshobson/agents",
-        skillName: "e2e-testing-patterns",
-        scopes: ["local", "global"],
-      },
-    ],
-  },
   "token-efficiency": {
-    ...fromContentManifest(
-      tokenEfficiencyManifest as ContentManifest,
-      "communication",
-      ["local"],
-    ),
-    framework: tokenEfficiencyFramework.trim(),
-    agents: tokenEfficiencyAgents.trim(),
+    id: "token-efficiency",
+    label: "Token Efficiency",
+    hint: "terse default responses through Caveman",
+    description:
+      "Project token-efficiency rules plus the Caveman skill for terse responses",
+    category: "communication",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+    ...composeModules(["token-efficiency"]),
     skills: [
       {
         source: "https://github.com/juliusbrussee/caveman",
@@ -339,199 +525,68 @@ const CONTENT_CAPABILITIES: Record<ContentCapabilityId, CapabilityManifest> = {
       },
     ],
   },
+  resilience: {
+    id: "resilience",
+    label: "Resilience",
+    hint: "error handling, structured logging, and recovery skills",
+    description:
+      "Error-handling and structured-logging standards with curated resilience skills",
+    category: "engineering",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+    ...composeModules(["error-handling", "structured-logging"]),
+    skills: [
+      {
+        source: "https://github.com/wshobson/agents",
+        skillName: "error-handling-patterns",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "https://github.com/aj-geddes/useful-ai-prompts",
+        skillName: "logging-best-practices",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
+  specs: {
+    id: "specs",
+    label: "Specs",
+    hint: "extract and interpret authoritative specs",
+    description:
+      "Skills for extracting authoritative specs and designing re-implementations from them",
+    category: "workflow",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "specs-extractor",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
+        skillName: "specs-interpreter",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
+  language: {
+    id: "language",
+    label: "Language",
+    hint: "UK business English guidance",
+    description: "UK business English guidance for project communication",
+    category: "communication",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "https://github.com/jezweb/claude-skills",
+        skillName: "uk-business-english",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
 };
-
-const WORKFLOW_CAPABILITIES: Record<WorkflowCapabilityId, CapabilityManifest> =
-  {
-    "open-spec": {
-      id: "open-spec",
-      label: "OpenSpec",
-      hint: "structured propose/apply/complete workflow",
-      description:
-        "Structured propose/apply/complete workflow for complex changes",
-      category: "workflow",
-      defaultSelected: true,
-      scopes: ["local", "global"],
-      skills: [
-        {
-          source: "aircury/ai-framework",
-          skillName: "open-spec-propose",
-          scopes: ["local", "global"],
-        },
-        {
-          source: "aircury/ai-framework",
-          skillName: "open-spec-apply",
-          scopes: ["local", "global"],
-        },
-        {
-          source: "aircury/ai-framework",
-          skillName: "open-spec-complete",
-          scopes: ["local", "global"],
-        },
-        {
-          source: "aircury/ai-framework",
-          skillName: "open-spec-explore",
-          scopes: ["local", "global"],
-        },
-      ],
-    },
-    "spec-kit": {
-      id: "spec-kit",
-      label: "Spec Kit",
-      hint: "formal specification workflow",
-      description:
-        "Formal specification workflow for feature definition and delivery",
-      category: "workflow",
-      defaultSelected: true,
-      scopes: ["local", "global"],
-      skills: [
-        {
-          source: "aircury/ai-framework",
-          skillName: "spec-kit-specify",
-          scopes: ["local", "global"],
-        },
-        {
-          source: "aircury/ai-framework",
-          skillName: "spec-kit-clarify",
-          scopes: ["local", "global"],
-        },
-        {
-          source: "aircury/ai-framework",
-          skillName: "spec-kit-plan",
-          scopes: ["local", "global"],
-        },
-        {
-          source: "aircury/ai-framework",
-          skillName: "spec-kit-analyse",
-          scopes: ["local", "global"],
-        },
-        {
-          source: "aircury/ai-framework",
-          skillName: "spec-kit-tasks",
-          scopes: ["local", "global"],
-        },
-        {
-          source: "aircury/ai-framework",
-          skillName: "spec-kit-implement",
-          scopes: ["local", "global"],
-        },
-        {
-          source: "aircury/ai-framework",
-          skillName: "spec-kit-checklist",
-          scopes: ["local", "global"],
-        },
-      ],
-    },
-    airsync: {
-      id: "airsync",
-      label: "Airsync",
-      hint: "collaborative memory workflow",
-      description: "Collaborative memory workflow for reusable team knowledge",
-      category: "workflow",
-      defaultSelected: true,
-      scopes: ["local", "global"],
-      skills: [
-        {
-          source: "aircury/ai-framework",
-          skillName: "airsync",
-          scopes: ["local", "global"],
-        },
-      ],
-    },
-    git: {
-      id: "git",
-      label: "Git",
-      hint: "atomic commit workflow helpers",
-      description: "Focused git workflow helpers for atomic commits",
-      category: "workflow",
-      defaultSelected: true,
-      scopes: ["local", "global"],
-      skills: [
-        {
-          source: "aircury/ai-framework",
-          skillName: "commit-changes",
-          scopes: ["local", "global"],
-        },
-      ],
-    },
-    architecture: {
-      id: "architecture",
-      label: "Architecture",
-      hint: "curated DDD and hexagonal architecture skills",
-      description:
-        "Curated external architecture guidance for DDD and hexagonal design",
-      category: "engineering",
-      defaultSelected: true,
-      scopes: ["local", "global"],
-      skills: [
-        {
-          source: "https://github.com/ccheney/robust-skills",
-          skillName: "clean-ddd-hexagonal",
-          scopes: ["local", "global"],
-        },
-      ],
-    },
-    resilience: {
-      id: "resilience",
-      label: "Resilience",
-      hint: "curated logging and recovery skills",
-      description:
-        "Curated external guidance for error handling and structured logging",
-      category: "engineering",
-      defaultSelected: true,
-      scopes: ["local", "global"],
-      skills: [
-        {
-          source: "https://github.com/wshobson/agents",
-          skillName: "error-handling-patterns",
-          scopes: ["local", "global"],
-        },
-        {
-          source: "https://github.com/aj-geddes/useful-ai-prompts",
-          skillName: "logging-best-practices",
-          scopes: ["local", "global"],
-        },
-      ],
-    },
-    specs: {
-      id: "specs",
-      label: "Specs",
-      hint: "extract and interpret authoritative specs",
-      description:
-        "Skills for extracting authoritative specs and designing re-implementations from them",
-      category: "workflow",
-      defaultSelected: true,
-      scopes: ["local", "global"],
-      skills: [
-        {
-          source: "aircury/ai-framework",
-          skillName: "specs-extractor",
-          scopes: ["local", "global"],
-        },
-        {
-          source: "aircury/ai-framework",
-          skillName: "specs-interpreter",
-          scopes: ["local", "global"],
-        },
-      ],
-    },
-    language: {
-      id: "language",
-      label: "Language",
-      hint: "UK business English guidance",
-      description: "UK business English guidance for project communication",
-      category: "communication",
-      defaultSelected: false,
-      scopes: ["local", "global"],
-      skills: [
-        {
-          source: "https://github.com/jezweb/claude-skills",
-          skillName: "uk-business-english",
-          scopes: ["local", "global"],
-        },
-      ],
-    },
-  };
 
 const CAPABILITY_ORDER: CapabilityId[] = [
   "open-spec",
@@ -541,23 +596,13 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "architecture",
   "decision-records",
   "testing",
-  "hexagonal-architecture",
-  "ddd",
   "code-style",
-  "airsync-memory",
-  "error-handling",
-  "structured-logging",
   "frontend",
   "token-efficiency",
   "resilience",
   "specs",
   "language",
 ];
-
-const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
-  ...CONTENT_CAPABILITIES,
-  ...WORKFLOW_CAPABILITIES,
-};
 
 export const CAPABILITIES: CapabilityManifest[] = CAPABILITY_ORDER.map(
   (id) => CAPABILITY_REGISTRY[id],
@@ -584,11 +629,7 @@ export function resolveCapabilityIds(
   const resolved = new Set<CapabilityId>();
   const visit = (capabilityId: CapabilityId) => {
     if (resolved.has(capabilityId)) return;
-    const capability = getCapabilityById(capabilityId);
     resolved.add(capabilityId);
-    for (const impliedId of capability.implies ?? []) {
-      visit(impliedId);
-    }
   };
 
   for (const capabilityId of capabilityIds) {

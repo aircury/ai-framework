@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import {
   createCapabilityProfile,
   getCapabilities,
+  getCapabilityById,
   getCapabilityFiles,
   getCapabilitySkills,
   getInitialCapabilityIds,
@@ -18,12 +19,7 @@ describe("capabilities", () => {
       "architecture",
       "decision-records",
       "testing",
-      "hexagonal-architecture",
-      "ddd",
       "code-style",
-      "airsync-memory",
-      "error-handling",
-      "structured-logging",
       "frontend",
       "token-efficiency",
       "resilience",
@@ -40,12 +36,7 @@ describe("capabilities", () => {
       "architecture",
       "decision-records",
       "testing",
-      "hexagonal-architecture",
-      "ddd",
       "code-style",
-      "airsync-memory",
-      "error-handling",
-      "structured-logging",
       "frontend",
       "token-efficiency",
       "resilience",
@@ -63,7 +54,9 @@ describe("capabilities", () => {
       "airsync",
       "git",
       "architecture",
+      "testing",
       "frontend",
+      "token-efficiency",
       "resilience",
       "specs",
       "language",
@@ -89,6 +82,27 @@ describe("capabilities", () => {
       "specs-extractor",
       "specs-interpreter",
     ]);
+  });
+
+  it("keeps standards and skills under the selected capability", () => {
+    expect(getCapabilityById("architecture")).toMatchObject({
+      label: "Architecture",
+      category: "engineering",
+      modules: ["hexagonal-architecture", "ddd"],
+    });
+    expect(getCapabilityById("architecture").framework).toContain(
+      "## Non-Negotiable Architecture Rules",
+    );
+    expect(
+      getCapabilityById("architecture").skills?.map((skill) => skill.skillName),
+    ).toEqual(["clean-ddd-hexagonal"]);
+
+    expect(getCapabilityById("testing")).toMatchObject({
+      modules: ["testing"],
+    });
+    expect(
+      getCapabilityById("testing").skills?.map((skill) => skill.skillName),
+    ).toEqual(["playwright-best-practices", "e2e-testing-patterns"]);
   });
 
   it("returns capability-owned files", () => {

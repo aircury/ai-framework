@@ -9,7 +9,7 @@ import type { CapabilityId, CapabilityManifest } from "./capabilities";
 import { getSelectedCapabilities } from "./capabilities";
 
 interface RendererViewModel {
-  installedModules: Pick<CapabilityManifest, "id" | "description">[];
+  installedCapabilities: Pick<CapabilityManifest, "id" | "description">[];
   frameworkSections: string[];
   agentRules: string[];
   includesDecisionRecords: boolean;
@@ -43,9 +43,12 @@ function createViewModel(
   const selectedIds = new Set(
     selectedCapabilities.map((capability) => capability.id),
   );
+  const selectedModuleIds = new Set(
+    selectedCapabilities.flatMap((capability) => capability.modules ?? []),
+  );
 
   return {
-    installedModules: selectedCapabilities.map(({ id, description }) => ({
+    installedCapabilities: selectedCapabilities.map(({ id, description }) => ({
       id,
       description,
     })),
@@ -57,12 +60,11 @@ function createViewModel(
       .filter(isString),
     includesDecisionRecords: selectedIds.has("decision-records"),
     includesTesting: selectedIds.has("testing"),
-    includesArchitecture:
-      selectedIds.has("hexagonal-architecture") || selectedIds.has("ddd"),
+    includesArchitecture: selectedIds.has("architecture"),
     includesCodeStyle: selectedIds.has("code-style"),
-    includesAirsyncMemory: selectedIds.has("airsync-memory"),
-    includesErrorHandling: selectedIds.has("error-handling"),
-    includesStructuredLogging: selectedIds.has("structured-logging"),
+    includesAirsyncMemory: selectedModuleIds.has("airsync-memory"),
+    includesErrorHandling: selectedModuleIds.has("error-handling"),
+    includesStructuredLogging: selectedModuleIds.has("structured-logging"),
     includesFrontend: selectedIds.has("frontend"),
     includesTokenEfficiency: selectedIds.has("token-efficiency"),
     enforceBritishEnglish: options?.britishEnglish ?? false,

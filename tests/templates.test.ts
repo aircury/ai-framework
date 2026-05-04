@@ -85,7 +85,7 @@ describe("templates", () => {
     });
 
     it("adds architecture rules only when architecture capabilities are enabled", () => {
-      expect(generateFramework(["hexagonal-architecture", "ddd"])).toContain(
+      expect(generateFramework(["architecture"])).toContain(
         "## Non-Negotiable Architecture Rules",
       );
       expect(generateFramework([])).not.toContain(
