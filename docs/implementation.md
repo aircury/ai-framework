@@ -20,13 +20,12 @@ The TUI performs this sequence:
 
 1. Select scope: `Local` or `Global`.
 2. Select tool-specific integrations.
-3. Select standards modules for local installs.
-4. Choose whether generated rules should enforce British English.
-5. Select skill groups.
-6. Review files and `npx skills add` commands.
-7. Confirm installation.
-8. Choose whether to skip or overwrite existing generated files.
-9. Write files, install skills, and update `.gitignore` with `specs/changes/`.
+3. Choose whether generated rules should enforce British English for local installs.
+4. Select capabilities.
+5. Review files and `npx skills add` commands.
+6. Confirm installation.
+7. Choose whether to skip or overwrite existing generated files.
+8. Write files, install skills, and update `.gitignore` with `specs/changes/`.
 
 Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and OpenCode are supported through `AGENTS.md` and selected skills. Tool-specific files are added only when selected.
 
@@ -34,21 +33,24 @@ Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and Open
 
 | File | Purpose |
 |---|---|
-| `FRAMEWORK.md` | Full project constitution generated from templates and selected standards modules. |
+| `FRAMEWORK.md` | Full project constitution generated from templates and selected capabilities. |
 | `AGENTS.md` | Short agent entrypoint that points to `FRAMEWORK.md`. Existing non-Aircury content is preserved by appending the framework reference. |
 | `CLAUDE.md` | Claude Code instructions, when Claude Code is selected. |
 | `GEMINI.md` | Gemini CLI instructions, when Gemini CLI is selected. |
-| `.aircury/framework.config.json` | Installed profile with selected modules and language settings. |
+| `.aircury/framework.config.json` | Installed profile with selected capabilities and language settings. |
 | `specs/features/README.md` | Starter guide for canonical living specifications. |
 | `specs/decisions/README.md` | Starter ADR guide when `decision-records` is enabled. |
 | `specs/ui/README.md` | Starter frontend design-system guide when `frontend` is enabled. |
+| `specs/ui/frontend-workflow.md` | Frontend workflow reference when `frontend` is enabled. |
 | `.gitignore` | Adds `specs/changes/` because workflow change artifacts are temporary. |
 
-## Standards Modules
+## Capabilities
 
-Standards modules live under `standards/modules/<module-id>/` and are composed into generated framework files.
+Capabilities are defined in `src/capabilities.ts`. A capability can contribute generated framework content, generated files, installable skills, or any combination of those.
 
-Each module contains:
+Content capabilities use module fragments from `standards/modules/<module-id>/` and are composed into generated framework files.
+
+Each content module contains:
 
 - `module.json`: id, label, hint, description, and default state.
 - `framework.md`: rules added to `FRAMEWORK.md`.
@@ -67,11 +69,22 @@ The current built-in module ids are:
 - `testing`
 - `token-efficiency`
 
-The installer stores the selected module ids in `.aircury/framework.config.json`. Re-run the installer or edit the profile and regenerate files if project standards need to change.
+Workflow and skill-only capabilities are also defined in `src/capabilities.ts`:
+
+- `open-spec`
+- `spec-kit`
+- `airsync`
+- `git`
+- `architecture`
+- `resilience`
+- `specs`
+- `language`
+
+The installer stores the selected capability ids in `.aircury/framework.config.json`. Re-run the installer or edit the profile and regenerate files if project standards need to change.
 
 ## Skill Installation
 
-Skill groups are defined in `src/skills-catalog.ts`. The installer expands selected groups into individual skills and groups them by source before running `npx skills add`.
+Installable skills are defined on capabilities in `src/capabilities.ts`. The installer expands selected capabilities into individual skills and groups them by source before running `npx skills add`.
 
 Local skill commands include the `universal` agent and any selected tool-specific agents. Global skill commands target only selected global tools.
 
@@ -87,9 +100,9 @@ Global installs also add `-g`:
 npx -y skills add <source> --skill <skill-name> -a <agent> -g -y
 ```
 
-## Default Skill Groups
+## Default Capabilities
 
-Default selected groups are:
+Default selected capabilities are:
 
 - `open-spec`
 - `spec-kit`
@@ -97,14 +110,20 @@ Default selected groups are:
 - `git`
 - `resilience`
 - `testing`
+- `hexagonal-architecture`
+- `ddd`
+- `code-style`
+- `airsync-memory`
+- `error-handling`
+- `structured-logging`
+- `frontend`
+- `token-efficiency`
 - `architecture`
 - `specs`
 
-Additional automatic selections:
+Additional automatic selection:
 
 - `language` is selected when British English is enabled.
-- `frontend` is selected when the `frontend` standards module is enabled.
-- `token-efficiency` is selected when the `token-efficiency` standards module is enabled.
 
 ## How Agents Should Use The Installed Framework
 

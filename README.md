@@ -25,7 +25,7 @@ Aircury is not just a collection of prompts. It installs a project operating sys
 - **Workflow routing**: agents recommend the lightest safe mode instead of forcing every task through the same process.
 - **Project-scoped rules**: generated `FRAMEWORK.md` and `AGENTS.md` make standards explicit for every future AI session.
 - **Composable standards**: teams can enable ADRs, DDD, hexagonal architecture, testing, frontend, logging, error handling, memory, and token-efficiency modules.
-- **Skill wiring**: curated skill groups are installed through `npx skills add`, so workflows are executable rather than only documented.
+- **Skill wiring**: selected capabilities install curated skills through `npx skills add`, so workflows are executable rather than only documented.
 - **Reduced intention debt**: ADRs, specs, and optional Airsync memory preserve why decisions were made, not just what code changed.
 
 The result is a setup where agents know how to work, what to protect, when to ask for structure, and where to leave durable project knowledge.
@@ -117,6 +117,7 @@ The default local and global capability selections include `specs`, so fresh ins
 Curated external skills can be added to the capability catalog and will appear in the same multiselect flow alongside built-in Aircury capabilities.
 
 When the local `token-efficiency` capability is enabled, the installer also adds project rules that start each new session in `caveman full` while keeping responses terse by default. This is intentionally project-scoped: it uses generated agent instruction files plus the `caveman` skill, and does not install any global shell hooks.
+
 ---
 
 ## Supported workflow modes
