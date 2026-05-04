@@ -52,6 +52,15 @@ import frontendFramework from "../standards/modules/frontend/framework.md" with 
 import frontendManifest from "../standards/modules/frontend/module.json" with {
   type: "json",
 };
+import decisionsReadme from "./install-content/specs/decisions/README.md" with {
+  type: "text",
+};
+import frontendWorkflow from "./install-content/specs/ui/frontend-workflow.md" with {
+  type: "text",
+};
+import uiReadme from "./install-content/specs/ui/README.md" with {
+  type: "text",
+};
 import hexagonalArchitectureAgents from "../standards/modules/hexagonal-architecture/agents.md" with {
   type: "text",
 };
@@ -200,14 +209,7 @@ const CONTENT_CAPABILITIES: Record<ContentCapabilityId, CapabilityManifest> = {
     files: [
       {
         path: "specs/decisions/README.md",
-        content: `# Architecture Decision Records
-
-\`specs/decisions/\` stores ADRs that preserve architectural and workflow intent.
-
-- Create a new ADR when a material decision is introduced or superseded.
-- Reference the superseded ADR instead of rewriting history.
-- Read relevant ADRs before changing areas they govern.
-`,
+        content: decisionsReadme,
         description: "ADR starter guide",
       },
     ],
@@ -265,14 +267,13 @@ const CONTENT_CAPABILITIES: Record<ContentCapabilityId, CapabilityManifest> = {
     files: [
       {
         path: "specs/ui/README.md",
-        content: `# Frontend Design System
-
-\`specs/ui/\` stores the project's living style guide and UI design tokens.
-
-- \`style-guide.md\`: The canonical source of truth for design tokens and UI patterns.
-- Update the style guide whenever new tokens or patterns are identified.
-`,
+        content: uiReadme,
         description: "Frontend design system starter guide",
+      },
+      {
+        path: "specs/ui/frontend-workflow.md",
+        content: frontendWorkflow,
+        description: "Frontend workflow reference",
       },
     ],
     skills: [
