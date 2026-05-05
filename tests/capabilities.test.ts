@@ -80,6 +80,7 @@ describe("capabilities", () => {
       "frontend-experience-extractor",
       "frontend-style-extractor",
       "frontend-ui-generator",
+      "vercel-react-best-practices",
       "specs-extractor",
       "specs-interpreter",
     ]);

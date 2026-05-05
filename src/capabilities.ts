@@ -510,6 +510,11 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
         skillName: "frontend-ui-generator",
         scopes: ["local", "global"],
       },
+      {
+        source: "https://github.com/vercel-labs/agent-skills",
+        skillName: "vercel-react-best-practices",
+        scopes: ["local", "global"],
+      },
     ],
   },
   "token-efficiency": {

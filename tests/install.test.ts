@@ -165,7 +165,7 @@ describe("getLocalCommands", () => {
   it("installs the skills derived from the default capabilities for universal", () => {
     const commands = getLocalCommands([], getInitialCapabilityIds("local"));
 
-    expect(commands).toHaveLength(6);
+    expect(commands).toHaveLength(7);
     const aircury = getCommandBySource(commands, aircurySkillsSource);
     expect(aircury.args).toContain("open-spec-propose");
     expect(aircury.args).toContain("spec-kit-specify");
@@ -202,6 +202,12 @@ describe("getLocalCommands", () => {
     expect(
       getCommandBySource(commands, "https://github.com/wshobson/agents").args,
     ).toContain("e2e-testing-patterns");
+    expect(
+      getCommandBySource(
+        commands,
+        "https://github.com/vercel-labs/agent-skills",
+      ).args,
+    ).toContain("vercel-react-best-practices");
   });
 
   it("installs multiple selected agents in each derived command", () => {
@@ -243,12 +249,18 @@ describe("getLocalCommands", () => {
   it("installs capability-required skills without a separate skill selection", () => {
     const commands = getLocalCommands([], ["frontend", "token-efficiency"]);
 
-    expect(commands).toHaveLength(2);
+    expect(commands).toHaveLength(3);
     expect(commands[0].args).toContain("frontend-layout-extractor");
     expect(commands[0].args).toContain("frontend-experience-extractor");
     expect(commands[0].args).toContain("frontend-style-extractor");
     expect(commands[0].args).toContain("frontend-ui-generator");
     expect(commands[1].args).toContain("caveman");
+    expect(
+      getCommandBySource(
+        commands,
+        "https://github.com/vercel-labs/agent-skills",
+      ).args,
+    ).toContain("vercel-react-best-practices");
   });
 
   it("installs the specs skills from the Aircury source", () => {
@@ -260,8 +272,8 @@ describe("getLocalCommands", () => {
 
   it("installs the frontend skills from the Aircury source", () => {
     const commands = getLocalCommands([], ["frontend"]);
-    expect(commands).toHaveLength(1);
-    expect(commands[0]).toEqual({
+    expect(commands).toHaveLength(2);
+    expect(getCommandBySource(commands, aircurySkillsSource)).toEqual({
       command: "npx",
       args: [
         "-y",
@@ -281,6 +293,27 @@ describe("getLocalCommands", () => {
         "-y",
       ],
       description: aircurySkillsDescription,
+    });
+    expect(
+      getCommandBySource(
+        commands,
+        "https://github.com/vercel-labs/agent-skills",
+      ),
+    ).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "https://github.com/vercel-labs/agent-skills",
+        "--skill",
+        "vercel-react-best-practices",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description:
+        "Install selected skills from https://github.com/vercel-labs/agent-skills",
     });
   });
 });
@@ -324,8 +357,8 @@ describe("runCommand", () => {
 
   it("installs the frontend skills globally from the Aircury source", () => {
     const commands = getGlobalCommands([], ["frontend"]);
-    expect(commands).toHaveLength(1);
-    expect(commands[0]).toEqual({
+    expect(commands).toHaveLength(2);
+    expect(getCommandBySource(commands, aircurySkillsSource)).toEqual({
       command: "npx",
       args: [
         "-y",
@@ -346,6 +379,28 @@ describe("runCommand", () => {
         "-y",
       ],
       description: aircurySkillsDescription,
+    });
+    expect(
+      getCommandBySource(
+        commands,
+        "https://github.com/vercel-labs/agent-skills",
+      ),
+    ).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "https://github.com/vercel-labs/agent-skills",
+        "--skill",
+        "vercel-react-best-practices",
+        "-a",
+        "universal",
+        "-g",
+        "-y",
+      ],
+      description:
+        "Install selected skills from https://github.com/vercel-labs/agent-skills",
     });
   });
 });
