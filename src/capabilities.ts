@@ -167,6 +167,16 @@ export interface CapabilityProfile {
   };
 }
 
+type LegacyModuleId = StandardModuleId | "tdd";
+
+export interface LegacyFrameworkConfig {
+  version?: 1;
+  modules: LegacyModuleId[];
+  language?: {
+    britishEnglish?: boolean;
+  };
+}
+
 interface StandardManifest {
   id: StandardModuleId;
   label: string;
@@ -619,6 +629,20 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "language",
 ];
 
+const LEGACY_MODULE_CAPABILITY_MAP: Record<LegacyModuleId, CapabilityId> = {
+  "decision-records": "decision-records",
+  tdd: "testing",
+  testing: "testing",
+  "hexagonal-architecture": "architecture",
+  ddd: "architecture",
+  "code-style": "code-style",
+  "airsync-memory": "airsync",
+  "error-handling": "resilience",
+  "structured-logging": "resilience",
+  frontend: "frontend",
+  "token-efficiency": "token-efficiency",
+};
+
 export const CAPABILITIES: CapabilityManifest[] = CAPABILITY_ORDER.map(
   (id) => CAPABILITY_REGISTRY[id],
 );
@@ -654,12 +678,40 @@ export function resolveCapabilityIds(
   return CAPABILITY_ORDER.filter((capabilityId) => resolved.has(capabilityId));
 }
 
+function isLegacyFrameworkConfig(
+  value: CapabilityId[] | LegacyFrameworkConfig | undefined,
+): value is LegacyFrameworkConfig {
+  return !!value && !Array.isArray(value) && Array.isArray(value.modules);
+}
+
+function resolveLegacyModuleCapabilities(
+  moduleIds: LegacyModuleId[],
+): CapabilityId[] {
+  const selected = new Set<CapabilityId>();
+
+  for (const moduleId of moduleIds) {
+    selected.add(LEGACY_MODULE_CAPABILITY_MAP[moduleId]);
+  }
+
+  return CAPABILITY_ORDER.filter((capabilityId) => selected.has(capabilityId));
+}
+
 export function createCapabilityProfile(
-  capabilityIds?: CapabilityId[],
+  capabilityIds?: CapabilityId[] | LegacyFrameworkConfig,
   options?: { britishEnglish?: boolean },
 ): CapabilityProfile {
-  const selected = new Set(resolveCapabilityIds(capabilityIds));
-  if (options?.britishEnglish) {
+  const britishEnglish =
+    options?.britishEnglish ??
+    (isLegacyFrameworkConfig(capabilityIds)
+      ? (capabilityIds.language?.britishEnglish ?? false)
+      : false);
+  const selected = new Set(
+    isLegacyFrameworkConfig(capabilityIds)
+      ? resolveLegacyModuleCapabilities(capabilityIds.modules)
+      : resolveCapabilityIds(capabilityIds),
+  );
+
+  if (britishEnglish) {
     selected.add("language");
   }
 
@@ -669,7 +721,7 @@ export function createCapabilityProfile(
       selected.has(capabilityId),
     ),
     language: {
-      britishEnglish: options?.britishEnglish ?? false,
+      britishEnglish,
     },
   };
 }

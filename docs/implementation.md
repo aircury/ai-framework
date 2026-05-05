@@ -76,6 +76,42 @@ For example, `architecture` includes the DDD and hexagonal architecture standard
 
 The installer stores the selected capability ids in `.aircury/framework.config.json`. Re-run the installer or edit the profile and regenerate files if project standards need to change.
 
+## Config Schema Migration
+
+Version 1 config files used `modules` as the selectable unit. Version 2 config files use `capabilities`, which can compose standards modules, generated starter files, and installable skills.
+
+The v2 shape is:
+
+```json
+{
+  "version": 2,
+  "capabilities": ["architecture", "decision-records", "testing"],
+  "language": {
+    "britishEnglish": false
+  }
+}
+```
+
+Use this compatibility mapping when migrating a v1 `.aircury/framework.config.json`:
+
+| v1 module | v2 capability |
+|---|---|
+| `decision-records` | `decision-records` |
+| `tdd` | `testing` |
+| `testing` | `testing` |
+| `hexagonal-architecture` | `architecture` |
+| `ddd` | `architecture` |
+| `code-style` | `code-style` |
+| `airsync-memory` | `airsync` |
+| `error-handling` | `resilience` |
+| `structured-logging` | `resilience` |
+| `frontend` | `frontend` |
+| `token-efficiency` | `token-efficiency` |
+
+The v2 capabilities `open-spec`, `spec-kit`, `git`, `specs`, and `language` have no direct v1 module equivalent because they represent workflow skills, source-of-truth spec helpers, or language preference rather than old standards modules.
+
+When both `hexagonal-architecture` and `ddd` are present, migrate them once to `architecture`. When either `error-handling` or `structured-logging` is present, migrate it to `resilience` because that capability owns both operational standards in the current installer model.
+
 ## Skill Installation
 
 Installable skills are defined on capabilities in `src/capabilities.ts`. The installer expands selected capabilities into individual skills and groups them by source before running `skills add` through `npx` when available, or `bunx` otherwise.

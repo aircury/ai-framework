@@ -142,6 +142,39 @@ describe("capabilities", () => {
     });
   });
 
+  it("migrates version 1 modules to version 2 capabilities", () => {
+    expect(
+      createCapabilityProfile({
+        version: 1,
+        modules: ["decision-records", "tdd", "hexagonal-architecture", "ddd"],
+      }),
+    ).toEqual({
+      version: 2,
+      capabilities: ["architecture", "decision-records", "testing"],
+      language: {
+        britishEnglish: false,
+      },
+    });
+  });
+
+  it("migrates legacy operational modules to the resilience capability", () => {
+    expect(
+      createCapabilityProfile({
+        version: 1,
+        modules: ["airsync-memory", "error-handling", "structured-logging"],
+        language: {
+          britishEnglish: true,
+        },
+      }),
+    ).toEqual({
+      version: 2,
+      capabilities: ["airsync", "resilience", "language"],
+      language: {
+        britishEnglish: true,
+      },
+    });
+  });
+
   it("keeps capability resolution stable", () => {
     expect(resolveCapabilityIds(["git", "frontend", "git"])).toEqual([
       "git",
