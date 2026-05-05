@@ -53,7 +53,8 @@ Use Vercel React Best Practices only when React/Next performance, hooks, renderi
 
 ### Phase 5 — Visual Implementation (UI)
 
-- Do not skip the layout or experience extraction phases because the task looks small.
+- Do not skip layout extraction, experience extraction, style extraction, or clean implementation planning for new UI, rebuilds, non-trivial forms, changed flows, role-gated UI, or substantial frontend changes.
+- For small safe UI edits, use the lightweight path unless ambiguity, behavior changes, new structure, or missing local precedent increases risk.
 - Do not skip the `frontend-style-extractor` phase even when `specs/ui/style-guide.md` does not exist yet.
 - Do not skip the `frontend-clean-implementation` phase for new UI work.
 - Do not invent design tokens or composition patterns that are not supported by the existing frontend.
@@ -125,7 +126,7 @@ The spec must strictly follow this format:
 
 | Task | Flow |
 |---|---|
-| Initial frontend project analysis (onboarding) | Execute the 3 phases + generate `specs/ui/style-guide.md` before any other task |
+| Initial frontend project analysis (onboarding) | Run the frontend onboarding pipeline: layout extraction, experience extraction, style extraction, clean implementation planning, and UI generation as needed |
 | Small safe UI edit | Inspect nearby code and `specs/ui/style-guide.md`; do not run the full extraction pipeline unless ambiguity or risk appears |
 | Small visual modification on existing component | Plan-Build (token analysis is still mandatory) |
 | New isolated well-specified component | OpenSpec |
@@ -136,7 +137,7 @@ The spec must strictly follow this format:
 
 - Do not invent design tokens that do not exist in the project.
 - Do not use hardcoded values where an equivalent token exists.
-- Do not omit the Phase 1-3 analysis by arguing "the task is too small".
+- Do not omit the frontend analysis and clean implementation planning pipeline for new UI or substantial frontend work by arguing "the task is too small".
 - Do not ship first-pass frontend code that needs a cleanup refactor for component boundaries, duplicated JSX, tangled state, or hardcoded styling.
 - Do not generate a component spec without acceptance criteria.
 - Do not introduce UI dependencies (icon libraries, animations, components) without an ADR.
