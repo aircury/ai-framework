@@ -135,6 +135,7 @@ Recommended skills:
 
 - `frontend-layout-extractor`
 - `frontend-experience-extractor`
+- `frontend-style-extractor`
 - `frontend-ui-generator`
 
 Expected artifacts:
@@ -155,13 +156,14 @@ Recommended skills:
 
 - `frontend-layout-extractor`
 - `frontend-experience-extractor`
+- `frontend-style-extractor`
 - `frontend-ui-generator`
 
 Expected flow:
 
 1. Extract `layout.md` from the existing screen to capture structure, hierarchy, and content slots.
 2. Extract `experience.md` from the existing screen to capture behavior, states, flows, and micro-interactions.
-3. Extract or update `specs/ui/style-guide.md` from the current project so the target design system is explicit.
+3. Extract or update `specs/ui/style-guide.md` from the current project with `frontend-style-extractor` so the target design system is explicit.
 4. Implement the restyled UI with `frontend-ui-generator`, using the extracted `layout.md` and `experience.md` as behavioral constraints and `specs/ui/style-guide.md` as the visual source of truth.
 
 Expected artifacts:
