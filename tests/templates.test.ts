@@ -27,6 +27,19 @@ describe("templates", () => {
       expect(renderFramework()).toBe(FRAMEWORK);
       expect(FRAMEWORK).toContain("## Token Efficiency");
     });
+
+    it("does not require commits as part of completion", () => {
+      expect(FRAMEWORK).toContain(
+        "Create git commits only when the user explicitly asks, using [Conventional Commits](https://www.conventionalcommits.org/) format.",
+      );
+      expect(FRAMEWORK).toContain(
+        "When committing, organise changes into atomic Conventional Commits",
+      );
+      expect(FRAMEWORK).not.toContain(
+        "Commit changes using the `commit-changes` skill",
+      );
+      expect(FRAMEWORK).not.toContain("atomic deployment");
+    });
   });
 
   describe("AGENTS", () => {
