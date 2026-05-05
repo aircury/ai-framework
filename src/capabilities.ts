@@ -312,6 +312,39 @@ function composeModules(
   };
 }
 
+export function getCapabilityDetailPath(capabilityId: CapabilityId): string {
+  return `docs/aircury/capabilities/${capabilityId}.md`;
+}
+
+function hasCapabilityDetail(capability: CapabilityManifest): boolean {
+  return !!capability.framework || !!capability.agents;
+}
+
+function createCapabilityDetailFile(
+  capability: CapabilityManifest,
+): CapabilityFile | null {
+  if (!hasCapabilityDetail(capability)) return null;
+
+  const sections = [
+    `# ${capability.label} Capability`,
+    capability.description,
+  ];
+
+  if (capability.framework) {
+    sections.push("## Framework Rules", capability.framework.trim());
+  }
+
+  if (capability.agents) {
+    sections.push("## Agent Operating Rules", capability.agents.trim());
+  }
+
+  return {
+    path: getCapabilityDetailPath(capability.id),
+    content: `${sections.join("\n\n")}\n`,
+    description: `${capability.label} capability rules`,
+  };
+}
+
 const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
   "open-spec": {
     id: "open-spec",
@@ -765,6 +798,12 @@ export function getCapabilityFiles(
   const seen = new Set<string>();
 
   for (const capability of getSelectedCapabilities(capabilityIds, scope)) {
+    const detailFile = createCapabilityDetailFile(capability);
+    if (detailFile && !seen.has(detailFile.path)) {
+      seen.add(detailFile.path);
+      files.push(detailFile);
+    }
+
     for (const file of capability.files ?? []) {
       if (seen.has(file.path)) continue;
       seen.add(file.path);

@@ -113,9 +113,19 @@ describe("capabilities", () => {
       getCapabilityFiles(["frontend", "decision-records"], "local"),
     ).toEqual([
       {
+        path: "docs/aircury/capabilities/decision-records.md",
+        content: expect.any(String),
+        description: "ADRs capability rules",
+      },
+      {
         path: "specs/decisions/README.md",
         content: expect.any(String),
         description: "ADR starter guide",
+      },
+      {
+        path: "docs/aircury/capabilities/frontend.md",
+        content: expect.any(String),
+        description: "Frontend capability rules",
       },
       {
         path: "specs/ui/README.md",

@@ -48,8 +48,8 @@ The agent recommends a mode and the user decides. Once a mode is selected, the a
 
 Capabilities are the unit of composition. Each capability can contribute one or more of:
 
-- sections in `FRAMEWORK.md`
-- rules in `AGENTS.md`
+- linked capability docs under `docs/aircury/capabilities/`
+- concise capability references in `FRAMEWORK.md`
 - starter files such as `specs/ui/README.md`
 - skills installed through `npx skills add <source> --skill ...`
 

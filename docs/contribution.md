@@ -26,7 +26,7 @@ Example:
 mkdir /tmp/aircury-install-test
 cd /tmp/aircury-install-test
 git init
-node /home/alex/projects/ai-framework/dist/cli.js
+node /path/to/ai-framework/dist/cli.js
 ```
 
 Use a throwaway directory because local installation writes framework files such as `FRAMEWORK.md`, `AGENTS.md`, `.aircury/framework.config.json`, starter `specs/` folders, `.gitignore`, and selected tool-specific files.
@@ -72,7 +72,7 @@ Then wire it into `src/capabilities.ts`:
 2. Add the id to `StandardModuleId`.
 3. Add the module to `STANDARD_MODULES`.
 4. Add the module id to the owning capability's `modules` list.
-5. Add template flags only if the templates need conditional behavior beyond normal section rendering.
+5. Add template flags only if the templates need conditional behavior beyond normal capability-doc linking.
 
 If the module needs starter files, attach them to the standard module. The owning capability will contribute those files when selected.
 
@@ -85,7 +85,7 @@ When adding a generated file:
 1. Add an `InstallFile` entry with `path`, `content`, and `description`.
 2. Decide whether it applies to every local install, selected tools, or selected capabilities.
 3. Ensure conflict behavior is safe when the file already exists.
-4. Add template flags only if the templates need conditional behavior beyond normal section rendering.
+4. Add template flags only if the templates need conditional behavior beyond normal capability-doc linking.
 5. Update `docs/implementation.md` if users need to know about the output.
 
 Avoid overwriting user-authored files unless the installer has asked for confirmation.
@@ -160,7 +160,7 @@ Generated documents are rendered from:
 - `templates/framework.md.hbs`
 - `templates/agents.md.hbs`
 
-Use module fragments for module-specific rules. Change templates only for cross-cutting structure or conditional sections that cannot live inside one module.
+Use module fragments for module-specific rules. Generated `FRAMEWORK.md` should stay compact and link to detailed capability docs under `docs/aircury/capabilities/`. Change templates only for cross-cutting structure or conditional sections that cannot live inside one module.
 
 ## Release Checklist
 

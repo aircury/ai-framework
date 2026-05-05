@@ -33,11 +33,12 @@ Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and Open
 
 | File | Purpose |
 |---|---|
-| `FRAMEWORK.md` | Full project constitution generated from templates and selected capabilities. |
+| `FRAMEWORK.md` | Governing project constitution generated from templates, with links to selected capability detail docs. |
 | `AGENTS.md` | Short agent entrypoint that points to `FRAMEWORK.md`. Existing non-Aircury content is preserved by appending the framework reference. |
 | `CLAUDE.md` | Claude Code instructions, when Claude Code is selected. |
 | `GEMINI.md` | Gemini CLI instructions, when Gemini CLI is selected. |
 | `.aircury/framework.config.json` | Installed profile with selected capabilities and language settings. |
+| `docs/aircury/capabilities/*.md` | Detailed rules for selected capabilities that contribute framework or agent guidance. |
 | `specs/features/README.md` | Starter guide for canonical living specifications. |
 | `specs/decisions/README.md` | Starter ADR guide when `decision-records` is enabled. |
 | `specs/ui/README.md` | Starter frontend design-system guide when `frontend` is enabled. |
@@ -46,15 +47,15 @@ Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and Open
 
 ## Capabilities
 
-Capabilities are defined in `src/capabilities.ts`. A capability is the unit users select in the installer. Each capability can contribute generated framework content, generated files, installable skills, or any combination of those.
+Capabilities are defined in `src/capabilities.ts`. A capability is the unit users select in the installer. Each capability can contribute generated capability docs, generated files, installable skills, or any combination of those.
 
 Some capabilities compose internal standard modules from `standards/modules/<module-id>/`. Those modules are implementation details, not separate installer choices.
 
 Each content module contains:
 
 - `module.json`: id, label, hint, description, and default state.
-- `framework.md`: rules added to `FRAMEWORK.md`.
-- `agents.md`: concise operating instructions added to agent rules.
+- `framework.md`: detailed framework rules written into the owning capability doc under `docs/aircury/capabilities/`.
+- `agents.md`: concise operating instructions written into the owning capability doc.
 
 The current built-in capabilities are:
 

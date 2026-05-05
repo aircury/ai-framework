@@ -6,12 +6,17 @@ import frameworkTemplateSource from "../templates/framework.md.hbs" with {
   type: "text",
 };
 import type { CapabilityId, CapabilityManifest } from "./capabilities";
-import { getSelectedCapabilities } from "./capabilities";
+import { getCapabilityDetailPath, getSelectedCapabilities } from "./capabilities";
+
+interface InstalledCapabilityView {
+  id: CapabilityId;
+  description: string;
+  detailPath?: string;
+}
 
 interface RendererViewModel {
-  installedCapabilities: Pick<CapabilityManifest, "id" | "description">[];
-  frameworkSections: string[];
-  agentRules: string[];
+  installedCapabilities: InstalledCapabilityView[];
+  includesCapabilityDetails: boolean;
   includesDecisionRecords: boolean;
   includesTesting: boolean;
   includesArchitecture: boolean;
@@ -35,6 +40,10 @@ function isString(value: unknown): value is string {
   return typeof value === "string";
 }
 
+function hasCapabilityDetail(capability: CapabilityManifest): boolean {
+  return isString(capability.framework) || isString(capability.agents);
+}
+
 function createViewModel(
   capabilityIds?: CapabilityId[],
   options?: { britishEnglish?: boolean },
@@ -48,16 +57,14 @@ function createViewModel(
   );
 
   return {
-    installedCapabilities: selectedCapabilities.map(({ id, description }) => ({
-      id,
-      description,
+    installedCapabilities: selectedCapabilities.map((capability) => ({
+      id: capability.id,
+      description: capability.description,
+      detailPath: hasCapabilityDetail(capability)
+        ? getCapabilityDetailPath(capability.id)
+        : undefined,
     })),
-    frameworkSections: selectedCapabilities
-      .map((capability) => capability.framework)
-      .filter(isString),
-    agentRules: selectedCapabilities
-      .map((capability) => capability.agents)
-      .filter(isString),
+    includesCapabilityDetails: selectedCapabilities.some(hasCapabilityDetail),
     includesDecisionRecords: selectedIds.has("decision-records"),
     includesTesting: selectedIds.has("testing"),
     includesArchitecture: selectedIds.has("architecture"),

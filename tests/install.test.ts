@@ -48,6 +48,19 @@ describe("getLocalFiles", () => {
     expect(paths).toContain("specs/features/README.md");
   });
 
+  it("generates detailed capability docs for selected capabilities", () => {
+    const files = getLocalFiles([], ["testing", "architecture"]);
+    const paths = files.map((file) => file.path);
+    expect(paths).toContain("docs/aircury/capabilities/testing.md");
+    expect(paths).toContain("docs/aircury/capabilities/architecture.md");
+    expect(getFileByPath(files, "docs/aircury/capabilities/testing.md").content)
+      .toContain("## TDD Workflow");
+    expect(
+      getFileByPath(files, "docs/aircury/capabilities/architecture.md")
+        .content,
+    ).toContain("## Non-Negotiable Architecture Rules");
+  });
+
   it("includes CLAUDE.md when Claude Code is selected", () => {
     const files = getLocalFiles(["claude-code"]);
     expect(files.map((file) => file.path)).toContain("CLAUDE.md");
@@ -77,7 +90,15 @@ describe("getLocalFiles", () => {
   it("generates framework content from the selected capabilities", () => {
     const files = getLocalFiles([], ["decision-records"]);
     const framework = getFileByPath(files, "FRAMEWORK.md");
-    expect(framework.content).toContain("## Architecture Decision Records");
+    const decisions = getFileByPath(
+      files,
+      "docs/aircury/capabilities/decision-records.md",
+    );
+    expect(framework.content).toContain(
+      "docs/aircury/capabilities/decision-records.md",
+    );
+    expect(framework.content).not.toContain("## Architecture Decision Records");
+    expect(decisions.content).toContain("## Architecture Decision Records");
     expect(framework.content).not.toContain("## TDD Workflow");
     expect(framework.content).not.toContain(
       "## Non-Negotiable Architecture Rules",
@@ -105,15 +126,27 @@ describe("getLocalFiles", () => {
   it("uses the full recommended profile by default", () => {
     const files = getLocalFiles([]);
     const framework = getFileByPath(files, "FRAMEWORK.md");
-    expect(framework.content).toContain("## TDD Workflow");
-    expect(framework.content).toContain("## Non-Negotiable Architecture Rules");
-    expect(framework.content).toContain("## Architecture Decision Records");
-    expect(framework.content).toContain("## Token Efficiency");
+    expect(framework.content).toContain("docs/aircury/capabilities/testing.md");
+    expect(framework.content).toContain(
+      "docs/aircury/capabilities/architecture.md",
+    );
+    expect(framework.content).toContain(
+      "docs/aircury/capabilities/decision-records.md",
+    );
+    expect(framework.content).toContain(
+      "docs/aircury/capabilities/token-efficiency.md",
+    );
+    expect(framework.content).not.toContain("## TDD Workflow");
+    expect(framework.content).not.toContain(
+      "## Non-Negotiable Architecture Rules",
+    );
   });
 
   it("adds capability-owned files when selected", () => {
     const files = getLocalFiles([], ["frontend", "decision-records"]);
     const paths = files.map((file) => file.path);
+    expect(paths).toContain("docs/aircury/capabilities/frontend.md");
+    expect(paths).toContain("docs/aircury/capabilities/decision-records.md");
     expect(paths).toContain("specs/ui/README.md");
     expect(paths).toContain("specs/decisions/README.md");
   });
@@ -139,19 +172,25 @@ describe("getLocalFiles", () => {
 
   it("includes experience extractor in FRAMEWORK.md when frontend is enabled", () => {
     const files = getLocalFiles([], ["frontend"]);
-    const framework = getFileByPath(files, "FRAMEWORK.md");
-    expect(framework.content).toContain("frontend-experience-extractor");
-    expect(framework.content).toContain("frontend-style-extractor");
+    const frontend = getFileByPath(
+      files,
+      "docs/aircury/capabilities/frontend.md",
+    );
+    expect(frontend.content).toContain("frontend-experience-extractor");
+    expect(frontend.content).toContain("frontend-style-extractor");
   });
 
-  it("includes terse-response guidance in FRAMEWORK.md when token-efficiency is enabled", () => {
+  it("includes terse-response guidance in the token-efficiency capability doc", () => {
     const files = getLocalFiles([], ["token-efficiency"]);
-    const framework = getFileByPath(files, "FRAMEWORK.md");
-    expect(framework.content).toContain(
+    const tokenEfficiency = getFileByPath(
+      files,
+      "docs/aircury/capabilities/token-efficiency.md",
+    );
+    expect(tokenEfficiency.content).toContain(
       "Load and apply the `caveman` skill in `full` mode",
     );
-    expect(framework.content).toContain("ACTIVE EVERY RESPONSE");
-    expect(framework.content).toContain("stop caveman");
+    expect(tokenEfficiency.content).toContain("ACTIVE EVERY RESPONSE");
+    expect(tokenEfficiency.content).toContain("stop caveman");
   });
 });
 

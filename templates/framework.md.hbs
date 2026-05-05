@@ -23,16 +23,16 @@ The following rules apply to every installation profile:
 
 {{#if installedCapabilities}}
 {{#each installedCapabilities}}
-- `{{id}}` — {{description}}
+- `{{id}}` — {{description}}{{#if detailPath}} See [`{{detailPath}}`](./{{detailPath}}).{{/if}}
 {{/each}}
 {{else}}
 No optional capabilities are enabled. The repository still uses the core workflow constitution.
 {{/if}}
 
-{{#each frameworkSections}}
-{{this}}
+{{#if includesCapabilityDetails}}
+Detailed capability rules are generated as separate files under [`docs/aircury/capabilities/`](./docs/aircury/capabilities/). `FRAMEWORK.md` remains the governing entrypoint; linked capability docs define the detailed standards for enabled capabilities.
+{{/if}}
 
-{{/each}}
 ## Coding Standards
 
 {{#if enforceBritishEnglish}}
@@ -68,6 +68,9 @@ Before starting any task:
 
 - Read `FRAMEWORK.md` in full if you have not already done so in this session.
 - Read the relevant specs in `specs/features/` that relate to the area you are changing.
+{{#if includesCapabilityDetails}}
+- Read the linked capability docs in `docs/aircury/capabilities/` for the enabled standards that apply to your task.
+{{/if}}
 {{#if includesAirsyncMemory}}
 - Search Airsync memory for relevant context before making decisions. Use `memory_search` with targeted queries about the area you are working on.
 {{/if}}
@@ -93,9 +96,6 @@ While executing work:
 {{#if includesAirsyncMemory}}
 - Capture reusable knowledge in Airsync INBOX when you discover validated patterns, repeated pitfalls, or team conventions. Search before proposing to avoid duplicates.
 {{/if}}
-{{#each agentRules}}
-{{this}}
-{{/each}}
 
 ## Workflow Framework
 
