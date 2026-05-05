@@ -1,11 +1,12 @@
 # Aircury Framework Playbook
 
-This playbook shows how to use Aircury after installation. If you are unsure which workflow to use, describe the task to the agent; the installed framework asks the agent to recommend a mode before doing non-trivial implementation work.
+This playbook shows how to use Aircury after installation. Safe fast-path work can proceed directly only when it is trivial, low-risk, easily reversible, narrowly scoped, and does not change behavior, architecture, public APIs, dependencies, persistence, security, or operational failure paths. If the task is complex, ambiguous, cross-cutting, architectural, risky, behavior-changing, or you want explicit workflow selection, describe the task to the agent and ask it to recommend a mode.
 
 ## Quick Decision Guide
 
 | Need | Recommended mode | Expected result |
 |---|---|---|
+| Trivial, low-risk, non-behavioral safe change | Fast path | Direct implementation, focused verification, and a concise summary. |
 | Small, well-understood change | `plan-build` | Short plan, implementation, verification, and spec update if behavior changes. |
 | Complex but clear change | `propose-apply-complete` | OpenSpec proposal artifacts, implementation, and final sync to `specs/features/`. |
 | Unknown root cause | `explore-propose-apply-complete` | Investigation first, then proposal, implementation, and completion. |
@@ -14,6 +15,25 @@ This playbook shows how to use Aircury after installation. If you are unsure whi
 | Rewrite from frozen specs | `specs-interpreter` | New implementation direction constrained by `specs/features/`. |
 
 ## Day-To-Day Examples
+
+### Use The Fast Path
+
+Use this when the change is trivial, low-risk, easily reversible, mechanical, and narrow.
+
+```text
+Fix the typo in the ADR guide, run the focused tests, and summarise the change.
+```
+
+Fast-path examples include typo fixes, docs cleanup, mechanical renames, narrow test updates, generated lockfile refreshes for an already-approved manifest change, and formatting-only changes.
+
+Do not use the fast path for product behavior changes, architecture changes, public API/schema changes, dependency selection, persistence changes, security-sensitive work, or operational failure-path changes. If unsure, route the work.
+
+Expected steps:
+
+1. Keep the change scoped to the requested area.
+2. Implement directly without workflow routing.
+3. Run focused verification.
+4. Summarise the result and any files changed.
 
 ### Fix A Specific Bug
 
@@ -200,7 +220,7 @@ If `airsync` is also enabled, the generated framework requires proposing reusabl
 
 **What if I do not know which mode to use?**
 
-Ask the agent to recommend a mode. The generated framework requires routing before non-trivial implementation.
+Ask the agent to recommend a mode. Routing is required for complex, ambiguous, cross-cutting, architectural, risky, behavior-changing, or user-requested routed work, not for clearly safe fast-path tasks.
 
 **Do all tasks need OpenSpec or Spec Kit?**
 

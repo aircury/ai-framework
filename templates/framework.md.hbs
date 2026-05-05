@@ -16,7 +16,7 @@ The following rules apply to every installation profile:
 - `specs/changes/` is optional working state and is not versioned.
 - Any workflow mode that changes observable system behavior MUST end with an update to `specs/features/`.
 - Prepare working tree changes as atomic, functional, and semantic units. Create git commits only when the user explicitly asks, using [Conventional Commits](https://www.conventionalcommits.org/) format.
-- Before starting any non-trivial change, the agent MUST act as a routing meta-agent and ask the user how to proceed.
+- Use the safe fast path only for trivial, low-risk, easily reversible work that is narrowly scoped and does not change observable behavior, architecture, public APIs, dependencies, persistence, security, or operational failure paths. Use meta-agent routing when the work is complex, ambiguous, cross-cutting, architectural, risky, changes behavior, or is user-requested.
 - Optional standards are enabled through `.aircury/framework.config.json`.
 
 ## Installed Capabilities
@@ -50,7 +50,9 @@ No optional capabilities are enabled. The repository still uses the core workflo
 
 ## Change Workflow
 
-For any non-trivial change:
+For safe fast-path work, implement directly with focused verification. The fast path is allowed only when the change is small, obvious, and has no product, architecture, API, dependency, persistence, security, or operational impact. Examples include typo fixes, docs cleanup, mechanical renames, narrow test updates, generated lockfile refreshes for an already-approved manifest change, and formatting-only changes. If unsure, use routing.
+
+For routed work:
 
 1. Identify the affected capability and observable behavior.
 2. Define or confirm the public behavior.
@@ -75,7 +77,7 @@ Before starting any task:
 {{#if includesCodeStyle}}
 - Analyze `package.json` and local config files to identify the project's linting and formatting strategy.
 {{/if}}
-- Act as a routing meta-agent: analyse the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
+- If the task clearly qualifies for the safe fast path, proceed directly and keep the change narrow. Otherwise, act as a routing meta-agent and follow `FRAMEWORK.md § Meta-agent routing`.
 
 While executing work:
 
@@ -111,14 +113,16 @@ These are operating modes, not different specification systems. They all converg
 
 ### Meta-agent routing
 
-Before starting any non-trivial change, the agent MUST act as a routing meta-agent. Its role is to analyse the request and recommend the most appropriate mode, but the user makes the final decision.
+Before starting complex, ambiguous, cross-cutting, architectural, risky, behavior-changing, or user-requested routed work, the agent MUST act as a routing meta-agent. Its role is to analyse the request and recommend the most appropriate mode, but the user makes the final decision.
+
+Do not force routing for safe fast-path tasks such as typo fixes, docs cleanup, mechanical renames, narrow test updates, generated lockfile refreshes for an already-approved manifest change, or formatting-only changes. Do not use the fast path for product behavior changes, architecture changes, public API/schema changes, dependency selection, persistence changes, security-sensitive work, or operational failure-path changes. If a task sits near that boundary, route it. Keep fast-path changes focused, run relevant verification, and summarise the result.
 
 **Routing protocol:**
 
 1. Analyze the request for complexity, ambiguity, and scope.
 2. Recommend one of the supported modes and briefly explain why.
 3. Present the user with explicit workflow choices.
-4. Ask the user how they want to proceed before doing any implementation work.
+4. Ask the user how they want to proceed before doing routed implementation work.
 
 ### Mode execution rules
 

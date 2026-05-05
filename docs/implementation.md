@@ -152,7 +152,7 @@ Additional automatic selection:
 
 ## How Agents Should Use The Installed Framework
 
-Agents should read `AGENTS.md` first, then `FRAMEWORK.md`. For non-trivial changes, the generated framework instructs them to act as a routing meta-agent before implementing.
+Agents should read `AGENTS.md` first, then `FRAMEWORK.md`. Safe fast-path tasks can proceed directly with focused verification only when they are trivial, low-risk, easily reversible, narrowly scoped, and do not change behavior, architecture, public APIs, dependencies, persistence, security, or operational failure paths. Complex, ambiguous, cross-cutting, architectural, risky, behavior-changing, or user-requested routed work uses the meta-agent routing flow before implementation.
 
 All workflow modes converge on `specs/features/`:
 

@@ -40,6 +40,30 @@ describe("templates", () => {
       );
       expect(FRAMEWORK).not.toContain("atomic deployment");
     });
+
+    it("allows a safe fast path without forced routing", () => {
+      expect(FRAMEWORK).toContain(
+        "Use the safe fast path only for trivial, low-risk, easily reversible work that is narrowly scoped",
+      );
+      expect(FRAMEWORK).toContain(
+        "does not change observable behavior, architecture, public APIs, dependencies, persistence, security, or operational failure paths",
+      );
+      expect(FRAMEWORK).toContain(
+        "typo fixes, docs cleanup, mechanical renames, narrow test updates, generated lockfile refreshes for an already-approved manifest change, or formatting-only changes",
+      );
+      expect(FRAMEWORK).toContain(
+        "Use meta-agent routing when the work is complex, ambiguous, cross-cutting, architectural, risky, changes behavior, or is user-requested.",
+      );
+      expect(FRAMEWORK).toContain(
+        "Do not use the fast path for product behavior changes, architecture changes, public API/schema changes, dependency selection, persistence changes, security-sensitive work, or operational failure-path changes.",
+      );
+      expect(FRAMEWORK).not.toContain(
+        "ask the user how they want to proceed before implementing anything",
+      );
+      expect(FRAMEWORK).not.toContain(
+        "Before starting any non-trivial change, the agent MUST act as a routing meta-agent",
+      );
+    });
   });
 
   describe("AGENTS", () => {
