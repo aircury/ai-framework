@@ -174,6 +174,7 @@ describe("getLocalCommands", () => {
     expect(aircury.args).toContain("frontend-layout-extractor");
     expect(aircury.args).toContain("frontend-experience-extractor");
     expect(aircury.args).toContain("frontend-style-extractor");
+    expect(aircury.args).toContain("frontend-clean-implementation");
     expect(aircury.args).toContain("frontend-ui-generator");
     expect(aircury.args).toContain("specs-extractor");
     expect(
@@ -253,6 +254,7 @@ describe("getLocalCommands", () => {
     expect(commands[0].args).toContain("frontend-layout-extractor");
     expect(commands[0].args).toContain("frontend-experience-extractor");
     expect(commands[0].args).toContain("frontend-style-extractor");
+    expect(commands[0].args).toContain("frontend-clean-implementation");
     expect(commands[0].args).toContain("frontend-ui-generator");
     expect(commands[1].args).toContain("caveman");
     expect(
@@ -286,6 +288,8 @@ describe("getLocalCommands", () => {
         "frontend-experience-extractor",
         "--skill",
         "frontend-style-extractor",
+        "--skill",
+        "frontend-clean-implementation",
         "--skill",
         "frontend-ui-generator",
         "-a",
@@ -371,6 +375,8 @@ describe("runCommand", () => {
         "frontend-experience-extractor",
         "--skill",
         "frontend-style-extractor",
+        "--skill",
+        "frontend-clean-implementation",
         "--skill",
         "frontend-ui-generator",
         "-a",

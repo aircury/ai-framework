@@ -507,6 +507,11 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
       {
         source: "aircury/ai-framework",
+        skillName: "frontend-clean-implementation",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
         skillName: "frontend-ui-generator",
         scopes: ["local", "global"],
       },
