@@ -19,7 +19,7 @@ When proposing an ADR to Airsync:
 - Use `scope: "team"`
 - Include tags: `["adr", "ADR-XXXX"]` (replace XXXX with the ADR number)
 - Include `source_refs` pointing to the ADR file path
-- Copy the ADR's Context, Decision, and Consections as the memory content
+- Copy the ADR's Context, Decision, and Consequences as the memory content
 
 ## ADR Template
 
