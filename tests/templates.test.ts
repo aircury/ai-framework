@@ -116,6 +116,24 @@ describe("templates", () => {
       );
     });
 
+    it("keeps one canonical ADR dual-write section when ADRs and Airsync are enabled", () => {
+      const framework = generateFramework(["decision-records", "airsync"]);
+      expect(framework).toContain("### ADR Dual-Write Rule");
+      expect(framework).toContain(
+        "If Airsync is enabled, follow the Airsync module's canonical ADR dual-write rule when an ADR is created or superseded.",
+      );
+      expect(framework).toContain(
+        "If an ADR is created or superseded, propose it to Airsync when Airsync is enabled.",
+      );
+      expect(framework.match(/### ADR Dual-Write Rule/g)).toHaveLength(1);
+      expect(framework.match(/- Use `memory_kind: "note"`/g)).toHaveLength(1);
+      expect(framework.match(/- Use `scope: "team"`/g)).toHaveLength(1);
+      expect(framework.match(/- Include `source_refs`/g)).toHaveLength(1);
+      expect(framework).not.toContain(
+        "Every ADR created or superseded MUST also be proposed to Airsync",
+      );
+    });
+
     it("adds testing guidance only when the testing capability is enabled", () => {
       expect(generateFramework(["testing"])).toContain("## TDD Workflow");
       expect(generateFramework([])).not.toContain("## TDD Workflow");

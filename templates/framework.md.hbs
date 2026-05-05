@@ -92,7 +92,6 @@ While executing work:
 - Selecting an OpenSpec workflow requires following its named sequence in order unless the user explicitly changes modes.
 {{#if includesAirsyncMemory}}
 - Capture reusable knowledge in Airsync INBOX when you discover validated patterns, repeated pitfalls, or team conventions. Search before proposing to avoid duplicates.
-- Every ADR created or superseded MUST also be proposed to Airsync as a `note` with `scope: "team"` and tags `["adr", "ADR-XXXX"]`.
 {{/if}}
 {{#each agentRules}}
 {{this}}
@@ -161,7 +160,10 @@ A change is not done unless all of the following are true:
 - Enabled architecture boundaries still hold.
 {{/if}}
 {{#if includesDecisionRecords}}
-- Material architectural decisions are captured or superseded in `specs/decisions/` and proposed to Airsync.
+- Material architectural decisions are captured or superseded in `specs/decisions/`.
+{{#if includesAirsyncMemory}}
+- If an ADR is created or superseded, propose it to Airsync when Airsync is enabled.
+{{/if}}
 {{/if}}
 {{#if includesAirsyncMemory}}
 - Relevant Airsync memory has been searched and new learnings have been captured in INBOX.
