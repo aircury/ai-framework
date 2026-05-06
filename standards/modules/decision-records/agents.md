@@ -1,2 +1,2 @@
 - Material architectural or workflow decisions MUST be captured or superseded in `specs/decisions/`.
-- When an ADR is created or superseded, agents MUST also propose a corresponding entry to Airsync INBOX using `memory_kind: "note"` and `scope: "team"` with tags including `"adr"` and the ADR number. This ensures team-wide discoverability beyond the current project.
+- If Airsync is enabled and an ADR is created or superseded, agents MUST follow the Airsync module's canonical ADR dual-write rule.
