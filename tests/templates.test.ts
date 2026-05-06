@@ -27,6 +27,19 @@ describe("templates", () => {
       expect(renderFramework()).toBe(FRAMEWORK);
       expect(FRAMEWORK).toContain("## Token Efficiency");
     });
+
+    it("does not require commits as part of completion", () => {
+      expect(FRAMEWORK).toContain(
+        "Create git commits only when the user explicitly asks, using [Conventional Commits](https://www.conventionalcommits.org/) format.",
+      );
+      expect(FRAMEWORK).toContain(
+        "When committing, organise changes into atomic Conventional Commits",
+      );
+      expect(FRAMEWORK).not.toContain(
+        "Commit changes using the `commit-changes` skill",
+      );
+      expect(FRAMEWORK).not.toContain("atomic deployment");
+    });
   });
 
   describe("AGENTS", () => {
@@ -76,6 +89,24 @@ describe("templates", () => {
       );
       expect(generateFramework([])).not.toContain(
         "## Architecture Decision Records",
+      );
+    });
+
+    it("keeps one canonical ADR dual-write section when ADRs and Airsync are enabled", () => {
+      const framework = generateFramework(["decision-records", "airsync"]);
+      expect(framework).toContain("### ADR Dual-Write Rule");
+      expect(framework).toContain(
+        "If Airsync is enabled, follow the Airsync module's canonical ADR dual-write rule when an ADR is created or superseded.",
+      );
+      expect(framework).toContain(
+        "If an ADR is created or superseded, propose it to Airsync when Airsync is enabled.",
+      );
+      expect(framework.match(/### ADR Dual-Write Rule/g)).toHaveLength(1);
+      expect(framework.match(/- Use `memory_kind: "note"`/g)).toHaveLength(1);
+      expect(framework.match(/- Use `scope: "team"`/g)).toHaveLength(1);
+      expect(framework.match(/- Include `source_refs`/g)).toHaveLength(1);
+      expect(framework).not.toContain(
+        "Every ADR created or superseded MUST also be proposed to Airsync",
       );
     });
 
