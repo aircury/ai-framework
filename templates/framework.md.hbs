@@ -15,7 +15,7 @@ The following rules apply to every installation profile:
 - `specs/features/` is canonical and versioned.
 - `specs/changes/` is optional working state and is not versioned.
 - Any workflow mode that changes observable system behavior MUST end with an update to `specs/features/`.
-- Use the `commit-changes` skill to organise working tree changes into atomic, functional, and semantic commits using the [Conventional Commits](https://www.conventionalcommits.org/) format.
+- Prepare working tree changes as atomic, functional, and semantic units. Create git commits only when the user explicitly asks, using [Conventional Commits](https://www.conventionalcommits.org/) format.
 - Before starting any non-trivial change, the agent MUST act as a routing meta-agent and ask the user how to proceed.
 - Optional standards are enabled through `.aircury/framework.config.json`.
 
@@ -58,7 +58,7 @@ For any non-trivial change:
 4. Implement inside the selected standards profile.
 5. Refactor for clarity and boundary enforcement.
 6. Run relevant verification, then broader checks.
-7. Commit changes using the `commit-changes` skill for atomic deployment.
+7. Prepare atomic working tree changes and summarise what is ready for review.
 
 ## Agent Operating Rules
 
@@ -83,14 +83,13 @@ While executing work:
 - Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy unless an external interface requires a different spelling.
 {{/if}}
 - All observable behavior changes MUST update `specs/features/` before the work is done.
-- Use the `commit-changes` skill to organise working tree changes into atomic, functional, and semantic commits using Conventional Commit format.
+- Use the `commit-changes` skill only when the user asks you to create commits. When committing, organise changes into atomic Conventional Commits; until then, keep changes organised in the working tree for review.
 - After the user selects a workflow mode, follow `FRAMEWORK.md § Mode execution rules` exactly.
 - Selecting `plan-build` authorises planning first, not automatic implementation.
 - Selecting `spec-kit` requires following the full Spec Kit sequence in order unless the user explicitly changes modes.
 - Selecting an OpenSpec workflow requires following its named sequence in order unless the user explicitly changes modes.
 {{#if includesAirsyncMemory}}
 - Capture reusable knowledge in Airsync INBOX when you discover validated patterns, repeated pitfalls, or team conventions. Search before proposing to avoid duplicates.
-- Every ADR created or superseded MUST also be proposed to Airsync as a `note` with `scope: "team"` and tags `["adr", "ADR-XXXX"]`.
 {{/if}}
 {{#each agentRules}}
 {{this}}
@@ -157,7 +156,10 @@ A change is not done unless all of the following are true:
 - Enabled architecture boundaries still hold.
 {{/if}}
 {{#if includesDecisionRecords}}
-- Material architectural decisions are captured or superseded in `specs/decisions/` and proposed to Airsync.
+- Material architectural decisions are captured or superseded in `specs/decisions/`.
+{{#if includesAirsyncMemory}}
+- If an ADR is created or superseded, propose it to Airsync when Airsync is enabled.
+{{/if}}
 {{/if}}
 {{#if includesAirsyncMemory}}
 - Relevant Airsync memory has been searched and new learnings have been captured in INBOX.
