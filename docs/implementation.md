@@ -25,7 +25,7 @@ The TUI performs this sequence:
 5. Review files and `npx skills add` commands.
 6. Confirm installation.
 7. Choose whether to skip or overwrite existing generated files.
-8. Write files, install skills, and update `.gitignore` with `specs/changes/`.
+8. Write files, install skills, and update `.gitignore` with temporary and local framework files.
 
 Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and OpenCode are supported through `AGENTS.md` and selected skills. Tool-specific files are added only when selected.
 
@@ -42,7 +42,7 @@ Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and Open
 | `specs/decisions/README.md` | Starter ADR guide when `decision-records` is enabled. |
 | `specs/ui/README.md` | Starter frontend design-system guide when `frontend` is enabled. |
 | `specs/ui/frontend-workflow.md` | Frontend workflow reference when `frontend` is enabled. |
-| `.gitignore` | Adds `specs/changes/` because workflow change artifacts are temporary. |
+| `.gitignore` | Adds temporary and local framework files. |
 
 ## Capabilities
 

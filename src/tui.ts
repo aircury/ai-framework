@@ -343,11 +343,11 @@ export async function run(): Promise<void> {
     );
 
   if (!isGlobal) {
-    const gitignoreResult = updateGitignore(cwd);
+    const gitignoreResult = updateGitignore(cwd, files);
     if (gitignoreResult.created) {
-      p.log.success(".gitignore created with specs/changes/ entry");
+      p.log.success(".gitignore created with local framework entries");
     } else if (gitignoreResult.updated) {
-      p.log.success(".gitignore updated with specs/changes/ entry");
+      p.log.success(".gitignore updated with local framework entries");
     }
   }
 

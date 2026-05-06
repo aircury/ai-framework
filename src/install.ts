@@ -313,30 +313,96 @@ export function runCommand(
   };
 }
 
-const GITIGNORE_ENTRY = "# Aircury AI Framework\nspecs/changes/";
+const GITIGNORE_HEADER = "# Aircury AI Framework";
+const ALWAYS_IGNORED_PATHS = [
+  "specs/changes/",
+  ".agents/skills/",
+  ".claude/skills/",
+  ".gemini/skills/",
+  "skills-lock.json",
+];
+const LOCAL_FRAMEWORK_IGNORED_FILES = new Set([
+  "FRAMEWORK.md",
+  "AGENTS.md",
+  "CLAUDE.md",
+  "GEMINI.md",
+]);
+const KNOWN_AIRCURY_GITIGNORE_ENTRIES = new Set([
+  ...ALWAYS_IGNORED_PATHS,
+  ...LOCAL_FRAMEWORK_IGNORED_FILES,
+  ".aircury/",
+  "docs/aircury/capabilities/",
+]);
 
-export function updateGitignore(cwd: string): {
+function getGitignoreEntry(file: InstallFile): string | null {
+  if (LOCAL_FRAMEWORK_IGNORED_FILES.has(file.path)) return file.path;
+  if (file.path.startsWith(".aircury/")) return ".aircury/";
+  if (file.path.startsWith("docs/aircury/capabilities/")) {
+    return "docs/aircury/capabilities/";
+  }
+
+  return null;
+}
+
+function buildAircuryGitignoreBlock(files: InstallFile[]): string {
+  const entries = new Set(ALWAYS_IGNORED_PATHS);
+  for (const file of files) {
+    const entry = getGitignoreEntry(file);
+    if (entry) entries.add(entry);
+  }
+
+  return `${GITIGNORE_HEADER}\n${[...entries].join("\n")}\n`;
+}
+
+function removeAircuryGitignoreBlock(content: string): string {
+  const lines = content.split("\n");
+  const keptLines: string[] = [];
+
+  for (let index = 0; index < lines.length; index++) {
+    if (lines[index] !== GITIGNORE_HEADER) {
+      keptLines.push(lines[index]);
+      continue;
+    }
+
+    index++;
+    while (
+      index < lines.length &&
+      (lines[index] === "" || KNOWN_AIRCURY_GITIGNORE_ENTRIES.has(lines[index]))
+    ) {
+      index++;
+    }
+    index--;
+  }
+
+  return keptLines.join("\n").trimEnd();
+}
+
+export function updateGitignore(
+  cwd: string,
+  files: InstallFile[] = [],
+): {
   updated: boolean;
   created: boolean;
 } {
   const gitignorePath = join(cwd, ".gitignore");
   const hasGitignore = existsSync(gitignorePath);
+  const aircuryBlock = buildAircuryGitignoreBlock(files);
 
   if (!hasGitignore) {
-    writeFileSync(gitignorePath, `${GITIGNORE_ENTRY}\n`, "utf-8");
+    writeFileSync(gitignorePath, aircuryBlock, "utf-8");
     return { updated: true, created: true };
   }
 
   const content = readFileSync(gitignorePath, "utf-8");
-  if (content.includes("specs/changes/")) {
+  const contentWithoutAircuryBlock = removeAircuryGitignoreBlock(content);
+  const nextContent = contentWithoutAircuryBlock
+    ? `${contentWithoutAircuryBlock}\n${aircuryBlock}`
+    : aircuryBlock;
+
+  if (content === nextContent) {
     return { updated: false, created: false };
   }
 
-  const separator = content.endsWith("\n") ? "" : "\n";
-  writeFileSync(
-    gitignorePath,
-    `${content}${separator}${GITIGNORE_ENTRY}\n`,
-    "utf-8",
-  );
+  writeFileSync(gitignorePath, nextContent, "utf-8");
   return { updated: true, created: false };
 }

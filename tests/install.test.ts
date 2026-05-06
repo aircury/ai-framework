@@ -1,5 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { existsSync, readFileSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { getInitialCapabilityIds } from "../src/capabilities";
@@ -13,6 +19,7 @@ import {
   type InstallFile,
   mergeFrameworkReferenceIntoAgents,
   runCommand,
+  updateGitignore,
   writeFile,
 } from "../src/install";
 
@@ -631,5 +638,89 @@ describe("mergeFrameworkReferenceIntoAgents", () => {
     );
 
     expect(merged).toBe(existing.endsWith("\n") ? existing : `${existing}\n`);
+  });
+});
+
+describe("updateGitignore", () => {
+  it("ignores local framework installation files but keeps shared specs versionable", () => {
+    const dir = `${tmpdir()}/sdd-gitignore-create-${Date.now()}`;
+    mkdirSync(dir, { recursive: true });
+    const files = getLocalFiles(
+      ["claude-code", "gemini-cli"],
+      ["decision-records", "frontend"],
+    );
+
+    const result = updateGitignore(dir, files);
+
+    expect(result).toEqual({ updated: true, created: true });
+    const content = readFileSync(join(dir, ".gitignore"), "utf-8");
+    expect(content).toContain("# Aircury AI Framework");
+    expect(content).toContain("specs/changes/");
+    expect(content).toContain(".agents/skills/");
+    expect(content).toContain(".claude/skills/");
+    expect(content).toContain(".gemini/skills/");
+    expect(content).toContain("skills-lock.json");
+    expect(content).toContain("FRAMEWORK.md");
+    expect(content).toContain("AGENTS.md");
+    expect(content).toContain("CLAUDE.md");
+    expect(content).toContain("GEMINI.md");
+    expect(content).toContain(".aircury/");
+    expect(content).toContain("docs/aircury/capabilities/");
+    expect(content).not.toContain("specs/features/");
+    expect(content).not.toContain("specs/decisions/");
+    expect(content).not.toContain("specs/ui/");
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("updates the old Aircury block without duplicating entries", () => {
+    const dir = `${tmpdir()}/sdd-gitignore-update-${Date.now()}`;
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      join(dir, ".gitignore"),
+      "node_modules/\n# Aircury AI Framework\nspecs/changes/\ndist/\n",
+      "utf-8",
+    );
+    const files = getLocalFiles([], ["testing"]);
+
+    expect(updateGitignore(dir, files)).toEqual({
+      updated: true,
+      created: false,
+    });
+    expect(updateGitignore(dir, files)).toEqual({
+      updated: false,
+      created: false,
+    });
+
+    const content = readFileSync(join(dir, ".gitignore"), "utf-8");
+    expect(content).toContain("node_modules/\n");
+    expect(content).toContain("dist/\n");
+    expect(content.match(/# Aircury AI Framework/g)).toHaveLength(1);
+    expect(content.match(/specs\/changes\//g)).toHaveLength(1);
+    expect(content.match(/\.agents\/skills\//g)).toHaveLength(1);
+    expect(content.match(/skills-lock\.json/g)).toHaveLength(1);
+    expect(content.match(/FRAMEWORK\.md/g)).toHaveLength(1);
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("preserves unrelated gitignore comments and sensitive file entries", () => {
+    const dir = `${tmpdir()}/sdd-gitignore-preserve-${Date.now()}`;
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      join(dir, ".gitignore"),
+      "# Dependencies\nnode_modules/\n\n# Local secrets\n.env\n.env.local\n",
+      "utf-8",
+    );
+
+    const result = updateGitignore(dir, getLocalFiles([]));
+
+    expect(result).toEqual({ updated: true, created: false });
+    const content = readFileSync(join(dir, ".gitignore"), "utf-8");
+    expect(content).toContain("# Dependencies\nnode_modules/");
+    expect(content).toContain("# Local secrets\n.env\n.env.local");
+    expect(content).toContain("# Aircury AI Framework");
+
+    rmSync(dir, { recursive: true });
   });
 });
