@@ -23,7 +23,9 @@ interface RendererViewModel {
   includesCapabilityDetails: boolean;
   includesDecisionRecords: boolean;
   includesTesting: boolean;
-  includesArchitecture: boolean;
+  includesDddHexagonalArchitecture: boolean;
+  includesCleanArchitecture: boolean;
+  includesLayeredArchitecture: boolean;
   includesCodeStyle: boolean;
   includesAirsyncMemory: boolean;
   includesErrorHandling: boolean;
@@ -63,7 +65,9 @@ function createViewModel(
     includesCapabilityDetails: selectedCapabilities.some(hasCapabilityDetail),
     includesDecisionRecords: selectedIds.has("decision-records"),
     includesTesting: selectedIds.has("testing"),
-    includesArchitecture: selectedIds.has("architecture"),
+    includesDddHexagonalArchitecture: selectedIds.has("hexagonal-architecture"),
+    includesCleanArchitecture: selectedIds.has("clean-architecture"),
+    includesLayeredArchitecture: selectedIds.has("layered-architecture"),
     includesCodeStyle: selectedIds.has("code-style"),
     includesAirsyncMemory: selectedModuleIds.has("airsync-memory"),
     includesErrorHandling: selectedModuleIds.has("error-handling"),

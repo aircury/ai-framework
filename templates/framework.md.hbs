@@ -152,8 +152,14 @@ A change is not done unless all of the following are true:
 {{#if includesTesting}}
 - Relevant behavior is covered by tests.
 {{/if}}
-{{#if includesArchitecture}}
-- Enabled architecture boundaries still hold.
+{{#if includesDddHexagonalArchitecture}}
+- DDD and hexagonal architecture boundaries still hold.
+{{/if}}
+{{#if includesCleanArchitecture}}
+- Clean Architecture dependencies still point inward and entities/use cases remain framework-independent.
+{{/if}}
+{{#if includesLayeredArchitecture}}
+- Layered Architecture boundaries still hold: controllers do not bypass services for business behavior, services own application logic, and repositories isolate persistence.
 {{/if}}
 {{#if includesDecisionRecords}}
 - Material architectural decisions are captured or superseded in `specs/decisions/`.

@@ -49,16 +49,33 @@ describe("getLocalFiles", () => {
   });
 
   it("generates detailed capability docs for selected capabilities", () => {
-    const files = getLocalFiles([], ["testing", "architecture"]);
+    const files = getLocalFiles(
+      [],
+      [
+        "testing",
+        "hexagonal-architecture",
+        "clean-architecture",
+        "layered-architecture",
+      ],
+    );
     const paths = files.map((file) => file.path);
     expect(paths).toContain("docs/aircury/capabilities/testing.md");
-    expect(paths).toContain("docs/aircury/capabilities/architecture.md");
-    expect(getFileByPath(files, "docs/aircury/capabilities/testing.md").content)
-      .toContain("## TDD Workflow");
+    expect(paths).not.toContain(
+      "docs/aircury/capabilities/hexagonal-architecture.md",
+    );
+    expect(paths).not.toContain(
+      "docs/aircury/capabilities/clean-architecture.md",
+    );
+    expect(paths).toContain(
+      "docs/aircury/capabilities/layered-architecture.md",
+    );
     expect(
-      getFileByPath(files, "docs/aircury/capabilities/architecture.md")
+      getFileByPath(files, "docs/aircury/capabilities/testing.md").content,
+    ).toContain("## TDD Workflow");
+    expect(
+      getFileByPath(files, "docs/aircury/capabilities/layered-architecture.md")
         .content,
-    ).toContain("## Non-Negotiable Architecture Rules");
+    ).toContain("## Layered Architecture Rules");
   });
 
   it("includes CLAUDE.md when Claude Code is selected", () => {
@@ -123,12 +140,18 @@ describe("getLocalFiles", () => {
     expect(agentsWithCapabilities.content).toContain("single source of truth");
   });
 
-  it("uses the full recommended profile by default", () => {
+  it("uses the non-architecture capability profile by default", () => {
     const files = getLocalFiles([]);
     const framework = getFileByPath(files, "FRAMEWORK.md");
     expect(framework.content).toContain("docs/aircury/capabilities/testing.md");
-    expect(framework.content).toContain(
-      "docs/aircury/capabilities/architecture.md",
+    expect(framework.content).not.toContain(
+      "docs/aircury/capabilities/hexagonal-architecture.md",
+    );
+    expect(framework.content).not.toContain(
+      "docs/aircury/capabilities/clean-architecture.md",
+    );
+    expect(framework.content).not.toContain(
+      "docs/aircury/capabilities/layered-architecture.md",
     );
     expect(framework.content).toContain(
       "docs/aircury/capabilities/decision-records.md",
@@ -204,7 +227,7 @@ describe("getLocalCommands", () => {
   it("installs the skills derived from the default capabilities for universal", () => {
     const commands = getLocalCommands([], getInitialCapabilityIds("local"));
 
-    expect(commands).toHaveLength(7);
+    expect(commands).toHaveLength(6);
     const aircury = getCommandBySource(commands, aircurySkillsSource);
     expect(aircury.args).toContain("open-spec-propose");
     expect(aircury.args).toContain("spec-kit-specify");
@@ -223,9 +246,10 @@ describe("getLocalCommands", () => {
       ).args,
     ).toContain("logging-best-practices");
     expect(
-      getCommandBySource(commands, "https://github.com/ccheney/robust-skills")
-        .args,
-    ).toContain("clean-ddd-hexagonal");
+      commands.some((command) =>
+        command.args.includes("https://github.com/ccheney/robust-skills"),
+      ),
+    ).toBe(false);
     expect(
       getCommandBySource(
         commands,
@@ -284,6 +308,40 @@ describe("getLocalCommands", () => {
       getCommandBySource(commands, "https://github.com/juliusbrussee/caveman")
         .args,
     ).toContain("caveman");
+  });
+
+  it("installs the hexagonal architecture skill only for hexagonal architecture", () => {
+    const hexagonalCommands = getLocalCommands([], ["hexagonal-architecture"]);
+    expect(
+      getCommandBySource(
+        hexagonalCommands,
+        "https://github.com/ccheney/robust-skills",
+      ).args,
+    ).toContain("clean-ddd-hexagonal");
+
+    const cleanCommands = getLocalCommands([], ["clean-architecture"]);
+    expect(
+      cleanCommands.some((command) =>
+        command.args.includes("https://github.com/ccheney/robust-skills"),
+      ),
+    ).toBe(false);
+
+    const layeredCommands = getLocalCommands([], ["layered-architecture"]);
+    expect(
+      layeredCommands.some((command) =>
+        command.args.includes("https://github.com/ccheney/robust-skills"),
+      ),
+    ).toBe(false);
+  });
+
+  it("does not install the hexagonal skill from defaults", () => {
+    const commands = getLocalCommands([], getInitialCapabilityIds("local"));
+
+    expect(
+      commands.some((command) =>
+        command.args.includes("https://github.com/ccheney/robust-skills"),
+      ),
+    ).toBe(false);
   });
 
   it("installs capability-required skills without a separate skill selection", () => {

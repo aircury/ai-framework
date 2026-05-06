@@ -126,14 +126,50 @@ describe("templates", () => {
     });
 
     it("adds architecture rules only when architecture capabilities are enabled", () => {
-      expect(generateFramework(["architecture"])).toContain(
-        "docs/aircury/capabilities/architecture.md",
+      expect(generateFramework(["hexagonal-architecture"])).toContain(
+        "docs/aircury/capabilities/hexagonal-architecture.md",
+      );
+      expect(generateFramework(["clean-architecture"])).toContain(
+        "docs/aircury/capabilities/clean-architecture.md",
+      );
+      expect(generateFramework(["layered-architecture"])).toContain(
+        "docs/aircury/capabilities/layered-architecture.md",
       );
       expect(generateFramework([])).not.toContain(
-        "docs/aircury/capabilities/architecture.md",
+        "docs/aircury/capabilities/hexagonal-architecture.md",
       );
-      expect(generateFramework(["architecture"])).not.toContain(
+      expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/clean-architecture.md",
+      );
+      expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/layered-architecture.md",
+      );
+      expect(generateFramework(["hexagonal-architecture"])).not.toContain(
         "## Non-Negotiable Architecture Rules",
+      );
+      expect(generateFramework(["clean-architecture"])).not.toContain(
+        "## Clean Architecture Rules",
+      );
+      expect(generateFramework(["hexagonal-architecture"])).toContain(
+        "DDD and hexagonal architecture boundaries still hold.",
+      );
+      expect(generateFramework(["hexagonal-architecture"])).not.toContain(
+        "Clean Architecture dependencies still point inward",
+      );
+      expect(generateFramework(["clean-architecture"])).toContain(
+        "Clean Architecture dependencies still point inward and entities/use cases remain framework-independent.",
+      );
+      expect(generateFramework(["clean-architecture"])).not.toContain(
+        "DDD and hexagonal architecture boundaries still hold.",
+      );
+      expect(generateFramework(["layered-architecture"])).toContain(
+        "Layered Architecture boundaries still hold",
+      );
+      expect(generateFramework(["layered-architecture"])).not.toContain(
+        "Clean Architecture dependencies still point inward",
+      );
+      expect(generateFramework(["layered-architecture"])).not.toContain(
+        "DDD and hexagonal architecture boundaries still hold.",
       );
     });
 

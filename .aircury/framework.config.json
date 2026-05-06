@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "capabilities": ["architecture", "decision-records", "testing"],
+  "capabilities": ["hexagonal-architecture", "decision-records", "testing"],
   "language": {
     "britishEnglish": false
   }

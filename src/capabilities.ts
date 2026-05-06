@@ -7,6 +7,15 @@ import airsyncMemoryFramework from "../standards/modules/airsync-memory/framewor
 import airsyncMemoryManifest from "../standards/modules/airsync-memory/module.json" with {
   type: "json",
 };
+import cleanArchitectureAgents from "../standards/modules/clean-architecture/agents.md" with {
+  type: "text",
+};
+import cleanArchitectureFramework from "../standards/modules/clean-architecture/framework.md" with {
+  type: "text",
+};
+import cleanArchitectureManifest from "../standards/modules/clean-architecture/module.json" with {
+  type: "json",
+};
 import codeStyleAgents from "../standards/modules/code-style/agents.md" with {
   type: "text",
 };
@@ -61,6 +70,15 @@ import hexagonalArchitectureFramework from "../standards/modules/hexagonal-archi
 import hexagonalArchitectureManifest from "../standards/modules/hexagonal-architecture/module.json" with {
   type: "json",
 };
+import layeredArchitectureAgents from "../standards/modules/layered-architecture/agents.md" with {
+  type: "text",
+};
+import layeredArchitectureFramework from "../standards/modules/layered-architecture/framework.md" with {
+  type: "text",
+};
+import layeredArchitectureManifest from "../standards/modules/layered-architecture/module.json" with {
+  type: "json",
+};
 import structuredLoggingAgents from "../standards/modules/structured-logging/agents.md" with {
   type: "text",
 };
@@ -108,6 +126,8 @@ export type CapabilityCategory =
 type StandardModuleId =
   | "decision-records"
   | "hexagonal-architecture"
+  | "clean-architecture"
+  | "layered-architecture"
   | "ddd"
   | "code-style"
   | "airsync-memory"
@@ -122,7 +142,9 @@ export type CapabilityId =
   | "spec-kit"
   | "airsync"
   | "git"
-  | "architecture"
+  | "hexagonal-architecture"
+  | "clean-architecture"
+  | "layered-architecture"
   | "decision-records"
   | "testing"
   | "code-style"
@@ -168,6 +190,7 @@ export interface CapabilityProfile {
 }
 
 type LegacyModuleId = StandardModuleId | "tdd";
+type LegacyCapabilityId = CapabilityId | "architecture";
 
 export interface LegacyFrameworkConfig {
   version?: 1;
@@ -228,6 +251,20 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
       hexagonalArchitectureManifest as StandardManifest,
       hexagonalArchitectureFramework,
       hexagonalArchitectureAgents,
+    ),
+  },
+  "clean-architecture": {
+    ...createStandardModule(
+      cleanArchitectureManifest as StandardManifest,
+      cleanArchitectureFramework,
+      cleanArchitectureAgents,
+    ),
+  },
+  "layered-architecture": {
+    ...createStandardModule(
+      layeredArchitectureManifest as StandardManifest,
+      layeredArchitectureFramework,
+      layeredArchitectureAgents,
     ),
   },
   ddd: {
@@ -325,10 +362,7 @@ function createCapabilityDetailFile(
 ): CapabilityFile | null {
   if (!hasCapabilityDetail(capability)) return null;
 
-  const sections = [
-    `# ${capability.label} Capability`,
-    capability.description,
-  ];
+  const sections = [`# ${capability.label} Capability`, capability.description];
 
   if (capability.framework) {
     sections.push("## Framework Rules", capability.framework.trim());
@@ -458,14 +492,14 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
     ],
   },
-  architecture: {
-    id: "architecture",
-    label: "Architecture",
-    hint: "DDD, hexagonal architecture, and curated architecture skills",
+  "hexagonal-architecture": {
+    id: "hexagonal-architecture",
+    label: "Hexagonal Architecture",
+    hint: "DDD, ports and adapters, and curated architecture skills",
     description:
-      "DDD and hexagonal architecture standards with curated architecture skills",
+      "Hexagonal Architecture and DDD standards with curated architecture skills",
     category: "engineering",
-    defaultSelected: true,
+    defaultSelected: false,
     scopes: ["local", "global"],
     ...composeModules(["hexagonal-architecture", "ddd"]),
     skills: [
@@ -475,6 +509,28 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
         scopes: ["local", "global"],
       },
     ],
+  },
+  "clean-architecture": {
+    id: "clean-architecture",
+    label: "Clean Architecture",
+    hint: "entities, use cases, adapters, and drivers",
+    description:
+      "Clean Architecture standards that keep business rules independent from frameworks, UI, databases, and external services",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    ...composeModules(["clean-architecture"]),
+  },
+  "layered-architecture": {
+    id: "layered-architecture",
+    label: "Layered Architecture",
+    hint: "controllers, services, and repositories",
+    description:
+      "Simple layered standards for projects that need clear separation without Clean or Hexagonal overhead",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    ...composeModules(["layered-architecture"]),
   },
   "decision-records": {
     id: "decision-records",
@@ -651,7 +707,9 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "spec-kit",
   "airsync",
   "git",
-  "architecture",
+  "hexagonal-architecture",
+  "clean-architecture",
+  "layered-architecture",
   "decision-records",
   "testing",
   "code-style",
@@ -666,8 +724,10 @@ const LEGACY_MODULE_CAPABILITY_MAP: Record<LegacyModuleId, CapabilityId> = {
   "decision-records": "decision-records",
   tdd: "testing",
   testing: "testing",
-  "hexagonal-architecture": "architecture",
-  ddd: "architecture",
+  "hexagonal-architecture": "hexagonal-architecture",
+  "clean-architecture": "clean-architecture",
+  "layered-architecture": "layered-architecture",
+  ddd: "hexagonal-architecture",
   "code-style": "code-style",
   "airsync-memory": "airsync",
   "error-handling": "resilience",
@@ -675,6 +735,43 @@ const LEGACY_MODULE_CAPABILITY_MAP: Record<LegacyModuleId, CapabilityId> = {
   frontend: "frontend",
   "token-efficiency": "token-efficiency",
 };
+
+const EXCLUSIVE_ARCHITECTURE_CAPABILITIES: CapabilityId[] = [
+  "hexagonal-architecture",
+  "clean-architecture",
+  "layered-architecture",
+];
+
+const LEGACY_CAPABILITY_MAP: Partial<Record<LegacyCapabilityId, CapabilityId>> =
+  {
+    architecture: "hexagonal-architecture",
+  };
+
+function normalizeLegacyCapabilityId(
+  capabilityId: LegacyCapabilityId,
+): CapabilityId {
+  return LEGACY_CAPABILITY_MAP[capabilityId] ?? capabilityId;
+}
+
+function normalizeExclusiveArchitectures(
+  capabilityIds: LegacyCapabilityId[],
+): CapabilityId[] {
+  const normalizedCapabilityIds = capabilityIds.map(
+    normalizeLegacyCapabilityId,
+  );
+  const selectedArchitectures = normalizedCapabilityIds.filter((capabilityId) =>
+    EXCLUSIVE_ARCHITECTURE_CAPABILITIES.includes(capabilityId),
+  );
+
+  if (selectedArchitectures.length <= 1) return normalizedCapabilityIds;
+
+  const selectedArchitecture = selectedArchitectures.at(-1);
+  return normalizedCapabilityIds.filter(
+    (capabilityId) =>
+      !EXCLUSIVE_ARCHITECTURE_CAPABILITIES.includes(capabilityId) ||
+      capabilityId === selectedArchitecture,
+  );
+}
 
 export const CAPABILITIES: CapabilityManifest[] = CAPABILITY_ORDER.map(
   (id) => CAPABILITY_REGISTRY[id],
@@ -696,7 +793,7 @@ export function getCapabilityById(
 }
 
 export function resolveCapabilityIds(
-  capabilityIds: CapabilityId[] = DEFAULT_LOCAL_CAPABILITY_IDS,
+  capabilityIds: LegacyCapabilityId[] = DEFAULT_LOCAL_CAPABILITY_IDS,
 ): CapabilityId[] {
   const resolved = new Set<CapabilityId>();
   const visit = (capabilityId: CapabilityId) => {
@@ -704,7 +801,7 @@ export function resolveCapabilityIds(
     resolved.add(capabilityId);
   };
 
-  for (const capabilityId of capabilityIds) {
+  for (const capabilityId of normalizeExclusiveArchitectures(capabilityIds)) {
     visit(capabilityId);
   }
 
@@ -712,7 +809,7 @@ export function resolveCapabilityIds(
 }
 
 function isLegacyFrameworkConfig(
-  value: CapabilityId[] | LegacyFrameworkConfig | undefined,
+  value: LegacyCapabilityId[] | LegacyFrameworkConfig | undefined,
 ): value is LegacyFrameworkConfig {
   return !!value && !Array.isArray(value) && Array.isArray(value.modules);
 }
@@ -726,11 +823,13 @@ function resolveLegacyModuleCapabilities(
     selected.add(LEGACY_MODULE_CAPABILITY_MAP[moduleId]);
   }
 
-  return CAPABILITY_ORDER.filter((capabilityId) => selected.has(capabilityId));
+  return normalizeExclusiveArchitectures(
+    CAPABILITY_ORDER.filter((capabilityId) => selected.has(capabilityId)),
+  );
 }
 
 export function createCapabilityProfile(
-  capabilityIds?: CapabilityId[] | LegacyFrameworkConfig,
+  capabilityIds?: LegacyCapabilityId[] | LegacyFrameworkConfig,
   options?: { britishEnglish?: boolean },
 ): CapabilityProfile {
   const britishEnglish =
