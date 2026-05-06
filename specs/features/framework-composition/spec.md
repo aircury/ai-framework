@@ -26,6 +26,25 @@ The framework MUST store each capability as metadata plus optional content, file
 - **WHEN** a maintainer updates a capability
 - **THEN** the normative text and installation metadata live in the capability registry and referenced content files
 
+### Requirement: Architecture capabilities SHALL be mutually exclusive
+The installer MUST allow a project to select only one architecture standard capability at a time.
+
+#### Scenario: A project starts interactive installation
+- **WHEN** the user runs the interactive installer
+- **THEN** the installer requires an explicit architecture capability choice without preselecting or recommending any architecture
+
+#### Scenario: A project selects one architecture standard interactively
+- **WHEN** the user selects more than one architecture capability during installation
+- **THEN** the installer asks the user to choose one architecture capability before files or commands are generated
+
+#### Scenario: A default profile is resolved outside the interactive installer
+- **WHEN** default capabilities are resolved without an explicit architecture capability
+- **THEN** no architecture capability, architecture rules, or architecture skills are included
+
+#### Scenario: A saved profile contains incompatible architecture capabilities
+- **WHEN** capability resolution receives multiple architecture capabilities such as `ddd-hexagonal`, `clean-architecture`, and `layered-architecture`
+- **THEN** the resolved capability set contains only one architecture capability
+
 ### Requirement: Generated documents SHALL use dedicated templates
 The framework MUST render generated files from dedicated template files instead of assembling full documents through large inline strings in TypeScript.
 

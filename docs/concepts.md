@@ -57,7 +57,7 @@ Examples:
 
 - `frontend` adds frontend rules, writes UI spec starters, and installs frontend extraction/generation skills.
 - `token-efficiency` adds terse-response rules and installs the Caveman skill.
-- `ddd-hexagonal` adds DDD+Hexagonal rules and installs curated architecture skills.
+- Architecture capabilities add one selected architecture standard and related skills, including `ddd-hexagonal` for DDD+Hexagonal projects.
 - `testing` adds testing rules and installs curated Playwright and E2E testing skills.
 - `resilience` adds error-handling and structured-logging rules and installs related recovery/logging skills.
 - `specs` installs skills for extracting and interpreting canonical specs.
