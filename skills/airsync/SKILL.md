@@ -85,7 +85,7 @@ The quality score (0.0-1.0) is computed automatically:
 
 | Kind | Use For | Example |
 |------|---------|---------|
-| `best_practice` | Validated approaches that work | "Use hexagonal architecture for framework modules" |
+| `best_practice` | Validated approaches that work | "Keep framework modules aligned with the selected architecture boundaries" |
 | `learning` | Insights from experience | "Discovered that batching reduces API calls by 80%" |
 | `observation` | Noted patterns without full validation | "Seems like Qdrant queries are faster with pre-filtering" |
 | `note` | General documentation | "API rate limits are 1000 req/min" |
@@ -191,7 +191,7 @@ The system prevents duplication at two levels:
 ```python
 # 1. Check if it already exists
 results = memory_search(
-    query="hexagonal architecture framework modules",
+    query="selected architecture framework module boundaries",
     memory_kind="best_practice"
 )
 
@@ -200,9 +200,9 @@ memory = memory_propose(entry={
     "memory_kind": "best_practice",
     "scope": "team",
     "author_agent_id": "claude-opus-4",
-    "title": "Use hexagonal architecture for framework modules",
-    "content": "All framework modules must follow hexagonal architecture...",
-    "tags": ["architecture", "hexagonal", "framework"],
+    "title": "Keep framework modules aligned with selected architecture boundaries",
+    "content": "All framework modules must respect the project's selected architecture boundaries...",
+    "tags": ["architecture", "boundaries", "framework"],
 })
 
 # 3. When confident, promote to PUBLISHED

@@ -7,6 +7,15 @@ import airsyncMemoryFramework from "../standards/modules/airsync-memory/framewor
 import airsyncMemoryManifest from "../standards/modules/airsync-memory/module.json" with {
   type: "json",
 };
+import cleanArchitectureAgents from "../standards/modules/clean-architecture/agents.md" with {
+  type: "text",
+};
+import cleanArchitectureFramework from "../standards/modules/clean-architecture/framework.md" with {
+  type: "text",
+};
+import cleanArchitectureManifest from "../standards/modules/clean-architecture/module.json" with {
+  type: "json",
+};
 import codeStyleAgents from "../standards/modules/code-style/agents.md" with {
   type: "text",
 };
@@ -61,6 +70,15 @@ import frontendFramework from "../standards/modules/frontend/framework.md" with 
 import frontendManifest from "../standards/modules/frontend/module.json" with {
   type: "json",
 };
+import layeredArchitectureAgents from "../standards/modules/layered-architecture/agents.md" with {
+  type: "text",
+};
+import layeredArchitectureFramework from "../standards/modules/layered-architecture/framework.md" with {
+  type: "text",
+};
+import layeredArchitectureManifest from "../standards/modules/layered-architecture/module.json" with {
+  type: "json",
+};
 import structuredLoggingAgents from "../standards/modules/structured-logging/agents.md" with {
   type: "text",
 };
@@ -108,6 +126,8 @@ export type CapabilityCategory =
 type StandardModuleId =
   | "decision-records"
   | "ddd-hexagonal"
+  | "clean-architecture"
+  | "layered-architecture"
   | "ddd"
   | "code-style"
   | "airsync-memory"
@@ -123,6 +143,8 @@ export type CapabilityId =
   | "airsync"
   | "git"
   | "ddd-hexagonal"
+  | "clean-architecture"
+  | "layered-architecture"
   | "decision-records"
   | "testing"
   | "code-style"
@@ -218,6 +240,20 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
       dddHexagonalManifest as StandardManifest,
       dddHexagonalFramework,
       dddHexagonalAgents,
+    ),
+  },
+  "clean-architecture": {
+    ...createStandardModule(
+      cleanArchitectureManifest as StandardManifest,
+      cleanArchitectureFramework,
+      cleanArchitectureAgents,
+    ),
+  },
+  "layered-architecture": {
+    ...createStandardModule(
+      layeredArchitectureManifest as StandardManifest,
+      layeredArchitectureFramework,
+      layeredArchitectureAgents,
     ),
   },
   ddd: {
@@ -451,7 +487,7 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
     hint: "domain modelling, ports and adapters, and curated architecture skills",
     description: "DDD+Hexagonal standards with curated architecture skills",
     category: "engineering",
-    defaultSelected: true,
+    defaultSelected: false,
     scopes: ["local", "global"],
     ...composeModules(["ddd-hexagonal", "ddd"]),
     skills: [
@@ -461,6 +497,28 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
         scopes: ["local", "global"],
       },
     ],
+  },
+  "clean-architecture": {
+    id: "clean-architecture",
+    label: "Clean Architecture",
+    hint: "entities, use cases, adapters, and drivers",
+    description:
+      "Clean Architecture standards that keep business rules independent from frameworks, UI, databases, and external services",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    ...composeModules(["clean-architecture"]),
+  },
+  "layered-architecture": {
+    id: "layered-architecture",
+    label: "Layered Architecture",
+    hint: "controllers, services, and repositories",
+    description:
+      "Simple layered standards for projects that need clear separation without Clean or Hexagonal overhead",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    ...composeModules(["layered-architecture"]),
   },
   "decision-records": {
     id: "decision-records",
@@ -617,6 +675,8 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "airsync",
   "git",
   "ddd-hexagonal",
+  "clean-architecture",
+  "layered-architecture",
   "decision-records",
   "testing",
   "code-style",
@@ -626,6 +686,29 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "specs",
   "language",
 ];
+
+const EXCLUSIVE_ARCHITECTURE_CAPABILITIES: CapabilityId[] = [
+  "ddd-hexagonal",
+  "clean-architecture",
+  "layered-architecture",
+];
+
+function normalizeExclusiveArchitectures(
+  capabilityIds: CapabilityId[],
+): CapabilityId[] {
+  const selectedArchitectures = capabilityIds.filter((capabilityId) =>
+    EXCLUSIVE_ARCHITECTURE_CAPABILITIES.includes(capabilityId),
+  );
+
+  if (selectedArchitectures.length <= 1) return capabilityIds;
+
+  const selectedArchitecture = selectedArchitectures.at(-1);
+  return capabilityIds.filter(
+    (capabilityId) =>
+      !EXCLUSIVE_ARCHITECTURE_CAPABILITIES.includes(capabilityId) ||
+      capabilityId === selectedArchitecture,
+  );
+}
 
 export const CAPABILITIES: CapabilityManifest[] = CAPABILITY_ORDER.map(
   (id) => CAPABILITY_REGISTRY[id],
@@ -655,7 +738,7 @@ export function resolveCapabilityIds(
     resolved.add(capabilityId);
   };
 
-  for (const capabilityId of capabilityIds) {
+  for (const capabilityId of normalizeExclusiveArchitectures(capabilityIds)) {
     visit(capabilityId);
   }
 

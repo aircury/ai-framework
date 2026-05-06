@@ -129,11 +129,47 @@ describe("templates", () => {
       expect(generateFramework(["ddd-hexagonal"])).toContain(
         "docs/aircury/capabilities/ddd-hexagonal.md",
       );
+      expect(generateFramework(["clean-architecture"])).toContain(
+        "docs/aircury/capabilities/clean-architecture.md",
+      );
+      expect(generateFramework(["layered-architecture"])).toContain(
+        "docs/aircury/capabilities/layered-architecture.md",
+      );
       expect(generateFramework([])).not.toContain(
         "docs/aircury/capabilities/ddd-hexagonal.md",
       );
+      expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/clean-architecture.md",
+      );
+      expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/layered-architecture.md",
+      );
       expect(generateFramework(["ddd-hexagonal"])).not.toContain(
         "## Non-Negotiable Architecture Rules",
+      );
+      expect(generateFramework(["clean-architecture"])).not.toContain(
+        "## Clean Architecture Rules",
+      );
+      expect(generateFramework(["ddd-hexagonal"])).toContain(
+        "DDD and hexagonal architecture boundaries still hold.",
+      );
+      expect(generateFramework(["ddd-hexagonal"])).not.toContain(
+        "Clean Architecture dependencies still point inward",
+      );
+      expect(generateFramework(["clean-architecture"])).toContain(
+        "Clean Architecture dependencies still point inward and entities/use cases remain framework-independent.",
+      );
+      expect(generateFramework(["clean-architecture"])).not.toContain(
+        "DDD and hexagonal architecture boundaries still hold.",
+      );
+      expect(generateFramework(["layered-architecture"])).toContain(
+        "Layered Architecture boundaries still hold",
+      );
+      expect(generateFramework(["layered-architecture"])).not.toContain(
+        "Clean Architecture dependencies still point inward",
+      );
+      expect(generateFramework(["layered-architecture"])).not.toContain(
+        "DDD and hexagonal architecture boundaries still hold.",
       );
     });
 
