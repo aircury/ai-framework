@@ -63,6 +63,8 @@ The current built-in capabilities are:
 - `airsync`
 - `git`
 - `ddd-hexagonal`
+- `clean-architecture`
+- `layered-architecture`
 - `decision-records`
 - `testing`
 - `code-style`
@@ -72,7 +74,7 @@ The current built-in capabilities are:
 - `specs`
 - `language`
 
-For example, `ddd-hexagonal` includes the DDD+Hexagonal standard modules plus the curated `clean-ddd-hexagonal` skill. `testing` includes testing rules plus Playwright and E2E skills. `resilience` includes error-handling and structured-logging rules plus related skills.
+For example, the architecture capabilities install one selected architecture standard. `ddd-hexagonal` includes the DDD+Hexagonal standard modules plus the curated `clean-ddd-hexagonal` skill. `testing` includes testing rules plus Playwright and E2E skills. `resilience` includes error-handling and structured-logging rules plus related skills.
 
 The installer stores the selected capability ids in `.aircury/framework.config.json`. Re-run the installer or edit the profile and regenerate files if project standards need to change.
 
@@ -113,6 +115,8 @@ Default selected capabilities are:
 Additional automatic selection:
 
 - `language` is selected when British English is enabled.
+
+Architecture is selected interactively and is not part of the default non-interactive profile.
 
 ## How Agents Should Use The Installed Framework
 

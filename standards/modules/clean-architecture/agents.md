@@ -1,0 +1,1 @@
+- Use Clean Architecture when selected: dependencies point inward only through `frameworks/drivers -> interface adapters -> use cases -> entities`, and framework, UI, database, or vendor details must not leak into entities or use cases.
