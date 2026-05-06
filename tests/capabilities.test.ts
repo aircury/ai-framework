@@ -16,7 +16,6 @@ describe("capabilities", () => {
       "spec-kit",
       "airsync",
       "git",
-      "ddd-hexagonal",
       "decision-records",
       "testing",
       "code-style",
@@ -33,7 +32,6 @@ describe("capabilities", () => {
       "spec-kit",
       "airsync",
       "git",
-      "ddd-hexagonal",
       "decision-records",
       "testing",
       "code-style",
@@ -54,6 +52,8 @@ describe("capabilities", () => {
       "airsync",
       "git",
       "ddd-hexagonal",
+      "clean-architecture",
+      "layered-architecture",
       "testing",
       "frontend",
       "token-efficiency",
@@ -83,6 +83,26 @@ describe("capabilities", () => {
     ]);
   });
 
+  it("installs the DDD+Hexagonal skill only for DDD+Hexagonal", () => {
+    expect(
+      getCapabilitySkills(["ddd-hexagonal"], "local").map(
+        (skill) => skill.skillName,
+      ),
+    ).toContain("clean-ddd-hexagonal");
+
+    expect(
+      getCapabilitySkills(["clean-architecture"], "local").map(
+        (skill) => skill.skillName,
+      ),
+    ).not.toContain("clean-ddd-hexagonal");
+
+    expect(
+      getCapabilitySkills(["layered-architecture"], "local").map(
+        (skill) => skill.skillName,
+      ),
+    ).not.toContain("clean-ddd-hexagonal");
+  });
+
   it("keeps standards and skills under the selected capability", () => {
     expect(getCapabilityById("ddd-hexagonal")).toMatchObject({
       label: "DDD+Hexagonal",
@@ -97,6 +117,24 @@ describe("capabilities", () => {
         (skill) => skill.skillName,
       ),
     ).toEqual(["clean-ddd-hexagonal"]);
+
+    expect(getCapabilityById("clean-architecture")).toMatchObject({
+      label: "Clean Architecture",
+      category: "engineering",
+      modules: ["clean-architecture"],
+    });
+    expect(getCapabilityById("clean-architecture").framework).toContain(
+      "## Clean Architecture Rules",
+    );
+
+    expect(getCapabilityById("layered-architecture")).toMatchObject({
+      label: "Layered Architecture",
+      category: "engineering",
+      modules: ["layered-architecture"],
+    });
+    expect(getCapabilityById("layered-architecture").framework).toContain(
+      "## Layered Architecture Rules",
+    );
 
     expect(getCapabilityById("testing")).toMatchObject({
       modules: ["testing"],
@@ -155,5 +193,33 @@ describe("capabilities", () => {
       "git",
       "frontend",
     ]);
+  });
+
+  it("allows only one architecture capability at a time", () => {
+    expect(
+      resolveCapabilityIds([
+        "ddd-hexagonal",
+        "clean-architecture",
+        "layered-architecture",
+      ]),
+    ).toEqual(["layered-architecture"]);
+    expect(
+      resolveCapabilityIds(["clean-architecture", "ddd-hexagonal"]),
+    ).toEqual(["ddd-hexagonal"]);
+    expect(
+      resolveCapabilityIds(["layered-architecture", "clean-architecture"]),
+    ).toEqual(["clean-architecture"]);
+  });
+
+  it("does not preselect an architecture capability", () => {
+    const localDefaults = getInitialCapabilityIds("local");
+    const globalDefaults = getInitialCapabilityIds("global");
+
+    expect(localDefaults).not.toContain("ddd-hexagonal");
+    expect(localDefaults).not.toContain("clean-architecture");
+    expect(localDefaults).not.toContain("layered-architecture");
+    expect(globalDefaults).not.toContain("ddd-hexagonal");
+    expect(globalDefaults).not.toContain("clean-architecture");
+    expect(globalDefaults).not.toContain("layered-architecture");
   });
 });

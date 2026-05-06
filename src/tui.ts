@@ -33,6 +33,38 @@ function getCategoryTag(category: CapabilityCategory): string {
   }
 }
 
+const ARCHITECTURE_CAPABILITY_OPTIONS: {
+  value: CapabilityId;
+  label: string;
+  hint: string;
+}[] = [
+  {
+    value: "ddd-hexagonal",
+    label: "DDD+Hexagonal",
+    hint: "DDD, ports, and adapters",
+  },
+  {
+    value: "clean-architecture",
+    label: "Clean Architecture",
+    hint: "entities, use cases, adapters, and drivers",
+  },
+  {
+    value: "layered-architecture",
+    label: "Layered Architecture",
+    hint: "controllers, services, and repositories",
+  },
+];
+
+const ARCHITECTURE_CAPABILITY_IDS = ARCHITECTURE_CAPABILITY_OPTIONS.map(
+  (option) => option.value,
+);
+
+function isArchitectureCapabilityId(
+  capabilityId: CapabilityId,
+): capabilityId is (typeof ARCHITECTURE_CAPABILITY_IDS)[number] {
+  return ARCHITECTURE_CAPABILITY_IDS.includes(capabilityId);
+}
+
 export async function run(): Promise<void> {
   p.intro("Aircury AI Framework Installer");
 
@@ -105,20 +137,47 @@ export async function run(): Promise<void> {
   }
 
   const availableCapabilities = getCapabilities(scope);
-  const selectedCapabilities = await p.multiselect<CapabilityId>({
-    message: "Capabilities",
-    options: availableCapabilities.map((capability) => ({
-      value: capability.id,
-      label: `[${getCategoryTag(capability.category)}] ${capability.label}`,
-      hint: capability.hint,
-    })),
-    initialValues: getInitialCapabilityIds(scope, {
-      britishEnglish: enforceBritishEnglish,
-    }),
-    required: false,
+  const initialCapabilityIds = getInitialCapabilityIds(scope, {
+    britishEnglish: enforceBritishEnglish,
+  });
+  const availableArchitectureCapabilities =
+    ARCHITECTURE_CAPABILITY_OPTIONS.filter((option) =>
+      availableCapabilities.some(
+        (capability) => capability.id === option.value,
+      ),
+    );
+  const selectedArchitecture = await p.select<CapabilityId>({
+    message: "Architecture capability (required)",
+    options: availableArchitectureCapabilities,
   });
 
-  if (p.isCancel(selectedCapabilities)) return p.cancel("Cancelled.");
+  if (p.isCancel(selectedArchitecture)) return p.cancel("Cancelled.");
+
+  const availableNonArchitectureCapabilities = availableCapabilities.filter(
+    (capability) => !isArchitectureCapabilityId(capability.id),
+  );
+  const selectedNonArchitectureCapabilities = await p.multiselect<CapabilityId>(
+    {
+      message: "Other capabilities",
+      options: availableNonArchitectureCapabilities.map((capability) => ({
+        value: capability.id,
+        label: `[${getCategoryTag(capability.category)}] ${capability.label}`,
+        hint: capability.hint,
+      })),
+      initialValues: initialCapabilityIds.filter(
+        (capabilityId) => !isArchitectureCapabilityId(capabilityId),
+      ),
+      required: false,
+    },
+  );
+
+  if (p.isCancel(selectedNonArchitectureCapabilities))
+    return p.cancel("Cancelled.");
+
+  const selectedCapabilities = [
+    selectedArchitecture,
+    ...selectedNonArchitectureCapabilities,
+  ];
 
   const resolvedCapabilities = resolveCapabilityIds(
     enforceBritishEnglish && !selectedCapabilities.includes("language")

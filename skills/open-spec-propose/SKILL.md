@@ -51,7 +51,7 @@ When ready to implement, use the `open-spec-apply` skill
    Artifact rules:
 
    - Keep them technology-aware if helpful for delivery.
-   - Keep them aligned with `AGENTS.md`, TDD, Hexagonal Architecture, and DDD.
+   - Keep them aligned with `AGENTS.md` and the enabled capability docs.
    - Use `specs/features/` as the canonical behavior baseline.
    - If the change modifies existing behavior, reference the affected canonical specs.
    - If the user already gave enough detail, write the artifacts directly instead of asking more questions.

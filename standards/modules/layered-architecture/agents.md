@@ -1,0 +1,1 @@
+- Use Layered Architecture when selected: keep the flow `controller/route -> service -> repository -> database`, do not let controllers bypass services for business behavior, and avoid Clean/Hexagonal-style abstractions unless there is a concrete need.
