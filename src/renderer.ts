@@ -5,13 +5,22 @@ import agentsTemplateSource from "../templates/agents.md.hbs" with {
 import frameworkTemplateSource from "../templates/framework.md.hbs" with {
   type: "text",
 };
-import type { CapabilityInputId, CapabilityManifest } from "./capabilities";
-import { getSelectedCapabilities } from "./capabilities";
+import type { CapabilityId, CapabilityInputId } from "./capabilities";
+import {
+  getCapabilityDetailPath,
+  getSelectedCapabilities,
+  hasCapabilityDetail,
+} from "./capabilities";
+
+interface InstalledCapabilityView {
+  id: CapabilityId;
+  description: string;
+  detailPath?: string;
+}
 
 interface RendererViewModel {
-  installedCapabilities: Pick<CapabilityManifest, "id" | "description">[];
-  frameworkSections: string[];
-  agentRules: string[];
+  installedCapabilities: InstalledCapabilityView[];
+  includesCapabilityDetails: boolean;
   includesDecisionRecords: boolean;
   includesTesting: boolean;
   includesArchitecture: boolean;
@@ -31,10 +40,6 @@ const renderAgentsTemplate = Handlebars.compile(agentsTemplateSource, {
   noEscape: true,
 });
 
-function isString(value: unknown): value is string {
-  return typeof value === "string";
-}
-
 function createViewModel(
   capabilityIds?: CapabilityInputId[],
   options?: { britishEnglish?: boolean },
@@ -48,16 +53,14 @@ function createViewModel(
   );
 
   return {
-    installedCapabilities: selectedCapabilities.map(({ id, description }) => ({
-      id,
-      description,
+    installedCapabilities: selectedCapabilities.map((capability) => ({
+      id: capability.id,
+      description: capability.description,
+      detailPath: hasCapabilityDetail(capability)
+        ? getCapabilityDetailPath(capability.id)
+        : undefined,
     })),
-    frameworkSections: selectedCapabilities
-      .map((capability) => capability.framework)
-      .filter(isString),
-    agentRules: selectedCapabilities
-      .map((capability) => capability.agents)
-      .filter(isString),
+    includesCapabilityDetails: selectedCapabilities.some(hasCapabilityDetail),
     includesDecisionRecords: selectedIds.has("decision-records"),
     includesTesting: selectedIds.has("testing"),
     includesArchitecture: selectedIds.has("ddd-hexagonal"),

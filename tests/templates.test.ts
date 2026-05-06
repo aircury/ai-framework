@@ -25,7 +25,14 @@ describe("templates", () => {
     it("matches the generated default profile", () => {
       expect(generateFramework()).toBe(FRAMEWORK);
       expect(renderFramework()).toBe(FRAMEWORK);
-      expect(FRAMEWORK).toContain("## Token Efficiency");
+      expect(FRAMEWORK).toContain(
+        "docs/aircury/capabilities/token-efficiency.md",
+      );
+      expect(FRAMEWORK).not.toContain("## Token Efficiency");
+    });
+
+    it("keeps generated framework materially smaller than the old inline version", () => {
+      expect(FRAMEWORK.trimEnd().split("\n").length).toBeLessThan(250);
     });
 
     it("does not require commits as part of completion", () => {
@@ -85,34 +92,37 @@ describe("templates", () => {
   describe("capability-aware generation", () => {
     it("adds ADR guidance only when the ADR capability is enabled", () => {
       expect(generateFramework(["decision-records"])).toContain(
-        "## Architecture Decision Records",
+        "docs/aircury/capabilities/decision-records.md",
       );
       expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/decision-records.md",
+      );
+      expect(generateFramework(["decision-records"])).not.toContain(
         "## Architecture Decision Records",
       );
     });
 
-    it("keeps one canonical ADR dual-write section when ADRs and Airsync are enabled", () => {
+    it("keeps ADR dual-write details out of the compact framework", () => {
       const framework = generateFramework(["decision-records", "airsync"]);
-      expect(framework).toContain("### ADR Dual-Write Rule");
-      expect(framework).toContain(
-        "If Airsync is enabled, follow the Airsync module's canonical ADR dual-write rule when an ADR is created or superseded.",
-      );
       expect(framework).toContain(
         "If an ADR is created or superseded, propose it to Airsync when Airsync is enabled.",
       );
-      expect(framework.match(/### ADR Dual-Write Rule/g)).toHaveLength(1);
-      expect(framework.match(/- Use `memory_kind: "note"`/g)).toHaveLength(1);
-      expect(framework.match(/- Use `scope: "team"`/g)).toHaveLength(1);
-      expect(framework.match(/- Include `source_refs`/g)).toHaveLength(1);
+      expect(framework).not.toContain("### ADR Dual-Write Rule");
+      expect(framework).not.toContain("memory_kind");
+      expect(framework).not.toContain("source_refs");
       expect(framework).not.toContain(
         "Every ADR created or superseded MUST also be proposed to Airsync",
       );
     });
 
     it("adds testing guidance only when the testing capability is enabled", () => {
-      expect(generateFramework(["testing"])).toContain("## TDD Workflow");
-      expect(generateFramework([])).not.toContain("## TDD Workflow");
+      expect(generateFramework(["testing"])).toContain(
+        "docs/aircury/capabilities/testing.md",
+      );
+      expect(generateFramework(["testing"])).not.toContain("## TDD Workflow");
+      expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/testing.md",
+      );
     });
 
     it("adds architecture rules only when DDD+Hexagonal is enabled", () => {
@@ -120,9 +130,12 @@ describe("templates", () => {
         "## Non-Negotiable Architecture Rules",
       );
       expect(generateFramework(["architecture"])).toContain(
-        "## Non-Negotiable Architecture Rules",
+        "docs/aircury/capabilities/architecture.md",
       );
       expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/architecture.md",
+      );
+      expect(generateFramework(["architecture"])).not.toContain(
         "## Non-Negotiable Architecture Rules",
       );
     });
@@ -134,10 +147,13 @@ describe("templates", () => {
 
     it("adds design-system search guidance when the frontend module is enabled", () => {
       expect(generateFramework(["frontend"])).toContain(
-        "extracted from the existing frontend through `frontend-ui-workflow`",
+        "docs/aircury/capabilities/frontend.md",
       );
       expect(generateFramework(["frontend"])).toContain(
-        "Use `frontend-ui-workflow` as the single frontend skill",
+        "extracted from the existing frontend through `frontend-ui-workflow`",
+      );
+      expect(generateFramework(["frontend"])).not.toContain(
+        "Use the `frontend-style-extractor` skill on the target frontend",
       );
     });
 
@@ -163,8 +179,13 @@ describe("templates", () => {
     });
 
     it("adds code style header to FRAMEWORK.md when enabled", () => {
-      expect(generateFramework(["code-style"])).toContain("## Code Style");
-      expect(generateFramework([])).not.toContain("## Code Style");
+      expect(generateFramework(["code-style"])).toContain(
+        "docs/aircury/capabilities/code-style.md",
+      );
+      expect(generateFramework(["code-style"])).not.toContain("## Code Style");
+      expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/code-style.md",
+      );
     });
 
     it("adds British English guidance when enabled", () => {
@@ -181,13 +202,13 @@ describe("templates", () => {
 
     it("adds token-efficiency guidance only when the capability is enabled", () => {
       expect(generateFramework(["token-efficiency"])).toContain(
-        "## Token Efficiency",
-      );
-      expect(generateFramework(["token-efficiency"])).toContain(
-        "Load and apply the `caveman` skill in `full` mode",
+        "docs/aircury/capabilities/token-efficiency.md",
       );
       expect(generateFramework([])).not.toContain("## Token Efficiency");
       expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/token-efficiency.md",
+      );
+      expect(generateFramework(["token-efficiency"])).not.toContain(
         "Load and apply the `caveman` skill in `full` mode",
       );
     });
