@@ -119,9 +119,19 @@ describe("capabilities", () => {
       getCapabilityFiles(["frontend", "decision-records"], "local"),
     ).toEqual([
       {
+        path: "docs/aircury/capabilities/decision-records.md",
+        content: expect.any(String),
+        description: "ADRs capability rules",
+      },
+      {
         path: "specs/decisions/README.md",
         content: expect.any(String),
         description: "ADR starter guide",
+      },
+      {
+        path: "docs/aircury/capabilities/frontend.md",
+        content: expect.any(String),
+        description: "Frontend capability rules",
       },
       {
         path: "specs/ui/README.md",
@@ -142,6 +152,39 @@ describe("capabilities", () => {
     ).toEqual({
       version: 2,
       capabilities: ["frontend", "language"],
+      language: {
+        britishEnglish: true,
+      },
+    });
+  });
+
+  it("migrates version 1 modules to version 2 capabilities", () => {
+    expect(
+      createCapabilityProfile({
+        version: 1,
+        modules: ["decision-records", "tdd", "hexagonal-architecture", "ddd"],
+      }),
+    ).toEqual({
+      version: 2,
+      capabilities: ["architecture", "decision-records", "testing"],
+      language: {
+        britishEnglish: false,
+      },
+    });
+  });
+
+  it("migrates legacy operational modules to the resilience capability", () => {
+    expect(
+      createCapabilityProfile({
+        version: 1,
+        modules: ["airsync-memory", "error-handling", "structured-logging"],
+        language: {
+          britishEnglish: true,
+        },
+      }),
+    ).toEqual({
+      version: 2,
+      capabilities: ["airsync", "resilience", "language"],
       language: {
         britishEnglish: true,
       },
