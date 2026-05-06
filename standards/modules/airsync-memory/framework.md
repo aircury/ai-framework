@@ -16,7 +16,7 @@ Capture knowledge that passes the **collaboration test**: "Would a developer on 
 
 **DO capture:**
 
-- ADRs (dual-write from `specs/decisions/` as `note` with `scope: "team"`)
+- ADRs that require dual-write from `specs/decisions/`
 - Validated patterns and approaches that work across projects
 - Repeated pitfalls and how to avoid them
 - Team-wide conventions and standards
