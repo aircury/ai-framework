@@ -502,7 +502,22 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
       {
         source: "aircury/ai-framework",
+        skillName: "frontend-style-extractor",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
+        skillName: "frontend-clean-implementation",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
         skillName: "frontend-ui-generator",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "https://github.com/vercel-labs/agent-skills",
+        skillName: "vercel-react-best-practices",
         scopes: ["local", "global"],
       },
     ],
