@@ -1,4 +1,7 @@
 {
-  "version": 1,
-  "modules": ["decision-records", "tdd", "ddd-hexagonal", "ddd"]
+  "version": 2,
+  "capabilities": ["ddd-hexagonal", "decision-records", "testing"],
+  "language": {
+    "britishEnglish": false
+  }
 }
