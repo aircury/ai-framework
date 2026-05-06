@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { getInitialCapabilityIds } from "../src/capabilities";
 import {
   checkConflicts,
+  getAircurySkillsSource,
   getGlobalCommands,
   getGlobalFiles,
   getLocalCommands,
@@ -33,6 +34,9 @@ function getCommandBySource(
   }
   return command;
 }
+
+const aircurySkillsSource = getAircurySkillsSource();
+const aircurySkillsDescription = `Install selected skills from ${aircurySkillsSource}`;
 
 describe("getLocalFiles", () => {
   it("always includes the core framework files", () => {
@@ -114,11 +118,22 @@ describe("getLocalFiles", () => {
     expect(paths).toContain("specs/decisions/README.md");
   });
 
+  it("requires searching the existing design system in the frontend workflow", () => {
+    const files = getLocalFiles([], ["frontend"]);
+    const workflow = getFileByPath(files, "specs/ui/frontend-workflow.md");
+    expect(workflow.content).toContain(
+      "Run `frontend-style-extractor` on the target frontend",
+    );
+  });
+
   it("adds frontend-specific check to FRAMEWORK.md when enabled", () => {
     const files = getLocalFiles([], ["frontend"]);
     const framework = getFileByPath(files, "FRAMEWORK.md");
     expect(framework.content).toContain(
       "Visual modifications align with the project design system tokens",
+    );
+    expect(framework?.content).toContain(
+      "extracted from the existing frontend with `frontend-style-extractor`",
     );
   });
 
@@ -126,6 +141,7 @@ describe("getLocalFiles", () => {
     const files = getLocalFiles([], ["frontend"]);
     const framework = getFileByPath(files, "FRAMEWORK.md");
     expect(framework.content).toContain("frontend-experience-extractor");
+    expect(framework.content).toContain("frontend-style-extractor");
   });
 
   it("includes terse-response guidance in FRAMEWORK.md when token-efficiency is enabled", () => {
@@ -149,13 +165,17 @@ describe("getLocalCommands", () => {
   it("installs the skills derived from the default capabilities for universal", () => {
     const commands = getLocalCommands([], getInitialCapabilityIds("local"));
 
-    expect(commands).toHaveLength(6);
-    const aircury = getCommandBySource(commands, "aircury/ai-framework");
+    expect(commands).toHaveLength(7);
+    const aircury = getCommandBySource(commands, aircurySkillsSource);
     expect(aircury.args).toContain("open-spec-propose");
     expect(aircury.args).toContain("spec-kit-specify");
     expect(aircury.args).toContain("airsync");
     expect(aircury.args).toContain("commit-changes");
     expect(aircury.args).toContain("frontend-layout-extractor");
+    expect(aircury.args).toContain("frontend-experience-extractor");
+    expect(aircury.args).toContain("frontend-style-extractor");
+    expect(aircury.args).toContain("frontend-clean-implementation");
+    expect(aircury.args).toContain("frontend-ui-generator");
     expect(aircury.args).toContain("specs-extractor");
     expect(
       getCommandBySource(
@@ -183,6 +203,12 @@ describe("getLocalCommands", () => {
     expect(
       getCommandBySource(commands, "https://github.com/wshobson/agents").args,
     ).toContain("e2e-testing-patterns");
+    expect(
+      getCommandBySource(
+        commands,
+        "https://github.com/vercel-labs/agent-skills",
+      ).args,
+    ).toContain("vercel-react-best-practices");
   });
 
   it("installs multiple selected agents in each derived command", () => {
@@ -192,7 +218,7 @@ describe("getLocalCommands", () => {
       "-y",
       "skills",
       "add",
-      "aircury/ai-framework",
+      aircurySkillsSource,
       "--skill",
       "commit-changes",
       "-a",
@@ -224,11 +250,19 @@ describe("getLocalCommands", () => {
   it("installs capability-required skills without a separate skill selection", () => {
     const commands = getLocalCommands([], ["frontend", "token-efficiency"]);
 
-    expect(commands).toHaveLength(2);
+    expect(commands).toHaveLength(3);
     expect(commands[0].args).toContain("frontend-layout-extractor");
     expect(commands[0].args).toContain("frontend-experience-extractor");
+    expect(commands[0].args).toContain("frontend-style-extractor");
+    expect(commands[0].args).toContain("frontend-clean-implementation");
     expect(commands[0].args).toContain("frontend-ui-generator");
     expect(commands[1].args).toContain("caveman");
+    expect(
+      getCommandBySource(
+        commands,
+        "https://github.com/vercel-labs/agent-skills",
+      ).args,
+    ).toContain("vercel-react-best-practices");
   });
 
   it("installs the specs skills from the Aircury source", () => {
@@ -237,16 +271,65 @@ describe("getLocalCommands", () => {
     expect(commands[0].args).toContain("specs-extractor");
     expect(commands[0].args).toContain("specs-interpreter");
   });
+
+  it("installs the frontend skills from the Aircury source", () => {
+    const commands = getLocalCommands([], ["frontend"]);
+    expect(commands).toHaveLength(2);
+    expect(getCommandBySource(commands, aircurySkillsSource)).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        aircurySkillsSource,
+        "--skill",
+        "frontend-layout-extractor",
+        "--skill",
+        "frontend-experience-extractor",
+        "--skill",
+        "frontend-style-extractor",
+        "--skill",
+        "frontend-clean-implementation",
+        "--skill",
+        "frontend-ui-generator",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description: aircurySkillsDescription,
+    });
+    expect(
+      getCommandBySource(
+        commands,
+        "https://github.com/vercel-labs/agent-skills",
+      ),
+    ).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "https://github.com/vercel-labs/agent-skills",
+        "--skill",
+        "vercel-react-best-practices",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description:
+        "Install selected skills from https://github.com/vercel-labs/agent-skills",
+    });
+  });
 });
 
 describe("getGlobalCommands", () => {
   it("installs global skills for universal from selected capabilities", () => {
     const commands = getGlobalCommands([], ["git"]);
     expect(commands).toHaveLength(1);
-    expect(getCommandBySource(commands, "aircury/ai-framework").args).toContain(
+    expect(getCommandBySource(commands, aircurySkillsSource).args).toContain(
       "-g",
     );
-    expect(getCommandBySource(commands, "aircury/ai-framework").args).toContain(
+    expect(getCommandBySource(commands, aircurySkillsSource).args).toContain(
       "commit-changes",
     );
   });
@@ -274,6 +357,57 @@ describe("runCommand", () => {
 
     expect(result.success).toBe(false);
     expect(result.stderr).toContain("aircury-missing-command");
+  });
+
+  it("installs the frontend skills globally from the Aircury source", () => {
+    const commands = getGlobalCommands([], ["frontend"]);
+    expect(commands).toHaveLength(2);
+    expect(getCommandBySource(commands, aircurySkillsSource)).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        aircurySkillsSource,
+        "--skill",
+        "frontend-layout-extractor",
+        "--skill",
+        "frontend-experience-extractor",
+        "--skill",
+        "frontend-style-extractor",
+        "--skill",
+        "frontend-clean-implementation",
+        "--skill",
+        "frontend-ui-generator",
+        "-a",
+        "universal",
+        "-g",
+        "-y",
+      ],
+      description: aircurySkillsDescription,
+    });
+    expect(
+      getCommandBySource(
+        commands,
+        "https://github.com/vercel-labs/agent-skills",
+      ),
+    ).toEqual({
+      command: "npx",
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "https://github.com/vercel-labs/agent-skills",
+        "--skill",
+        "vercel-react-best-practices",
+        "-a",
+        "universal",
+        "-g",
+        "-y",
+      ],
+      description:
+        "Install selected skills from https://github.com/vercel-labs/agent-skills",
+    });
   });
 });
 

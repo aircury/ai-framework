@@ -78,7 +78,10 @@ describe("capabilities", () => {
       "clean-ddd-hexagonal",
       "frontend-layout-extractor",
       "frontend-experience-extractor",
+      "frontend-style-extractor",
+      "frontend-clean-implementation",
       "frontend-ui-generator",
+      "vercel-react-best-practices",
       "specs-extractor",
       "specs-interpreter",
     ]);

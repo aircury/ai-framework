@@ -98,6 +98,36 @@ describe("templates", () => {
       expect(generateAgents(["code-style"])).toBe(generateAgents([]));
     });
 
+    it("adds design-system search guidance when the frontend module is enabled", () => {
+      expect(generateFramework(["frontend"])).toContain(
+        "extracted from the existing frontend with `frontend-style-extractor`",
+      );
+      expect(generateFramework(["frontend"])).toContain(
+        "Use the `frontend-style-extractor` skill on the target frontend",
+      );
+    });
+
+    it("keeps AGENTS.md stable across non-token-efficiency module selections", () => {
+      expect(generateAgents(["decision-records"])).toBe(
+        generateAgents(["code-style"]),
+      );
+      expect(generateAgents(["decision-records", "frontend"])).toBe(
+        generateAgents(["code-style", "frontend"]),
+      );
+    });
+
+    it("adds token-efficiency guidance to AGENTS.md only when the module is enabled", () => {
+      expect(generateAgents(["token-efficiency"])).toContain(
+        "Start every new session in `caveman full`",
+      );
+      expect(generateAgents()).toContain(
+        "Start every new session in `caveman full`",
+      );
+      expect(generateAgents(["decision-records"])).not.toContain(
+        "Start every new session in `caveman full`",
+      );
+    });
+
     it("adds code style header to FRAMEWORK.md when enabled", () => {
       expect(generateFramework(["code-style"])).toContain("## Code Style");
       expect(generateFramework([])).not.toContain("## Code Style");
