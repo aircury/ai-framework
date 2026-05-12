@@ -483,8 +483,7 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
     id: "frontend",
     label: "Frontend",
     hint: "design tokens, component tree, style guide, and frontend skills",
-    description:
-      "Frontend standards with layout, experience, and UI generation skills",
+    description: "Frontend standards with a self-contained UI workflow skill",
     category: "frontend",
     defaultSelected: true,
     scopes: ["local", "global"],
@@ -492,27 +491,7 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
     skills: [
       {
         source: "aircury/ai-framework",
-        skillName: "frontend-layout-extractor",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "frontend-experience-extractor",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "frontend-style-extractor",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "frontend-clean-implementation",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "frontend-ui-generator",
+        skillName: "frontend-ui-workflow",
         scopes: ["local", "global"],
       },
       {

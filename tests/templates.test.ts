@@ -100,10 +100,10 @@ describe("templates", () => {
 
     it("adds design-system search guidance when the frontend module is enabled", () => {
       expect(generateFramework(["frontend"])).toContain(
-        "extracted from the existing frontend with `frontend-style-extractor`",
+        "extracted from the existing frontend through `frontend-ui-workflow`",
       );
       expect(generateFramework(["frontend"])).toContain(
-        "Use the `frontend-style-extractor` skill on the target frontend",
+        "Use `frontend-ui-workflow` as the single frontend skill",
       );
     });
 

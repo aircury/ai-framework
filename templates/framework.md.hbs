@@ -172,7 +172,7 @@ A change is not done unless all of the following are true:
 - The code style is consistent with the project's configured tools.
 {{/if}}
 {{#if includesFrontend}}
-- Visual modifications align with the project design system tokens in `specs/ui/style-guide.md`, extracted from the existing frontend with `frontend-style-extractor`.
+- Visual modifications align with the project design system tokens in `specs/ui/style-guide.md`, extracted from the existing frontend through `frontend-ui-workflow`.
 - New UI and substantial frontend changes follow `specs/features/<feature>/implementation-plan.md` or an equivalent reviewed structure plan.
 - Frontend code is shippable without a cleanup refactor: component responsibilities are clear, state ownership is simple, conditional rendering is readable, local primitives are reused, and unnecessary abstractions are absent.
 {{/if}}

@@ -133,15 +133,13 @@ Redesign the user profile card. Extract the current layout and experience, updat
 
 Recommended skills:
 
-- `frontend-layout-extractor`
-- `frontend-experience-extractor`
-- `frontend-style-extractor`
-- `frontend-ui-generator`
+- `frontend-ui-workflow`
 
 Expected artifacts:
 
 - `specs/features/<feature>/layout.md`
 - `specs/features/<feature>/experience.md`
+- `specs/features/<feature>/implementation-plan.md`
 - `specs/ui/style-guide.md`
 
 ### Restyle An Existing App Into A New Design System
@@ -154,22 +152,21 @@ Restyle this existing screen using the design system from the current app. Extra
 
 Recommended skills:
 
-- `frontend-layout-extractor`
-- `frontend-experience-extractor`
-- `frontend-style-extractor`
-- `frontend-ui-generator`
+- `frontend-ui-workflow`
 
 Expected flow:
 
-1. Extract `layout.md` from the existing screen to capture structure, hierarchy, and content slots.
-2. Extract `experience.md` from the existing screen to capture behavior, states, flows, and micro-interactions.
-3. Extract or update `specs/ui/style-guide.md` from the current project with `frontend-style-extractor` so the target design system is explicit.
-4. Implement the restyled UI with `frontend-ui-generator`, using the extracted `layout.md` and `experience.md` as behavioral constraints and `specs/ui/style-guide.md` as the visual source of truth.
+1. Use `frontend-ui-workflow` to extract `layout.md` from the existing screen to capture structure, hierarchy, and content slots.
+2. Use `frontend-ui-workflow` to extract `experience.md` from the existing screen to capture behavior, states, flows, and micro-interactions.
+3. Use `frontend-ui-workflow` to extract or update `specs/ui/style-guide.md` from the current project so the target design system is explicit.
+4. Use `frontend-ui-workflow` to produce `implementation-plan.md` before writing substantial UI code.
+5. Use `frontend-ui-workflow` to implement the restyled UI, using `layout.md`, `experience.md`, `implementation-plan.md`, and `specs/ui/style-guide.md` as sources of truth.
 
 Expected artifacts:
 
 - `specs/features/<feature>/layout.md` from the existing implementation.
 - `specs/features/<feature>/experience.md` from the existing implementation.
+- `specs/features/<feature>/implementation-plan.md` for clean implementation boundaries.
 - `specs/ui/style-guide.md` from the target project.
 - Restyled UI code that preserves existing behavior but follows the current design system.
 
