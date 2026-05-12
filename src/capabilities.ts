@@ -132,9 +132,6 @@ export type CapabilityId =
   | "specs"
   | "language";
 
-export type LegacyCapabilityId = "architecture";
-export type CapabilityInputId = CapabilityId | LegacyCapabilityId;
-
 export interface CapabilitySkill {
   source: string;
   skillName: string;
@@ -167,16 +164,6 @@ export interface CapabilityProfile {
   capabilities: CapabilityId[];
   language: {
     britishEnglish: boolean;
-  };
-}
-
-type LegacyModuleId = StandardModuleId | "hexagonal-architecture" | "tdd";
-
-export interface LegacyFrameworkConfig {
-  version?: 1;
-  modules: LegacyModuleId[];
-  language?: {
-    britishEnglish?: boolean;
   };
 }
 
@@ -328,10 +315,7 @@ function createCapabilityDetailFile(
 ): CapabilityFile | null {
   if (!hasCapabilityDetail(capability)) return null;
 
-  const sections = [
-    `# ${capability.label} Capability`,
-    capability.description,
-  ];
+  const sections = [`# ${capability.label} Capability`, capability.description];
 
   if (capability.framework) {
     sections.push("## Framework Rules", capability.framework.trim());
@@ -643,20 +627,6 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "language",
 ];
 
-const LEGACY_MODULE_CAPABILITY_MAP: Record<LegacyModuleId, CapabilityId> = {
-  "decision-records": "decision-records",
-  tdd: "testing",
-  testing: "testing",
-  "hexagonal-architecture": "ddd-hexagonal",
-  ddd: "ddd-hexagonal",
-  "code-style": "code-style",
-  "airsync-memory": "airsync",
-  "error-handling": "resilience",
-  "structured-logging": "resilience",
-  frontend: "frontend",
-  "token-efficiency": "token-efficiency",
-};
-
 export const CAPABILITIES: CapabilityManifest[] = CAPABILITY_ORDER.map(
   (id) => CAPABILITY_REGISTRY[id],
 );
@@ -666,27 +636,21 @@ export const DEFAULT_LOCAL_CAPABILITY_IDS: CapabilityId[] = CAPABILITIES.filter(
     capability.scopes.includes("local") && capability.defaultSelected,
 ).map((capability) => capability.id);
 
-function normalizeCapabilityId(capabilityId: CapabilityInputId): CapabilityId {
-  if (capabilityId === "architecture") return "ddd-hexagonal";
-  return capabilityId;
-}
-
 export function getCapabilities(scope: CapabilityScope): CapabilityManifest[] {
   return CAPABILITIES.filter((capability) => capability.scopes.includes(scope));
 }
 
 export function getCapabilityById(
-  capabilityId: CapabilityInputId,
+  capabilityId: CapabilityId,
 ): CapabilityManifest {
-  return CAPABILITY_REGISTRY[normalizeCapabilityId(capabilityId)];
+  return CAPABILITY_REGISTRY[capabilityId];
 }
 
 export function resolveCapabilityIds(
-  capabilityIds: CapabilityInputId[] = DEFAULT_LOCAL_CAPABILITY_IDS,
+  capabilityIds: CapabilityId[] = DEFAULT_LOCAL_CAPABILITY_IDS,
 ): CapabilityId[] {
   const resolved = new Set<CapabilityId>();
-  const visit = (capabilityId: CapabilityInputId) => {
-    capabilityId = normalizeCapabilityId(capabilityId);
+  const visit = (capabilityId: CapabilityId) => {
     if (resolved.has(capabilityId)) return;
     resolved.add(capabilityId);
   };
@@ -698,38 +662,12 @@ export function resolveCapabilityIds(
   return CAPABILITY_ORDER.filter((capabilityId) => resolved.has(capabilityId));
 }
 
-function isLegacyFrameworkConfig(
-  value: CapabilityId[] | LegacyFrameworkConfig | undefined,
-): value is LegacyFrameworkConfig {
-  return !!value && !Array.isArray(value) && Array.isArray(value.modules);
-}
-
-function resolveLegacyModuleCapabilities(
-  moduleIds: LegacyModuleId[],
-): CapabilityId[] {
-  const selected = new Set<CapabilityId>();
-
-  for (const moduleId of moduleIds) {
-    selected.add(LEGACY_MODULE_CAPABILITY_MAP[moduleId]);
-  }
-
-  return CAPABILITY_ORDER.filter((capabilityId) => selected.has(capabilityId));
-}
-
 export function createCapabilityProfile(
-  capabilityIds?: CapabilityInputId[] | LegacyFrameworkConfig,
+  capabilityIds?: CapabilityId[],
   options?: { britishEnglish?: boolean },
 ): CapabilityProfile {
-  const britishEnglish =
-    options?.britishEnglish ??
-    (isLegacyFrameworkConfig(capabilityIds)
-      ? (capabilityIds.language?.britishEnglish ?? false)
-      : false);
-  const selected = new Set(
-    isLegacyFrameworkConfig(capabilityIds)
-      ? resolveLegacyModuleCapabilities(capabilityIds.modules)
-      : resolveCapabilityIds(capabilityIds),
-  );
+  const britishEnglish = options?.britishEnglish ?? false;
+  const selected = new Set(resolveCapabilityIds(capabilityIds));
 
   if (britishEnglish) {
     selected.add("language");
@@ -747,7 +685,7 @@ export function createCapabilityProfile(
 }
 
 export function getSelectedCapabilities(
-  capabilityIds?: CapabilityInputId[],
+  capabilityIds?: CapabilityId[],
   scope?: CapabilityScope,
 ): CapabilityManifest[] {
   const selected = resolveCapabilityIds(capabilityIds);
@@ -778,7 +716,7 @@ export function getInitialCapabilityIds(
 }
 
 export function getCapabilityFiles(
-  capabilityIds: CapabilityInputId[],
+  capabilityIds: CapabilityId[],
   scope: CapabilityScope,
 ): CapabilityFile[] {
   const files: CapabilityFile[] = [];
@@ -802,7 +740,7 @@ export function getCapabilityFiles(
 }
 
 export function getCapabilitySkills(
-  capabilityIds: CapabilityInputId[],
+  capabilityIds: CapabilityId[],
   scope: CapabilityScope,
 ): CapabilitySkill[] {
   const skills: CapabilitySkill[] = [];
