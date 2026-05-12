@@ -49,14 +49,15 @@ describe("getLocalFiles", () => {
   });
 
   it("generates detailed capability docs for selected capabilities", () => {
-    const files = getLocalFiles([], ["testing", "architecture"]);
+    const files = getLocalFiles([], ["testing", "ddd-hexagonal"]);
     const paths = files.map((file) => file.path);
     expect(paths).toContain("docs/aircury/capabilities/testing.md");
-    expect(paths).toContain("docs/aircury/capabilities/architecture.md");
-    expect(getFileByPath(files, "docs/aircury/capabilities/testing.md").content)
-      .toContain("## TDD Workflow");
+    expect(paths).toContain("docs/aircury/capabilities/ddd-hexagonal.md");
     expect(
-      getFileByPath(files, "docs/aircury/capabilities/architecture.md")
+      getFileByPath(files, "docs/aircury/capabilities/testing.md").content,
+    ).toContain("## TDD Workflow");
+    expect(
+      getFileByPath(files, "docs/aircury/capabilities/ddd-hexagonal.md")
         .content,
     ).toContain("## Non-Negotiable Architecture Rules");
   });
@@ -128,7 +129,7 @@ describe("getLocalFiles", () => {
     const framework = getFileByPath(files, "FRAMEWORK.md");
     expect(framework.content).toContain("docs/aircury/capabilities/testing.md");
     expect(framework.content).toContain(
-      "docs/aircury/capabilities/architecture.md",
+      "docs/aircury/capabilities/ddd-hexagonal.md",
     );
     expect(framework.content).toContain(
       "docs/aircury/capabilities/decision-records.md",
