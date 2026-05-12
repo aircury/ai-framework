@@ -1,0 +1,7 @@
+{
+  "id": "ddd-hexagonal",
+  "label": "DDD+Hexagonal",
+  "hint": "domain modelling plus ports and adapters around the core",
+  "description": "Requires DDD boundaries, inward dependencies, and adapters around the application and domain core.",
+  "defaultEnabled": true
+}

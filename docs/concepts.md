@@ -27,7 +27,7 @@ Aircury installs a project operating system for AI-assisted delivery:
 - **One source of truth**: observable behavior is captured in `specs/features/`.
 - **Workflow routing**: agents recommend the lightest safe mode instead of forcing every task through the same process.
 - **Project-scoped rules**: generated `FRAMEWORK.md` and `AGENTS.md` make standards explicit for future AI sessions.
-- **Composable capabilities**: teams can enable ADRs, DDD, hexagonal architecture, testing, frontend, logging, error handling, memory, token efficiency, and workflow skills independently.
+- **Composable capabilities**: teams can enable ADRs, DDD+Hexagonal, testing, frontend, logging, error handling, memory, token efficiency, and workflow skills independently.
 - **Skill wiring**: selected capabilities install curated skills through `npx skills add`, so workflows are executable rather than only documented.
 - **Reduced intention debt**: ADRs, specs, and optional Airsync memory preserve why decisions were made, not just what code changed.
 
@@ -57,7 +57,7 @@ Examples:
 
 - `frontend` adds frontend rules, writes UI spec starters, and installs frontend extraction/generation skills.
 - `token-efficiency` adds terse-response rules and installs the Caveman skill.
-- `architecture` adds DDD and hexagonal architecture rules and installs curated architecture skills.
+- `ddd-hexagonal` adds DDD+Hexagonal rules and installs curated architecture skills.
 - `testing` adds testing rules and installs curated Playwright and E2E testing skills.
 - `resilience` adds error-handling and structured-logging rules and installs related recovery/logging skills.
 - `specs` installs skills for extracting and interpreting canonical specs.
