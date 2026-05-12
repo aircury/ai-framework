@@ -5,7 +5,7 @@ import agentsTemplateSource from "../templates/agents.md.hbs" with {
 import frameworkTemplateSource from "../templates/framework.md.hbs" with {
   type: "text",
 };
-import type { CapabilityId, CapabilityInputId } from "./capabilities";
+import type { CapabilityId } from "./capabilities";
 import {
   getCapabilityDetailPath,
   getSelectedCapabilities,
@@ -41,7 +41,7 @@ const renderAgentsTemplate = Handlebars.compile(agentsTemplateSource, {
 });
 
 function createViewModel(
-  capabilityIds?: CapabilityInputId[],
+  capabilityIds?: CapabilityId[],
   options?: { britishEnglish?: boolean },
 ): RendererViewModel {
   const selectedCapabilities = getSelectedCapabilities(capabilityIds, "local");
@@ -79,7 +79,7 @@ function trimRenderedDocument(content: string): string {
 }
 
 export function renderFramework(
-  capabilityIds?: CapabilityInputId[],
+  capabilityIds?: CapabilityId[],
   options?: { britishEnglish?: boolean },
 ): string {
   return trimRenderedDocument(
@@ -88,7 +88,7 @@ export function renderFramework(
 }
 
 export function renderAgents(
-  capabilityIds?: CapabilityInputId[],
+  capabilityIds?: CapabilityId[],
   options?: { britishEnglish?: boolean },
 ): string {
   return trimRenderedDocument(

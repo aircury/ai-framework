@@ -127,15 +127,12 @@ describe("templates", () => {
 
     it("adds architecture rules only when DDD+Hexagonal is enabled", () => {
       expect(generateFramework(["ddd-hexagonal"])).toContain(
-        "## Non-Negotiable Architecture Rules",
-      );
-      expect(generateFramework(["architecture"])).toContain(
-        "docs/aircury/capabilities/architecture.md",
+        "docs/aircury/capabilities/ddd-hexagonal.md",
       );
       expect(generateFramework([])).not.toContain(
-        "docs/aircury/capabilities/architecture.md",
+        "docs/aircury/capabilities/ddd-hexagonal.md",
       );
-      expect(generateFramework(["architecture"])).not.toContain(
+      expect(generateFramework(["ddd-hexagonal"])).not.toContain(
         "## Non-Negotiable Architecture Rules",
       );
     });

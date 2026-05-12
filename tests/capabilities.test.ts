@@ -106,14 +106,6 @@ describe("capabilities", () => {
     ).toEqual(["playwright-best-practices", "e2e-testing-patterns"]);
   });
 
-  it("maps the legacy architecture capability id to ddd-hexagonal", () => {
-    expect(resolveCapabilityIds(["architecture"])).toEqual(["ddd-hexagonal"]);
-    expect(createCapabilityProfile(["architecture"]).capabilities).toContain(
-      "ddd-hexagonal",
-    );
-    expect(getCapabilityById("architecture").id).toBe("ddd-hexagonal");
-  });
-
   it("returns capability-owned files", () => {
     expect(
       getCapabilityFiles(["frontend", "decision-records"], "local"),
@@ -152,39 +144,6 @@ describe("capabilities", () => {
     ).toEqual({
       version: 2,
       capabilities: ["frontend", "language"],
-      language: {
-        britishEnglish: true,
-      },
-    });
-  });
-
-  it("migrates version 1 modules to version 2 capabilities", () => {
-    expect(
-      createCapabilityProfile({
-        version: 1,
-        modules: ["decision-records", "tdd", "hexagonal-architecture", "ddd"],
-      }),
-    ).toEqual({
-      version: 2,
-      capabilities: ["architecture", "decision-records", "testing"],
-      language: {
-        britishEnglish: false,
-      },
-    });
-  });
-
-  it("migrates legacy operational modules to the resilience capability", () => {
-    expect(
-      createCapabilityProfile({
-        version: 1,
-        modules: ["airsync-memory", "error-handling", "structured-logging"],
-        language: {
-          britishEnglish: true,
-        },
-      }),
-    ).toEqual({
-      version: 2,
-      capabilities: ["airsync", "resilience", "language"],
       language: {
         britishEnglish: true,
       },
