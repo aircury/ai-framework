@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import {
-  type CapabilityInputId,
+  type CapabilityId,
   type CapabilityScope,
   createCapabilityProfile,
   getCapabilityFiles,
@@ -76,7 +76,7 @@ function getBaseFiles(): InstallFile[] {
 
 export function getLocalFiles(
   tools: Tool[],
-  capabilityIds?: CapabilityInputId[],
+  capabilityIds?: CapabilityId[],
   options?: InstallOptions,
 ): InstallFile[] {
   const profile = createCapabilityProfile(capabilityIds, {
@@ -192,7 +192,7 @@ export function getSkillsRunner(): SkillsRunner {
 }
 
 function buildCapabilityCommands(
-  selectedCapabilityIds: CapabilityInputId[],
+  selectedCapabilityIds: CapabilityId[],
   agents: string[],
   scope: CapabilityScope,
   isGlobal: boolean,
@@ -218,7 +218,7 @@ function buildCapabilityCommands(
 
 export function getLocalCommands(
   tools: Tool[],
-  capabilityIds: CapabilityInputId[],
+  capabilityIds: CapabilityId[],
 ): InstallCommand[] {
   return buildCapabilityCommands(
     capabilityIds,
@@ -230,7 +230,7 @@ export function getLocalCommands(
 
 export function getGlobalCommands(
   tools: Tool[],
-  capabilityIds: CapabilityInputId[],
+  capabilityIds: CapabilityId[],
 ): InstallCommand[] {
   return buildCapabilityCommands(
     capabilityIds,
