@@ -122,7 +122,7 @@ describe("getLocalFiles", () => {
     const files = getLocalFiles([], ["frontend"]);
     const workflow = getFileByPath(files, "specs/ui/frontend-workflow.md");
     expect(workflow.content).toContain(
-      "Run `frontend-style-extractor` on the target frontend",
+      "Use `frontend-ui-workflow` to generate or update `specs/ui/style-guide.md`",
     );
   });
 
@@ -133,15 +133,15 @@ describe("getLocalFiles", () => {
       "Visual modifications align with the project design system tokens",
     );
     expect(framework?.content).toContain(
-      "extracted from the existing frontend with `frontend-style-extractor`",
+      "extracted from the existing frontend through `frontend-ui-workflow`",
     );
   });
 
-  it("includes experience extractor in FRAMEWORK.md when frontend is enabled", () => {
+  it("includes frontend workflow guidance in FRAMEWORK.md when frontend is enabled", () => {
     const files = getLocalFiles([], ["frontend"]);
     const framework = getFileByPath(files, "FRAMEWORK.md");
-    expect(framework.content).toContain("frontend-experience-extractor");
-    expect(framework.content).toContain("frontend-style-extractor");
+    expect(framework.content).toContain("frontend-ui-workflow");
+    expect(framework.content).toContain("implementation-plan.md");
   });
 
   it("includes terse-response guidance in FRAMEWORK.md when token-efficiency is enabled", () => {
@@ -171,11 +171,7 @@ describe("getLocalCommands", () => {
     expect(aircury.args).toContain("spec-kit-specify");
     expect(aircury.args).toContain("airsync");
     expect(aircury.args).toContain("commit-changes");
-    expect(aircury.args).toContain("frontend-layout-extractor");
-    expect(aircury.args).toContain("frontend-experience-extractor");
-    expect(aircury.args).toContain("frontend-style-extractor");
-    expect(aircury.args).toContain("frontend-clean-implementation");
-    expect(aircury.args).toContain("frontend-ui-generator");
+    expect(aircury.args).toContain("frontend-ui-workflow");
     expect(aircury.args).toContain("specs-extractor");
     expect(
       getCommandBySource(
@@ -251,11 +247,7 @@ describe("getLocalCommands", () => {
     const commands = getLocalCommands([], ["frontend", "token-efficiency"]);
 
     expect(commands).toHaveLength(3);
-    expect(commands[0].args).toContain("frontend-layout-extractor");
-    expect(commands[0].args).toContain("frontend-experience-extractor");
-    expect(commands[0].args).toContain("frontend-style-extractor");
-    expect(commands[0].args).toContain("frontend-clean-implementation");
-    expect(commands[0].args).toContain("frontend-ui-generator");
+    expect(commands[0].args).toContain("frontend-ui-workflow");
     expect(commands[1].args).toContain("caveman");
     expect(
       getCommandBySource(
@@ -283,15 +275,7 @@ describe("getLocalCommands", () => {
         "add",
         aircurySkillsSource,
         "--skill",
-        "frontend-layout-extractor",
-        "--skill",
-        "frontend-experience-extractor",
-        "--skill",
-        "frontend-style-extractor",
-        "--skill",
-        "frontend-clean-implementation",
-        "--skill",
-        "frontend-ui-generator",
+        "frontend-ui-workflow",
         "-a",
         "universal",
         "-y",
@@ -370,15 +354,7 @@ describe("runCommand", () => {
         "add",
         aircurySkillsSource,
         "--skill",
-        "frontend-layout-extractor",
-        "--skill",
-        "frontend-experience-extractor",
-        "--skill",
-        "frontend-style-extractor",
-        "--skill",
-        "frontend-clean-implementation",
-        "--skill",
-        "frontend-ui-generator",
+        "frontend-ui-workflow",
         "-a",
         "universal",
         "-g",

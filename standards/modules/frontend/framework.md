@@ -1,144 +1,91 @@
 ## 1. Module Purpose
 
-Activate this module when the project has an existing frontend. Analyze the code before modifying the UI. Replicate and extend the UI with strict fidelity to the project's real design system. Do not assume rules about styles, components, or visual behaviors without this module active.
+Activate this module when the project has an existing frontend or when a task creates, rebuilds, restyles, or substantially changes UI. Analyze the code before modifying the UI. Replicate and extend the UI with strict fidelity to the project's real design system.
 
-## 2. Analysis Pipeline
+Use `frontend-ui-workflow` as the single frontend skill. It is self-contained and includes bundled references for layout extraction, experience extraction, style extraction, clean implementation planning, and final UI generation.
 
-Execute this workflow to replicate or extend a UI module.
+## 2. Workflow Selection
 
-### Phase 1 — Structural Extraction (Layout)
-
-Use the `frontend-layout-extractor` skill to analyze the source code at the target location.
-
-- **Goal**: Produce a `layout.md` file that captures every field, label, and static element with "full field parity".
-- **Constraint**: This phase must ignore all styling and complex orchestration logic.
-- **Output**: `specs/features/<feature-name>/layout.md`.
-
-### Phase 2 — Behavioral Extraction (Experience)
-
-Use the `frontend-experience-extractor` skill to analyze the same source code.
-
-- Replicate and extend the existing UI with fidelity to the real project design system.
-- Treat `layout.md` as the structural source of truth and `experience.md` as the behavioral source of truth.
-- Use `frontend-style-extractor` to search the codebase for the real reusable tokens, primitives, and composition patterns before writing UI code.
-- Use tokens from `specs/ui/style-guide.md` instead of hardcoded color, typography, or spacing values.
-- Extend the component libraries already present in the project instead of rewriting them from scratch.
-- Detect the correct reusable component path before creating shared UI files.
-- Add an ADR before introducing a new UI dependency such as an animation, component, or icon library.
-- Keep `specs/ui/style-guide.md` current when analysis discovers new tokens or patterns.
-
-- **Goal**: Produce an `experience.md` file that captures user flows, micro-interactions, state transitions, validation feedback, and conditional visibility or authorization logic.
-- **Constraint**: This phase focuses on "how it feels" and the behavioral logic, including who sees what and when, while `layout.md` remains the source of structural field parity.
-- **Output**: `specs/features/<feature-name>/experience.md`.
-
-### Phase 3 — Design System Extraction (Style)
-
-Use the `frontend-style-extractor` skill on the target frontend to generate or update `specs/ui/style-guide.md` from the existing design system.
-
-- **Goal**: Identify reusable design tokens, shared primitives, composition patterns, and visual conventions already present in the project.
-- **Constraint**: Do not invent tokens or infer visual rules that are not supported by the existing frontend.
-- **Output**: `specs/ui/style-guide.md`.
-
-### Phase 4 — Clean Implementation Planning
-
-Use the `frontend-clean-implementation` skill to generate `specs/features/<feature-name>/implementation-plan.md` before writing frontend code.
-
-- **Goal**: Define maintainable component boundaries, file organization, state ownership, JSX structure, local primitive reuse, and conditional rendering strategy before implementation.
-- **Constraint**: New UI must be shippable without a cleanup refactor unless requirements change.
-- **Output**: `specs/features/<feature-name>/implementation-plan.md`.
-
-The plan must prevent giant components, duplicated JSX, messy conditional rendering, tangled form state, poor naming, hardcoded styling, and vague file placement.
-
-Use Vercel React Best Practices only when React/Next performance, hooks, rendering, or data-fetching patterns matter. Do not use it as a substitute for component responsibility, naming, file organization, or maintainable JSX structure.
-
-### Phase 5 — Visual Implementation (UI)
-
-- Do not skip layout extraction, experience extraction, style extraction, or clean implementation planning for new UI, rebuilds, non-trivial forms, changed flows, role-gated UI, or substantial frontend changes.
-- For small safe UI edits, use the lightweight path unless ambiguity, behavior changes, new structure, or missing local precedent increases risk.
-- Do not skip the `frontend-style-extractor` phase even when `specs/ui/style-guide.md` does not exist yet.
-- Do not skip the `frontend-clean-implementation` phase for new UI work.
-- Do not invent design tokens or composition patterns that are not supported by the existing frontend.
-- Do not finish a UI task without acceptance criteria and the relevant spec updates in `specs/features/`.
-
-Use the `frontend-ui-generator` skill to build the interface based on `layout.md`, `experience.md`, `implementation-plan.md`, and the extracted `style-guide.md`, ensuring strict adherence to the project's design system and clean implementation plan.
-
-- **Style Guide**: Ensure `specs/ui/style-guide.md` is updated with current tokens.
-- **Implementation**: Replicate the exact structure and behavior while following the clean implementation plan.
-- **Fidelity**: Achieve full parity with the specified layout and experience, including role-gated rendering and field-level visibility rules, while maintaining strict consistency with the project's visual style.
-
-
-## 3. Project Style Guide
-
-Generate or automatically update the `specs/ui/style-guide.md` file after completing the three analysis phases. This file is the absolute design source of truth for the project.
-
-- Generate the file automatically from the analysis. Do not write it by hand.
-- Update the file whenever you detect new tokens or unrecorded patterns.
-- Reference the guide in every component spec you produce.
-- Mark a section as `[pending analysis]` if there is not enough data. Do not omit it, leave it empty, or invent values.
-
-Mandatory file structure:
-
-```md
-# Style guide — [project name]
-
-## Colors
-| Token | Value | Semantic Use |
-|---|---|---|
-
-## Typography
-| Level | Family | Size | Weight | Line Height |
-|---|---|---|---|---|
-
-## Spacing
-[base scale, available values, usage rules]
-
-## Interaction States
-[per state: hover, focus, active, disabled, loading, error]
-[per state: what changes visually + duration + easing if applicable]
-
-## Project Notes
-[detected specific conventions that do not fit in the above categories]
-```
-
-## 4. Component Spec
-
-Produce a spec in `specs/features/[component-name].md` for every UI task that generates or modifies a component.
-
-The spec must strictly follow this format:
-- API: Define props with name, type, default value, and requirement status.
-- Variants: Define an exhaustive list detailing what changes visually in each variant.
-- States: Define what happens visually and functionally in every possible state.
-- Tokens used: Explicitly reference tokens from `specs/ui/style-guide.md`. Do not use hardcoded values.
-- Acceptance criteria: Define at least one visual, one functional, and one accessibility criterion. Specs without acceptance criteria are invalid.
-- Out of scope: Explicitly declare what is excluded to prevent scope creep.
-
-## 5. Implementation Rules
-
-- Use exclusively tokens from `specs/ui/style-guide.md` in generated code. Do not introduce hardcoded values for color, typography, or spacing.
-- Extend existing component libraries (MUI, shadcn, Radix) by following their customization patterns. Do not rewrite their components from scratch.
-- Propose the complete API in the spec before writing code if a component does not exist in the project.
-- Generate or update `implementation-plan.md` before creating new UI components.
-- Keep orchestration, presentational rendering, form state, and conditional branches separated when combining them would produce a giant component.
-- Create new animations using the library already present in the project. Write an ADR to introduce a new animation library.
-- Place reusable generic components in the folder designated by the project for that purpose (e.g., `components/ui/`, `shared/`). Detect the path before creating files.
-
-## 6. Framework Flow Triggers
+Use the lightest workflow that controls risk.
 
 | Task | Flow |
 |---|---|
-| Initial frontend project analysis (onboarding) | Run the frontend onboarding pipeline: layout extraction, experience extraction, style extraction, clean implementation planning, and UI generation as needed |
-| Small safe UI edit | Inspect nearby code and `specs/ui/style-guide.md`; do not run the full extraction pipeline unless ambiguity or risk appears |
-| Small visual modification on existing component | Plan-Build (token analysis is still mandatory) |
-| New isolated well-specified component | OpenSpec |
-| New design system or significant UI refactor | Spec Kit |
-| React/Next performance, hooks, rendering, data fetching, bundle, or server/client boundary work | Load `vercel-react-best-practices` |
+| Small safe UI edit | Inspect nearby code and `specs/ui/style-guide.md`; do not run the full pipeline unless ambiguity or risk appears |
+| Existing UI rebuild or restyle | Use `frontend-ui-workflow` to extract layout and experience, update the style guide, plan clean implementation, and generate UI |
+| New UI or substantial behavior change | Use `frontend-ui-workflow` to derive layout and experience from specs/requirements, update the style guide, plan clean implementation, and generate UI |
+| React/Next performance, hooks, rendering, data fetching, bundle, or server/client boundary work | Load `vercel-react-best-practices` alongside `frontend-ui-workflow` when UI contracts are involved |
 
-## 7. Absolute Restrictions
+## 3. Required Frontend Artifacts
+
+For new UI, rebuilds, non-trivial forms, role-gated UI, restyles, or substantial behavior changes, maintain these files:
+
+- `specs/features/<feature-name>/layout.md`: structural source of truth for fields, labels, sections, actions, and static content.
+- `specs/features/<feature-name>/experience.md`: behavioral source of truth for flows, micro-interactions, validation, loading/error/empty states, and visibility rules.
+- `specs/features/<feature-name>/implementation-plan.md`: clean implementation source of truth for component responsibilities, file organization, state ownership, JSX structure, local primitive reuse, and conditional rendering strategy.
+- `specs/ui/style-guide.md`: canonical source of truth for design tokens, reusable primitives, variants, states, responsive conventions, accessibility-related visual conventions, gaps, and strict reuse rules.
+
+Small safe UI edits may skip the full artifact pipeline when nearby code and `specs/ui/style-guide.md` are sufficient.
+
+## 4. Full Frontend Pipeline
+
+Use `frontend-ui-workflow` for this pipeline. The skill decides which bundled references to read.
+
+1. Produce or update `layout.md` to capture what must render with full field parity.
+2. Produce or update `experience.md` to capture how the UI behaves and when fields, sections, and actions render, hide, disable, or become read-only.
+3. Produce or update `specs/ui/style-guide.md` from the real frontend codebase before writing substantial UI code.
+4. Produce or update `implementation-plan.md` before implementing substantial UI.
+5. Implement the UI from `layout.md`, `experience.md`, `implementation-plan.md`, and `specs/ui/style-guide.md`.
+6. Update the canonical feature spec in `specs/features/` when observable behavior changes.
+
+For existing UI rebuilds, extract `layout.md` and `experience.md` from the source UI. For new UI, derive them from the feature spec, requirements, designs, and verified product conventions.
+
+## 5. Style Guide Structure
+
+`specs/ui/style-guide.md` must follow the detailed structure used by `frontend-ui-workflow`:
+
+- Overview.
+- Sources analysed.
+- Design tokens.
+- Semantic usage rules.
+- Core UI primitives.
+- Interaction states.
+- Composition patterns.
+- Responsive conventions.
+- Accessibility-related visual conventions.
+- Known gaps and inconsistencies.
+- Strict reuse rules.
+
+Mark a section as `[pending analysis]` if there is not enough data. Do not omit it, leave it empty, or invent values.
+
+## 6. Implementation Rules
+
+- Use tokens, primitives, variants, and composition patterns from `specs/ui/style-guide.md` before introducing new visual structures.
+- Extend existing component libraries such as MUI, shadcn, Radix, or local primitives by following their project patterns. Do not rewrite them from scratch.
+- Detect the correct reusable component path before creating shared UI files.
+- Generate or update `implementation-plan.md` before creating substantial new UI components.
+- Keep orchestration, presentational rendering, form state, and conditional branches separated when combining them would produce a giant component.
+- Create new animations using the library already present in the project.
+- Add an ADR before introducing a new UI dependency such as an animation, component, or icon library.
+
+## 7. Quality Review Before Finish
+
+Before finishing substantial frontend work, verify:
+
+- Field parity with `layout.md`.
+- Experience parity with `experience.md`.
+- Hidden, disabled, read-only, role-gated, owner-gated, tenant-gated, plan-gated, and feature-flagged behavior.
+- Design-token and primitive fidelity with `specs/ui/style-guide.md`.
+- Component responsibility boundaries, state ownership, JSX structure, conditional rendering, and naming from `implementation-plan.md`.
+- Accessibility and responsive behavior.
+- Relevant tests, lint, typecheck, or build checks when feasible.
+
+## 8. Absolute Restrictions
 
 - Do not invent design tokens that do not exist in the project.
-- Do not use hardcoded values where an equivalent token exists.
-- Do not omit the frontend analysis and clean implementation planning pipeline for new UI or substantial frontend work by arguing "the task is too small".
-- Do not ship first-pass frontend code that needs a cleanup refactor for component boundaries, duplicated JSX, tangled state, or hardcoded styling.
-- Do not generate a component spec without acceptance criteria.
-- Do not introduce UI dependencies (icon libraries, animations, components) without an ADR.
+- Do not use hardcoded values where an equivalent token, primitive, variant, or observed convention exists.
+- Do not skip style extraction for substantial frontend work, even when `specs/ui/style-guide.md` does not exist yet.
+- Do not skip clean implementation planning for new UI, rebuilds, non-trivial forms, changed flows, role-gated UI, or substantial frontend changes.
+- Do not ship first-pass frontend code that needs a cleanup refactor for component boundaries, duplicated JSX, tangled state, unclear naming, or hardcoded styling.
+- Do not generate or modify substantial UI without updating the relevant frontend artifacts.
+- Do not introduce UI dependencies without explicit approval and an ADR.
 - Do not assume a composition pattern is correct without verifying it in the existing code.
