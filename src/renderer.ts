@@ -5,7 +5,7 @@ import agentsTemplateSource from "../templates/agents.md.hbs" with {
 import frameworkTemplateSource from "../templates/framework.md.hbs" with {
   type: "text",
 };
-import type { CapabilityId, CapabilityManifest } from "./capabilities";
+import type { CapabilityInputId, CapabilityManifest } from "./capabilities";
 import { getSelectedCapabilities } from "./capabilities";
 
 interface RendererViewModel {
@@ -36,7 +36,7 @@ function isString(value: unknown): value is string {
 }
 
 function createViewModel(
-  capabilityIds?: CapabilityId[],
+  capabilityIds?: CapabilityInputId[],
   options?: { britishEnglish?: boolean },
 ): RendererViewModel {
   const selectedCapabilities = getSelectedCapabilities(capabilityIds, "local");
@@ -60,7 +60,7 @@ function createViewModel(
       .filter(isString),
     includesDecisionRecords: selectedIds.has("decision-records"),
     includesTesting: selectedIds.has("testing"),
-    includesArchitecture: selectedIds.has("architecture"),
+    includesArchitecture: selectedIds.has("ddd-hexagonal"),
     includesCodeStyle: selectedIds.has("code-style"),
     includesAirsyncMemory: selectedModuleIds.has("airsync-memory"),
     includesErrorHandling: selectedModuleIds.has("error-handling"),
@@ -76,7 +76,7 @@ function trimRenderedDocument(content: string): string {
 }
 
 export function renderFramework(
-  capabilityIds?: CapabilityId[],
+  capabilityIds?: CapabilityInputId[],
   options?: { britishEnglish?: boolean },
 ): string {
   return trimRenderedDocument(
@@ -85,7 +85,7 @@ export function renderFramework(
 }
 
 export function renderAgents(
-  capabilityIds?: CapabilityId[],
+  capabilityIds?: CapabilityInputId[],
   options?: { britishEnglish?: boolean },
 ): string {
   return trimRenderedDocument(

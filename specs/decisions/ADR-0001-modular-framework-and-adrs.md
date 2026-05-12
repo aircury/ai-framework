@@ -15,7 +15,7 @@ The initial built-in modules are:
 
 - `decision-records`
 - `tdd`
-- `hexagonal-architecture`
+- `ddd-hexagonal`
 - `ddd`
 
 Local installations will persist their selected modules in `.aircury/framework.config.json`.

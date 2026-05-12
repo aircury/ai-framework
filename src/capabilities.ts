@@ -25,6 +25,15 @@ import dddFramework from "../standards/modules/ddd/framework.md" with {
 import dddManifest from "../standards/modules/ddd/module.json" with {
   type: "json",
 };
+import dddHexagonalAgents from "../standards/modules/ddd-hexagonal/agents.md" with {
+  type: "text",
+};
+import dddHexagonalFramework from "../standards/modules/ddd-hexagonal/framework.md" with {
+  type: "text",
+};
+import dddHexagonalManifest from "../standards/modules/ddd-hexagonal/module.json" with {
+  type: "json",
+};
 import decisionRecordsAgents from "../standards/modules/decision-records/agents.md" with {
   type: "text",
 };
@@ -50,15 +59,6 @@ import frontendFramework from "../standards/modules/frontend/framework.md" with 
   type: "text",
 };
 import frontendManifest from "../standards/modules/frontend/module.json" with {
-  type: "json",
-};
-import hexagonalArchitectureAgents from "../standards/modules/hexagonal-architecture/agents.md" with {
-  type: "text",
-};
-import hexagonalArchitectureFramework from "../standards/modules/hexagonal-architecture/framework.md" with {
-  type: "text",
-};
-import hexagonalArchitectureManifest from "../standards/modules/hexagonal-architecture/module.json" with {
   type: "json",
 };
 import structuredLoggingAgents from "../standards/modules/structured-logging/agents.md" with {
@@ -107,7 +107,7 @@ export type CapabilityCategory =
 
 type StandardModuleId =
   | "decision-records"
-  | "hexagonal-architecture"
+  | "ddd-hexagonal"
   | "ddd"
   | "code-style"
   | "airsync-memory"
@@ -122,7 +122,7 @@ export type CapabilityId =
   | "spec-kit"
   | "airsync"
   | "git"
-  | "architecture"
+  | "ddd-hexagonal"
   | "decision-records"
   | "testing"
   | "code-style"
@@ -131,6 +131,9 @@ export type CapabilityId =
   | "resilience"
   | "specs"
   | "language";
+
+export type LegacyCapabilityId = "architecture";
+export type CapabilityInputId = CapabilityId | LegacyCapabilityId;
 
 export interface CapabilitySkill {
   source: string;
@@ -213,11 +216,11 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
       ],
     ),
   },
-  "hexagonal-architecture": {
+  "ddd-hexagonal": {
     ...createStandardModule(
-      hexagonalArchitectureManifest as StandardManifest,
-      hexagonalArchitectureFramework,
-      hexagonalArchitectureAgents,
+      dddHexagonalManifest as StandardManifest,
+      dddHexagonalFramework,
+      dddHexagonalAgents,
     ),
   },
   ddd: {
@@ -415,16 +418,15 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
     ],
   },
-  architecture: {
-    id: "architecture",
-    label: "Architecture",
-    hint: "DDD, hexagonal architecture, and curated architecture skills",
-    description:
-      "DDD and hexagonal architecture standards with curated architecture skills",
+  "ddd-hexagonal": {
+    id: "ddd-hexagonal",
+    label: "DDD+Hexagonal",
+    hint: "domain modelling, ports and adapters, and curated architecture skills",
+    description: "DDD+Hexagonal standards with curated architecture skills",
     category: "engineering",
     defaultSelected: true,
     scopes: ["local", "global"],
-    ...composeModules(["hexagonal-architecture", "ddd"]),
+    ...composeModules(["ddd-hexagonal", "ddd"]),
     skills: [
       {
         source: "https://github.com/ccheney/robust-skills",
@@ -587,7 +589,7 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "spec-kit",
   "airsync",
   "git",
-  "architecture",
+  "ddd-hexagonal",
   "decision-records",
   "testing",
   "code-style",
@@ -607,21 +609,27 @@ export const DEFAULT_LOCAL_CAPABILITY_IDS: CapabilityId[] = CAPABILITIES.filter(
     capability.scopes.includes("local") && capability.defaultSelected,
 ).map((capability) => capability.id);
 
+function normalizeCapabilityId(capabilityId: CapabilityInputId): CapabilityId {
+  if (capabilityId === "architecture") return "ddd-hexagonal";
+  return capabilityId;
+}
+
 export function getCapabilities(scope: CapabilityScope): CapabilityManifest[] {
   return CAPABILITIES.filter((capability) => capability.scopes.includes(scope));
 }
 
 export function getCapabilityById(
-  capabilityId: CapabilityId,
+  capabilityId: CapabilityInputId,
 ): CapabilityManifest {
-  return CAPABILITY_REGISTRY[capabilityId];
+  return CAPABILITY_REGISTRY[normalizeCapabilityId(capabilityId)];
 }
 
 export function resolveCapabilityIds(
-  capabilityIds: CapabilityId[] = DEFAULT_LOCAL_CAPABILITY_IDS,
+  capabilityIds: CapabilityInputId[] = DEFAULT_LOCAL_CAPABILITY_IDS,
 ): CapabilityId[] {
   const resolved = new Set<CapabilityId>();
-  const visit = (capabilityId: CapabilityId) => {
+  const visit = (capabilityId: CapabilityInputId) => {
+    capabilityId = normalizeCapabilityId(capabilityId);
     if (resolved.has(capabilityId)) return;
     resolved.add(capabilityId);
   };
@@ -634,7 +642,7 @@ export function resolveCapabilityIds(
 }
 
 export function createCapabilityProfile(
-  capabilityIds?: CapabilityId[],
+  capabilityIds?: CapabilityInputId[],
   options?: { britishEnglish?: boolean },
 ): CapabilityProfile {
   const selected = new Set(resolveCapabilityIds(capabilityIds));
@@ -654,7 +662,7 @@ export function createCapabilityProfile(
 }
 
 export function getSelectedCapabilities(
-  capabilityIds?: CapabilityId[],
+  capabilityIds?: CapabilityInputId[],
   scope?: CapabilityScope,
 ): CapabilityManifest[] {
   const selected = resolveCapabilityIds(capabilityIds);
@@ -685,7 +693,7 @@ export function getInitialCapabilityIds(
 }
 
 export function getCapabilityFiles(
-  capabilityIds: CapabilityId[],
+  capabilityIds: CapabilityInputId[],
   scope: CapabilityScope,
 ): CapabilityFile[] {
   const files: CapabilityFile[] = [];
@@ -703,7 +711,7 @@ export function getCapabilityFiles(
 }
 
 export function getCapabilitySkills(
-  capabilityIds: CapabilityId[],
+  capabilityIds: CapabilityInputId[],
   scope: CapabilityScope,
 ): CapabilitySkill[] {
   const skills: CapabilitySkill[] = [];

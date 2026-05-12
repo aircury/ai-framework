@@ -115,7 +115,10 @@ describe("templates", () => {
       expect(generateFramework([])).not.toContain("## TDD Workflow");
     });
 
-    it("adds architecture rules only when architecture capabilities are enabled", () => {
+    it("adds architecture rules only when DDD+Hexagonal is enabled", () => {
+      expect(generateFramework(["ddd-hexagonal"])).toContain(
+        "## Non-Negotiable Architecture Rules",
+      );
       expect(generateFramework(["architecture"])).toContain(
         "## Non-Negotiable Architecture Rules",
       );
