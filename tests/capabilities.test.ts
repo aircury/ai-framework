@@ -16,7 +16,7 @@ describe("capabilities", () => {
       "spec-kit",
       "airsync",
       "git",
-      "architecture",
+      "ddd-hexagonal",
       "decision-records",
       "testing",
       "code-style",
@@ -33,7 +33,7 @@ describe("capabilities", () => {
       "spec-kit",
       "airsync",
       "git",
-      "architecture",
+      "ddd-hexagonal",
       "decision-records",
       "testing",
       "code-style",
@@ -53,7 +53,7 @@ describe("capabilities", () => {
       "spec-kit",
       "airsync",
       "git",
-      "architecture",
+      "ddd-hexagonal",
       "testing",
       "frontend",
       "token-efficiency",
@@ -66,7 +66,7 @@ describe("capabilities", () => {
   it("expands selected capabilities into unique installable skills", () => {
     expect(
       getCapabilitySkills(
-        ["open-spec", "git", "frontend", "specs", "architecture"],
+        ["open-spec", "git", "frontend", "specs", "ddd-hexagonal"],
         "local",
       ).map((skill) => skill.skillName),
     ).toEqual([
@@ -84,16 +84,18 @@ describe("capabilities", () => {
   });
 
   it("keeps standards and skills under the selected capability", () => {
-    expect(getCapabilityById("architecture")).toMatchObject({
-      label: "Architecture",
+    expect(getCapabilityById("ddd-hexagonal")).toMatchObject({
+      label: "DDD+Hexagonal",
       category: "engineering",
-      modules: ["hexagonal-architecture", "ddd"],
+      modules: ["ddd-hexagonal", "ddd"],
     });
-    expect(getCapabilityById("architecture").framework).toContain(
+    expect(getCapabilityById("ddd-hexagonal").framework).toContain(
       "## Non-Negotiable Architecture Rules",
     );
     expect(
-      getCapabilityById("architecture").skills?.map((skill) => skill.skillName),
+      getCapabilityById("ddd-hexagonal").skills?.map(
+        (skill) => skill.skillName,
+      ),
     ).toEqual(["clean-ddd-hexagonal"]);
 
     expect(getCapabilityById("testing")).toMatchObject({
@@ -102,6 +104,14 @@ describe("capabilities", () => {
     expect(
       getCapabilityById("testing").skills?.map((skill) => skill.skillName),
     ).toEqual(["playwright-best-practices", "e2e-testing-patterns"]);
+  });
+
+  it("maps the legacy architecture capability id to ddd-hexagonal", () => {
+    expect(resolveCapabilityIds(["architecture"])).toEqual(["ddd-hexagonal"]);
+    expect(createCapabilityProfile(["architecture"]).capabilities).toContain(
+      "ddd-hexagonal",
+    );
+    expect(getCapabilityById("architecture").id).toBe("ddd-hexagonal");
   });
 
   it("returns capability-owned files", () => {
