@@ -1,4 +1,4 @@
-import type { CapabilityId } from "./capabilities";
+import type { CapabilityInputId } from "./capabilities";
 import { renderAgents, renderFramework } from "./renderer";
 
 const FRAMEWORK = renderFramework();
@@ -7,21 +7,21 @@ const AGENTS = renderAgents();
 export { AGENTS, FRAMEWORK };
 
 export function generateFramework(
-  capabilityIds?: CapabilityId[],
+  capabilityIds?: CapabilityInputId[],
   options?: { britishEnglish?: boolean },
 ): string {
   return renderFramework(capabilityIds, options);
 }
 
 export function generateAgents(
-  capabilityIds?: CapabilityId[],
+  capabilityIds?: CapabilityInputId[],
   options?: { britishEnglish?: boolean },
 ): string {
   return renderAgents(capabilityIds, options);
 }
 
 export function generateOpencodeAgent(
-  capabilityIds?: CapabilityId[],
+  capabilityIds?: CapabilityInputId[],
   options?: { britishEnglish?: boolean },
 ): string {
   return `---
