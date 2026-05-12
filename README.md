@@ -2,13 +2,15 @@
 
 [![npm](https://img.shields.io/npm/v/@aircury/ai-framework)](https://www.npmjs.com/package/@aircury/ai-framework)
 
-The Aircury AI Framework is a meta-framework for AI-assisted software engineering. It defines how AI agents should think, plan, and deliver code across all Aircury projects while separating a shared workflow constitution from installable capabilities.
+The Aircury AI Framework is a meta-routing framework for AI-assisted software engineering. Its main job is to decide which workflow an AI agent should use for each request.
 
-It installs project rules, agent entrypoints, living specification folders, optional engineering standards, and curated skills. The canonical source of truth for behavior is always `specs/features/`, whether a task uses `plan-build`, OpenSpec, Spec Kit, or a direct implementation flow.
+You normally do not choose a mode. Ask for the work you need, and the framework tells the agent whether to use `plan-build`, OpenSpec, Spec Kit, or a direct implementation flow. Only specify a mode when you explicitly want to force that workflow.
+
+It also installs project rules, agent entrypoints, living specification folders, optional engineering standards, and curated skills while separating a shared workflow constitution from installable capabilities.
 
 ## Why Aircury
 
-Aircury gives agents enough structure to work consistently without forcing every change through a heavy process:
+Aircury gives agents enough structure to work consistently without forcing every change through a heavy process. The default behavior is automatic routing:
 
 - Use `plan-build` for clear day-to-day changes.
 - Use OpenSpec when a change needs proposal, implementation, and completion artifacts.
