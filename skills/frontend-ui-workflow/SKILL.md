@@ -1,6 +1,13 @@
 ---
 name: frontend-ui-workflow
-description: Use this skill for frontend UI work that must preserve or extend a product's real design system: new screens/components, high-fidelity rebuilds, restyles, non-trivial forms, role-gated UI, substantial behavior changes, or UI implementation that needs layout, experience, style-guide, clean implementation planning, and final code generation. This is the single frontend skill to install; it is self-contained and routes between lightweight UI edits and the full frontend workflow using bundled references.
+description: >
+  Use this skill for frontend UI work that must preserve or extend a product's
+  real design system: new screens/components, high-fidelity rebuilds, restyles,
+  non-trivial forms, role-gated UI, substantial behavior changes, or UI
+  implementation that needs layout, experience, style-guide, clean
+  implementation planning, and final code generation. This is the single
+  frontend skill to install; it is self-contained and routes between
+  lightweight UI edits and the full frontend workflow using bundled references.
 license: MIT
 metadata:
   author: Aircury
