@@ -1,8 +1,17 @@
 import { describe, expect, it } from "bun:test";
-import { existsSync, readFileSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { getInitialCapabilityIds } from "../src/capabilities";
+import {
+  getCapabilitySkills,
+  getInitialCapabilityIds,
+} from "../src/capabilities";
 import {
   checkConflicts,
   getAircurySkillsSource,
@@ -11,8 +20,10 @@ import {
   getLocalCommands,
   getLocalFiles,
   type InstallFile,
+  isMergeableFrameworkEntrypoint,
   mergeFrameworkReferenceIntoAgents,
   runCommand,
+  syncClaudeCodeSkills,
   writeFile,
 } from "../src/install";
 
@@ -566,6 +577,107 @@ describe("writeFile", () => {
     expect(content).toContain(
       "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).",
     );
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("merges the framework reference into an existing local CLAUDE.md", () => {
+    const dir = `${tmpdir()}/sdd-claude-merge-${Date.now()}`;
+    const file = getFileByPath(getLocalFiles(["claude-code"]), "CLAUDE.md");
+
+    writeFile(
+      {
+        path: "CLAUDE.md",
+        content: "# Existing Claude\n\nProject-specific Claude instructions.",
+        description: "",
+      },
+      dir,
+      false,
+    );
+    writeFile(file, dir, false);
+
+    const content = readFileSync(join(dir, "CLAUDE.md"), "utf-8");
+    expect(content).toContain("Project-specific Claude instructions.");
+    expect(content).toContain(
+      "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).",
+    );
+
+    rmSync(dir, { recursive: true });
+  });
+});
+
+describe("isMergeableFrameworkEntrypoint", () => {
+  it("marks AGENTS.md and CLAUDE.md as mergeable", () => {
+    expect(isMergeableFrameworkEntrypoint("AGENTS.md")).toBe(true);
+    expect(isMergeableFrameworkEntrypoint("CLAUDE.md")).toBe(true);
+    expect(isMergeableFrameworkEntrypoint("GEMINI.md")).toBe(false);
+  });
+});
+
+describe("syncClaudeCodeSkills", () => {
+  it("copies selected skills from .agents/skills to .claude/skills", () => {
+    const dir = `${tmpdir()}/sdd-claude-skills-${Date.now()}`;
+    const skillDir = join(dir, ".agents", "skills", "commit-changes");
+    mkdirSync(skillDir, { recursive: true });
+    writeFileSync(join(skillDir, "SKILL.md"), "# Commit Changes", "utf-8");
+
+    const result = syncClaudeCodeSkills(dir, [
+      {
+        source: "aircury/ai-framework",
+        skillName: "commit-changes",
+        scopes: ["local"],
+      },
+    ]);
+
+    expect(result).toEqual({ copied: ["commit-changes"], missing: [] });
+    expect(
+      readFileSync(
+        join(dir, ".claude", "skills", "commit-changes", "SKILL.md"),
+        "utf-8",
+      ),
+    ).toBe("# Commit Changes");
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("reports selected skills missing from .agents/skills", () => {
+    const dir = `${tmpdir()}/sdd-claude-skills-missing-${Date.now()}`;
+
+    const result = syncClaudeCodeSkills(dir, [
+      {
+        source: "unknown/source",
+        skillName: "missing-skill",
+        scopes: ["local"],
+      },
+    ]);
+
+    expect(result).toEqual({ copied: [], missing: ["missing-skill"] });
+    expect(existsSync(join(dir, ".claude", "skills"))).toBe(true);
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("falls back to the Aircury source for selected local skills", () => {
+    const dir = `${tmpdir()}/sdd-claude-aircury-skill-${Date.now()}`;
+    const skills = getCapabilitySkills(["frontend"], "local").filter(
+      (skill) => skill.skillName === "frontend-ui-workflow",
+    );
+
+    const result = syncClaudeCodeSkills(dir, skills);
+
+    expect(result).toEqual({ copied: ["frontend-ui-workflow"], missing: [] });
+    expect(
+      readFileSync(
+        join(dir, ".agents", "skills", "frontend-ui-workflow", "SKILL.md"),
+        "utf-8",
+      ),
+    ).toContain("name: frontend-ui-workflow");
+    expect(
+      readFileSync(
+        join(dir, ".claude", "skills", "frontend-ui-workflow", "SKILL.md"),
+        "utf-8",
+      ),
+    ).toContain("name: frontend-ui-workflow");
 
     rmSync(dir, { recursive: true });
   });

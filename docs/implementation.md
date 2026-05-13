@@ -35,7 +35,7 @@ Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and Open
 |---|---|
 | `FRAMEWORK.md` | Full project constitution generated from templates and selected capabilities. |
 | `AGENTS.md` | Short agent entrypoint that points to `FRAMEWORK.md`. Existing non-Aircury content is preserved by appending the framework reference. |
-| `CLAUDE.md` | Claude Code instructions, when Claude Code is selected. |
+| `CLAUDE.md` | Claude Code instructions, when Claude Code is selected. Existing non-Aircury content is preserved by appending the framework reference. |
 | `GEMINI.md` | Gemini CLI instructions, when Gemini CLI is selected. |
 | `.aircury/framework.config.json` | Installed profile with selected capabilities and language settings. |
 | `specs/features/README.md` | Starter guide for canonical living specifications. |
@@ -83,6 +83,8 @@ The installer stores the selected capability ids in `.aircury/framework.config.j
 Installable skills are defined on capabilities in `src/capabilities.ts`. The installer expands selected capabilities into individual skills and groups them by source before running `skills add` through `npx` when available, or `bunx` otherwise.
 
 Local skill commands include the `universal` agent and any selected tool-specific agents. Global skill commands target only selected global tools.
+
+When Claude Code is selected for a local install, the installer passes `-a claude-code` to `skills add` and then synchronises available selected skills from `.agents/skills/` into `.claude/skills/` so Claude Code can load them from its project-specific skills directory. If a selected skill was not materialised by `skills add`, the installer reports a warning instead of failing the project installation.
 
 The generated command shape is:
 
@@ -134,7 +136,7 @@ Before writing files, the installer checks whether generated files already exist
 
 If conflicts are found, the user chooses:
 
-- `Skip existing`: only write files that do not exist. `AGENTS.md` is still safely merged with the framework reference.
+- `Skip existing`: only write files that do not exist. `AGENTS.md` and `CLAUDE.md` are still safely merged with the framework reference.
 - `Overwrite all`: replace generated files with the new rendered content.
 
 The installer never deletes project code.
