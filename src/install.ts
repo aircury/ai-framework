@@ -1,9 +1,16 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join } from "node:path";
 import {
   type CapabilityId,
   type CapabilityScope,
+  type CapabilitySkill,
   createCapabilityProfile,
   getCapabilityFiles,
   getCapabilitySkills,
@@ -30,6 +37,11 @@ export interface InstallCommand {
 
 export interface InstallOptions {
   britishEnglish?: boolean;
+}
+
+export interface ClaudeSkillsSyncResult {
+  copied: string[];
+  missing: string[];
 }
 
 type SkillsRunner = "npx" | "bunx";
@@ -63,6 +75,11 @@ function resolveSkillSource(source: string): string {
 
 const FRAMEWORK_REFERENCE_SENTENCE =
   "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).";
+const MERGEABLE_FRAMEWORK_ENTRYPOINTS = new Set(["AGENTS.md", "CLAUDE.md"]);
+
+export function isMergeableFrameworkEntrypoint(path: string): boolean {
+  return MERGEABLE_FRAMEWORK_ENTRYPOINTS.has(path);
+}
 
 function getBaseFiles(): InstallFile[] {
   return [
@@ -262,7 +279,11 @@ export function writeFile(
   isGlobal: boolean,
 ): void {
   const fullPath = isGlobal ? file.path : join(cwd, file.path);
-  if (!isGlobal && file.path === "AGENTS.md" && existsSync(fullPath)) {
+  if (
+    !isGlobal &&
+    isMergeableFrameworkEntrypoint(file.path) &&
+    existsSync(fullPath)
+  ) {
     writeFileSync(
       fullPath,
       mergeFrameworkReferenceIntoAgents(
@@ -276,6 +297,58 @@ export function writeFile(
 
   mkdirSync(dirname(fullPath), { recursive: true });
   writeFileSync(fullPath, file.content, "utf-8");
+}
+
+export function syncClaudeCodeSkills(
+  cwd: string,
+  skills: CapabilitySkill[],
+): ClaudeSkillsSyncResult {
+  const copied: string[] = [];
+  const missing: string[] = [];
+  const uniqueSkills = [
+    ...new Map(skills.map((skill) => [skill.skillName, skill])).values(),
+  ].sort((left, right) => left.skillName.localeCompare(right.skillName));
+
+  if (uniqueSkills.length === 0) {
+    return { copied, missing };
+  }
+
+  const sourceRoot = join(cwd, ".agents", "skills");
+  const targetRoot = join(cwd, ".claude", "skills");
+  mkdirSync(targetRoot, { recursive: true });
+
+  for (const skill of uniqueSkills) {
+    const source = join(sourceRoot, skill.skillName);
+    if (!existsSync(source)) {
+      const fallbackSource = getAircurySkillFallbackSource(skill);
+      if (!fallbackSource) {
+        missing.push(skill.skillName);
+        continue;
+      }
+
+      cpSync(fallbackSource, source, {
+        recursive: true,
+        force: true,
+      });
+    }
+
+    cpSync(source, join(targetRoot, skill.skillName), {
+      recursive: true,
+      force: true,
+    });
+    copied.push(skill.skillName);
+  }
+
+  return { copied, missing };
+}
+
+function getAircurySkillFallbackSource(skill: CapabilitySkill): string | null {
+  if (skill.source !== AIRCURY_SKILLS_SOURCE) return null;
+
+  const source = join(getAircurySkillsSource(), "skills", skill.skillName);
+  if (!existsSync(source)) return null;
+
+  return source;
 }
 
 export function mergeFrameworkReferenceIntoAgents(
