@@ -14,6 +14,10 @@ Build a high-fidelity UI that follows `layout.md`, `experience.md`, `implementat
 - `specs/ui/style-guide.md`: canonical design tokens, primitives, variants, and composition patterns.
 - The target frontend codebase.
 
+## Scope Boundary
+
+Write frontend code only. Do not edit backend files, API endpoints, server actions, models, repositories, services, migrations, jobs, queues, auth policies, or infrastructure unless the user explicitly granted permission for that backend change. If backend support is required, ask for permission before touching those files and name the exact change needed.
+
 ## Workflow
 
 1. Inspect the target frontend for existing implementation patterns before editing.
@@ -27,6 +31,10 @@ Build a high-fidelity UI that follows `layout.md`, `experience.md`, `implementat
 ## Implementation Rules
 
 - Reuse shared primitives and composition patterns before creating new UI elements.
+- Reuse existing hooks and common components before adding feature-local code.
+- Create feature hooks for non-trivial orchestration, form coordination, derived state, permission gates, filters, or data shaping that would otherwise clutter render code.
+- Create or update common hooks and shared components when repeated behavior or UI structure has stable reuse across screens or features.
+- Keep one-off UI local to the feature when reuse is not demonstrated.
 - Use the project's established styling system, such as existing design tokens, CSS variables, Tailwind conventions, theme variants, shadcn/ui, Radix, MUI, or local primitives.
 - Use hardcoded visual values only when the project has no equivalent token or observed convention, and document the gap if substantial.
 - Implement all accessibility requirements from `layout.md`, `experience.md`, and project conventions.
@@ -41,6 +49,7 @@ Build a high-fidelity UI that follows `layout.md`, `experience.md`, `implementat
 - Visibility Fidelity: field-, section-, and action-level hidden, disabled, read-only, role-gated, owner-gated, tenant-gated, plan-gated, and feature-flagged rules must match `experience.md` exactly.
 - Token Fidelity: visual implementation must reuse documented tokens, primitives, variants, and composition patterns from `specs/ui/style-guide.md`.
 - Clean Implementation: final code must match `implementation-plan.md` and avoid giant components, duplicated JSX, tangled state, poor naming, and unclear conditional rendering.
+- Reuse Fidelity: repeated logic and UI structure must be handled through appropriately local or shared hooks/components instead of copy-paste.
 
 ## Final Verification
 
@@ -48,5 +57,6 @@ Before finishing, verify:
 
 - All required artifacts exist or were intentionally not needed because the task used the small safe edit path.
 - The implementation satisfies `layout.md`, `experience.md`, `implementation-plan.md`, and `specs/ui/style-guide.md`.
+- No backend files were modified unless the user explicitly authorized backend work.
 - Nearby tests, lint, typecheck, or build commands were run when feasible.
 - Any skipped verification is reported with the reason.

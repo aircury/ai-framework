@@ -11,6 +11,18 @@ You are a senior frontend workflow agent. Your mission is to choose the lightest
 
 This skill is self-contained. When installed by itself, use the bundled references in `references/` as the source for all frontend extraction, style-guide, planning, and implementation instructions.
 
+## Scope Boundary
+
+Frontend work is limited to frontend code unless the user explicitly authorizes backend changes. Do not modify backend code, API endpoints, server actions, database schemas, migrations, models, repositories, services, jobs, queues, auth policies, or infrastructure as part of this skill by default.
+
+If the UI appears to require backend support, stop before editing backend files and ask for permission. State the exact backend layer or files that seem necessary and what frontend behavior they would unblock. Continue with frontend-only work when a safe mock, existing API, or documented contract is enough.
+
+## Reuse And Extraction Bias
+
+Before creating substantial UI, inspect existing shared components, local primitives, hooks, utilities, form patterns, and feature folders. Prefer existing project conventions over generic names or folder structures.
+
+Create or update common hooks and components when there is stable reuse across screens, features, or repeated branches in the same feature. Keep one-off UI and narrowly specific helpers local to the feature until real reuse exists. Do not duplicate meaningful JSX, state orchestration, permission checks, validation plumbing, or data-shaping logic when a small shared component or hook would make the implementation clearer.
+
 ## Inputs
 - A frontend task from the user.
 - The target frontend codebase or relevant path when available.
@@ -27,7 +39,8 @@ Use this path for copy changes, minor spacing adjustments, simple token swaps, o
 1. Inspect the nearby component and shared primitive usage before editing.
 2. Check `specs/ui/style-guide.md` when the change touches visual tokens, variants, spacing, typography, or interaction states.
 3. Preserve existing component boundaries and state ownership unless the user explicitly asks for a refactor.
-4. Update the relevant feature spec only when observable behavior changes.
+4. Reuse existing hooks, helpers, and primitives before adding local code.
+5. Update the relevant feature spec only when observable behavior changes.
 
 Do not run the full pipeline unless the change exposes ambiguity, affects multiple states, changes behavior, introduces new UI structure, or lacks clear local precedent.
 
@@ -83,14 +96,17 @@ Before finishing substantial frontend work, verify:
 - Visibility integrity: hidden, disabled, read-only, and role/permission-gated states match `experience.md` exactly.
 - Token fidelity: UI uses the project's real tokens, primitives, variants, and composition patterns from `specs/ui/style-guide.md`.
 - Clean implementation: component responsibilities, state ownership, conditional rendering, JSX structure, and naming match `implementation-plan.md`.
+- Reuse discipline: common hooks and shared components are created or reused when repeated state, behavior, or UI structure would otherwise drift.
 - Accessibility and responsiveness: requirements from `layout.md`, `experience.md`, and project conventions are implemented.
 - Dependency control: no new UI, icon, animation, or component dependency is introduced without explicit user approval and an ADR.
 
 ## Restrictions
 
 - Do not invent design tokens, spacing scales, visual primitives, or composition patterns that are not supported by the target frontend.
+- Do not touch backend files, API contracts, persistence, server-side business logic, migrations, or infrastructure unless the user explicitly grants permission for that backend change.
 - Do not hardcode visual values when an equivalent token, primitive, variant, or pattern exists.
 - Do not skip style extraction for substantial frontend work, even when `specs/ui/style-guide.md` does not exist yet.
 - Do not skip clean implementation planning for new UI, rebuilds, non-trivial forms, role-gated UI, or substantial frontend changes.
 - Do not ship giant components, duplicated JSX, tangled state, unclear naming, or messy conditionals that require a cleanup refactor.
+- Do not create generic shared hooks or components without demonstrated reuse, but do create them when repeated behavior or UI structure makes local duplication harder to maintain.
 - Do not treat `vercel-react-best-practices` as a substitute for this workflow's layout, experience, style-system, and maintainability contracts.
