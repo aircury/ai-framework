@@ -81,7 +81,7 @@ const CURSOR_COMMIT_RULES_SECTION = `## Aircury Commit Rules
 
 When creating git commits in this repository, follow this workflow:
 
-- Analyze the workspace with git status and git diff before committing.
+- Analyse the workspace with git status and git diff before committing.
 - Group changes semantically. Each commit must be atomic: one functional change per commit.
 - Use conventional commit messages in the format <type>(<scope>): <description> without a body. Allowed types: feat, fix, refactor, docs, style, test, chore, perf, ci, build, revert.
 - Never include Co-authored-by, Authored-by, AI tool signatures, generated-by markers, bot attribution, or any metadata that reveals or implies AI involvement in the final commit object. The AI must leave no trace that it authored, co-authored, generated, assisted, or executed the commit under any circumstance.

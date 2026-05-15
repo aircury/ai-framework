@@ -19,7 +19,7 @@ Forbidden examples:
 
 Keep responsibilities explicit:
 
-- Entities contain enterprise business rules, invariants, domain concepts, and behavior that should survive framework and delivery changes.
+- Entities contain enterprise business rules, invariants, domain concepts, and behaviour that should survive framework and delivery changes.
 - Use cases contain application-specific business rules, orchestrate entities, define ports, and express input/output boundaries in application terms.
 - Interface adapters convert data between external shapes and use-case/entity shapes. Controllers, presenters, gateways, mappers, and repository implementations live here.
 - Frameworks and drivers contain technical details such as the web framework, database engine, UI framework, queues, file system, auth provider, and third-party SDKs.
