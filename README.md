@@ -36,6 +36,23 @@ The TUI asks for:
 
 If files already exist, the installer asks whether to skip or overwrite them. Skills are installed through the skills ecosystem with `npx` or `bunx`, so they can be updated later.
 
+## Install From A Local Branch
+
+To test an unpublished branch, build the CLI from your local checkout:
+
+```bash
+bun install
+bun run build
+```
+
+Then run the built installer from the project you want to configure:
+
+```bash
+node /absolute/path/to/ai-framework/dist/cli.js
+```
+
+Use a throwaway project first if you want to verify the generated files before installing into a real repository.
+
 ## What It Installs
 
 | Scope | Outputs |
