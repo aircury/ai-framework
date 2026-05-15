@@ -28,8 +28,8 @@ When committing changes, follow this workflow:
 
 4. **Commit rules**:
    - One-line messages only — never use a commit body.
-   - Never include `Co-authored-by`, `Authored-by`, or any author metadata.
+   - Never include commit bodies, trailers, co-author lines, AI/tool attribution, generated-by markers, bot signatures, or metadata implying AI involvement.
    - Use `git add` for specific files per commit, never `git add .` unless all changes belong to one commit.
-   - Run `git status` after each commit to verify success.
+   - After each commit, run `git log -1 --format=%B` and verify the final message contains no AI-related attribution or metadata, then run `git status` to verify success.
 
 5. **Execution order**: Stage and commit one group at a time. Do not skip ahead.
