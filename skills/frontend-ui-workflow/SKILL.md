@@ -23,6 +23,15 @@ Before creating substantial UI, inspect existing shared components, local primit
 
 Create or update common hooks and components when there is stable reuse across screens, features, or repeated branches in the same feature. Keep one-off UI and narrowly specific helpers local to the feature until real reuse exists. Do not duplicate meaningful JSX, state orchestration, permission checks, validation plumbing, or data-shaping logic when a small shared component or hook would make the implementation clearer.
 
+## Hook Extraction Policy
+
+For substantial frontend work, explicitly decide which behavior belongs in hooks before writing component code. Feature-local hooks do not require cross-feature reuse; use them when screen orchestration would otherwise make a component hard to read.
+
+- Create feature hooks for non-trivial form coordination, filters, derived state, permission gates, query adaptation, data shaping, multi-step flows, or complex event handlers.
+- Create shared/common hooks only when the same behavior has stable reuse across screens, features, or repeated branches in the same feature.
+- Keep simple visual state close to the component when extraction would only hide obvious markup behavior.
+- Do not leave complex orchestration embedded in JSX or large page components when a named hook would clarify ownership and make the UI shippable without a cleanup refactor.
+
 ## Inputs
 - A frontend task from the user.
 - The target frontend codebase or relevant path when available.
@@ -97,6 +106,7 @@ Before finishing substantial frontend work, verify:
 - Token fidelity: UI uses the project's real tokens, primitives, variants, and composition patterns from `specs/ui/style-guide.md`.
 - Clean implementation: component responsibilities, state ownership, conditional rendering, JSX structure, and naming match `implementation-plan.md`.
 - Reuse discipline: common hooks and shared components are created or reused when repeated state, behavior, or UI structure would otherwise drift.
+- Hook clarity: feature hooks are created for non-trivial local orchestration, while shared hooks are reserved for stable reuse.
 - Accessibility and responsiveness: requirements from `layout.md`, `experience.md`, and project conventions are implemented.
 - Dependency control: no new UI, icon, animation, or component dependency is introduced without explicit user approval and an ADR.
 

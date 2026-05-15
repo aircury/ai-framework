@@ -37,6 +37,9 @@ Use this structure:
 ## State Ownership
 [Where server data, form state, local UI state, derived state, and transient state live.]
 
+## Hook Extraction Plan
+[Existing hooks to reuse, feature hooks to create, shared hooks to create or update, and logic that should intentionally stay in components.]
+
 ## Rendering Structure
 [How JSX should be composed to avoid giant components and duplicated branches.]
 
@@ -60,18 +63,21 @@ Use this structure:
 3. Verify local primitives and import paths in the codebase; do not rely only on `style-guide.md`.
 4. Keep orchestration concerns separate from presentational rendering when one component would otherwise mix data loading, form coordination, permissions, and layout markup.
 5. Assign each state concern to one owner: server data, form state, local UI state, derived values, and transient interaction state.
-6. Avoid duplicated source-of-truth state and effect-driven derived state.
-7. Name complex conditions before rendering them.
-8. Extract repeated JSX only when it improves readability or prevents drift.
-9. Keep narrowly reusable helpers local to the feature until there is real cross-feature reuse.
+6. Decide hook boundaries before implementation so complex orchestration does not end up embedded in page components or JSX.
+7. Avoid duplicated source-of-truth state and effect-driven derived state.
+8. Name complex conditions before rendering them.
+9. Extract repeated JSX only when it improves readability or prevents drift.
+10. Keep narrowly reusable helpers local to the feature until there is real cross-feature reuse.
 
 ## Hooks And Common Components
 
-The plan must explicitly decide what stays local and what becomes reusable.
+The plan must explicitly decide what stays in components, what becomes a feature hook, and what becomes a shared/common hook.
 
 - Reuse existing shared hooks, form helpers, data-fetching wrappers, permission helpers, and UI primitives before creating new ones.
-- Create a feature hook when a screen has non-trivial local orchestration, form coordination, filters, derived state, permission gates, or data shaping that would make the component hard to read.
+- Create a feature hook when a screen has non-trivial local orchestration, form coordination, filters, derived state, permission gates, query adaptation, data shaping, multi-step flow state, or complex event handlers that would make the component hard to read.
+- Feature hooks do not require cross-feature reuse; they exist to keep local behavior named, testable, and separate from presentational rendering.
 - Create or update a common hook when the same state orchestration, validation flow, permission logic, query adapter, or event handling pattern appears in multiple places or is clearly intended for reuse.
+- Keep simple visual state in the component when extraction would only hide obvious markup behavior.
 - Create a local sub-component when repeated JSX is specific to one feature and extraction improves readability.
 - Create or update a shared/common component when a stable visual pattern, field group, card, table section, empty state, toolbar, dialog, or action cluster repeats across features or matches an existing shared UI family.
 - Do not create generic abstractions just to reduce line count; require demonstrated reuse, strong naming, and a clear owner folder.
@@ -83,6 +89,7 @@ Include project-specific checks for:
 - Component size and responsibility boundaries.
 - Duplicated JSX and duplicated business rules.
 - Hooks and common components are reused or created when repeated behavior or UI structure would otherwise drift.
+- Feature hooks are created for non-trivial local orchestration even when shared reuse is not yet demonstrated.
 - Clear conditional rendering.
 - Clear state ownership.
 - Form and validation readability.

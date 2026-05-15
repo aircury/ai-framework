@@ -32,9 +32,12 @@ Write frontend code only. Do not edit backend files, API endpoints, server actio
 
 - Reuse shared primitives and composition patterns before creating new UI elements.
 - Reuse existing hooks and common components before adding feature-local code.
-- Create feature hooks for non-trivial orchestration, form coordination, derived state, permission gates, filters, or data shaping that would otherwise clutter render code.
+- Create feature hooks for non-trivial orchestration, form coordination, derived state, permission gates, filters, query adaptation, data shaping, multi-step flow state, or complex event handlers that would otherwise clutter render code.
+- If `implementation-plan.md` names a feature hook, create or update that hook before wiring the presentational component so orchestration does not leak into JSX.
+- Feature hooks do not require cross-feature reuse; shared/common hooks do.
 - Create or update common hooks and shared components when repeated behavior or UI structure has stable reuse across screens or features.
 - Keep one-off UI local to the feature when reuse is not demonstrated.
+- Keep simple visual state in the component when a hook would only obscure obvious behavior.
 - Use the project's established styling system, such as existing design tokens, CSS variables, Tailwind conventions, theme variants, shadcn/ui, Radix, MUI, or local primitives.
 - Use hardcoded visual values only when the project has no equivalent token or observed convention, and document the gap if substantial.
 - Implement all accessibility requirements from `layout.md`, `experience.md`, and project conventions.
@@ -50,6 +53,7 @@ Write frontend code only. Do not edit backend files, API endpoints, server actio
 - Token Fidelity: visual implementation must reuse documented tokens, primitives, variants, and composition patterns from `specs/ui/style-guide.md`.
 - Clean Implementation: final code must match `implementation-plan.md` and avoid giant components, duplicated JSX, tangled state, poor naming, and unclear conditional rendering.
 - Reuse Fidelity: repeated logic and UI structure must be handled through appropriately local or shared hooks/components instead of copy-paste.
+- Hook Clarity: non-trivial local orchestration must live in feature hooks, while common hooks are reserved for stable reuse.
 
 ## Final Verification
 
@@ -58,5 +62,6 @@ Before finishing, verify:
 - All required artifacts exist or were intentionally not needed because the task used the small safe edit path.
 - The implementation satisfies `layout.md`, `experience.md`, `implementation-plan.md`, and `specs/ui/style-guide.md`.
 - No backend files were modified unless the user explicitly authorized backend work.
+- Feature hooks, shared hooks, and component-local state match the hook extraction decisions in `implementation-plan.md`.
 - Nearby tests, lint, typecheck, or build commands were run when feasible.
 - Any skipped verification is reported with the reason.
