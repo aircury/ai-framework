@@ -654,8 +654,8 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
   language: {
     id: "language",
     label: "Language",
-    hint: "UK business English guidance",
-    description: "UK business English guidance for project communication",
+    hint: "British business English guidance",
+    description: "British business English guidance for project communication",
     category: "communication",
     defaultSelected: false,
     scopes: ["local", "global"],

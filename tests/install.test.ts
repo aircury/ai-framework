@@ -317,7 +317,7 @@ describe("getLocalCommands", () => {
     ]);
   });
 
-  it("installs the UK business English skill from its external source", () => {
+  it("installs the external UK business English skill", () => {
     const commands = getLocalCommands([], ["language"]);
     expect(
       getCommandBySource(commands, "https://github.com/jezweb/claude-skills")
