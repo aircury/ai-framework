@@ -65,8 +65,9 @@ Mark a section as `[pending analysis]` if there is not enough data. Do not omit 
 - Extend existing component libraries such as MUI, shadcn, Radix, or local primitives by following their project patterns. Do not rewrite them from scratch.
 - Detect the correct reusable component path before creating shared UI files.
 - Inspect existing shared components, hooks, utilities, form patterns, and local primitives before creating substantial UI.
-- Create feature hooks for non-trivial orchestration, form coordination, filters, derived state, permission gates, or data shaping that would otherwise clutter render code.
-- Create or update common hooks and shared components when repeated behavior or UI structure has stable reuse across screens or features.
+- Create feature hooks for non-trivial orchestration, form coordination, filters, derived state, permission gates, query adaptation, data shaping, multi-step flow state, or complex event handlers that would otherwise clutter render code. Feature hooks do not require cross-feature reuse.
+- Create or update common hooks and shared components when repeated behavior or UI structure has stable reuse across screens or features. Shared hooks require stable reuse or a clearly reusable project convention.
+- Keep simple visual state in the component when extraction would only hide obvious markup behavior.
 - Keep one-off UI and narrowly specific helpers local to the feature until real reuse exists.
 - Generate or update `implementation-plan.md` before creating substantial new UI components.
 - Keep orchestration, presentational rendering, form state, and conditional branches separated when combining them would produce a giant component.
@@ -83,6 +84,7 @@ Before finishing substantial frontend work, verify:
 - Design-token and primitive fidelity with `specs/ui/style-guide.md`.
 - Component responsibility boundaries, state ownership, JSX structure, conditional rendering, and naming from `implementation-plan.md`.
 - Hooks and common components are reused or created where repeated behavior or UI structure would otherwise drift.
+- Feature hooks are created where non-trivial local orchestration would otherwise make components hard to read.
 - Accessibility and responsive behavior.
 - Relevant tests, lint, typecheck, or build checks when feasible.
 
