@@ -43,8 +43,9 @@ Use this path for new screens/components, high-fidelity rebuilds, changed user f
 - Extend the component libraries already used by the project instead of reimplementing them from scratch.
 - Detect the correct shared UI folder before creating reusable components.
 - Inspect existing shared components, hooks, utilities, form patterns, and local primitives before creating substantial UI.
-- Create feature hooks for non-trivial orchestration, form coordination, filters, derived state, permission gates, or data shaping that would otherwise clutter render code.
-- Create or update common hooks and shared components when repeated behavior or UI structure has stable reuse across screens or features.
+- Create feature hooks for non-trivial orchestration, form coordination, filters, derived state, permission gates, query adaptation, data shaping, multi-step flow state, or complex event handlers that would otherwise clutter render code. Feature hooks do not require cross-feature reuse.
+- Create or update common hooks and shared components when repeated behavior or UI structure has stable reuse across screens or features. Shared hooks require stable reuse or a clearly reusable project convention.
+- Keep simple visual state in the component when extraction would only hide obvious markup behavior.
 - Keep one-off UI and narrowly specific helpers local to the feature until real reuse exists.
 - Keep new UI shippable without a cleanup refactor unless requirements change.
 - Use `frontend-ui-workflow` to define component boundaries, state ownership, file placement, JSX structure, primitive reuse, and conditional rendering strategy before writing substantial new UI code.
@@ -82,6 +83,7 @@ Before finishing new UI or substantial frontend changes, verify:
 - orchestration, presentational rendering, form state, and conditional branches are not tangled into one giant component
 - repeated JSX and repeated business rules have been removed when extraction improves clarity
 - hooks and common components are reused or created where repeated behavior or UI structure would otherwise drift
+- feature hooks are created where non-trivial local orchestration would otherwise make components hard to read
 - conditional rendering is readable, including loading, empty, error, disabled, read-only, and role-gated states
 - local primitives and tokens from `specs/ui/style-guide.md` are reused before introducing new visual structures
 - the implementation is shippable without a cleanup refactor unless requirements change
