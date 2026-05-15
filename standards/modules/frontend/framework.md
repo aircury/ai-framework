@@ -4,6 +4,8 @@ Activate this module when the project has an existing frontend or when a task cr
 
 Use `frontend-ui-workflow` as the single frontend skill. It is self-contained and includes bundled references for layout extraction, experience extraction, style extraction, clean implementation planning, and final UI generation.
 
+Frontend work is frontend-only by default. Do not modify backend files, API endpoints, server actions, schemas, migrations, services, repositories, jobs, queues, auth policies, or infrastructure unless the user explicitly authorizes backend work. If backend support appears necessary, ask for permission before touching those files and name the exact backend layer or files required.
+
 ## 2. Workflow Selection
 
 Use the lightest workflow that controls risk.
@@ -62,6 +64,10 @@ Mark a section as `[pending analysis]` if there is not enough data. Do not omit 
 - Use tokens, primitives, variants, and composition patterns from `specs/ui/style-guide.md` before introducing new visual structures.
 - Extend existing component libraries such as MUI, shadcn, Radix, or local primitives by following their project patterns. Do not rewrite them from scratch.
 - Detect the correct reusable component path before creating shared UI files.
+- Inspect existing shared components, hooks, utilities, form patterns, and local primitives before creating substantial UI.
+- Create feature hooks for non-trivial orchestration, form coordination, filters, derived state, permission gates, or data shaping that would otherwise clutter render code.
+- Create or update common hooks and shared components when repeated behavior or UI structure has stable reuse across screens or features.
+- Keep one-off UI and narrowly specific helpers local to the feature until real reuse exists.
 - Generate or update `implementation-plan.md` before creating substantial new UI components.
 - Keep orchestration, presentational rendering, form state, and conditional branches separated when combining them would produce a giant component.
 - Create new animations using the library already present in the project.
@@ -76,16 +82,20 @@ Before finishing substantial frontend work, verify:
 - Hidden, disabled, read-only, role-gated, owner-gated, tenant-gated, plan-gated, and feature-flagged behavior.
 - Design-token and primitive fidelity with `specs/ui/style-guide.md`.
 - Component responsibility boundaries, state ownership, JSX structure, conditional rendering, and naming from `implementation-plan.md`.
+- Hooks and common components are reused or created where repeated behavior or UI structure would otherwise drift.
 - Accessibility and responsive behavior.
 - Relevant tests, lint, typecheck, or build checks when feasible.
 
 ## 8. Absolute Restrictions
 
 - Do not invent design tokens that do not exist in the project.
+- Do not touch backend files, API contracts, persistence, server-side business logic, migrations, or infrastructure unless the user explicitly grants permission for that backend change.
 - Do not use hardcoded values where an equivalent token, primitive, variant, or observed convention exists.
 - Do not skip style extraction for substantial frontend work, even when `specs/ui/style-guide.md` does not exist yet.
 - Do not skip clean implementation planning for new UI, rebuilds, non-trivial forms, changed flows, role-gated UI, or substantial frontend changes.
 - Do not ship first-pass frontend code that needs a cleanup refactor for component boundaries, duplicated JSX, tangled state, unclear naming, or hardcoded styling.
+- Do not duplicate meaningful JSX, state orchestration, permission checks, validation plumbing, or data-shaping logic when a small shared component or hook would make the implementation clearer.
+- Do not create generic shared hooks or components without demonstrated reuse.
 - Do not generate or modify substantial UI without updating the relevant frontend artifacts.
 - Do not introduce UI dependencies without explicit approval and an ADR.
 - Do not assume a composition pattern is correct without verifying it in the existing code.
