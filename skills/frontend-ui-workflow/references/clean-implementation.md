@@ -15,6 +15,10 @@ This is a structure and maintainability step, not a visual design step and not a
 - `specs/ui/style-guide.md`: project tokens, reusable primitives, variants, and composition patterns.
 - The target frontend codebase, including nearby features and shared UI folders.
 
+## Scope Boundary
+
+This planning step is frontend-only. Do not plan backend edits, API changes, server actions, migrations, persistence changes, jobs, queues, or infrastructure changes unless the user explicitly granted permission for backend work. If backend support appears necessary, record the frontend need and ask for permission before planning backend files.
+
 ## Output File
 
 Save the result to `specs/features/<feature-name>/implementation-plan.md`. Create the directory if needed.
@@ -61,12 +65,24 @@ Use this structure:
 8. Extract repeated JSX only when it improves readability or prevents drift.
 9. Keep narrowly reusable helpers local to the feature until there is real cross-feature reuse.
 
+## Hooks And Common Components
+
+The plan must explicitly decide what stays local and what becomes reusable.
+
+- Reuse existing shared hooks, form helpers, data-fetching wrappers, permission helpers, and UI primitives before creating new ones.
+- Create a feature hook when a screen has non-trivial local orchestration, form coordination, filters, derived state, permission gates, or data shaping that would make the component hard to read.
+- Create or update a common hook when the same state orchestration, validation flow, permission logic, query adapter, or event handling pattern appears in multiple places or is clearly intended for reuse.
+- Create a local sub-component when repeated JSX is specific to one feature and extraction improves readability.
+- Create or update a shared/common component when a stable visual pattern, field group, card, table section, empty state, toolbar, dialog, or action cluster repeats across features or matches an existing shared UI family.
+- Do not create generic abstractions just to reduce line count; require demonstrated reuse, strong naming, and a clear owner folder.
+
 ## Anti-Cleanup Checklist Requirements
 
 Include project-specific checks for:
 
 - Component size and responsibility boundaries.
 - Duplicated JSX and duplicated business rules.
+- Hooks and common components are reused or created when repeated behavior or UI structure would otherwise drift.
 - Clear conditional rendering.
 - Clear state ownership.
 - Form and validation readability.
@@ -78,6 +94,7 @@ Include project-specific checks for:
 
 - Do not produce code in this step. Produce the plan that governs implementation.
 - Do not introduce new dependencies without explicit approval and an ADR.
+- Do not plan backend changes unless the user explicitly grants permission for backend work.
 - Do not split components merely to satisfy an arbitrary line count.
 - Do not create over-abstracted generic components that hide simple feature-specific intent.
 - Use React/Next performance guidance only when hooks, rendering, data-fetching, bundle, or server/client boundary patterns matter.
