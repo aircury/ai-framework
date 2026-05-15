@@ -36,6 +36,7 @@ Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and Open
 | `FRAMEWORK.md` | Full project constitution generated from templates and selected capabilities. |
 | `AGENTS.md` | Short agent entrypoint that points to `FRAMEWORK.md`. Existing non-Aircury content is preserved by appending the framework reference. |
 | `CLAUDE.md` | Claude Code instructions, when Claude Code is selected. Existing non-Aircury content is preserved by appending the framework reference. |
+| `.cursorrules` | Cursor rules, when Cursor is selected. Existing content is preserved by appending Aircury commit rules. |
 | `GEMINI.md` | Gemini CLI instructions, when Gemini CLI is selected. |
 | `.aircury/framework.config.json` | Installed profile with selected capabilities and language settings. |
 | `specs/features/README.md` | Starter guide for canonical living specifications. |
