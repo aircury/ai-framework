@@ -1,5 +1,5 @@
 - Agents MUST search Airsync memory before making architectural or workflow decisions in areas where prior team knowledge may exist.
 - When an ADR is created or superseded in `specs/decisions/`, agents MUST follow the Airsync module's canonical ADR dual-write rule.
-- Agents MUST capture reusable knowledge in Airsync INBOX when they discover: validated patterns, repeated pitfalls with fixes, team conventions, or mental models that explain system behavior.
+- Agents MUST capture reusable knowledge in Airsync INBOX when they discover: validated patterns, repeated pitfalls with fixes, team conventions, or mental models that explain system behaviour.
 - Agents MUST NOT capture project-specific implementation details, debugging sessions without transferable lessons, or content already documented elsewhere.
 - Before proposing to Airsync, agents SHOULD run `memory_search` to avoid duplicates. If similar content exists, enhance it instead of creating a new entry.

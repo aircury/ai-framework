@@ -14,7 +14,7 @@ The following rules apply to every installation profile:
 
 - `specs/features/` is canonical and versioned.
 - `specs/changes/` is optional working state and is not versioned.
-- Any workflow mode that changes observable system behavior MUST end with an update to `specs/features/`.
+- Any workflow mode that changes observable system behaviour MUST end with an update to `specs/features/`.
 - Prepare working tree changes as atomic, functional, and semantic units. Create git commits only when the user explicitly asks, using [Conventional Commits](https://www.conventionalcommits.org/) format.
 - Before starting any non-trivial change, the agent MUST act as a routing meta-agent and ask the user how to proceed.
 - Optional standards are enabled through `.aircury/framework.config.json`.
@@ -45,15 +45,15 @@ Detailed capability rules are generated as separate files under [`docs/aircury/c
 - Fail with clear errors and documented tradeoffs.
 - Avoid boolean flag arguments when a richer type or explicit method is clearer.
 - Prefer composition over inheritance.
-- Keep modules deep: small public surface, meaningful internal behavior.
+- Keep modules deep: small public surface, meaningful internal behaviour.
 - Remove dead code and speculative abstractions.
 
 ## Change Workflow
 
 For any non-trivial change:
 
-1. Identify the affected capability and observable behavior.
-2. Define or confirm the public behavior.
+1. Identify the affected capability and observable behaviour.
+2. Define or confirm the public behaviour.
 3. Choose the workflow mode with the user through meta-agent routing.
 4. Implement inside the selected standards profile.
 5. Refactor for clarity and boundary enforcement.
@@ -76,7 +76,7 @@ Before starting any task:
 - Read the relevant ADRs in `specs/decisions/` when the area is governed by prior decisions.
 {{/if}}
 {{#if includesCodeStyle}}
-- Analyze `package.json` and local config files to identify the project's linting and formatting strategy.
+- Analyse `package.json` and local config files to identify the project's linting and formatting strategy.
 {{/if}}
 - Act as a routing meta-agent: analyse the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
 
@@ -85,7 +85,7 @@ While executing work:
 {{#if enforceBritishEnglish}}
 - Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy unless an external interface requires a different spelling.
 {{/if}}
-- All observable behavior changes MUST update `specs/features/` before the work is done.
+- All observable behaviour changes MUST update `specs/features/` before the work is done.
 - Use the `commit-changes` skill only when the user asks you to create commits. When committing, organise changes into atomic Conventional Commits; until then, keep changes organised in the working tree for review.
 - After the user selects a workflow mode, follow `FRAMEWORK.md § Mode execution rules` exactly.
 - Selecting `plan-build` authorises planning first, not automatic implementation.
@@ -102,7 +102,7 @@ This framework uses a framework-agnostic change workflow.
 ### Supported modes
 
 - `plan-build`: complete a planning step first, then implement only after the plan is finished and the user asks to proceed.
-- `propose-apply-complete`: create working artifacts, implement from them, then sync canonical specs.
+- `propose-apply-complete`: create working artefacts, implement from them, then sync canonical specs.
 - `explore-propose-apply-complete`: explore first when the problem is unclear, then formalise and implement.
 - `spec-kit`: spec-driven development using the Spec Kit workflow. Best for new features, cross-cutting concerns, or work requiring formal spec governance.
 
@@ -114,7 +114,7 @@ Before starting any non-trivial change, the agent MUST act as a routing meta-age
 
 **Routing protocol:**
 
-1. Analyze the request for complexity, ambiguity, and scope.
+1. Analyse the request for complexity, ambiguity, and scope.
 2. Recommend one of the supported modes and briefly explain why.
 3. Present the user with explicit workflow choices.
 4. Ask the user how they want to proceed before doing any implementation work.
@@ -129,7 +129,7 @@ Once the user selects a mode, the agent MUST follow that mode strictly. Do not m
   3. Do not start building in the same step unless the user explicitly asks to continue with implementation after seeing the plan.
 - `propose-apply-complete`:
   1. Run `open-spec-propose` first.
-  2. Only after proposal artifacts exist, run `open-spec-apply`.
+  2. Only after proposal artefacts exist, run `open-spec-apply`.
   3. After implementation is done, run `open-spec-complete`.
   4. Do not jump directly to apply or complete if the selected workflow has not reached that step.
 - `explore-propose-apply-complete`:
@@ -148,9 +148,9 @@ A change is not done unless all of the following are true:
 - Relevant verification has been run for the affected scope.
 - Naming matches the chosen problem language of the project.
 - No unnecessary abstractions or framework leakage were introduced.
-- Relevant spec in `specs/features/` reflects the current behavior.
+- Relevant spec in `specs/features/` reflects the current behaviour.
 {{#if includesTesting}}
-- Relevant behavior is covered by tests.
+- Relevant behaviour is covered by tests.
 {{/if}}
 {{#if includesDddHexagonalArchitecture}}
 - DDD and hexagonal architecture boundaries still hold.
@@ -159,7 +159,7 @@ A change is not done unless all of the following are true:
 - Clean Architecture dependencies still point inward and entities/use cases remain framework-independent.
 {{/if}}
 {{#if includesLayeredArchitecture}}
-- Layered Architecture boundaries still hold: controllers do not bypass services for business behavior, services own application logic, and repositories isolate persistence.
+- Layered Architecture boundaries still hold: controllers do not bypass services for business behaviour, services own application logic, and repositories isolate persistence.
 {{/if}}
 {{#if includesDecisionRecords}}
 - Material architectural decisions are captured or superseded in `specs/decisions/`.
@@ -187,16 +187,16 @@ A change is not done unless all of the following are true:
 
 ## Living Specifications
 
-`specs/features/` is the authoritative, technology-agnostic description of what the system does. It is not a planning artifact. It is a permanent record of system behavior.
+`specs/features/` is the authoritative, technology-agnostic description of what the system does. It is not a planning artefact. It is a permanent record of system behaviour.
 
 ### Non-Negotiable Rule
 
-Every observable behavior change to the codebase MUST update `specs/features/` before the change is considered done.
+Every observable behaviour change to the codebase MUST update `specs/features/` before the change is considered done.
 
 ### Spec format
 
 ```md
-### Requirement: <system behavior as a declarative statement>
+### Requirement: <system behaviour as a declarative statement>
 <One-sentence description using SHALL/MUST.>
 
 #### Scenario: <observable outcome>
@@ -204,20 +204,20 @@ Every observable behavior change to the codebase MUST update `specs/features/` b
 - **THEN** <expected system response>
 ```
 
-Use RFC 2119 language. Do not include implementation details, technology names, or framework references. Specs describe behavior, not code.
+Use RFC 2119 language. Do not include implementation details, technology names, or framework references. Specs describe behaviour, not code.
 
 ## Review Checklist
 
 Before finishing work, verify:
 
-- Is the chosen behavior reflected in `specs/features/`?
+- Is the chosen behaviour reflected in `specs/features/`?
 - Is the code aligned with the enabled capabilities?
 - Are tradeoffs explicit enough that a future agent can continue safely?
 - Would this change still make sense if infrastructure or tooling changed?
 
 If the answer to any of these is "no", the change is not ready.
 
-## Default Agent Behavior
+## Default Agent Behaviour
 
 When contributing:
 
