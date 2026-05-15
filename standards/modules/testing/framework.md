@@ -8,7 +8,7 @@ Testing includes a red -> green -> refactor workflow by default.
 
 Work in vertical slices:
 
-1. Write one failing test for one observable behavior.
+1. Write one failing test for one observable behaviour.
 2. Implement the minimum code needed to pass.
 3. Refactor while keeping tests green.
 4. Repeat.

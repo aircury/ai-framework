@@ -6,7 +6,7 @@ Use this reference when a frontend task is substantial enough that the short rul
 
 Frontend work is frontend-only by default. Do not modify backend files, API endpoints, server actions, schemas, migrations, services, repositories, jobs, queues, auth policies, or infrastructure unless the user explicitly authorizes backend work.
 
-If backend support appears necessary, ask for permission before touching backend files. Name the exact backend layer or files required and the frontend behavior they would unblock.
+If backend support appears necessary, ask for permission before touching backend files. Name the exact backend layer or files required and the frontend behaviour they would unblock.
 
 ## Workflow tiers
 
@@ -14,16 +14,16 @@ Use the lightest workflow that still controls risk.
 
 ### Small safe UI edits
 
-Use this path for copy changes, minor spacing adjustments, simple token swaps, or isolated changes to an existing component with no new behavior.
+Use this path for copy changes, minor spacing adjustments, simple token swaps, or isolated changes to an existing component with no new behaviour.
 
 1. Inspect the nearby component and shared primitive usage before editing.
 2. Check `specs/ui/style-guide.md` when the change touches visual tokens, variants, spacing, typography, or interaction states.
 3. Preserve existing component boundaries and state ownership unless the task is explicitly a refactor.
-4. Update the relevant feature spec only when observable behavior changes.
+4. Update the relevant feature spec only when observable behaviour changes.
 
-Do not run the full extraction pipeline unless the change exposes ambiguity, affects multiple states, changes behavior, introduces new UI structure, or lacks clear local precedent.
+Do not run the full extraction pipeline unless the change exposes ambiguity, affects multiple states, changes behaviour, introduces new UI structure, or lacks clear local precedent.
 
-### New UI, rebuilds, and substantial behavior changes
+### New UI, rebuilds, and substantial behaviour changes
 
 Use this path for new screens/components, high-fidelity rebuilds, changed user flows, non-trivial forms, role-gated UI, or any frontend task likely to create new structure or state.
 
@@ -36,7 +36,7 @@ Use this path for new screens/components, high-fidelity rebuilds, changed user f
 
 ## Fidelity rules
 
-- Match the existing product structure, behavior, and visual language before introducing new patterns.
+- Match the existing product structure, behaviour, and visual language before introducing new patterns.
 - Use `frontend-ui-workflow` to search the codebase for reusable design tokens, shared primitives, and repeated composition patterns before writing new UI code.
 - Prefer project tokens and existing component primitives over hardcoded values.
 - Treat `layout.md` as the structural source of truth and `experience.md` as the behavioral source of truth.
@@ -44,8 +44,8 @@ Use this path for new screens/components, high-fidelity rebuilds, changed user f
 - Detect the correct shared UI folder before creating reusable components.
 - Inspect existing shared components, hooks, utilities, form patterns, and local primitives before creating substantial UI.
 - Create feature hooks for non-trivial orchestration, form coordination, filters, derived state, permission gates, query adaptation, data shaping, multi-step flow state, or complex event handlers that would otherwise clutter render code. Feature hooks do not require cross-feature reuse.
-- Create or update common hooks and shared components when repeated behavior or UI structure has stable reuse across screens or features. Shared hooks require stable reuse or a clearly reusable project convention.
-- Keep simple visual state in the component when extraction would only hide obvious markup behavior.
+- Create or update common hooks and shared components when repeated behaviour or UI structure has stable reuse across screens or features. Shared hooks require stable reuse or a clearly reusable project convention.
+- Keep simple visual state in the component when extraction would only hide obvious markup behaviour.
 - Keep one-off UI and narrowly specific helpers local to the feature until real reuse exists.
 - Keep new UI shippable without a cleanup refactor unless requirements change.
 - Use `frontend-ui-workflow` to define component boundaries, state ownership, file placement, JSX structure, primitive reuse, and conditional rendering strategy before writing substantial new UI code.
@@ -55,7 +55,7 @@ Use this path for new screens/components, high-fidelity rebuilds, changed user f
 
 Keep `specs/ui/style-guide.md` current. It should capture at least:
 
-- colors and semantic usage
+- colours and semantic usage
 - typography levels and weights
 - spacing scale and usage rules
 - interaction states such as hover, focus, active, disabled, loading, and error
@@ -72,7 +72,7 @@ For each meaningful UI change, the corresponding feature spec should capture:
 - functional and visual states
 - tokens used from `specs/ui/style-guide.md`
 - implementation-quality checks from `implementation-plan.md` when the full frontend workflow applies
-- acceptance criteria covering visual behavior, functional behavior, and accessibility
+- acceptance criteria covering visual behaviour, functional behaviour, and accessibility
 - explicit out-of-scope notes when they prevent ambiguity
 
 ## Quality review before finish
@@ -82,7 +82,7 @@ Before finishing new UI or substantial frontend changes, verify:
 - component responsibilities are clear and named in project language
 - orchestration, presentational rendering, form state, and conditional branches are not tangled into one giant component
 - repeated JSX and repeated business rules have been removed when extraction improves clarity
-- hooks and common components are reused or created where repeated behavior or UI structure would otherwise drift
+- hooks and common components are reused or created where repeated behaviour or UI structure would otherwise drift
 - feature hooks are created where non-trivial local orchestration would otherwise make components hard to read
 - conditional rendering is readable, including loading, empty, error, disabled, read-only, and role-gated states
 - local primitives and tokens from `specs/ui/style-guide.md` are reused before introducing new visual structures

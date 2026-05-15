@@ -6,11 +6,11 @@ Use a simple top-down dependency flow:
 
 `controller/route -> service -> repository -> database`
 
-Do not skip layers when the skipped layer owns behavior.
+Do not skip layers when the skipped layer owns behaviour.
 
 Forbidden examples:
 
-- Controllers, routes, handlers, or UI server actions querying the database directly for behavior that belongs in a service.
+- Controllers, routes, handlers, or UI server actions querying the database directly for behaviour that belongs in a service.
 - Controllers duplicating business rules that should live in services.
 - Repositories depending on HTTP request/response objects, UI components, controllers, or transport-specific DTOs.
 - Services leaking ORM models or database-specific query details into controllers.
@@ -20,7 +20,7 @@ Forbidden examples:
 Keep responsibilities direct and pragmatic:
 
 - Controllers/routes handle transport concerns: request parsing, shallow input validation, authentication context extraction, status codes, and response shaping.
-- Services own application behavior: business rules, validation that depends on current state, orchestration, transactions, and calls to repositories or external clients.
+- Services own application behaviour: business rules, validation that depends on current state, orchestration, transactions, and calls to repositories or external clients.
 - Repositories own persistence details: queries, database writes, ORM usage, persistence mapping, and database-specific errors.
 - Database/bootstrap code owns concrete client setup, connection management, and migrations.
 
@@ -37,4 +37,4 @@ Required approach:
 
 ### 4. Escalation Rule
 
-If business rules become complex, infrastructure needs multiple adapters, or the same behavior must be driven by HTTP, jobs, CLI, events, and tests, consider switching to Clean or Hexagonal Architecture instead of adding ad hoc abstractions.
+If business rules become complex, infrastructure needs multiple adapters, or the same behaviour must be driven by HTTP, jobs, CLI, events, and tests, consider switching to Clean or Hexagonal Architecture instead of adding ad hoc abstractions.

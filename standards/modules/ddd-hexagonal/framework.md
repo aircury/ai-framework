@@ -22,7 +22,7 @@ Required approach:
 
 ### 2. Hexagonal Ports and Adapters
 
-Every external dependency must sit behind a port when it affects business behavior.
+Every external dependency must sit behind a port when it affects business behaviour.
 
 Examples:
 
