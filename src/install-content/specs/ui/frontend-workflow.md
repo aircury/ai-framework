@@ -2,6 +2,12 @@
 
 Use this reference when a frontend task is substantial enough that the short rules in `FRAMEWORK.md` are not enough. The single installed frontend skill is `frontend-ui-workflow`; it contains the references needed for layout extraction, experience extraction, style extraction, clean implementation planning, and final UI generation.
 
+## Scope boundary
+
+Frontend work is frontend-only by default. Do not modify backend files, API endpoints, server actions, schemas, migrations, services, repositories, jobs, queues, auth policies, or infrastructure unless the user explicitly authorizes backend work.
+
+If backend support appears necessary, ask for permission before touching backend files. Name the exact backend layer or files required and the frontend behavior they would unblock.
+
 ## Workflow tiers
 
 Use the lightest workflow that still controls risk.
@@ -36,6 +42,10 @@ Use this path for new screens/components, high-fidelity rebuilds, changed user f
 - Treat `layout.md` as the structural source of truth and `experience.md` as the behavioral source of truth.
 - Extend the component libraries already used by the project instead of reimplementing them from scratch.
 - Detect the correct shared UI folder before creating reusable components.
+- Inspect existing shared components, hooks, utilities, form patterns, and local primitives before creating substantial UI.
+- Create feature hooks for non-trivial orchestration, form coordination, filters, derived state, permission gates, or data shaping that would otherwise clutter render code.
+- Create or update common hooks and shared components when repeated behavior or UI structure has stable reuse across screens or features.
+- Keep one-off UI and narrowly specific helpers local to the feature until real reuse exists.
 - Keep new UI shippable without a cleanup refactor unless requirements change.
 - Use `frontend-ui-workflow` to define component boundaries, state ownership, file placement, JSX structure, primitive reuse, and conditional rendering strategy before writing substantial new UI code.
 - Use `vercel-react-best-practices` when React/Next performance, hooks, rendering, data-fetching, bundle, or server/client boundary patterns matter. Do not use it as a substitute for frontend implementation quality.
@@ -71,6 +81,7 @@ Before finishing new UI or substantial frontend changes, verify:
 - component responsibilities are clear and named in project language
 - orchestration, presentational rendering, form state, and conditional branches are not tangled into one giant component
 - repeated JSX and repeated business rules have been removed when extraction improves clarity
+- hooks and common components are reused or created where repeated behavior or UI structure would otherwise drift
 - conditional rendering is readable, including loading, empty, error, disabled, read-only, and role-gated states
 - local primitives and tokens from `specs/ui/style-guide.md` are reused before introducing new visual structures
 - the implementation is shippable without a cleanup refactor unless requirements change
@@ -78,9 +89,12 @@ Before finishing new UI or substantial frontend changes, verify:
 ## Restrictions
 
 - Do not run the full extraction pipeline for small safe UI edits when nearby code and `specs/ui/style-guide.md` are sufficient.
+- Do not touch backend files, API contracts, persistence, server-side business logic, migrations, or infrastructure unless the user explicitly grants permission for that backend change.
 - Do not skip extraction phases for new UI, rebuilds, non-trivial forms, changed flows, role-gated UI, or substantial visual/behavioral changes.
 - Do not skip the style extraction phase even when `specs/ui/style-guide.md` does not exist yet.
 - Do not skip clean implementation planning for new UI or substantial frontend changes.
 - Do not invent design tokens, spacing scales, or composition patterns that are not supported by the existing frontend.
 - Do not use hardcoded values when an equivalent token or shared primitive already exists.
+- Do not duplicate meaningful JSX, state orchestration, permission checks, validation plumbing, or data-shaping logic when a small shared component or hook would make the implementation clearer.
+- Do not create generic shared hooks or components without demonstrated reuse.
 - Do not introduce a new UI dependency such as an icon, animation, or component library without an ADR.
