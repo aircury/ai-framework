@@ -9,6 +9,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+  FRAMEWORK_MAINTAINED_NOTICE,
   getCapabilitySkills,
   getInitialCapabilityIds,
 } from "../src/capabilities";
@@ -59,6 +60,43 @@ describe("getLocalFiles", () => {
     expect(paths).toContain("AGENTS.md");
     expect(paths).toContain(".aircury/framework.config.json");
     expect(paths).toContain("specs/features/README.md");
+    expect(paths).not.toContain("FRAMEWORK.local.md");
+  });
+
+  it("adds maintained-file warnings to strict framework files", () => {
+    const files = getLocalFiles(["cursor"], ["testing"]);
+    const framework = getFileByPath(files, "FRAMEWORK.md");
+    const config = getFileByPath(files, ".aircury/framework.config.json");
+    const capability = getFileByPath(
+      files,
+      "docs/aircury/capabilities/testing.md",
+    );
+    const cursorRules = getFileByPath(files, ".cursorrules");
+
+    expect(framework.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
+    expect(JSON.parse(config.content)._notice).toBe(
+      FRAMEWORK_MAINTAINED_NOTICE,
+    );
+    expect(capability.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
+    expect(cursorRules.content).toContain("## Aircury Commit Rules");
+    expect(cursorRules.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
+  });
+
+  it("keeps FRAMEWORK.local.md outside managed install files", () => {
+    const dir = `${tmpdir()}/sdd-framework-local-${Date.now()}`;
+    const localPath = join(dir, "FRAMEWORK.local.md");
+    const localContent = "# Local framework rules\n\nKeep this.";
+
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(localPath, localContent, "utf-8");
+
+    for (const file of getLocalFiles([])) {
+      writeFile(file, dir, false);
+    }
+
+    expect(readFileSync(localPath, "utf-8")).toBe(localContent);
+
+    rmSync(dir, { recursive: true });
   });
 
   it("generates detailed capability docs for selected capabilities", () => {
@@ -104,6 +142,7 @@ describe("getLocalFiles", () => {
     const cursorRules = getFileByPath(files, ".cursorrules");
 
     expect(cursorRules.content).toContain("## Aircury Commit Rules");
+    expect(cursorRules.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
     expect(cursorRules.content).toContain("Each commit must be atomic");
     expect(cursorRules.content).toContain("<type>(<scope>): <description>");
     expect(cursorRules.content).toContain("git log -1 --format=%B");
@@ -119,6 +158,7 @@ describe("getLocalFiles", () => {
     const files = getLocalFiles([], ["decision-records", "testing"]);
     const config = getFileByPath(files, ".aircury/framework.config.json");
     expect(config.content).toContain('"capabilities": [');
+    expect(config.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
     expect(config.content).toContain('"decision-records"');
     expect(config.content).toContain('"testing"');
     expect(config.content).not.toContain('"git"');
@@ -779,6 +819,22 @@ describe("mergeFrameworkReferenceIntoAgents", () => {
 
     expect(merged).toBe(existing.endsWith("\n") ? existing : `${existing}\n`);
   });
+
+  it("adds the managed-section warning to an existing framework section", () => {
+    const existing =
+      "# AGENTS.md\n\n## Framework\n\nThis project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).\n";
+    const merged = mergeFrameworkReferenceIntoAgents(
+      existing,
+      frameworkReference,
+    );
+
+    expect(merged).toContain(
+      "Framework-managed section. Add project-specific instructions outside this section.",
+    );
+    expect(merged).toContain(
+      "This project follows the Aircury engineering framework",
+    );
+  });
 });
 
 describe("mergeCursorRules", () => {
@@ -802,5 +858,14 @@ describe("mergeCursorRules", () => {
     const merged = mergeCursorRules(existing, cursorRules);
 
     expect(merged).toBe(existing.endsWith("\n") ? existing : `${existing}\n`);
+  });
+
+  it("adds the maintained-file warning to an existing Aircury commit rules section", () => {
+    const existing = `# Existing\n\n## Aircury Commit Rules\n\n- Existing managed rule.`;
+    const merged = mergeCursorRules(existing, cursorRules);
+
+    expect(merged).toContain("## Aircury Commit Rules");
+    expect(merged).toContain(FRAMEWORK_MAINTAINED_NOTICE);
+    expect(merged).toContain("- Existing managed rule.");
   });
 });
