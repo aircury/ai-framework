@@ -80,6 +80,7 @@ describe("capabilities", () => {
       "vercel-react-best-practices",
       "specs-extractor",
       "specs-interpreter",
+      "semantic-line-breaks",
     ]);
   });
 
