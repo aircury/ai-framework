@@ -23,6 +23,7 @@ import {
   type InstallFile,
   isMergeableCursorRules,
   isMergeableFrameworkEntrypoint,
+  isProtectedLocalCompanion,
   mergeCursorRules,
   mergeFrameworkReferenceIntoAgents,
   runCommand,
@@ -60,7 +61,17 @@ describe("getLocalFiles", () => {
     expect(paths).toContain("AGENTS.md");
     expect(paths).toContain(".aircury/framework.config.json");
     expect(paths).toContain("specs/features/README.md");
-    expect(paths).not.toContain("FRAMEWORK.local.md");
+    expect(paths).toContain("FRAMEWORK.local.md");
+  });
+
+  it("installs FRAMEWORK.local.md as an editable local companion", () => {
+    const files = getLocalFiles([]);
+    const local = getFileByPath(files, "FRAMEWORK.local.md");
+
+    expect(local.description).toBe("Project-specific framework instructions");
+    expect(local.content).toContain("Project-specific instructions");
+    expect(local.content).toContain("never overwrites it during updates");
+    expect(local.content).not.toContain(FRAMEWORK_MAINTAINED_NOTICE);
   });
 
   it("adds maintained-file warnings to strict framework files", () => {
@@ -82,7 +93,7 @@ describe("getLocalFiles", () => {
     expect(cursorRules.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
   });
 
-  it("keeps FRAMEWORK.local.md outside managed install files", () => {
+  it("preserves an existing FRAMEWORK.local.md during install writes", () => {
     const dir = `${tmpdir()}/sdd-framework-local-${Date.now()}`;
     const localPath = join(dir, "FRAMEWORK.local.md");
     const localContent = "# Local framework rules\n\nKeep this.";
@@ -698,6 +709,13 @@ describe("isMergeableCursorRules", () => {
   it("marks .cursorrules as mergeable", () => {
     expect(isMergeableCursorRules(".cursorrules")).toBe(true);
     expect(isMergeableCursorRules(".cursor/rules/rule.mdc")).toBe(false);
+  });
+});
+
+describe("isProtectedLocalCompanion", () => {
+  it("marks FRAMEWORK.local.md as protected", () => {
+    expect(isProtectedLocalCompanion("FRAMEWORK.local.md")).toBe(true);
+    expect(isProtectedLocalCompanion("FRAMEWORK.md")).toBe(false);
   });
 });
 

@@ -17,6 +17,7 @@ import {
   getLocalFiles,
   isMergeableCursorRules,
   isMergeableFrameworkEntrypoint,
+  isProtectedLocalCompanion,
   runCommand,
   syncClaudeCodeSkills,
   updateGitignore,
@@ -332,6 +333,11 @@ export async function run(): Promise<void> {
   }
 
   for (const { file, exists } of conflicts) {
+    if (!isGlobal && exists && isProtectedLocalCompanion(file.path)) {
+      skipped++;
+      continue;
+    }
+
     if (
       exists &&
       overwrite === "skip" &&
