@@ -51,6 +51,24 @@ describe("templates", () => {
       expect(FRAMEWORK).not.toContain("atomic deployment");
     });
 
+    it("enforces the strict Spec Kit dual-analysis sequence", () => {
+      expect(FRAMEWORK).toContain(
+        "Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-analyse` → `spec-kit-tasks` → `spec-kit-analyse` → `spec-kit-implement`.",
+      );
+      expect(FRAMEWORK).toContain(
+        "`spec-kit-analyse` MUST run before tasks to catch spec/plan/FRAMEWORK drift, and after tasks to validate user-story coverage.",
+      );
+      expect(FRAMEWORK).toContain(
+        "CRITICAL findings from either `spec-kit-analyse` run block progress.",
+      );
+      expect(FRAMEWORK).toContain(
+        "`spec-kit-checklist` may be used as a review or quality gate, but it does not replace required sequence steps.",
+      );
+      expect(FRAMEWORK).toContain(
+        "Do not skip ahead when an earlier required Spec Kit step has not been completed.",
+      );
+    });
+
     it("uses British English spelling in generated framework content", () => {
       expect(FRAMEWORK).toContain("observable behaviour");
       expect(FRAMEWORK).toContain("Analyse the request");
