@@ -194,6 +194,30 @@ describe("getLocalFiles", () => {
     );
     expect(framework.content).not.toContain("## Architecture Decision Records");
     expect(decisions.content).toContain("## Architecture Decision Records");
+    expect(decisions.content).toContain(
+      "ADRs are mutable only while their status is `Draft`.",
+    );
+    expect(decisions.content).toContain(
+      "An ADR leaves `Draft` only when the user explicitly confirms that the functionality or change is complete and that the ADR should no longer be a draft.",
+    );
+    expect(decisions.content).toContain(
+      "After every modification to a draft ADR, ask the user whether they want to publish it now.",
+    );
+    expect(decisions.content).toContain(
+      "`Supersedes: ADR-XXXX` or `Amends: ADR-XXXX`",
+    );
+    expect(decisions.content).toContain(
+      "update the prior non-draft ADR only to mark that it was changed and where the new decision lives",
+    );
+    expect(decisions.content).toContain(
+      "Use `Supersedes: ADR-XXXX` when the new decision completely replaces or invalidates the old one.",
+    );
+    expect(decisions.content).toContain(
+      "Use `Amends: ADR-XXXX` when the new decision modifies, clarifies, or adds to the old one without completely invalidating it.",
+    );
+    expect(decisions.content).toContain(
+      "- Superseded by: ADR-YYYY (only when updating a prior ADR marker)",
+    );
     expect(framework.content).not.toContain("## TDD Workflow");
     expect(framework.content).not.toContain(
       "## Non-Negotiable Architecture Rules",

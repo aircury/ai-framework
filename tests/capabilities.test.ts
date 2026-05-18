@@ -194,6 +194,71 @@ describe("capabilities", () => {
     ]);
   });
 
+  it("documents ADR immutability after draft status", () => {
+    const files = getCapabilityFiles(["decision-records"], "local");
+    const capabilityRules = files.find(
+      (file) => file.path === "docs/aircury/capabilities/decision-records.md",
+    );
+    const starterGuide = files.find(
+      (file) => file.path === "specs/decisions/README.md",
+    );
+
+    expect(capabilityRules?.content).toContain(
+      "ADRs are mutable only while their status is `Draft`.",
+    );
+    expect(capabilityRules?.content).toContain(
+      "An ADR leaves `Draft` only when the user explicitly confirms that the functionality or change is complete and that the ADR should no longer be a draft.",
+    );
+    expect(capabilityRules?.content).toContain(
+      "Agents must not promote draft ADRs on their own.",
+    );
+    expect(capabilityRules?.content).toContain(
+      "After every modification to a draft ADR, ask the user whether they want to publish it now.",
+    );
+    expect(capabilityRules?.content).toContain(
+      "Do not edit non-draft ADRs.",
+    );
+    expect(capabilityRules?.content).toContain(
+      "update the prior non-draft ADR only to mark that it was changed and where the new decision lives",
+    );
+    expect(capabilityRules?.content).toContain(
+      "Use `Supersedes: ADR-XXXX` when the new decision completely replaces or invalidates the old one.",
+    );
+    expect(capabilityRules?.content).toContain(
+      "Use `Amends: ADR-XXXX` when the new decision modifies, clarifies, or adds to the old one without completely invalidating it.",
+    );
+    expect(capabilityRules?.content).toContain(
+      "- Superseded by: ADR-YYYY (only when updating a prior ADR marker)",
+    );
+    expect(capabilityRules?.content).toContain(
+      "- Status: Draft | Accepted | Superseded | Deprecated",
+    );
+    expect(capabilityRules?.content).toContain(
+      "- Amends: ADR-XXXX (optional)",
+    );
+    expect(starterGuide?.content).toContain(
+      "ADRs are editable only while `Status: Draft`.",
+    );
+    expect(starterGuide?.content).toContain(
+      "An ADR leaves `Draft` only when the user explicitly confirms that the functionality or change is complete and that the ADR should be published now.",
+    );
+    expect(starterGuide?.content).toContain(
+      "After every draft ADR modification, ask the user whether they want to publish it now",
+    );
+    expect(starterGuide?.content).toContain(
+      "`Supersedes: ADR-XXXX` or `Amends: ADR-XXXX`",
+    );
+    expect(starterGuide?.content).toContain(
+      "update the prior ADR only to say that it changed and where the new ADR is",
+    );
+    expect(starterGuide?.content).toContain(
+      "Use `Supersedes: ADR-XXXX` when the new decision completely replaces or invalidates the old one.",
+    );
+    expect(starterGuide?.content).toContain(
+      "Use `Amends: ADR-XXXX` when the new decision modifies, clarifies, or adds to the old one without completely invalidating it.",
+    );
+  });
+
   it("creates a version 2 capability profile", () => {
     expect(
       createCapabilityProfile(["frontend"], { britishEnglish: true }),
