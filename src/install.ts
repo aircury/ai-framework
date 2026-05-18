@@ -12,6 +12,7 @@ import {
   type CapabilityScope,
   type CapabilitySkill,
   createCapabilityProfile,
+  FRAMEWORK_MAINTAINED_NOTICE,
   getCapabilityFiles,
   getCapabilitySkills,
 } from "./capabilities";
@@ -77,7 +78,13 @@ const FRAMEWORK_REFERENCE_SENTENCE =
   "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).";
 const MERGEABLE_FRAMEWORK_ENTRYPOINTS = new Set(["AGENTS.md", "CLAUDE.md"]);
 const CURSOR_RULES_PATH = ".cursorrules";
+const AGENTS_FRAMEWORK_SECTION_HEADING = "## Framework";
+const AGENTS_FRAMEWORK_SECTION_NOTICE =
+  "> Framework-managed section. Add project-specific instructions outside this section.";
+const CURSOR_COMMIT_RULES_HEADING = "## Aircury Commit Rules";
 const CURSOR_COMMIT_RULES_SECTION = `## Aircury Commit Rules
+
+${FRAMEWORK_MAINTAINED_NOTICE}
 
 When creating git commits in this repository, follow this workflow:
 
@@ -399,6 +406,17 @@ export function mergeFrameworkReferenceIntoAgents(
   }
 
   if (trimmedExisting.includes(FRAMEWORK_REFERENCE_SENTENCE)) {
+    if (trimmedExisting.includes(AGENTS_FRAMEWORK_SECTION_NOTICE)) {
+      return `${trimmedExisting}\n`;
+    }
+
+    if (trimmedExisting.includes(AGENTS_FRAMEWORK_SECTION_HEADING)) {
+      return `${trimmedExisting.replace(
+        AGENTS_FRAMEWORK_SECTION_HEADING,
+        `${AGENTS_FRAMEWORK_SECTION_HEADING}\n\n${AGENTS_FRAMEWORK_SECTION_NOTICE}`,
+      )}\n`;
+    }
+
     return `${trimmedExisting}\n`;
   }
 
@@ -416,8 +434,15 @@ export function mergeCursorRules(
     return `${trimmedRules}\n`;
   }
 
-  if (trimmedExisting.includes("## Aircury Commit Rules")) {
-    return `${trimmedExisting}\n`;
+  if (trimmedExisting.includes(CURSOR_COMMIT_RULES_HEADING)) {
+    if (trimmedExisting.includes(FRAMEWORK_MAINTAINED_NOTICE)) {
+      return `${trimmedExisting}\n`;
+    }
+
+    return `${trimmedExisting.replace(
+      CURSOR_COMMIT_RULES_HEADING,
+      `${CURSOR_COMMIT_RULES_HEADING}\n\n${FRAMEWORK_MAINTAINED_NOTICE}`,
+    )}\n`;
   }
 
   return `${trimmedExisting}\n\n${trimmedRules}\n`;

@@ -194,6 +194,7 @@ export interface CapabilityManifest {
 
 export interface CapabilityProfile {
   version: 2;
+  _notice: string;
   capabilities: CapabilityId[];
   language: {
     britishEnglish: boolean;
@@ -215,6 +216,9 @@ interface StandardModule {
   agents: string;
   files?: CapabilityFile[];
 }
+
+export const FRAMEWORK_MAINTAINED_NOTICE =
+  "This file is maintained by Aircury AI Framework. Do not edit it directly. Add project-specific rules in FRAMEWORK.local.md.";
 
 function createStandardModule(
   manifest: StandardManifest,
@@ -369,7 +373,11 @@ function createCapabilityDetailFile(
 ): CapabilityFile | null {
   if (!hasCapabilityDetail(capability)) return null;
 
-  const sections = [`# ${capability.label} Capability`, capability.description];
+  const sections = [
+    `# ${capability.label} Capability`,
+    `> ${FRAMEWORK_MAINTAINED_NOTICE}`,
+    capability.description,
+  ];
 
   if (capability.framework) {
     sections.push("## Framework Rules", capability.framework.trim());
@@ -801,6 +809,7 @@ export function createCapabilityProfile(
 
   return {
     version: 2,
+    _notice: FRAMEWORK_MAINTAINED_NOTICE,
     capabilities: CAPABILITY_ORDER.filter((capabilityId) =>
       selected.has(capabilityId),
     ),

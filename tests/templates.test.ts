@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import { FRAMEWORK_MAINTAINED_NOTICE } from "../src/capabilities";
 import { renderAgents, renderFramework } from "../src/renderer";
 import {
   AGENTS,
@@ -16,6 +17,8 @@ describe("templates", () => {
     });
 
     it("contains core framework sections", () => {
+      expect(FRAMEWORK).toContain(FRAMEWORK_MAINTAINED_NOTICE);
+      expect(FRAMEWORK).toContain("FRAMEWORK.local.md");
       expect(FRAMEWORK).toContain("## Core Workflow Constitution");
       expect(FRAMEWORK).toContain("## Definition of Done");
       expect(FRAMEWORK).toContain("## Workflow Framework");
@@ -66,6 +69,10 @@ describe("templates", () => {
 
     it("references FRAMEWORK.md", () => {
       expect(AGENTS).toContain("FRAMEWORK.md");
+      expect(AGENTS).toContain(
+        "Framework-managed section. Add project-specific instructions outside this section.",
+      );
+      expect(AGENTS).toContain("FRAMEWORK.local.md");
       expect(AGENTS).toContain("single source of truth");
       expect(AGENTS).not.toContain(
         "Selecting `plan-build` authorises planning first, not automatic implementation.",
