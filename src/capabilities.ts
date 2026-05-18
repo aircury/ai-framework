@@ -685,6 +685,11 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
         skillName: "specs-interpreter",
         scopes: ["local", "global"],
       },
+      {
+        source: "aircury/ai-framework",
+        skillName: "semantic-line-breaks",
+        scopes: ["local", "global"],
+      },
     ],
   },
   language: {
