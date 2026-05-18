@@ -1,5 +1,5 @@
 ### Requirement: Agents SHALL persist material architectural decisions as ADRs
-The framework MUST require agents to create or update an ADR when a task introduces, changes, or supersedes a material architectural or workflow decision.
+The framework MUST require agents to create a new ADR when a task introduces, changes, amends, or supersedes a material architectural or workflow decision.
 
 #### Scenario: A task introduces a new cross-cutting rule
 - **WHEN** an agent defines a new rule that affects architecture, workflow governance, or delivery standards
@@ -7,7 +7,41 @@ The framework MUST require agents to create or update an ADR when a task introdu
 
 #### Scenario: A task changes an existing architectural direction
 - **WHEN** an agent changes a previously recorded architectural or workflow decision
-- **THEN** the agent creates a new ADR that references the superseded decision instead of silently rewriting history
+- **THEN** the agent creates a new ADR with `Supersedes: ADR-XXXX` if the new decision completely replaces or invalidates the old one
+- **AND** the agent creates a new ADR with `Amends: ADR-XXXX` if the new decision only modifies, clarifies, or adds to the old one without completely invalidating it
+
+### Requirement: Agents SHALL treat non-draft ADRs as immutable
+The framework MUST require agents to edit ADRs only while their status is exactly `Draft`.
+
+#### Scenario: A task attempts to alter a non-draft ADR
+- **GIVEN** an ADR has a status other than `Draft`, no status, or an unknown status
+- **WHEN** an agent detects that the recorded decision needs to change
+- **THEN** the agent creates a new ADR with `Supersedes: ADR-XXXX` if the new decision completely replaces or invalidates the old one
+- **AND** the agent creates a new ADR with `Amends: ADR-XXXX` if the new decision only modifies, clarifies, or adds to the old one without completely invalidating it
+- **AND** the agent updates the prior ADR only to state that it has changed and that the changes are recorded in the new ADR
+- **AND** the agent does not modify the prior ADR's original Context, Decision, Reason, or Consequences
+
+#### Scenario: A draft ADR is refined before acceptance
+- **GIVEN** an ADR has `Status: Draft`
+- **WHEN** the decision is still being developed
+- **THEN** the agent may update that draft ADR in place
+
+#### Scenario: A draft ADR is modified
+- **GIVEN** an ADR has `Status: Draft`
+- **WHEN** an agent modifies the draft ADR
+- **THEN** the agent asks the user whether they want to publish it now
+- **AND** the ADR remains `Draft` unless the user explicitly confirms publication
+
+#### Scenario: The user confirms the change is complete
+- **GIVEN** an ADR has `Status: Draft`
+- **WHEN** the user explicitly confirms that the functionality or change is complete
+- **AND** the user explicitly confirms that the ADR should be published now
+- **THEN** the agent may change the ADR status from `Draft` to `Accepted`
+
+#### Scenario: Publication confirmation is absent
+- **GIVEN** an ADR has `Status: Draft`
+- **WHEN** the user does not explicitly confirm that the ADR should be published now
+- **THEN** the agent keeps `Status: Draft`
 
 ### Requirement: Agents SHALL consult relevant ADRs before changing governed areas
 The framework MUST require agents to read relevant ADRs before implementing work in an area governed by prior decisions.
