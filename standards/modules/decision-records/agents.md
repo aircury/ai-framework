@@ -1,2 +1,9 @@
 - Material architectural or workflow decisions MUST be captured or superseded in `specs/decisions/`.
+- Agents MUST only edit ADRs whose status is exactly `Draft`; any other status, missing status, or unknown status makes the ADR immutable.
+- Agents MUST NOT promote an ADR out of `Draft` unless the user explicitly confirms that the functionality or change is complete and that the ADR should be published now.
+- After every draft ADR modification, agents MUST ask the user whether they want to publish it now; without explicit confirmation, keep `Status: Draft`.
+- If a prior decision changes, agents MUST create a new ADR with `Supersedes: ADR-XXXX` or `Amends: ADR-XXXX` instead of editing the existing ADR.
+- Use `Supersedes: ADR-XXXX` when the new decision completely replaces or invalidates the old one.
+- Use `Amends: ADR-XXXX` when the new decision modifies, clarifies, or adds to the old one without completely invalidating it.
+- After creating the new ADR, agents may update the prior non-draft ADR only to say that it was changed and where the new ADR is, such as `Status: Superseded` and `Superseded by: ADR-YYYY`; they MUST NOT alter the prior ADR's original context, decision, reason, or consequences.
 - If Airsync is enabled and an ADR is created or superseded, agents MUST follow the Airsync module's canonical ADR dual-write rule.
