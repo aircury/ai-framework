@@ -75,7 +75,7 @@ The current built-in capabilities are:
 - `specs`
 - `language`
 
-For example, the architecture capabilities install one selected architecture standard. `ddd-hexagonal` includes the DDD+Hexagonal standard modules plus the curated `clean-ddd-hexagonal` skill. `custom-architecture` installs a discovery skill that analyses the repository and writes the project-specific architecture section to `FRAMEWORK.local.md`. `testing` includes testing rules plus Playwright and E2E skills. `resilience` includes error-handling and structured-logging rules plus related skills.
+For example, the architecture capabilities install one selected architecture standard. `ddd-hexagonal` includes the DDD+Hexagonal standard modules plus the curated `clean-ddd-hexagonal` skill. `custom-architecture` installs a discovery skill that analyses the repository and writes the project-specific architecture section to `FRAMEWORK.local.md`. `testing` includes testing rules plus Playwright and E2E skills. `resilience` includes error-handling and structured-logging rules plus related skills. `specs` includes skills for extracting behaviour specs, interpreting specs, applying semantic line breaks, and using DBML as the standard for database schema documentation in `db/schema.dbml`.
 
 The installer stores the selected capability ids in `.aircury/framework.config.json`. Re-run the installer or edit the profile and regenerate files if project standards need to change.
 

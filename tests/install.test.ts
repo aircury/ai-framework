@@ -313,6 +313,7 @@ describe("getLocalCommands", () => {
     expect(aircury.args).toContain("commit-changes");
     expect(aircury.args).toContain("frontend-ui-workflow");
     expect(aircury.args).toContain("specs-extractor");
+    expect(aircury.args).toContain("dbml-database-docs");
     expect(
       getCommandBySource(
         commands,
@@ -451,6 +452,8 @@ describe("getLocalCommands", () => {
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toContain("specs-extractor");
     expect(commands[0].args).toContain("specs-interpreter");
+    expect(commands[0].args).toContain("semantic-line-breaks");
+    expect(commands[0].args).toContain("dbml-database-docs");
   });
 
   it("installs the frontend skills from the Aircury source", () => {

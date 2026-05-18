@@ -698,6 +698,11 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
         skillName: "semantic-line-breaks",
         scopes: ["local", "global"],
       },
+      {
+        source: "aircury/ai-framework",
+        skillName: "dbml-database-docs",
+        scopes: ["local", "global"],
+      },
     ],
   },
   language: {
