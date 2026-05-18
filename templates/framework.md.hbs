@@ -144,9 +144,11 @@ Once the user selects a mode, the agent MUST follow that mode strictly. Do not m
   2. Do not implement during explore mode.
   3. After exploration, continue with `open-spec-propose`, then `open-spec-apply`, then `open-spec-complete` in order.
 - `spec-kit`:
-  1. Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-analyse` → `spec-kit-tasks` → `spec-kit-implement`.
-  2. `spec-kit-checklist` may be used as a review or quality gate, but it does not replace required sequence steps.
-  3. Do not skip ahead to implementation, planning, or task generation when an earlier required Spec Kit step has not been completed.
+  1. Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-analyse` → `spec-kit-tasks` → `spec-kit-analyse` → `spec-kit-implement`.
+  2. `spec-kit-analyse` MUST run before tasks to catch spec/plan/FRAMEWORK drift, and after tasks to validate user-story coverage.
+  3. CRITICAL findings from either `spec-kit-analyse` run block progress. Stop the workflow and fix them before continuing to any later Spec Kit step.
+  4. `spec-kit-checklist` may be used as a review or quality gate, but it does not replace required sequence steps.
+  5. Do not skip ahead when an earlier required Spec Kit step has not been completed.
 
 ## Definition of Done
 
