@@ -82,6 +82,7 @@ describe("capabilities", () => {
       "specs-extractor",
       "specs-interpreter",
       "semantic-line-breaks",
+      "dbml-database-docs",
     ]);
   });
 
