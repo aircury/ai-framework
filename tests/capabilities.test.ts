@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import {
   createCapabilityProfile,
+  FRAMEWORK_MAINTAINED_NOTICE,
   getCapabilities,
   getCapabilityById,
   getCapabilityFiles,
@@ -182,6 +183,7 @@ describe("capabilities", () => {
       createCapabilityProfile(["frontend"], { britishEnglish: true }),
     ).toEqual({
       version: 2,
+      _notice: FRAMEWORK_MAINTAINED_NOTICE,
       capabilities: ["frontend", "language"],
       language: {
         britishEnglish: true,

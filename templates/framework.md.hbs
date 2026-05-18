@@ -1,5 +1,7 @@
 # FRAMEWORK.md
 
+> This file is maintained by Aircury AI Framework. Do not edit it directly. Add project-specific rules in FRAMEWORK.local.md.
+
 ## Purpose
 
 This framework defines the core workflow, specification, and agent-routing rules for repositories that adopt it.
@@ -7,6 +9,10 @@ This framework defines the core workflow, specification, and agent-routing rules
 Optional standards are composed at install time so teams can keep the shared delivery model while choosing the engineering standards they actually want enforced.
 
 When tradeoffs appear, prefer maintainability, correctness, and explicit intent over hidden conventions or tool-driven shortcuts.
+
+## Project-Specific Instructions
+
+Use `FRAMEWORK.local.md` as the official repository-local companion file for project-specific instructions, additions, and overrides. Install and update operations do not manage or overwrite that file.
 
 ## Core Workflow Constitution
 
@@ -65,6 +71,7 @@ For any non-trivial change:
 Before starting any task:
 
 - Read `FRAMEWORK.md` in full if you have not already done so in this session.
+- Read `FRAMEWORK.local.md` when it exists and apply its project-specific instructions alongside this framework.
 - Read the relevant specs in `specs/features/` that relate to the area you are changing.
 {{#if includesCapabilityDetails}}
 - Read the linked capability docs in `docs/aircury/capabilities/` for the enabled standards that apply to your task.
