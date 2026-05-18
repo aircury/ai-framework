@@ -224,6 +224,23 @@ describe("getLocalFiles", () => {
     );
   });
 
+  it("always includes core engineering non-negotiables", () => {
+    const files = getLocalFiles([], []);
+    const framework = getFileByPath(files, "FRAMEWORK.md");
+
+    expect(framework.content).toContain("## Engineering Non-Negotiables");
+    expect(framework.content).toContain(
+      "TDD is the default implementation discipline",
+    );
+    expect(framework.content).toContain(
+      "SOLID principles are mandatory design constraints",
+    );
+    expect(framework.content).toContain("Clean Code is mandatory");
+    expect(framework.content).toContain(
+      "Architecture boundaries must remain explicit",
+    );
+  });
+
   it("keeps AGENTS.md focused on the framework reference", () => {
     const withCapabilities = getLocalFiles(
       [],
@@ -261,6 +278,7 @@ describe("getLocalFiles", () => {
     expect(framework.content).toContain(
       "docs/aircury/capabilities/token-efficiency.md",
     );
+    expect(framework.content).toContain("## Engineering Non-Negotiables");
     expect(framework.content).not.toContain("## TDD Workflow");
     expect(framework.content).not.toContain(
       "## Non-Negotiable Architecture Rules",

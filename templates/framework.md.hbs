@@ -25,6 +25,18 @@ The following rules apply to every installation profile:
 - Before starting any non-trivial change, the agent MUST act as a routing meta-agent and ask the user how to proceed.
 - Optional standards are enabled through `.aircury/framework.config.json`.
 
+## Engineering Non-Negotiables
+
+These rules apply to every installation profile, regardless of selected capabilities:
+
+- TDD is the default implementation discipline when automated testing is feasible: write or update a failing test for one observable behaviour, make it pass with the smallest correct change, then refactor while keeping tests green.
+- Do not bypass TDD for bugs, business logic, regressions, contracts, or high-risk behaviour unless the user explicitly accepts that automated coverage is not feasible.
+- SOLID principles are mandatory design constraints: keep responsibilities focused, dependencies explicit and substitutable, interfaces narrow, and high-level policy independent from low-level details.
+- Clean Code is mandatory: use intention-revealing names, simple control flow, cohesive functions, clear errors, and code that can be reviewed without decoding hidden conventions.
+- Architecture boundaries must remain explicit. UI, transport, persistence, framework, and vendor details must not leak into core business rules.
+- Prefer the simplest design that preserves correctness and future change. Do not add speculative abstractions, dead code, broad public APIs, or clever indirection.
+- Any exception to these rules must be called out with the tradeoff and verification that makes the exception safe.
+
 ## Installed Capabilities
 
 {{#if installedCapabilities}}
@@ -66,9 +78,10 @@ For any non-trivial change:
 2. Define or confirm the public behaviour.
 3. Choose the workflow mode with the user through meta-agent routing.
 4. Implement inside the selected standards profile.
-5. Refactor for clarity and boundary enforcement.
-6. Run relevant verification, then broader checks.
-7. Prepare atomic working tree changes and summarise what is ready for review.
+5. Follow the engineering non-negotiables: TDD where feasible, SOLID design, Clean Code, and explicit boundaries.
+6. Refactor for clarity and boundary enforcement.
+7. Run relevant verification, then broader checks.
+8. Prepare atomic working tree changes and summarise what is ready for review.
 
 ## Agent Operating Rules
 
@@ -97,6 +110,8 @@ While executing work:
 - Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy unless an external interface requires a different spelling.
 {{/if}}
 - All observable behaviour changes MUST update `specs/features/` before the work is done.
+- Follow TDD for observable behaviour changes when automated testing is feasible: failing test, minimum implementation, refactor.
+- Preserve SOLID design, Clean Code, and explicit architecture boundaries in every change.
 - Use the `commit-changes` skill only when the user asks you to create commits. When committing, organise changes into atomic Conventional Commits; until then, keep changes organised in the working tree for review.
 - After the user selects a workflow mode, follow `FRAMEWORK.md § Mode execution rules` exactly.
 - Selecting `plan-build` authorises planning first, not automatic implementation.
@@ -159,8 +174,10 @@ Once the user selects a mode, the agent MUST follow that mode strictly. Do not m
 A change is not done unless all of the following are true:
 
 - Relevant verification has been run for the affected scope.
+- TDD was followed where automated testing was feasible, or the exception is explicit and justified.
 - Naming matches the chosen problem language of the project.
-- No unnecessary abstractions or framework leakage were introduced.
+- SOLID, Clean Code, and explicit architecture boundaries were preserved.
+- No unnecessary abstractions, dead code, or framework leakage were introduced.
 - Relevant spec in `specs/features/` reflects the current behaviour.
 {{#if includesTesting}}
 - Relevant behaviour is covered by tests.

@@ -6,7 +6,7 @@ The Aircury AI Framework is a meta-routing framework for AI-assisted software en
 
 You normally do not choose a mode. Ask for the work you need, and the framework tells the agent whether to use `plan-build`, OpenSpec, Spec Kit, or a direct implementation flow. Only specify a mode when you explicitly want to force that workflow.
 
-It also installs project rules, agent entrypoints, living specification folders, optional engineering standards, and curated skills while separating a shared workflow constitution from installable capabilities.
+It also installs project rules, agent entrypoints, living specification folders, mandatory engineering non-negotiables, optional standards, and curated skills while separating a shared workflow constitution from installable capabilities.
 
 ## Why Aircury
 
@@ -35,6 +35,8 @@ The TUI asks for:
 4. **Capabilities** — choose the workflows and standards this installation should include.
 
 If files already exist, the installer asks whether to skip or overwrite them. Skills are installed through the skills ecosystem with `npx` or `bunx`, so they can be updated later.
+
+Every local installation includes non-negotiable engineering rules in `FRAMEWORK.md`: TDD where automated testing is feasible, SOLID design constraints, Clean Code, explicit architecture boundaries, and justified tradeoffs for any exception.
 
 ## Install From A Local Branch
 
