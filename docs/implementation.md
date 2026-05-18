@@ -49,6 +49,8 @@ Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and Open
 
 Capabilities are defined in `src/capabilities.ts`. A capability is the unit users select in the installer. Each capability can contribute generated framework content, generated files, installable skills, or any combination of those.
 
+Capabilities are additive. Local installations always include core engineering non-negotiables in `FRAMEWORK.md`, even when optional capabilities are not selected: TDD where automated testing is feasible, SOLID design constraints, Clean Code, explicit architecture boundaries, and explicit justification for safe exceptions.
+
 Some capabilities compose internal standard modules from `standards/modules/<module-id>/`. Those modules are implementation details, not separate installer choices.
 
 Each content module contains:
