@@ -78,10 +78,19 @@ const FRAMEWORK_REFERENCE_SENTENCE =
   "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).";
 const MERGEABLE_FRAMEWORK_ENTRYPOINTS = new Set(["AGENTS.md", "CLAUDE.md"]);
 const CURSOR_RULES_PATH = ".cursorrules";
+const FRAMEWORK_LOCAL_PATH = "FRAMEWORK.local.md";
 const AGENTS_FRAMEWORK_SECTION_HEADING = "## Framework";
 const AGENTS_FRAMEWORK_SECTION_NOTICE =
   "> Framework-managed section. Add project-specific instructions outside this section.";
 const CURSOR_COMMIT_RULES_HEADING = "## Aircury Commit Rules";
+const FRAMEWORK_LOCAL_CONTENT = `# FRAMEWORK.local.md
+
+Project-specific instructions, additions, and overrides for this repository.
+
+This file is intentionally local to the project. Aircury AI Framework installs it as a starter file but never overwrites it during updates.
+
+Add repository-specific rules below.
+`;
 const CURSOR_COMMIT_RULES_SECTION = `## Aircury Commit Rules
 
 ${FRAMEWORK_MAINTAINED_NOTICE}
@@ -107,6 +116,10 @@ export function isMergeableCursorRules(path: string): boolean {
   return path === CURSOR_RULES_PATH;
 }
 
+export function isProtectedLocalCompanion(path: string): boolean {
+  return path === FRAMEWORK_LOCAL_PATH;
+}
+
 function getBaseFiles(): InstallFile[] {
   return [
     {
@@ -130,6 +143,11 @@ export function getLocalFiles(
       path: "FRAMEWORK.md",
       content: generateFramework(profile.capabilities, options),
       description: "Framework rules (source of truth)",
+    },
+    {
+      path: FRAMEWORK_LOCAL_PATH,
+      content: FRAMEWORK_LOCAL_CONTENT,
+      description: "Project-specific framework instructions",
     },
     {
       path: "AGENTS.md",
@@ -313,6 +331,14 @@ export function writeFile(
   isGlobal: boolean,
 ): void {
   const fullPath = isGlobal ? file.path : join(cwd, file.path);
+  if (
+    !isGlobal &&
+    isProtectedLocalCompanion(file.path) &&
+    existsSync(fullPath)
+  ) {
+    return;
+  }
+
   if (
     !isGlobal &&
     isMergeableFrameworkEntrypoint(file.path) &&
