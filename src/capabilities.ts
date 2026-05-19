@@ -413,6 +413,11 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
         skillName: "commit-changes",
         scopes: ["local", "global"],
       },
+      {
+        source: "aircury/ai-framework",
+        skillName: "requesting-code-review",
+        scopes: ["local", "global"],
+      },
     ],
   },
   architecture: {

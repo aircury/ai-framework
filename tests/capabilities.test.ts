@@ -75,6 +75,7 @@ describe("capabilities", () => {
       "open-spec-complete",
       "open-spec-explore",
       "commit-changes",
+      "requesting-code-review",
       "clean-ddd-hexagonal",
       "frontend-layout-extractor",
       "frontend-experience-extractor",

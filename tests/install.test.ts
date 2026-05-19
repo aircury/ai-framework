@@ -155,6 +155,7 @@ describe("getLocalCommands", () => {
     expect(aircury.args).toContain("spec-kit-specify");
     expect(aircury.args).toContain("airsync");
     expect(aircury.args).toContain("commit-changes");
+    expect(aircury.args).toContain("requesting-code-review");
     expect(aircury.args).toContain("frontend-layout-extractor");
     expect(aircury.args).toContain("specs-extractor");
     expect(
@@ -195,6 +196,8 @@ describe("getLocalCommands", () => {
       "aircury/ai-framework",
       "--skill",
       "commit-changes",
+      "--skill",
+      "requesting-code-review",
       "-a",
       "universal",
       "-a",
@@ -248,6 +251,9 @@ describe("getGlobalCommands", () => {
     );
     expect(getCommandBySource(commands, "aircury/ai-framework").args).toContain(
       "commit-changes",
+    );
+    expect(getCommandBySource(commands, "aircury/ai-framework").args).toContain(
+      "requesting-code-review",
     );
   });
 
