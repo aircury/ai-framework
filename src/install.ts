@@ -7,6 +7,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   type CapabilityId,
   type CapabilityScope,
@@ -51,7 +52,8 @@ let cachedSkillsRunner: SkillsRunner | null = null;
 const AIRCURY_SKILLS_SOURCE = "aircury/ai-framework";
 
 function getLocalAircurySkillsSource(): string | null {
-  const root = join(import.meta.dir, "..");
+  const moduleDir = dirname(fileURLToPath(import.meta.url));
+  const root = join(moduleDir, "..");
 
   if (existsSync(join(root, "src")) && existsSync(join(root, "skills"))) {
     return root;
