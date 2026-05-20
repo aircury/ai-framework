@@ -53,6 +53,11 @@ const ARCHITECTURE_CAPABILITY_OPTIONS: {
     label: "Layered Architecture",
     hint: "controllers, services, and repositories",
   },
+  {
+    value: "custom-architecture",
+    label: "Custom Architecture",
+    hint: "discover and document this project's real architecture",
+  },
 ];
 
 const ARCHITECTURE_CAPABILITY_IDS = ARCHITECTURE_CAPABILITY_OPTIONS.map(
