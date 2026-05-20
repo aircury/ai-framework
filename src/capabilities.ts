@@ -25,6 +25,15 @@ import codeStyleFramework from "../standards/modules/code-style/framework.md" wi
 import codeStyleManifest from "../standards/modules/code-style/module.json" with {
   type: "json",
 };
+import customArchitectureAgents from "../standards/modules/custom-architecture/agents.md" with {
+  type: "text",
+};
+import customArchitectureFramework from "../standards/modules/custom-architecture/framework.md" with {
+  type: "text",
+};
+import customArchitectureManifest from "../standards/modules/custom-architecture/module.json" with {
+  type: "json",
+};
 import dddAgents from "../standards/modules/ddd/agents.md" with {
   type: "text",
 };
@@ -128,6 +137,7 @@ type StandardModuleId =
   | "ddd-hexagonal"
   | "clean-architecture"
   | "layered-architecture"
+  | "custom-architecture"
   | "ddd"
   | "code-style"
   | "airsync-memory"
@@ -145,6 +155,7 @@ export type CapabilityId =
   | "ddd-hexagonal"
   | "clean-architecture"
   | "layered-architecture"
+  | "custom-architecture"
   | "decision-records"
   | "testing"
   | "code-style"
@@ -254,6 +265,13 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
       layeredArchitectureManifest as StandardManifest,
       layeredArchitectureFramework,
       layeredArchitectureAgents,
+    ),
+  },
+  "custom-architecture": {
+    ...createStandardModule(
+      customArchitectureManifest as StandardManifest,
+      customArchitectureFramework,
+      customArchitectureAgents,
     ),
   },
   ddd: {
@@ -520,6 +538,24 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
     scopes: ["local", "global"],
     ...composeModules(["layered-architecture"]),
   },
+  "custom-architecture": {
+    id: "custom-architecture",
+    label: "Custom Architecture",
+    hint: "discover and document this project's real architecture",
+    description:
+      "Custom architecture discovery that records project-specific boundaries in FRAMEWORK.local.md",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    ...composeModules(["custom-architecture"]),
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "custom-architecture",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
   "decision-records": {
     id: "decision-records",
     label: "ADRs",
@@ -677,6 +713,7 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "ddd-hexagonal",
   "clean-architecture",
   "layered-architecture",
+  "custom-architecture",
   "decision-records",
   "testing",
   "code-style",
@@ -691,6 +728,7 @@ const EXCLUSIVE_ARCHITECTURE_CAPABILITIES: CapabilityId[] = [
   "ddd-hexagonal",
   "clean-architecture",
   "layered-architecture",
+  "custom-architecture",
 ];
 
 function normalizeExclusiveArchitectures(

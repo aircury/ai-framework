@@ -135,6 +135,12 @@ describe("templates", () => {
       expect(generateFramework(["layered-architecture"])).toContain(
         "docs/aircury/capabilities/layered-architecture.md",
       );
+      expect(generateFramework(["custom-architecture"])).toContain(
+        "docs/aircury/capabilities/custom-architecture.md",
+      );
+      expect(generateFramework(["custom-architecture"])).toContain(
+        "The project-specific architecture source of truth is `FRAMEWORK.local.md` under `## Project Architecture`.",
+      );
       expect(generateFramework([])).not.toContain(
         "docs/aircury/capabilities/ddd-hexagonal.md",
       );
@@ -143,6 +149,12 @@ describe("templates", () => {
       );
       expect(generateFramework([])).not.toContain(
         "docs/aircury/capabilities/layered-architecture.md",
+      );
+      expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/custom-architecture.md",
+      );
+      expect(generateFramework([])).not.toContain(
+        "The project-specific architecture source of truth is `FRAMEWORK.local.md`",
       );
       expect(generateFramework(["ddd-hexagonal"])).not.toContain(
         "## Non-Negotiable Architecture Rules",
@@ -169,6 +181,15 @@ describe("templates", () => {
         "Clean Architecture dependencies still point inward",
       );
       expect(generateFramework(["layered-architecture"])).not.toContain(
+        "DDD and hexagonal architecture boundaries still hold.",
+      );
+      expect(generateFramework(["custom-architecture"])).toContain(
+        "The project-specific architecture section in `FRAMEWORK.local.md` exists",
+      );
+      expect(generateFramework(["custom-architecture"])).not.toContain(
+        "Clean Architecture dependencies still point inward",
+      );
+      expect(generateFramework(["custom-architecture"])).not.toContain(
         "DDD and hexagonal architecture boundaries still hold.",
       );
     });

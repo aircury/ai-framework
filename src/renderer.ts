@@ -26,6 +26,7 @@ interface RendererViewModel {
   includesDddHexagonalArchitecture: boolean;
   includesCleanArchitecture: boolean;
   includesLayeredArchitecture: boolean;
+  includesCustomArchitecture: boolean;
   includesCodeStyle: boolean;
   includesAirsyncMemory: boolean;
   includesErrorHandling: boolean;
@@ -68,6 +69,7 @@ function createViewModel(
     includesDddHexagonalArchitecture: selectedIds.has("ddd-hexagonal"),
     includesCleanArchitecture: selectedIds.has("clean-architecture"),
     includesLayeredArchitecture: selectedIds.has("layered-architecture"),
+    includesCustomArchitecture: selectedIds.has("custom-architecture"),
     includesCodeStyle: selectedIds.has("code-style"),
     includesAirsyncMemory: selectedModuleIds.has("airsync-memory"),
     includesErrorHandling: selectedModuleIds.has("error-handling"),

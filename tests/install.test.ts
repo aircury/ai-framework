@@ -328,6 +328,20 @@ describe("getLocalCommands", () => {
     ).toBe(false);
   });
 
+  it("installs the custom architecture skill only for Custom Architecture", () => {
+    const customCommands = getLocalCommands([], ["custom-architecture"]);
+    expect(
+      getCommandBySource(customCommands, aircurySkillsSource).args,
+    ).toContain("custom-architecture");
+
+    const cleanCommands = getLocalCommands([], ["clean-architecture"]);
+    expect(
+      cleanCommands.some((command) =>
+        command.args.includes("custom-architecture"),
+      ),
+    ).toBe(false);
+  });
+
   it("does not install the hexagonal skill from defaults", () => {
     const commands = getLocalCommands([], getInitialCapabilityIds("local"));
 

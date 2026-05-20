@@ -54,6 +54,7 @@ describe("capabilities", () => {
       "ddd-hexagonal",
       "clean-architecture",
       "layered-architecture",
+      "custom-architecture",
       "testing",
       "frontend",
       "token-efficiency",
@@ -136,6 +137,20 @@ describe("capabilities", () => {
       "## Layered Architecture Rules",
     );
 
+    expect(getCapabilityById("custom-architecture")).toMatchObject({
+      label: "Custom Architecture",
+      category: "engineering",
+      modules: ["custom-architecture"],
+    });
+    expect(getCapabilityById("custom-architecture").framework).toContain(
+      "## Custom Architecture Rules",
+    );
+    expect(
+      getCapabilityById("custom-architecture").skills?.map(
+        (skill) => skill.skillName,
+      ),
+    ).toEqual(["custom-architecture"]);
+
     expect(getCapabilityById("testing")).toMatchObject({
       modules: ["testing"],
     });
@@ -201,14 +216,18 @@ describe("capabilities", () => {
         "ddd-hexagonal",
         "clean-architecture",
         "layered-architecture",
+        "custom-architecture",
       ]),
-    ).toEqual(["layered-architecture"]);
+    ).toEqual(["custom-architecture"]);
     expect(
       resolveCapabilityIds(["clean-architecture", "ddd-hexagonal"]),
     ).toEqual(["ddd-hexagonal"]);
     expect(
       resolveCapabilityIds(["layered-architecture", "clean-architecture"]),
     ).toEqual(["clean-architecture"]);
+    expect(
+      resolveCapabilityIds(["custom-architecture", "ddd-hexagonal"]),
+    ).toEqual(["ddd-hexagonal"]);
   });
 
   it("does not preselect an architecture capability", () => {
@@ -218,8 +237,10 @@ describe("capabilities", () => {
     expect(localDefaults).not.toContain("ddd-hexagonal");
     expect(localDefaults).not.toContain("clean-architecture");
     expect(localDefaults).not.toContain("layered-architecture");
+    expect(localDefaults).not.toContain("custom-architecture");
     expect(globalDefaults).not.toContain("ddd-hexagonal");
     expect(globalDefaults).not.toContain("clean-architecture");
     expect(globalDefaults).not.toContain("layered-architecture");
+    expect(globalDefaults).not.toContain("custom-architecture");
   });
 });
