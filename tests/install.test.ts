@@ -16,6 +16,7 @@ import {
 } from "../src/capabilities";
 import {
   checkConflicts,
+  compareSkillVersions,
   getAircurySkillsSource,
   getGlobalCommands,
   getGlobalFiles,
@@ -25,6 +26,7 @@ import {
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
   mergeFrameworkReferenceIntoAgents,
+  readSkillVersion,
   runCommand,
   syncClaudeCodeSkills,
   writeFile,
@@ -742,6 +744,48 @@ describe("isProtectedLocalCompanion", () => {
     );
     expect(isProtectedLocalCompanion("FRAMEWORK.local.md")).toBe(false);
     expect(isProtectedLocalCompanion("FRAMEWORK.md")).toBe(false);
+  });
+});
+
+describe("skill versions", () => {
+  it("reads metadata.version from skill frontmatter", () => {
+    const dir = `${tmpdir()}/sdd-skill-version-${Date.now()}`;
+    const skillPath = join(dir, "SKILL.md");
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      skillPath,
+      `---\nname: example\nmetadata:\n  author: Aircury\n  version: "1.2.3"\n---\n`,
+      "utf-8",
+    );
+
+    expect(readSkillVersion(skillPath)).toBe("1.2.3");
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("returns null when a skill version is missing", () => {
+    const dir = `${tmpdir()}/sdd-skill-version-missing-${Date.now()}`;
+    const skillPath = join(dir, "SKILL.md");
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(skillPath, `---\nname: example\n---\n`, "utf-8");
+
+    expect(readSkillVersion(skillPath)).toBeNull();
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("compares equal numeric skill versions", () => {
+    expect(compareSkillVersions("1.0", "1.0.0")).toBe("equal");
+  });
+
+  it("compares greater and lower numeric skill versions", () => {
+    expect(compareSkillVersions("1.2.0", "1.1.9")).toBe("left-greater");
+    expect(compareSkillVersions("1.0.0", "1.0.1")).toBe("right-greater");
+  });
+
+  it("treats missing and unparsable versions as unknown", () => {
+    expect(compareSkillVersions(null, "1.0.0")).toBe("unknown");
+    expect(compareSkillVersions("next", "1.0.0")).toBe("unknown");
   });
 });
 

@@ -47,6 +47,12 @@ export interface ClaudeSkillsSyncResult {
   missing: string[];
 }
 
+export type SkillVersionOrder =
+  | "equal"
+  | "left-greater"
+  | "right-greater"
+  | "unknown";
+
 type SkillsRunner = "npx" | "bunx";
 let cachedSkillsRunner: SkillsRunner | null = null;
 
@@ -101,6 +107,65 @@ export function isMergeableFrameworkEntrypoint(path: string): boolean {
 
 export function isProtectedLocalCompanion(path: string): boolean {
   return path === FRAMEWORK_LOCAL_PATH;
+}
+
+export function readSkillVersion(skillPath: string): string | null {
+  if (!existsSync(skillPath)) return null;
+
+  return parseSkillVersion(readFileSync(skillPath, "utf-8"));
+}
+
+function parseSkillVersion(content: string): string | null {
+  const lines = content.split(/\r?\n/);
+  if (lines[0]?.trim() !== "---") return null;
+
+  let inMetadata = false;
+  for (const line of lines.slice(1)) {
+    if (line.trim() === "---") return null;
+
+    if (/^metadata:\s*$/.test(line)) {
+      inMetadata = true;
+      continue;
+    }
+
+    if (inMetadata && /^\S/.test(line)) {
+      inMetadata = false;
+    }
+
+    if (!inMetadata) continue;
+
+    const match = /^\s+version:\s*["']?([^"'\s]+)["']?\s*$/.exec(line);
+    if (match) return match[1];
+  }
+
+  return null;
+}
+
+export function compareSkillVersions(
+  left: string | null,
+  right: string | null,
+): SkillVersionOrder {
+  const leftParts = parseNumericVersion(left);
+  const rightParts = parseNumericVersion(right);
+
+  if (!leftParts || !rightParts) return "unknown";
+
+  const length = Math.max(leftParts.length, rightParts.length);
+  for (let index = 0; index < length; index++) {
+    const leftPart = leftParts[index] ?? 0;
+    const rightPart = rightParts[index] ?? 0;
+
+    if (leftPart > rightPart) return "left-greater";
+    if (leftPart < rightPart) return "right-greater";
+  }
+
+  return "equal";
+}
+
+function parseNumericVersion(version: string | null): number[] | null {
+  if (!version || !/^\d+(\.\d+)*$/.test(version)) return null;
+
+  return version.split(".").map((part) => Number(part));
 }
 
 function getBaseFiles(): InstallFile[] {
