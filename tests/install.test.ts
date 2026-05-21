@@ -492,6 +492,7 @@ describe("getLocalCommands", () => {
     expect(commands[0].args).toContain("specs-interpreter");
     expect(commands[0].args).toContain("semantic-line-breaks");
     expect(commands[0].args).toContain("dbml-database-docs");
+    expect(commands[0].args).toContain("local-customization");
   });
 
   it("installs the frontend skills from the Aircury source", () => {

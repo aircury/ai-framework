@@ -703,6 +703,11 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
         skillName: "dbml-database-docs",
         scopes: ["local", "global"],
       },
+      {
+        source: "aircury/ai-framework",
+        skillName: "local-customization",
+        scopes: ["local", "global"],
+      },
     ],
   },
   language: {

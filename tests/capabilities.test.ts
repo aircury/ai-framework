@@ -84,6 +84,7 @@ describe("capabilities", () => {
       "specs-interpreter",
       "semantic-line-breaks",
       "dbml-database-docs",
+      "local-customization",
     ]);
   });
 
