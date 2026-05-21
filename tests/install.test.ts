@@ -60,16 +60,18 @@ describe("getLocalFiles", () => {
     expect(paths).toContain("AGENTS.md");
     expect(paths).toContain(".aircury/framework.config.json");
     expect(paths).toContain("specs/features/README.md");
-    expect(paths).toContain("FRAMEWORK.local.md");
+    expect(paths).toContain(".localRules/framework.local.md");
   });
 
-  it("installs FRAMEWORK.local.md as an editable local companion", () => {
+  it("installs .localRules/framework.local.md as an editable local companion", () => {
     const files = getLocalFiles([]);
-    const local = getFileByPath(files, "FRAMEWORK.local.md");
+    const local = getFileByPath(files, ".localRules/framework.local.md");
 
     expect(local.description).toBe("Project-specific framework instructions");
     expect(local.content).toContain("Project-specific instructions");
+    expect(local.content).toContain("versioned with the project");
     expect(local.content).toContain("never overwrites it during updates");
+    expect(local.content).toContain(".localRules/skills/<skill-name>/");
     expect(local.content).not.toContain(FRAMEWORK_MAINTAINED_NOTICE);
   });
 
@@ -89,12 +91,12 @@ describe("getLocalFiles", () => {
     expect(capability.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
   });
 
-  it("preserves an existing FRAMEWORK.local.md during install writes", () => {
+  it("preserves an existing .localRules/framework.local.md during install writes", () => {
     const dir = `${tmpdir()}/sdd-framework-local-${Date.now()}`;
-    const localPath = join(dir, "FRAMEWORK.local.md");
+    const localPath = join(dir, ".localRules", "framework.local.md");
     const localContent = "# Local framework rules\n\nKeep this.";
 
-    mkdirSync(dir, { recursive: true });
+    mkdirSync(join(dir, ".localRules"), { recursive: true });
     writeFileSync(localPath, localContent, "utf-8");
 
     for (const file of getLocalFiles([])) {
@@ -734,8 +736,11 @@ describe("isMergeableFrameworkEntrypoint", () => {
 });
 
 describe("isProtectedLocalCompanion", () => {
-  it("marks FRAMEWORK.local.md as protected", () => {
-    expect(isProtectedLocalCompanion("FRAMEWORK.local.md")).toBe(true);
+  it("marks .localRules/framework.local.md as protected", () => {
+    expect(isProtectedLocalCompanion(".localRules/framework.local.md")).toBe(
+      true,
+    );
+    expect(isProtectedLocalCompanion("FRAMEWORK.local.md")).toBe(false);
     expect(isProtectedLocalCompanion("FRAMEWORK.md")).toBe(false);
   });
 });

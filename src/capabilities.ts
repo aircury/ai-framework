@@ -218,7 +218,7 @@ interface StandardModule {
 }
 
 export const FRAMEWORK_MAINTAINED_NOTICE =
-  "This file is maintained by Aircury AI Framework. Do not edit it directly. Add project-specific rules in FRAMEWORK.local.md.";
+  "This file is maintained by Aircury AI Framework. Do not edit it directly. Add project-specific rules in .localRules/framework.local.md.";
 
 function createStandardModule(
   manifest: StandardManifest,
@@ -551,7 +551,7 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
     label: "Custom Architecture",
     hint: "discover and document this project's real architecture",
     description:
-      "Custom architecture discovery that records project-specific boundaries in FRAMEWORK.local.md",
+      "Custom architecture discovery that records project-specific boundaries in .localRules/framework.local.md",
     category: "engineering",
     defaultSelected: false,
     scopes: ["local", "global"],
