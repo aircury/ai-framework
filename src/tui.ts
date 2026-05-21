@@ -15,7 +15,6 @@ import {
   getGlobalFiles,
   getLocalCommands,
   getLocalFiles,
-  isMergeableCursorRules,
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
   runCommand,
@@ -115,11 +114,6 @@ export async function run(): Promise<void> {
             value: "claude-code",
             label: "Claude Code",
             hint: "CLAUDE.md + .claude/skills/",
-          },
-          {
-            value: "cursor",
-            label: "Cursor",
-            hint: ".cursorrules",
           },
           { value: "gemini-cli", label: "Gemini CLI", hint: "GEMINI.md" },
         ];
@@ -346,11 +340,7 @@ export async function run(): Promise<void> {
     if (
       exists &&
       overwrite === "skip" &&
-      !(
-        !isGlobal &&
-        (isMergeableFrameworkEntrypoint(file.path) ||
-          isMergeableCursorRules(file.path))
-      )
+      !(!isGlobal && isMergeableFrameworkEntrypoint(file.path))
     ) {
       skipped++;
       continue;

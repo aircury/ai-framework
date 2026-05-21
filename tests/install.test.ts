@@ -22,10 +22,8 @@ import {
   getLocalCommands,
   getLocalFiles,
   type InstallFile,
-  isMergeableCursorRules,
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
-  mergeCursorRules,
   mergeFrameworkReferenceIntoAgents,
   runCommand,
   syncClaudeCodeSkills,
@@ -76,22 +74,19 @@ describe("getLocalFiles", () => {
   });
 
   it("adds maintained-file warnings to strict framework files", () => {
-    const files = getLocalFiles(["cursor"], ["testing"]);
+    const files = getLocalFiles([], ["testing"]);
     const framework = getFileByPath(files, "FRAMEWORK.md");
     const config = getFileByPath(files, ".aircury/framework.config.json");
     const capability = getFileByPath(
       files,
       "docs/aircury/capabilities/testing.md",
     );
-    const cursorRules = getFileByPath(files, ".cursorrules");
 
     expect(framework.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
     expect(JSON.parse(config.content)._notice).toBe(
       FRAMEWORK_MAINTAINED_NOTICE,
     );
     expect(capability.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
-    expect(cursorRules.content).toContain("## Aircury Commit Rules");
-    expect(cursorRules.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
   });
 
   it("preserves an existing FRAMEWORK.local.md during install writes", () => {
@@ -149,18 +144,7 @@ describe("getLocalFiles", () => {
     expect(files.map((file) => file.path)).toContain("GEMINI.md");
   });
 
-  it("includes .cursorrules when Cursor is selected", () => {
-    const files = getLocalFiles(["cursor"]);
-    const cursorRules = getFileByPath(files, ".cursorrules");
-
-    expect(cursorRules.content).toContain("## Aircury Commit Rules");
-    expect(cursorRules.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
-    expect(cursorRules.content).toContain("Each commit must be atomic");
-    expect(cursorRules.content).toContain("<type>(<scope>): <description>");
-    expect(cursorRules.content).toContain("git log -1 --format=%B");
-  });
-
-  it("does not include .cursorrules when Cursor is not selected", () => {
+  it("does not include .cursorrules", () => {
     const files = getLocalFiles([]);
 
     expect(files.map((file) => file.path)).not.toContain(".cursorrules");
@@ -739,28 +723,6 @@ describe("writeFile", () => {
 
     rmSync(dir, { recursive: true });
   });
-
-  it("appends Cursor commit rules into an existing .cursorrules", () => {
-    const dir = `${tmpdir()}/sdd-cursor-rules-merge-${Date.now()}`;
-    const file = getFileByPath(getLocalFiles(["cursor"]), ".cursorrules");
-
-    writeFile(
-      {
-        path: ".cursorrules",
-        content: "# Existing Cursor Rules\n\nKeep existing project rules.",
-        description: "",
-      },
-      dir,
-      false,
-    );
-    writeFile(file, dir, false);
-
-    const content = readFileSync(join(dir, ".cursorrules"), "utf-8");
-    expect(content).toContain("Keep existing project rules.");
-    expect(content).toContain("## Aircury Commit Rules");
-
-    rmSync(dir, { recursive: true });
-  });
 });
 
 describe("isMergeableFrameworkEntrypoint", () => {
@@ -768,13 +730,6 @@ describe("isMergeableFrameworkEntrypoint", () => {
     expect(isMergeableFrameworkEntrypoint("AGENTS.md")).toBe(true);
     expect(isMergeableFrameworkEntrypoint("CLAUDE.md")).toBe(true);
     expect(isMergeableFrameworkEntrypoint("GEMINI.md")).toBe(false);
-  });
-});
-
-describe("isMergeableCursorRules", () => {
-  it("marks .cursorrules as mergeable", () => {
-    expect(isMergeableCursorRules(".cursorrules")).toBe(true);
-    expect(isMergeableCursorRules(".cursor/rules/rule.mdc")).toBe(false);
   });
 });
 
@@ -929,38 +884,5 @@ describe("mergeFrameworkReferenceIntoAgents", () => {
     expect(merged).toContain(
       "This project follows the Aircury engineering framework",
     );
-  });
-});
-
-describe("mergeCursorRules", () => {
-  const cursorRules = getFileByPath(
-    getLocalFiles(["cursor"]),
-    ".cursorrules",
-  ).content;
-
-  it("appends Cursor commit rules when missing", () => {
-    const merged = mergeCursorRules(
-      "# Existing\n\nExisting Cursor rules.",
-      cursorRules,
-    );
-
-    expect(merged).toContain("Existing Cursor rules.");
-    expect(merged).toContain("## Aircury Commit Rules");
-  });
-
-  it("does not duplicate Cursor commit rules", () => {
-    const existing = `# Existing\n\n${cursorRules}`;
-    const merged = mergeCursorRules(existing, cursorRules);
-
-    expect(merged).toBe(existing.endsWith("\n") ? existing : `${existing}\n`);
-  });
-
-  it("adds the maintained-file warning to an existing Aircury commit rules section", () => {
-    const existing = `# Existing\n\n## Aircury Commit Rules\n\n- Existing managed rule.`;
-    const merged = mergeCursorRules(existing, cursorRules);
-
-    expect(merged).toContain("## Aircury Commit Rules");
-    expect(merged).toContain(FRAMEWORK_MAINTAINED_NOTICE);
-    expect(merged).toContain("- Existing managed rule.");
   });
 });
