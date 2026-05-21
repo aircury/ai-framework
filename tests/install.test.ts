@@ -22,6 +22,7 @@ import {
   getGlobalFiles,
   getLocalCommands,
   getLocalFiles,
+  getLocalSkillOverrides,
   type InstallFile,
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
@@ -786,6 +787,92 @@ describe("skill versions", () => {
   it("treats missing and unparsable versions as unknown", () => {
     expect(compareSkillVersions(null, "1.0.0")).toBe("unknown");
     expect(compareSkillVersions("next", "1.0.0")).toBe("unknown");
+  });
+});
+
+describe("getLocalSkillOverrides", () => {
+  it("detects a selected skill override with SKILL.md", () => {
+    const dir = `${tmpdir()}/sdd-local-skill-override-${Date.now()}`;
+    const skillDir = join(dir, ".localRules", "skills", "commit-changes");
+    mkdirSync(skillDir, { recursive: true });
+    writeFileSync(join(skillDir, "SKILL.md"), "# Local Commit", "utf-8");
+
+    const overrides = getLocalSkillOverrides(dir, [
+      {
+        source: "aircury/ai-framework",
+        skillName: "commit-changes",
+        scopes: ["local"],
+      },
+    ]);
+
+    expect(overrides).toEqual([
+      {
+        skill: {
+          source: "aircury/ai-framework",
+          skillName: "commit-changes",
+          scopes: ["local"],
+        },
+        path: skillDir,
+        skillPath: join(skillDir, "SKILL.md"),
+      },
+    ]);
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("ignores selected skills without local overrides", () => {
+    const dir = `${tmpdir()}/sdd-local-skill-override-missing-${Date.now()}`;
+    mkdirSync(dir, { recursive: true });
+
+    expect(
+      getLocalSkillOverrides(dir, [
+        {
+          source: "aircury/ai-framework",
+          skillName: "commit-changes",
+          scopes: ["local"],
+        },
+      ]),
+    ).toEqual([]);
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("ignores override folders without SKILL.md", () => {
+    const dir = `${tmpdir()}/sdd-local-skill-override-empty-${Date.now()}`;
+    mkdirSync(join(dir, ".localRules", "skills", "commit-changes"), {
+      recursive: true,
+    });
+
+    expect(
+      getLocalSkillOverrides(dir, [
+        {
+          source: "aircury/ai-framework",
+          skillName: "commit-changes",
+          scopes: ["local"],
+        },
+      ]),
+    ).toEqual([]);
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("only detects overrides for selected skills", () => {
+    const dir = `${tmpdir()}/sdd-local-skill-override-selected-${Date.now()}`;
+    const skillDir = join(dir, ".localRules", "skills", "commit-changes");
+    mkdirSync(skillDir, { recursive: true });
+    writeFileSync(join(skillDir, "SKILL.md"), "# Local Commit", "utf-8");
+
+    expect(
+      getLocalSkillOverrides(dir, [
+        {
+          source: "aircury/ai-framework",
+          skillName: "frontend-ui-workflow",
+          scopes: ["local"],
+        },
+      ]),
+    ).toEqual([]);
+
+    rmSync(dir, { recursive: true });
   });
 });
 

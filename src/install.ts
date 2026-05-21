@@ -47,6 +47,12 @@ export interface ClaudeSkillsSyncResult {
   missing: string[];
 }
 
+export interface LocalSkillOverride {
+  skill: CapabilitySkill;
+  path: string;
+  skillPath: string;
+}
+
 export type SkillVersionOrder =
   | "equal"
   | "left-greater"
@@ -87,6 +93,7 @@ const FRAMEWORK_REFERENCE_SENTENCE =
   "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).";
 const MERGEABLE_FRAMEWORK_ENTRYPOINTS = new Set(["AGENTS.md", "CLAUDE.md"]);
 const FRAMEWORK_LOCAL_PATH = ".localRules/framework.local.md";
+const LOCAL_SKILLS_PATH = ".localRules/skills";
 const AGENTS_FRAMEWORK_SECTION_HEADING = "## Framework";
 const AGENTS_FRAMEWORK_SECTION_NOTICE =
   "> Framework-managed section. Add project-specific instructions outside this section.";
@@ -166,6 +173,27 @@ function parseNumericVersion(version: string | null): number[] | null {
   if (!version || !/^\d+(\.\d+)*$/.test(version)) return null;
 
   return version.split(".").map((part) => Number(part));
+}
+
+export function getLocalSkillOverrides(
+  cwd: string,
+  skills: CapabilitySkill[],
+): LocalSkillOverride[] {
+  const overrides: LocalSkillOverride[] = [];
+  const seenSkillNames = new Set<string>();
+
+  for (const skill of skills) {
+    if (seenSkillNames.has(skill.skillName)) continue;
+    seenSkillNames.add(skill.skillName);
+
+    const path = join(cwd, LOCAL_SKILLS_PATH, skill.skillName);
+    const skillPath = join(path, "SKILL.md");
+    if (!existsSync(skillPath)) continue;
+
+    overrides.push({ skill, path, skillPath });
+  }
+
+  return overrides;
 }
 
 function getBaseFiles(): InstallFile[] {
