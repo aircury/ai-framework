@@ -4,6 +4,7 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  realpathSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
@@ -200,7 +201,6 @@ export function getGlobalFiles(tools: Tool[]): InstallFile[] {
 function getLocalSkillAgents(tools: Tool[]): string[] {
   const agents = new Set<string>(["universal"]);
 
-  if (tools.includes("claude-code")) agents.add("claude-code");
   if (tools.includes("gemini-cli")) agents.add("gemini-cli");
 
   return [...agents];
@@ -403,7 +403,13 @@ export function syncClaudeCodeSkills(
       });
     }
 
-    cpSync(source, join(targetRoot, skill.skillName), {
+    const target = join(targetRoot, skill.skillName);
+    if (areSamePath(source, target)) {
+      copied.push(skill.skillName);
+      continue;
+    }
+
+    cpSync(source, target, {
       recursive: true,
       force: true,
     });
@@ -411,6 +417,12 @@ export function syncClaudeCodeSkills(
   }
 
   return { copied, missing };
+}
+
+function areSamePath(source: string, target: string): boolean {
+  if (!existsSync(source) || !existsSync(target)) return false;
+
+  return realpathSync(source) === realpathSync(target);
 }
 
 function getAircurySkillFallbackSource(skill: CapabilitySkill): string | null {
