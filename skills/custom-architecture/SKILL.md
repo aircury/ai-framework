@@ -1,6 +1,9 @@
 ---
 name: custom-architecture
 description: Analyse a repository's real architecture and write or refresh the Project Architecture section in .localRules/framework.local.md for projects using the Custom Architecture capability.
+metadata:
+  author: Aircury
+  version: "1.0"
 ---
 
 # Custom Architecture Discovery
