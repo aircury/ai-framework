@@ -100,7 +100,10 @@ To add an Aircury skill from this repo:
 2. Add a skill entry to the relevant capability in `src/capabilities.ts`.
 3. Use `source: "aircury/ai-framework"`.
 4. Set the supported `scopes`.
-5. Add or update tests if capability behavior changes.
+5. Include `metadata.version` in the skill frontmatter.
+6. Add or update tests if capability behavior changes.
+
+Official Aircury skills use `metadata.version` for local override update warnings. Bump the version whenever an official skill changes behaviour, workflow routing, guardrails, bundled references, or user-visible instructions that local overrides may need to review.
 
 To add an external skill:
 
