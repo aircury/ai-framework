@@ -23,7 +23,7 @@ import featuresReadme from "./install-content/specs/features/README.md" with {
 };
 import { generateAgents, generateFramework } from "./templates";
 
-export type Tool = "claude-code" | "cursor" | "gemini-cli";
+export type Tool = "claude-code" | "gemini-cli";
 export type Scope = CapabilityScope;
 
 export interface InstallFile {
@@ -80,12 +80,10 @@ function resolveSkillSource(source: string): string {
 const FRAMEWORK_REFERENCE_SENTENCE =
   "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).";
 const MERGEABLE_FRAMEWORK_ENTRYPOINTS = new Set(["AGENTS.md", "CLAUDE.md"]);
-const CURSOR_RULES_PATH = ".cursorrules";
 const FRAMEWORK_LOCAL_PATH = "FRAMEWORK.local.md";
 const AGENTS_FRAMEWORK_SECTION_HEADING = "## Framework";
 const AGENTS_FRAMEWORK_SECTION_NOTICE =
   "> Framework-managed section. Add project-specific instructions outside this section.";
-const CURSOR_COMMIT_RULES_HEADING = "## Aircury Commit Rules";
 const FRAMEWORK_LOCAL_CONTENT = `# FRAMEWORK.local.md
 
 Project-specific instructions, additions, and overrides for this repository.
@@ -94,29 +92,9 @@ This file is intentionally local to the project. Aircury AI Framework installs i
 
 Add repository-specific rules below.
 `;
-const CURSOR_COMMIT_RULES_SECTION = `## Aircury Commit Rules
-
-${FRAMEWORK_MAINTAINED_NOTICE}
-
-When creating git commits in this repository, follow this workflow:
-
-- Analyse the workspace with git status and git diff before committing.
-- Group changes semantically. Each commit must be atomic: one functional change per commit.
-- Use conventional commit messages in the format <type>(<scope>): <description> without a body. Allowed types: feat, fix, refactor, docs, style, test, chore, perf, ci, build, revert.
-- Never include Co-authored-by, Authored-by, AI tool signatures, generated-by markers, bot attribution, or any metadata that reveals or implies AI involvement in the final commit object. The AI must leave no trace that it authored, co-authored, generated, assisted, or executed the commit under any circumstance.
-- Do not use commit bodies, trailers, templates, --author, --trailer, --template, -F, --file, -C, -c, git interpret-trailers, amend, reword, hooks, or external commit tools to add, preserve, or hide AI attribution, co-authorship, generated-by metadata, bot attribution, or tool signatures.
-- Treat variants such as Co-authored by, Generated with, AI-assisted, Assisted-by, Tool, Cursor-Agent, Signed-off-by with an AI/bot identity, unusual casing, extra whitespace, or Unicode punctuation as prohibited AI attribution.
-- Use git add for specific files per commit, never git add . unless all changes belong to one commit.
-- After each commit, run git log -1 --format=%B and verify the final message contains no AI-related attribution or metadata, then run git status to verify success.
-- Stage and commit one group at a time. Do not skip ahead.
-`;
 
 export function isMergeableFrameworkEntrypoint(path: string): boolean {
   return MERGEABLE_FRAMEWORK_ENTRYPOINTS.has(path);
-}
-
-export function isMergeableCursorRules(path: string): boolean {
-  return path === CURSOR_RULES_PATH;
 }
 
 export function isProtectedLocalCompanion(path: string): boolean {
@@ -179,14 +157,6 @@ export function getLocalFiles(
       path: "GEMINI.md",
       content: generateAgents(profile.capabilities, options),
       description: "Agent instructions for Gemini CLI",
-    });
-  }
-
-  if (tools.includes("cursor")) {
-    files.push({
-      path: CURSOR_RULES_PATH,
-      content: CURSOR_COMMIT_RULES_SECTION,
-      description: "Cursor commit rules",
     });
   }
 
@@ -357,15 +327,6 @@ export function writeFile(
     return;
   }
 
-  if (!isGlobal && isMergeableCursorRules(file.path) && existsSync(fullPath)) {
-    writeFileSync(
-      fullPath,
-      mergeCursorRules(readFileSync(fullPath, "utf-8"), file.content),
-      "utf-8",
-    );
-    return;
-  }
-
   mkdirSync(dirname(fullPath), { recursive: true });
   writeFileSync(fullPath, file.content, "utf-8");
 }
@@ -461,31 +422,6 @@ export function mergeFrameworkReferenceIntoAgents(
   }
 
   return `${trimmedExisting}\n\n${trimmedReference}\n`;
-}
-
-export function mergeCursorRules(
-  existingContent: string,
-  cursorCommitRules: string,
-): string {
-  const trimmedExisting = existingContent.trim();
-  const trimmedRules = cursorCommitRules.trim();
-
-  if (trimmedExisting.length === 0) {
-    return `${trimmedRules}\n`;
-  }
-
-  if (trimmedExisting.includes(CURSOR_COMMIT_RULES_HEADING)) {
-    if (trimmedExisting.includes(FRAMEWORK_MAINTAINED_NOTICE)) {
-      return `${trimmedExisting}\n`;
-    }
-
-    return `${trimmedExisting.replace(
-      CURSOR_COMMIT_RULES_HEADING,
-      `${CURSOR_COMMIT_RULES_HEADING}\n\n${FRAMEWORK_MAINTAINED_NOTICE}`,
-    )}\n`;
-  }
-
-  return `${trimmedExisting}\n\n${trimmedRules}\n`;
 }
 
 export function runCommand(
