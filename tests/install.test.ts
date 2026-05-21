@@ -4,6 +4,7 @@ import {
   mkdirSync,
   readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -391,7 +392,7 @@ describe("getLocalCommands", () => {
     ).toContain("vercel-react-best-practices");
   });
 
-  it("installs multiple selected agents in each derived command", () => {
+  it("installs local skills through universal and non-Claude tool agents", () => {
     const commands = getLocalCommands(["claude-code", "gemini-cli"], ["git"]);
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toEqual([
@@ -404,11 +405,17 @@ describe("getLocalCommands", () => {
       "-a",
       "universal",
       "-a",
-      "claude-code",
-      "-a",
       "gemini-cli",
       "-y",
     ]);
+  });
+
+  it("does not ask skills add to install local Claude Code skills directly", () => {
+    const commands = getLocalCommands(["claude-code"], ["git"]);
+
+    expect(commands).toHaveLength(1);
+    expect(commands[0].args).toContain("universal");
+    expect(commands[0].args).not.toContain("claude-code");
   });
 
   it("installs the external UK business English skill", () => {
@@ -842,6 +849,31 @@ describe("syncClaudeCodeSkills", () => {
         "utf-8",
       ),
     ).toContain("name: frontend-ui-workflow");
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("skips copying when the source and Claude target are the same directory", () => {
+    const dir = `${tmpdir()}/sdd-claude-same-skill-${Date.now()}`;
+    const sourceRoot = join(dir, ".agents", "skills");
+    const targetDir = join(dir, ".claude", "skills", "caveman");
+    mkdirSync(sourceRoot, { recursive: true });
+    mkdirSync(targetDir, { recursive: true });
+    writeFileSync(join(targetDir, "SKILL.md"), "# Caveman", "utf-8");
+    symlinkSync(targetDir, join(sourceRoot, "caveman"), "dir");
+
+    const result = syncClaudeCodeSkills(dir, [
+      {
+        source: "https://github.com/juliusbrussee/caveman",
+        skillName: "caveman",
+        scopes: ["local"],
+      },
+    ]);
+
+    expect(result).toEqual({ copied: ["caveman"], missing: [] });
+    expect(
+      readFileSync(join(targetDir, "SKILL.md"), "utf-8"),
+    ).toBe("# Caveman");
 
     rmSync(dir, { recursive: true });
   });
