@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "_notice": "This file is maintained by Aircury AI Framework. Do not edit it directly. Add project-specific rules in FRAMEWORK.local.md.",
+  "_notice": "This file is maintained by Aircury AI Framework. Do not edit it directly. Add project-specific rules in .localRules/framework.local.md.",
   "capabilities": ["ddd-hexagonal", "decision-records", "testing"],
   "language": {
     "britishEnglish": false

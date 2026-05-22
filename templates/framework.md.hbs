@@ -1,6 +1,6 @@
 # FRAMEWORK.md
 
-> This file is maintained by Aircury AI Framework. Do not edit it directly. Add project-specific rules in FRAMEWORK.local.md.
+> This file is maintained by Aircury AI Framework. Do not edit it directly. Add project-specific rules in .localRules/framework.local.md.
 
 ## Purpose
 
@@ -12,7 +12,7 @@ When tradeoffs appear, prefer maintainability, correctness, and explicit intent 
 
 ## Project-Specific Instructions
 
-Use `FRAMEWORK.local.md` as the official repository-local companion file for project-specific instructions, additions, and overrides. Install and update operations do not manage or overwrite that file.
+Use `.localRules/framework.local.md` as the official versioned repository-local companion file for project-specific instructions, additions, and overrides. Install and update operations do not manage or overwrite that file.
 
 ## Core Workflow Constitution
 
@@ -52,10 +52,10 @@ Detailed capability rules are generated as separate files under [`docs/aircury/c
 {{/if}}
 
 {{#if includesCustomArchitecture}}
-This installation uses Custom Architecture. The project-specific architecture source of truth is `FRAMEWORK.local.md` under `## Project Architecture`.
+This installation uses Custom Architecture. The project-specific architecture source of truth is `.localRules/framework.local.md` under `## Project Architecture`.
 {{/if}}
 
-## Coding Standards
+## Core Code Quality
 
 {{#if enforceBritishEnglish}}
 - Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy.
@@ -64,6 +64,7 @@ This installation uses Custom Architecture. The project-specific architecture so
 - Use explicit names that reflect the problem space.
 - Keep functions small, cohesive, and intention-revealing.
 - Prefer immutable data and side-effect isolation.
+- Prefer simple, cohesive changes that preserve correctness and intent.
 - Fail with clear errors and documented tradeoffs.
 - Avoid boolean flag arguments when a richer type or explicit method is clearer.
 - Prefer composition over inheritance.
@@ -88,7 +89,7 @@ For any non-trivial change:
 Before starting any task:
 
 - Read `FRAMEWORK.md` in full if you have not already done so in this session.
-- Read `FRAMEWORK.local.md` when it exists and apply its project-specific instructions alongside this framework.
+- Read `.localRules/framework.local.md` when it exists and apply its project-specific instructions alongside this framework.
 - Read the relevant specs in `specs/features/` that relate to the area you are changing.
 {{#if includesCapabilityDetails}}
 - Read the linked capability docs in `docs/aircury/capabilities/` for the enabled standards that apply to your task.
@@ -102,7 +103,7 @@ Before starting any task:
 {{#if includesCodeStyle}}
 - Analyse `package.json` and local config files to identify the project's linting and formatting strategy.
 {{/if}}
-- Act as a routing meta-agent: analyse the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
+- Act as a routing meta-agent: analyse the request, recommend an available workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
 
 While executing work:
 
@@ -115,8 +116,12 @@ While executing work:
 - Use the `commit-changes` skill only when the user asks you to create commits. When committing, organise changes into atomic Conventional Commits; until then, keep changes organised in the working tree for review.
 - After the user selects a workflow mode, follow `FRAMEWORK.md § Mode execution rules` exactly.
 - Selecting `plan-build` authorises planning first, not automatic implementation.
+{{#if includesSpecKit}}
 - Selecting `spec-kit` requires following the full Spec Kit sequence in order unless the user explicitly changes modes.
+{{/if}}
+{{#if includesOpenSpec}}
 - Selecting an OpenSpec workflow requires following its named sequence in order unless the user explicitly changes modes.
+{{/if}}
 {{#if includesAirsyncMemory}}
 - Capture reusable knowledge in Airsync INBOX when you discover validated patterns, repeated pitfalls, or team conventions. Search before proposing to avoid duplicates.
 {{/if}}
@@ -128,9 +133,13 @@ This framework uses a framework-agnostic change workflow.
 ### Supported modes
 
 - `plan-build`: complete a planning step first, then implement only after the plan is finished and the user asks to proceed.
+{{#if includesOpenSpec}}
 - `propose-apply-complete`: create working artefacts, implement from them, then sync canonical specs.
 - `explore-propose-apply-complete`: explore first when the problem is unclear, then formalise and implement.
+{{/if}}
+{{#if includesSpecKit}}
 - `spec-kit`: spec-driven development using the Spec Kit workflow. Best for new features, cross-cutting concerns, or work requiring formal spec governance.
+{{/if}}
 
 These are operating modes, not different specification systems. They all converge on the same canonical source of truth: `specs/features/`.
 
@@ -141,7 +150,7 @@ Before starting any non-trivial change, the agent MUST act as a routing meta-age
 **Routing protocol:**
 
 1. Analyse the request for complexity, ambiguity, and scope.
-2. Recommend one of the supported modes and briefly explain why.
+2. Recommend one of the available supported modes and briefly explain why.
 3. Present the user with explicit workflow choices.
 4. Ask the user how they want to proceed before doing any implementation work.
 
@@ -153,6 +162,7 @@ Once the user selects a mode, the agent MUST follow that mode strictly. Do not m
   1. Plan first.
   2. Stop after the plan and present it clearly.
   3. Do not start building in the same step unless the user explicitly asks to continue with implementation after seeing the plan.
+{{#if includesOpenSpec}}
 - `propose-apply-complete`:
   1. Run `open-spec-propose` first.
   2. Only after proposal artefacts exist, run `open-spec-apply`.
@@ -162,12 +172,15 @@ Once the user selects a mode, the agent MUST follow that mode strictly. Do not m
   1. Run `open-spec-explore` first.
   2. Do not implement during explore mode.
   3. After exploration, continue with `open-spec-propose`, then `open-spec-apply`, then `open-spec-complete` in order.
+{{/if}}
+{{#if includesSpecKit}}
 - `spec-kit`:
   1. Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-analyse` → `spec-kit-tasks` → `spec-kit-analyse` → `spec-kit-implement`.
   2. `spec-kit-analyse` MUST run before tasks to catch spec/plan/FRAMEWORK drift, and after tasks to validate user-story coverage.
   3. CRITICAL findings from either `spec-kit-analyse` run block progress. Stop the workflow and fix them before continuing to any later Spec Kit step.
   4. `spec-kit-checklist` may be used as a review or quality gate, but it does not replace required sequence steps.
   5. Do not skip ahead when an earlier required Spec Kit step has not been completed.
+{{/if}}
 
 ## Definition of Done
 
@@ -192,7 +205,7 @@ A change is not done unless all of the following are true:
 - Layered Architecture boundaries still hold: controllers do not bypass services for business behaviour, services own application logic, and repositories isolate persistence.
 {{/if}}
 {{#if includesCustomArchitecture}}
-- The project-specific architecture section in `FRAMEWORK.local.md` exists, reflects the current repository structure, and was updated if architectural boundaries changed.
+- The project-specific architecture section in `.localRules/framework.local.md` exists, reflects the current repository structure, and was updated if architectural boundaries changed.
 {{/if}}
 {{#if includesDecisionRecords}}
 - Material architectural decisions are captured or superseded in `specs/decisions/`.

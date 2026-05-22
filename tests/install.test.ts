@@ -16,15 +16,20 @@ import {
 } from "../src/capabilities";
 import {
   checkConflicts,
+  compareSkillVersions,
   getAircurySkillsSource,
   getGlobalCommands,
   getGlobalFiles,
   getLocalCommands,
   getLocalFiles,
+  getLocalSkillOverrides,
   type InstallFile,
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
   mergeFrameworkReferenceIntoAgents,
+  persistRuntimeSkillToLocalRules,
+  readSkillVersion,
+  restoreLocalSkillOverrides,
   runCommand,
   syncClaudeCodeSkills,
   writeFile,
@@ -60,16 +65,18 @@ describe("getLocalFiles", () => {
     expect(paths).toContain("AGENTS.md");
     expect(paths).toContain(".aircury/framework.config.json");
     expect(paths).toContain("specs/features/README.md");
-    expect(paths).toContain("FRAMEWORK.local.md");
+    expect(paths).toContain(".localRules/framework.local.md");
   });
 
-  it("installs FRAMEWORK.local.md as an editable local companion", () => {
+  it("installs .localRules/framework.local.md as an editable local companion", () => {
     const files = getLocalFiles([]);
-    const local = getFileByPath(files, "FRAMEWORK.local.md");
+    const local = getFileByPath(files, ".localRules/framework.local.md");
 
     expect(local.description).toBe("Project-specific framework instructions");
     expect(local.content).toContain("Project-specific instructions");
+    expect(local.content).toContain("versioned with the project");
     expect(local.content).toContain("never overwrites it during updates");
+    expect(local.content).toContain(".localRules/skills/<skill-name>/");
     expect(local.content).not.toContain(FRAMEWORK_MAINTAINED_NOTICE);
   });
 
@@ -89,12 +96,12 @@ describe("getLocalFiles", () => {
     expect(capability.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
   });
 
-  it("preserves an existing FRAMEWORK.local.md during install writes", () => {
+  it("preserves an existing .localRules/framework.local.md during install writes", () => {
     const dir = `${tmpdir()}/sdd-framework-local-${Date.now()}`;
-    const localPath = join(dir, "FRAMEWORK.local.md");
+    const localPath = join(dir, ".localRules", "framework.local.md");
     const localContent = "# Local framework rules\n\nKeep this.";
 
-    mkdirSync(dir, { recursive: true });
+    mkdirSync(join(dir, ".localRules"), { recursive: true });
     writeFileSync(localPath, localContent, "utf-8");
 
     for (const file of getLocalFiles([])) {
@@ -487,6 +494,7 @@ describe("getLocalCommands", () => {
     expect(commands[0].args).toContain("specs-interpreter");
     expect(commands[0].args).toContain("semantic-line-breaks");
     expect(commands[0].args).toContain("dbml-database-docs");
+    expect(commands[0].args).toContain("local-customization");
   });
 
   it("installs the frontend skills from the Aircury source", () => {
@@ -723,6 +731,54 @@ describe("writeFile", () => {
 
     rmSync(dir, { recursive: true });
   });
+
+  it("preserves configured local skills when rewriting framework config", () => {
+    const dir = `${tmpdir()}/sdd-config-local-skills-${Date.now()}`;
+    const configPath = join(dir, ".aircury", "framework.config.json");
+    mkdirSync(join(dir, ".aircury"), { recursive: true });
+    writeFileSync(
+      configPath,
+      `${JSON.stringify(
+        {
+          version: 2,
+          _notice: FRAMEWORK_MAINTAINED_NOTICE,
+          capabilities: ["testing"],
+          language: { britishEnglish: false },
+          localSkills: [
+            {
+              name: "payments-refunds",
+              kind: "local-skill",
+              source: ".localRules/skills/payments-refunds",
+            },
+          ],
+        },
+        null,
+        2,
+      )}\n`,
+      "utf-8",
+    );
+
+    writeFile(
+      getFileByPath(
+        getLocalFiles([], ["frontend"]),
+        ".aircury/framework.config.json",
+      ),
+      dir,
+      false,
+    );
+
+    const config = JSON.parse(readFileSync(configPath, "utf-8"));
+    expect(config.capabilities).toContain("frontend");
+    expect(config.localSkills).toEqual([
+      {
+        name: "payments-refunds",
+        kind: "local-skill",
+        source: ".localRules/skills/payments-refunds",
+      },
+    ]);
+
+    rmSync(dir, { recursive: true });
+  });
 });
 
 describe("isMergeableFrameworkEntrypoint", () => {
@@ -734,13 +790,599 @@ describe("isMergeableFrameworkEntrypoint", () => {
 });
 
 describe("isProtectedLocalCompanion", () => {
-  it("marks FRAMEWORK.local.md as protected", () => {
-    expect(isProtectedLocalCompanion("FRAMEWORK.local.md")).toBe(true);
+  it("marks .localRules/framework.local.md as protected", () => {
+    expect(isProtectedLocalCompanion(".localRules/framework.local.md")).toBe(
+      true,
+    );
+    expect(isProtectedLocalCompanion("FRAMEWORK.local.md")).toBe(false);
     expect(isProtectedLocalCompanion("FRAMEWORK.md")).toBe(false);
   });
 });
 
+describe("skill versions", () => {
+  it("reads metadata.version from skill frontmatter", () => {
+    const dir = `${tmpdir()}/sdd-skill-version-${Date.now()}`;
+    const skillPath = join(dir, "SKILL.md");
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      skillPath,
+      `---\nname: example\nmetadata:\n  author: Aircury\n  version: "1.2.3"\n---\n`,
+      "utf-8",
+    );
+
+    expect(readSkillVersion(skillPath)).toBe("1.2.3");
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("returns null when a skill version is missing", () => {
+    const dir = `${tmpdir()}/sdd-skill-version-missing-${Date.now()}`;
+    const skillPath = join(dir, "SKILL.md");
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(skillPath, `---\nname: example\n---\n`, "utf-8");
+
+    expect(readSkillVersion(skillPath)).toBeNull();
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("compares equal numeric skill versions", () => {
+    expect(compareSkillVersions("1.0", "1.0.0")).toBe("equal");
+  });
+
+  it("compares greater and lower numeric skill versions", () => {
+    expect(compareSkillVersions("1.2.0", "1.1.9")).toBe("left-greater");
+    expect(compareSkillVersions("1.0.0", "1.0.1")).toBe("right-greater");
+  });
+
+  it("treats missing and unparsable versions as unknown", () => {
+    expect(compareSkillVersions(null, "1.0.0")).toBe("unknown");
+    expect(compareSkillVersions("next", "1.0.0")).toBe("unknown");
+  });
+});
+
+describe("getLocalSkillOverrides", () => {
+  it("detects a selected skill override with SKILL.md", () => {
+    const dir = `${tmpdir()}/sdd-local-skill-override-${Date.now()}`;
+    const skillDir = join(dir, ".localRules", "skills", "commit-changes");
+    mkdirSync(skillDir, { recursive: true });
+    writeFileSync(join(skillDir, "SKILL.md"), "# Local Commit", "utf-8");
+
+    const overrides = getLocalSkillOverrides(dir, [
+      {
+        source: "aircury/ai-framework",
+        skillName: "commit-changes",
+        scopes: ["local"],
+      },
+    ]);
+
+    expect(overrides).toEqual([
+      {
+        skill: {
+          source: "aircury/ai-framework",
+          skillName: "commit-changes",
+          scopes: ["local"],
+        },
+        path: skillDir,
+        skillPath: join(skillDir, "SKILL.md"),
+      },
+    ]);
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("ignores selected skills without local overrides", () => {
+    const dir = `${tmpdir()}/sdd-local-skill-override-missing-${Date.now()}`;
+    mkdirSync(dir, { recursive: true });
+
+    expect(
+      getLocalSkillOverrides(dir, [
+        {
+          source: "aircury/ai-framework",
+          skillName: "commit-changes",
+          scopes: ["local"],
+        },
+      ]),
+    ).toEqual([]);
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("ignores override folders without SKILL.md", () => {
+    const dir = `${tmpdir()}/sdd-local-skill-override-empty-${Date.now()}`;
+    mkdirSync(join(dir, ".localRules", "skills", "commit-changes"), {
+      recursive: true,
+    });
+
+    expect(
+      getLocalSkillOverrides(dir, [
+        {
+          source: "aircury/ai-framework",
+          skillName: "commit-changes",
+          scopes: ["local"],
+        },
+      ]),
+    ).toEqual([]);
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("only detects overrides for selected skills", () => {
+    const dir = `${tmpdir()}/sdd-local-skill-override-selected-${Date.now()}`;
+    const skillDir = join(dir, ".localRules", "skills", "commit-changes");
+    mkdirSync(skillDir, { recursive: true });
+    writeFileSync(join(skillDir, "SKILL.md"), "# Local Commit", "utf-8");
+
+    expect(
+      getLocalSkillOverrides(dir, [
+        {
+          source: "aircury/ai-framework",
+          skillName: "frontend-ui-workflow",
+          scopes: ["local"],
+        },
+      ]),
+    ).toEqual([]);
+
+    rmSync(dir, { recursive: true });
+  });
+});
+
+describe("persistRuntimeSkillToLocalRules", () => {
+  it("persists a runtime skill from .agents/skills", () => {
+    const dir = `${tmpdir()}/sdd-persist-agent-skill-${Date.now()}`;
+    const runtimeDir = join(dir, ".agents", "skills", "commit-changes");
+    mkdirSync(join(runtimeDir, "references"), { recursive: true });
+    writeFileSync(join(runtimeDir, "SKILL.md"), "# Runtime Commit", "utf-8");
+    writeFileSync(join(runtimeDir, "references", "guide.md"), "Guide", "utf-8");
+
+    const result = persistRuntimeSkillToLocalRules(dir, "commit-changes");
+
+    expect(result.persisted).toBe(true);
+    expect(result.source).toBe(runtimeDir);
+    expect(
+      readFileSync(
+        join(dir, ".localRules", "skills", "commit-changes", "SKILL.md"),
+        "utf-8",
+      ),
+    ).toBe("# Runtime Commit");
+    expect(
+      readFileSync(
+        join(
+          dir,
+          ".localRules",
+          "skills",
+          "commit-changes",
+          "references",
+          "guide.md",
+        ),
+        "utf-8",
+      ),
+    ).toBe("Guide");
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("falls back to .claude/skills when .agents is unavailable", () => {
+    const dir = `${tmpdir()}/sdd-persist-claude-skill-${Date.now()}`;
+    const runtimeDir = join(dir, ".claude", "skills", "commit-changes");
+    mkdirSync(runtimeDir, { recursive: true });
+    writeFileSync(join(runtimeDir, "SKILL.md"), "# Claude Commit", "utf-8");
+
+    const result = persistRuntimeSkillToLocalRules(dir, "commit-changes");
+
+    expect(result.persisted).toBe(true);
+    expect(result.source).toBe(runtimeDir);
+    expect(
+      readFileSync(
+        join(dir, ".localRules", "skills", "commit-changes", "SKILL.md"),
+        "utf-8",
+      ),
+    ).toBe("# Claude Commit");
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("reports missing runtime skills without creating invalid shadows", () => {
+    const dir = `${tmpdir()}/sdd-persist-missing-skill-${Date.now()}`;
+    mkdirSync(dir, { recursive: true });
+
+    const result = persistRuntimeSkillToLocalRules(dir, "missing-skill");
+
+    expect(result.persisted).toBe(false);
+    expect(result.source).toBeNull();
+    expect(
+      existsSync(join(dir, ".localRules", "skills", "missing-skill")),
+    ).toBe(false);
+
+    rmSync(dir, { recursive: true });
+  });
+});
+
+describe("restoreLocalSkillOverrides", () => {
+  const skill = {
+    source: "aircury/ai-framework",
+    skillName: "commit-changes",
+    scopes: ["local" as const],
+  };
+
+  it("restores a local shadow when versions match", () => {
+    const dir = `${tmpdir()}/sdd-restore-matching-skill-${Date.now()}`;
+    const officialDir = join(dir, ".agents", "skills", "commit-changes");
+    const localDir = join(dir, ".localRules", "skills", "commit-changes");
+    mkdirSync(officialDir, { recursive: true });
+    mkdirSync(localDir, { recursive: true });
+    writeFileSync(
+      join(officialDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.0"\n---\n\n# Official`,
+      "utf-8",
+    );
+    writeFileSync(
+      join(localDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.0.0"\n---\n\n# Local`,
+      "utf-8",
+    );
+
+    const result = restoreLocalSkillOverrides(dir, [skill]);
+
+    expect(result).toEqual({
+      restored: ["commit-changes"],
+      skipped: [],
+      missing: [],
+      warnings: [],
+    });
+    expect(readFileSync(join(officialDir, "SKILL.md"), "utf-8")).toContain(
+      "# Local",
+    );
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("emits no warning when versions match", () => {
+    const dir = `${tmpdir()}/sdd-restore-no-warning-${Date.now()}`;
+    const officialDir = join(dir, ".agents", "skills", "commit-changes");
+    const localDir = join(dir, ".localRules", "skills", "commit-changes");
+    mkdirSync(officialDir, { recursive: true });
+    mkdirSync(localDir, { recursive: true });
+    writeFileSync(
+      join(officialDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.0"\n---\n\n# Official`,
+      "utf-8",
+    );
+    writeFileSync(
+      join(localDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.0"\n---\n\n# Local`,
+      "utf-8",
+    );
+
+    const result = restoreLocalSkillOverrides(dir, [skill]);
+
+    expect(result.restored).toEqual(["commit-changes"]);
+    expect(result.warnings).toEqual([]);
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("keeps the official runtime skill when versions differ", () => {
+    const dir = `${tmpdir()}/sdd-restore-newer-official-${Date.now()}`;
+    const officialDir = join(dir, ".agents", "skills", "commit-changes");
+    const localDir = join(dir, ".localRules", "skills", "commit-changes");
+    mkdirSync(officialDir, { recursive: true });
+    mkdirSync(localDir, { recursive: true });
+    writeFileSync(
+      join(officialDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.1"\n---\n\n# Official`,
+      "utf-8",
+    );
+    writeFileSync(
+      join(localDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.0"\n---\n\n# Local`,
+      "utf-8",
+    );
+
+    const result = restoreLocalSkillOverrides(dir, [skill]);
+
+    expect(result.restored).toEqual([]);
+    expect(result.skipped).toEqual(["commit-changes"]);
+    expect(result.warnings[0].message).toContain("Official version 1.1");
+    expect(readFileSync(join(officialDir, "SKILL.md"), "utf-8")).toContain(
+      "# Official",
+    );
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("warns and keeps the official runtime skill when local version is greater", () => {
+    const dir = `${tmpdir()}/sdd-restore-local-greater-${Date.now()}`;
+    const officialDir = join(dir, ".agents", "skills", "commit-changes");
+    const localDir = join(dir, ".localRules", "skills", "commit-changes");
+    mkdirSync(officialDir, { recursive: true });
+    mkdirSync(localDir, { recursive: true });
+    writeFileSync(
+      join(officialDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.0"\n---\n\n# Official`,
+      "utf-8",
+    );
+    writeFileSync(
+      join(localDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.1"\n---\n\n# Local`,
+      "utf-8",
+    );
+
+    const result = restoreLocalSkillOverrides(dir, [skill]);
+
+    expect(result.restored).toEqual([]);
+    expect(result.skipped).toEqual(["commit-changes"]);
+    expect(result.warnings[0].message).toContain(
+      "Local shadow version 1.1 differs from official version 1.0",
+    );
+    expect(readFileSync(join(officialDir, "SKILL.md"), "utf-8")).toContain(
+      "# Official",
+    );
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("warns and keeps official runtime skill when a version is unparsable", () => {
+    const dir = `${tmpdir()}/sdd-restore-unparsable-version-${Date.now()}`;
+    const officialDir = join(dir, ".agents", "skills", "commit-changes");
+    const localDir = join(dir, ".localRules", "skills", "commit-changes");
+    mkdirSync(officialDir, { recursive: true });
+    mkdirSync(localDir, { recursive: true });
+    writeFileSync(
+      join(officialDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.0-beta"\n---\n\n# Official`,
+      "utf-8",
+    );
+    writeFileSync(
+      join(localDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.0"\n---\n\n# Local`,
+      "utf-8",
+    );
+
+    const result = restoreLocalSkillOverrides(dir, [skill]);
+
+    expect(result.restored).toEqual([]);
+    expect(result.skipped).toEqual(["commit-changes"]);
+    expect(result.warnings[0].message).toContain(
+      "Version comparison was unknown",
+    );
+    expect(result.warnings[0].officialVersion).toBe("1.0-beta");
+    expect(readFileSync(join(officialDir, "SKILL.md"), "utf-8")).toContain(
+      "# Official",
+    );
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("warns and keeps official runtime skill when versions are unknown", () => {
+    const dir = `${tmpdir()}/sdd-restore-unknown-version-${Date.now()}`;
+    const officialDir = join(dir, ".agents", "skills", "commit-changes");
+    const localDir = join(dir, ".localRules", "skills", "commit-changes");
+    mkdirSync(officialDir, { recursive: true });
+    mkdirSync(localDir, { recursive: true });
+    writeFileSync(join(officialDir, "SKILL.md"), "# Official", "utf-8");
+    writeFileSync(join(localDir, "SKILL.md"), "# Local", "utf-8");
+
+    const result = restoreLocalSkillOverrides(dir, [skill]);
+
+    expect(result.restored).toEqual([]);
+    expect(result.skipped).toEqual(["commit-changes"]);
+    expect(result.warnings[0].message).toContain("unknown");
+    expect(readFileSync(join(officialDir, "SKILL.md"), "utf-8")).toBe(
+      "# Official",
+    );
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("restores configured new local skills that are not selected capability skills", () => {
+    const dir = `${tmpdir()}/sdd-restore-configured-local-skill-${Date.now()}`;
+    const localDir = join(dir, ".localRules", "skills", "payments-refunds");
+    mkdirSync(localDir, { recursive: true });
+    mkdirSync(join(dir, ".aircury"), { recursive: true });
+    writeFileSync(
+      join(localDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.0"\n---\n\n# Payments Refunds`,
+      "utf-8",
+    );
+    writeFileSync(
+      join(dir, ".aircury", "framework.config.json"),
+      `${JSON.stringify(
+        {
+          version: 2,
+          _notice: FRAMEWORK_MAINTAINED_NOTICE,
+          capabilities: [],
+          language: { britishEnglish: false },
+          localSkills: [
+            {
+              name: "payments-refunds",
+              kind: "local-skill",
+              source: ".localRules/skills/payments-refunds",
+            },
+          ],
+        },
+        null,
+        2,
+      )}\n`,
+      "utf-8",
+    );
+
+    const result = restoreLocalSkillOverrides(dir, []);
+
+    expect(result).toEqual({
+      restored: ["payments-refunds"],
+      skipped: [],
+      missing: [],
+      warnings: [],
+    });
+    expect(
+      readFileSync(
+        join(dir, ".agents", "skills", "payments-refunds", "SKILL.md"),
+        "utf-8",
+      ),
+    ).toContain("# Payments Refunds");
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("reports configured local skills missing from .localRules", () => {
+    const dir = `${tmpdir()}/sdd-restore-missing-configured-local-skill-${Date.now()}`;
+    mkdirSync(join(dir, ".aircury"), { recursive: true });
+    writeFileSync(
+      join(dir, ".aircury", "framework.config.json"),
+      `${JSON.stringify(
+        {
+          version: 2,
+          _notice: FRAMEWORK_MAINTAINED_NOTICE,
+          capabilities: [],
+          language: { britishEnglish: false },
+          localSkills: [
+            {
+              name: "missing-local-skill",
+              kind: "local-skill",
+              source: ".localRules/skills/missing-local-skill",
+            },
+          ],
+        },
+        null,
+        2,
+      )}\n`,
+      "utf-8",
+    );
+
+    const result = restoreLocalSkillOverrides(dir, []);
+
+    expect(result.restored).toEqual([]);
+    expect(result.missing).toEqual(["missing-local-skill"]);
+
+    rmSync(dir, { recursive: true });
+  });
+});
+
 describe("syncClaudeCodeSkills", () => {
+  it("syncs restored configured local skills into .claude/skills", () => {
+    const dir = `${tmpdir()}/sdd-claude-configured-local-skill-${Date.now()}`;
+    const localDir = join(dir, ".localRules", "skills", "payments-refunds");
+    mkdirSync(localDir, { recursive: true });
+    mkdirSync(join(dir, ".aircury"), { recursive: true });
+    writeFileSync(join(localDir, "SKILL.md"), "# Payments Refunds", "utf-8");
+    writeFileSync(
+      join(dir, ".aircury", "framework.config.json"),
+      `${JSON.stringify(
+        {
+          version: 2,
+          _notice: FRAMEWORK_MAINTAINED_NOTICE,
+          capabilities: [],
+          language: { britishEnglish: false },
+          localSkills: [
+            {
+              name: "payments-refunds",
+              kind: "local-skill",
+              source: ".localRules/skills/payments-refunds",
+            },
+          ],
+        },
+        null,
+        2,
+      )}\n`,
+      "utf-8",
+    );
+
+    const restoreResult = restoreLocalSkillOverrides(dir, []);
+    const syncResult = syncClaudeCodeSkills(dir, [
+      {
+        source: "local",
+        skillName: "payments-refunds",
+        scopes: ["local"],
+      },
+    ]);
+
+    expect(restoreResult.restored).toEqual(["payments-refunds"]);
+    expect(syncResult).toEqual({ copied: ["payments-refunds"], missing: [] });
+    expect(
+      readFileSync(
+        join(dir, ".claude", "skills", "payments-refunds", "SKILL.md"),
+        "utf-8",
+      ),
+    ).toBe("# Payments Refunds");
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("syncs restored local shadows into .claude/skills", () => {
+    const dir = `${tmpdir()}/sdd-claude-restored-shadow-${Date.now()}`;
+    const skill = {
+      source: "aircury/ai-framework",
+      skillName: "commit-changes",
+      scopes: ["local" as const],
+    };
+    const officialDir = join(dir, ".agents", "skills", "commit-changes");
+    const localDir = join(dir, ".localRules", "skills", "commit-changes");
+    mkdirSync(officialDir, { recursive: true });
+    mkdirSync(localDir, { recursive: true });
+    writeFileSync(
+      join(officialDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.0"\n---\n\n# Official`,
+      "utf-8",
+    );
+    writeFileSync(
+      join(localDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.0"\n---\n\n# Local`,
+      "utf-8",
+    );
+
+    restoreLocalSkillOverrides(dir, [skill]);
+    const result = syncClaudeCodeSkills(dir, [skill]);
+
+    expect(result).toEqual({ copied: ["commit-changes"], missing: [] });
+    expect(
+      readFileSync(
+        join(dir, ".claude", "skills", "commit-changes", "SKILL.md"),
+        "utf-8",
+      ),
+    ).toContain("# Local");
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("syncs the official runtime skill to .claude/skills when versions differ", () => {
+    const dir = `${tmpdir()}/sdd-claude-official-shadow-${Date.now()}`;
+    const skill = {
+      source: "aircury/ai-framework",
+      skillName: "commit-changes",
+      scopes: ["local" as const],
+    };
+    const officialDir = join(dir, ".agents", "skills", "commit-changes");
+    const localDir = join(dir, ".localRules", "skills", "commit-changes");
+    mkdirSync(officialDir, { recursive: true });
+    mkdirSync(localDir, { recursive: true });
+    writeFileSync(
+      join(officialDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.1"\n---\n\n# Official`,
+      "utf-8",
+    );
+    writeFileSync(
+      join(localDir, "SKILL.md"),
+      `---\nmetadata:\n  version: "1.0"\n---\n\n# Local`,
+      "utf-8",
+    );
+
+    const restoreResult = restoreLocalSkillOverrides(dir, [skill]);
+    const syncResult = syncClaudeCodeSkills(dir, [skill]);
+
+    expect(restoreResult.restored).toEqual([]);
+    expect(restoreResult.skipped).toEqual(["commit-changes"]);
+    expect(syncResult).toEqual({ copied: ["commit-changes"], missing: [] });
+    expect(
+      readFileSync(
+        join(dir, ".claude", "skills", "commit-changes", "SKILL.md"),
+        "utf-8",
+      ),
+    ).toContain("# Official");
+
+    rmSync(dir, { recursive: true });
+  });
+
   it("copies selected skills from .agents/skills to .claude/skills", () => {
     const dir = `${tmpdir()}/sdd-claude-skills-${Date.now()}`;
     const skillDir = join(dir, ".agents", "skills", "commit-changes");
@@ -826,9 +1468,9 @@ describe("syncClaudeCodeSkills", () => {
     ]);
 
     expect(result).toEqual({ copied: ["caveman"], missing: [] });
-    expect(
-      readFileSync(join(targetDir, "SKILL.md"), "utf-8"),
-    ).toBe("# Caveman");
+    expect(readFileSync(join(targetDir, "SKILL.md"), "utf-8")).toBe(
+      "# Caveman",
+    );
 
     rmSync(dir, { recursive: true });
   });

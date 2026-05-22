@@ -84,6 +84,7 @@ describe("capabilities", () => {
       "specs-interpreter",
       "semantic-line-breaks",
       "dbml-database-docs",
+      "local-customization",
     ]);
   });
 
@@ -215,9 +216,7 @@ describe("capabilities", () => {
     expect(capabilityRules?.content).toContain(
       "After every modification to a draft ADR, ask the user whether they want to publish it now.",
     );
-    expect(capabilityRules?.content).toContain(
-      "Do not edit non-draft ADRs.",
-    );
+    expect(capabilityRules?.content).toContain("Do not edit non-draft ADRs.");
     expect(capabilityRules?.content).toContain(
       "update the prior non-draft ADR only to mark that it was changed and where the new decision lives",
     );
@@ -233,9 +232,7 @@ describe("capabilities", () => {
     expect(capabilityRules?.content).toContain(
       "- Status: Draft | Accepted | Superseded | Deprecated",
     );
-    expect(capabilityRules?.content).toContain(
-      "- Amends: ADR-XXXX (optional)",
-    );
+    expect(capabilityRules?.content).toContain("- Amends: ADR-XXXX (optional)");
     expect(starterGuide?.content).toContain(
       "ADRs are editable only while `Status: Draft`.",
     );

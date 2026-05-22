@@ -18,7 +18,7 @@ describe("templates", () => {
 
     it("contains core framework sections", () => {
       expect(FRAMEWORK).toContain(FRAMEWORK_MAINTAINED_NOTICE);
-      expect(FRAMEWORK).toContain("FRAMEWORK.local.md");
+      expect(FRAMEWORK).toContain(".localRules/framework.local.md");
       expect(FRAMEWORK).toContain("## Core Workflow Constitution");
       expect(FRAMEWORK).toContain("## Definition of Done");
       expect(FRAMEWORK).toContain("## Workflow Framework");
@@ -90,7 +90,7 @@ describe("templates", () => {
       expect(AGENTS).toContain(
         "Framework-managed section. Add project-specific instructions outside this section.",
       );
-      expect(AGENTS).toContain("FRAMEWORK.local.md");
+      expect(AGENTS).toContain(".localRules/framework.local.md");
       expect(AGENTS).toContain("single source of truth");
       expect(AGENTS).not.toContain(
         "Selecting `plan-build` authorises planning first, not automatic implementation.",
@@ -159,6 +159,28 @@ describe("templates", () => {
       );
     });
 
+    it("shows OpenSpec modes only when OpenSpec is enabled", () => {
+      expect(generateFramework(["open-spec"])).toContain(
+        "`propose-apply-complete`",
+      );
+      expect(generateFramework(["open-spec"])).toContain(
+        "Run `open-spec-propose` first.",
+      );
+      expect(generateFramework([])).not.toContain("`propose-apply-complete`");
+      expect(generateFramework([])).not.toContain("`open-spec-propose`");
+    });
+
+    it("shows Spec Kit mode only when Spec Kit is enabled", () => {
+      expect(generateFramework(["spec-kit"])).toContain("`spec-kit`");
+      expect(generateFramework(["spec-kit"])).toContain(
+        "Follow the Spec Kit sequence strictly",
+      );
+      expect(generateFramework([])).not.toContain("`spec-kit`");
+      expect(generateFramework([])).not.toContain(
+        "Follow the Spec Kit sequence strictly",
+      );
+    });
+
     it("adds architecture rules only when DDD+Hexagonal is enabled", () => {
       expect(generateFramework(["ddd-hexagonal"])).toContain(
         "docs/aircury/capabilities/ddd-hexagonal.md",
@@ -173,7 +195,7 @@ describe("templates", () => {
         "docs/aircury/capabilities/custom-architecture.md",
       );
       expect(generateFramework(["custom-architecture"])).toContain(
-        "The project-specific architecture source of truth is `FRAMEWORK.local.md` under `## Project Architecture`.",
+        "The project-specific architecture source of truth is `.localRules/framework.local.md` under `## Project Architecture`.",
       );
       expect(generateFramework([])).not.toContain(
         "docs/aircury/capabilities/ddd-hexagonal.md",
@@ -188,7 +210,7 @@ describe("templates", () => {
         "docs/aircury/capabilities/custom-architecture.md",
       );
       expect(generateFramework([])).not.toContain(
-        "The project-specific architecture source of truth is `FRAMEWORK.local.md`",
+        "The project-specific architecture source of truth is `.localRules/framework.local.md`",
       );
       expect(generateFramework(["ddd-hexagonal"])).not.toContain(
         "## Non-Negotiable Architecture Rules",
@@ -218,7 +240,7 @@ describe("templates", () => {
         "DDD and hexagonal architecture boundaries still hold.",
       );
       expect(generateFramework(["custom-architecture"])).toContain(
-        "The project-specific architecture section in `FRAMEWORK.local.md` exists",
+        "The project-specific architecture section in `.localRules/framework.local.md` exists",
       );
       expect(generateFramework(["custom-architecture"])).not.toContain(
         "Clean Architecture dependencies still point inward",

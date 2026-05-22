@@ -5,12 +5,15 @@ import {
   mkdirSync,
   readFileSync,
   realpathSync,
+  renameSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   type CapabilityId,
+  type CapabilityProfile,
   type CapabilityScope,
   type CapabilitySkill,
   createCapabilityProfile,
@@ -47,6 +50,46 @@ export interface ClaudeSkillsSyncResult {
   missing: string[];
 }
 
+export interface LocalSkillOverride {
+  skill: CapabilitySkill;
+  path: string;
+  skillPath: string;
+}
+
+export interface PersistLocalSkillResult {
+  skillName: string;
+  source: string | null;
+  target: string;
+  persisted: boolean;
+  reason?: string;
+}
+
+interface ConfiguredLocalSkillShadow {
+  name: string;
+  path: string;
+  skillPath: string;
+}
+
+export interface LocalSkillRestoreWarning {
+  skillName: string;
+  officialVersion: string | null;
+  localVersion: string | null;
+  message: string;
+}
+
+export interface LocalSkillRestoreResult {
+  restored: string[];
+  skipped: string[];
+  missing: string[];
+  warnings: LocalSkillRestoreWarning[];
+}
+
+export type SkillVersionOrder =
+  | "equal"
+  | "left-greater"
+  | "right-greater"
+  | "unknown";
+
 type SkillsRunner = "npx" | "bunx";
 let cachedSkillsRunner: SkillsRunner | null = null;
 
@@ -80,15 +123,19 @@ function resolveSkillSource(source: string): string {
 const FRAMEWORK_REFERENCE_SENTENCE =
   "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).";
 const MERGEABLE_FRAMEWORK_ENTRYPOINTS = new Set(["AGENTS.md", "CLAUDE.md"]);
-const FRAMEWORK_LOCAL_PATH = "FRAMEWORK.local.md";
+const FRAMEWORK_LOCAL_PATH = ".localRules/framework.local.md";
+const LOCAL_SKILLS_PATH = ".localRules/skills";
+const FRAMEWORK_CONFIG_PATH = ".aircury/framework.config.json";
 const AGENTS_FRAMEWORK_SECTION_HEADING = "## Framework";
 const AGENTS_FRAMEWORK_SECTION_NOTICE =
   "> Framework-managed section. Add project-specific instructions outside this section.";
-const FRAMEWORK_LOCAL_CONTENT = `# FRAMEWORK.local.md
+const FRAMEWORK_LOCAL_CONTENT = `# .localRules/framework.local.md
 
 Project-specific instructions, additions, and overrides for this repository.
 
-This file is intentionally local to the project. Aircury AI Framework installs it as a starter file but never overwrites it during updates.
+This file is versioned with the project. Aircury AI Framework installs it as a starter file but never overwrites it during updates.
+
+Store modified project-local skill copies under .localRules/skills/<skill-name>/. Future framework updates will prefer those copies while keeping upstream skill updates visible for manual migration.
 
 Add repository-specific rules below.
 `;
@@ -99,6 +146,266 @@ export function isMergeableFrameworkEntrypoint(path: string): boolean {
 
 export function isProtectedLocalCompanion(path: string): boolean {
   return path === FRAMEWORK_LOCAL_PATH;
+}
+
+export function readSkillVersion(skillPath: string): string | null {
+  if (!existsSync(skillPath)) return null;
+
+  return parseSkillVersion(readFileSync(skillPath, "utf-8"));
+}
+
+function parseSkillVersion(content: string): string | null {
+  const lines = content.split(/\r?\n/);
+  if (lines[0]?.trim() !== "---") return null;
+
+  let inMetadata = false;
+  for (const line of lines.slice(1)) {
+    if (line.trim() === "---") return null;
+
+    if (/^metadata:\s*$/.test(line)) {
+      inMetadata = true;
+      continue;
+    }
+
+    if (inMetadata && /^\S/.test(line)) {
+      inMetadata = false;
+    }
+
+    if (!inMetadata) continue;
+
+    const match = /^\s+version:\s*["']?([^"'\s]+)["']?\s*$/.exec(line);
+    if (match) return match[1];
+  }
+
+  return null;
+}
+
+export function compareSkillVersions(
+  left: string | null,
+  right: string | null,
+): SkillVersionOrder {
+  const leftParts = parseNumericVersion(left);
+  const rightParts = parseNumericVersion(right);
+
+  if (!leftParts || !rightParts) return "unknown";
+
+  const length = Math.max(leftParts.length, rightParts.length);
+  for (let index = 0; index < length; index++) {
+    const leftPart = leftParts[index] ?? 0;
+    const rightPart = rightParts[index] ?? 0;
+
+    if (leftPart > rightPart) return "left-greater";
+    if (leftPart < rightPart) return "right-greater";
+  }
+
+  return "equal";
+}
+
+function parseNumericVersion(version: string | null): number[] | null {
+  if (!version || !/^\d+(\.\d+)*$/.test(version)) return null;
+
+  return version.split(".").map((part) => Number(part));
+}
+
+export function getLocalSkillOverrides(
+  cwd: string,
+  skills: CapabilitySkill[],
+): LocalSkillOverride[] {
+  const overrides: LocalSkillOverride[] = [];
+  const seenSkillNames = new Set<string>();
+
+  for (const skill of skills) {
+    if (seenSkillNames.has(skill.skillName)) continue;
+    seenSkillNames.add(skill.skillName);
+
+    const path = join(cwd, LOCAL_SKILLS_PATH, skill.skillName);
+    const skillPath = join(path, "SKILL.md");
+    if (!existsSync(skillPath)) continue;
+
+    overrides.push({ skill, path, skillPath });
+  }
+
+  return overrides;
+}
+
+export function persistRuntimeSkillToLocalRules(
+  cwd: string,
+  skillName: string,
+): PersistLocalSkillResult {
+  const source = getRuntimeSkillSource(cwd, skillName);
+  const target = join(cwd, LOCAL_SKILLS_PATH, skillName);
+
+  if (!source) {
+    return {
+      skillName,
+      source: null,
+      target,
+      persisted: false,
+      reason: `Runtime skill not found for ${skillName}`,
+    };
+  }
+
+  const targetParent = dirname(target);
+  const temporaryTarget = join(
+    targetParent,
+    `.${skillName}.tmp-${process.pid}-${Date.now()}`,
+  );
+
+  mkdirSync(targetParent, { recursive: true });
+  rmSync(temporaryTarget, { recursive: true, force: true });
+
+  try {
+    cpSync(source, temporaryTarget, { recursive: true, force: true });
+    rmSync(target, { recursive: true, force: true });
+    renameSync(temporaryTarget, target);
+  } catch (error) {
+    rmSync(temporaryTarget, { recursive: true, force: true });
+    throw error;
+  }
+
+  return { skillName, source, target, persisted: true };
+}
+
+function readFrameworkConfig(configPath: string): CapabilityProfile {
+  if (!existsSync(configPath)) {
+    return {
+      version: 2,
+      _notice: FRAMEWORK_MAINTAINED_NOTICE,
+      capabilities: [],
+      language: { britishEnglish: false },
+    };
+  }
+
+  return JSON.parse(readFileSync(configPath, "utf-8")) as CapabilityProfile;
+}
+
+function getRuntimeSkillSource(cwd: string, skillName: string): string | null {
+  const agentsSkill = join(cwd, ".agents", "skills", skillName);
+  if (existsSync(join(agentsSkill, "SKILL.md"))) return agentsSkill;
+
+  const claudeSkill = join(cwd, ".claude", "skills", skillName);
+  if (existsSync(join(claudeSkill, "SKILL.md"))) return claudeSkill;
+
+  return null;
+}
+
+export function restoreLocalSkillOverrides(
+  cwd: string,
+  skills: CapabilitySkill[],
+): LocalSkillRestoreResult {
+  const restored: string[] = [];
+  const skipped: string[] = [];
+  const missing: string[] = [];
+  const warnings: LocalSkillRestoreWarning[] = [];
+
+  for (const override of getLocalSkillOverrides(cwd, skills)) {
+    const skillName = override.skill.skillName;
+    const officialPath = ensureRuntimeSkill(cwd, override.skill);
+    if (!officialPath) {
+      missing.push(skillName);
+      continue;
+    }
+
+    const officialSkillPath = join(officialPath, "SKILL.md");
+    const officialVersion = readSkillVersion(officialSkillPath);
+    const localVersion = readSkillVersion(override.skillPath);
+    const order = compareSkillVersions(officialVersion, localVersion);
+
+    if (order === "equal") {
+      rmSync(officialPath, { recursive: true, force: true });
+      cpSync(override.path, officialPath, { recursive: true, force: true });
+      restored.push(skillName);
+      continue;
+    }
+
+    skipped.push(skillName);
+    warnings.push({
+      skillName,
+      officialVersion,
+      localVersion,
+      message: getLocalSkillRestoreWarningMessage(
+        skillName,
+        officialVersion,
+        localVersion,
+        order,
+      ),
+    });
+  }
+
+  const handledSkillNames = new Set([
+    ...restored,
+    ...skipped,
+    ...missing,
+    ...skills.map((skill) => skill.skillName),
+  ]);
+
+  for (const localSkill of getConfiguredLocalSkillShadows(cwd)) {
+    if (handledSkillNames.has(localSkill.name)) continue;
+    if (!existsSync(localSkill.skillPath)) {
+      missing.push(localSkill.name);
+      continue;
+    }
+
+    const target = join(cwd, ".agents", "skills", localSkill.name);
+    rmSync(target, { recursive: true, force: true });
+    mkdirSync(dirname(target), { recursive: true });
+    cpSync(localSkill.path, target, { recursive: true, force: true });
+    restored.push(localSkill.name);
+  }
+
+  return { restored, skipped, missing, warnings };
+}
+
+function getConfiguredLocalSkillShadows(
+  cwd: string,
+): ConfiguredLocalSkillShadow[] {
+  const configPath = join(cwd, FRAMEWORK_CONFIG_PATH);
+  if (!existsSync(configPath)) return [];
+
+  const config = readFrameworkConfig(configPath);
+  if (!Array.isArray(config.localSkills)) return [];
+
+  return config.localSkills
+    .filter((localSkill) => localSkill.kind === "local-skill")
+    .map((localSkill) => {
+      const path = join(cwd, localSkill.source);
+      return {
+        name: localSkill.name,
+        path,
+        skillPath: join(path, "SKILL.md"),
+      };
+    });
+}
+
+function ensureRuntimeSkill(
+  cwd: string,
+  skill: CapabilitySkill,
+): string | null {
+  const source = join(cwd, ".agents", "skills", skill.skillName);
+  if (existsSync(join(source, "SKILL.md"))) return source;
+
+  const fallbackSource = getAircurySkillFallbackSource(skill);
+  if (!fallbackSource) return null;
+
+  cpSync(fallbackSource, source, { recursive: true, force: true });
+  return source;
+}
+
+function getLocalSkillRestoreWarningMessage(
+  skillName: string,
+  officialVersion: string | null,
+  localVersion: string | null,
+  order: SkillVersionOrder,
+): string {
+  if (order === "left-greater") {
+    return `Local skill override not restored: ${skillName}. Official version ${officialVersion} is newer than local shadow version ${localVersion}. Review and migrate the local shadow manually.`;
+  }
+
+  if (order === "right-greater") {
+    return `Local skill override not restored: ${skillName}. Local shadow version ${localVersion} differs from official version ${officialVersion}. Review both copies before restoring manually.`;
+  }
+
+  return `Local skill override not restored: ${skillName}. Version comparison was unknown (official: ${officialVersion ?? "unknown"}, local: ${localVersion ?? "unknown"}). Review both copies before restoring manually.`;
 }
 
 function getBaseFiles(): InstallFile[] {
@@ -327,8 +634,39 @@ export function writeFile(
     return;
   }
 
+  if (
+    !isGlobal &&
+    file.path === FRAMEWORK_CONFIG_PATH &&
+    existsSync(fullPath)
+  ) {
+    mkdirSync(dirname(fullPath), { recursive: true });
+    writeFileSync(
+      fullPath,
+      mergeFrameworkConfigLocalSkills(
+        readFileSync(fullPath, "utf-8"),
+        file.content,
+      ),
+      "utf-8",
+    );
+    return;
+  }
+
   mkdirSync(dirname(fullPath), { recursive: true });
   writeFileSync(fullPath, file.content, "utf-8");
+}
+
+function mergeFrameworkConfigLocalSkills(
+  existingContent: string,
+  generatedContent: string,
+): string {
+  const existing = JSON.parse(existingContent) as Partial<CapabilityProfile>;
+  const generated = JSON.parse(generatedContent) as CapabilityProfile;
+
+  if (Array.isArray(existing.localSkills) && existing.localSkills.length > 0) {
+    generated.localSkills = existing.localSkills;
+  }
+
+  return `${JSON.stringify(generated, null, 2)}\n`;
 }
 
 export function syncClaudeCodeSkills(
