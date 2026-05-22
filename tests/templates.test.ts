@@ -159,6 +159,28 @@ describe("templates", () => {
       );
     });
 
+    it("shows OpenSpec modes only when OpenSpec is enabled", () => {
+      expect(generateFramework(["open-spec"])).toContain(
+        "`propose-apply-complete`",
+      );
+      expect(generateFramework(["open-spec"])).toContain(
+        "Run `open-spec-propose` first.",
+      );
+      expect(generateFramework([])).not.toContain("`propose-apply-complete`");
+      expect(generateFramework([])).not.toContain("`open-spec-propose`");
+    });
+
+    it("shows Spec Kit mode only when Spec Kit is enabled", () => {
+      expect(generateFramework(["spec-kit"])).toContain("`spec-kit`");
+      expect(generateFramework(["spec-kit"])).toContain(
+        "Follow the Spec Kit sequence strictly",
+      );
+      expect(generateFramework([])).not.toContain("`spec-kit`");
+      expect(generateFramework([])).not.toContain(
+        "Follow the Spec Kit sequence strictly",
+      );
+    });
+
     it("adds architecture rules only when DDD+Hexagonal is enabled", () => {
       expect(generateFramework(["ddd-hexagonal"])).toContain(
         "docs/aircury/capabilities/ddd-hexagonal.md",
