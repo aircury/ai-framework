@@ -81,7 +81,8 @@ Use this path when the user wants a new repository-specific skill.
 7. Keep the body focused on deterministic workflow steps and repository-specific context.
 8. Add bundled `references/`, `scripts/`, or `assets/` only when the skill needs them.
 9. Copy the completed runtime skill directory into `.localRules/skills/<skill-name>/`.
-10. Tell the user that the runtime skill was created and that `.localRules/skills/` holds the persisted project copy.
+10. Add or update the new skill in `.aircury/framework.config.json` under `localSkills` so the installer can restore it on future installs.
+11. Tell the user that the runtime skill was created, that `.localRules/skills/` holds the persisted project copy, and that `.aircury/framework.config.json` tracks it.
 
 Starter frontmatter:
 
@@ -96,11 +97,28 @@ metadata:
 ---
 ```
 
+Config entry for a new local skill:
+
+```json
+{
+  "localSkills": [
+    {
+      "name": "example-local-skill",
+      "kind": "local-skill",
+      "source": ".localRules/skills/example-local-skill"
+    }
+  ]
+}
+```
+
+When updating `.aircury/framework.config.json`, preserve existing capabilities, language preferences, notices, and unrelated `localSkills` entries. Replace only the entry with the same `name`.
+
 ## Safety Rules
 
 - Never overwrite `.localRules/skills/<skill-name>/` without reading it first.
 - Never discard user-authored local rules or local skill content.
 - Never leave a modified runtime skill unpersisted; copy it to `.localRules/skills/<skill-name>/` before finishing.
+- Never leave a new local skill unregistered; add it to `.aircury/framework.config.json` under `localSkills` before finishing.
 - Never change `metadata.version` when modifying an existing skill. Only new local skills get a new local version.
 - Do not perform automatic merges between upstream and local skill text; skill wording changes agent behaviour and should be reviewed deliberately.
 - If upstream and persisted local versions differ during an update, keep the official runtime skill installed and tell the user manual migration may be needed.
@@ -113,5 +131,6 @@ When finished, report:
 - Files created or changed under `.localRules/`.
 - Runtime skill files created or changed under `.agents/skills/` or `.claude/skills/`.
 - Whether the runtime skill was persisted into `.localRules/skills/`.
+- Whether a new local skill was registered in `.aircury/framework.config.json` under `localSkills`.
 - The `metadata.version` found, and confirmation that it was not changed for existing skills.
 - Whether the installer must be rerun to sync runtime skill directories.

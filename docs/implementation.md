@@ -25,7 +25,9 @@ The TUI performs this sequence:
 5. Review files and `npx skills add` commands.
 6. Confirm installation.
 7. Choose whether to skip or overwrite existing generated files.
-8. Write files, install skills, and update `.gitignore` with `specs/changes/`.
+8. Install selected skills.
+9. Restore compatible local skill shadows from `.localRules/skills/`.
+10. Write files and update `.gitignore` with `specs/changes/`.
 
 Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and OpenCode are supported through `AGENTS.md` and selected skills. Tool-specific files are added only when selected.
 
@@ -36,9 +38,9 @@ Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and Open
 | `FRAMEWORK.md` | Full project constitution generated from templates and selected capabilities. |
 | `AGENTS.md` | Short agent entrypoint that points to `FRAMEWORK.md`. Existing non-Aircury content is preserved by appending the framework reference. |
 | `CLAUDE.md` | Claude Code instructions, when Claude Code is selected. Existing non-Aircury content is preserved by appending the framework reference. |
-| `.cursorrules` | Cursor rules, when Cursor is selected. Existing content is preserved by appending Aircury commit rules. |
 | `GEMINI.md` | Gemini CLI instructions, when Gemini CLI is selected. |
 | `.aircury/framework.config.json` | Installed profile with selected capabilities and language settings. |
+| `.localRules/framework.local.md` | Versioned project-specific framework rules. Created once and never overwritten by updates. |
 | `specs/features/README.md` | Starter guide for canonical living specifications. |
 | `specs/decisions/README.md` | Starter ADR guide when `decision-records` is enabled. |
 | `specs/ui/README.md` | Starter frontend design-system guide when `frontend` is enabled. |
@@ -81,6 +83,8 @@ For example, the architecture capabilities install one selected architecture sta
 
 The installer stores the selected capability ids in `.aircury/framework.config.json`. Re-run the installer or edit the profile and regenerate files if project standards need to change.
 
+Local project skills can be registered in `.aircury/framework.config.json` under `localSkills` with `name`, `kind: "local-skill"`, and `source`. The source points to `.localRules/skills/<skill-name>/`, which is the versioned project copy.
+
 ## Skill Installation
 
 Installable skills are defined on capabilities in `src/capabilities.ts`. The installer expands selected capabilities into individual skills and groups them by source before running `skills add` through `npx` when available, or `bunx` otherwise.
@@ -88,6 +92,10 @@ Installable skills are defined on capabilities in `src/capabilities.ts`. The ins
 Local skill commands include the `universal` agent and any selected tool-specific agents except Claude Code. Global skill commands include `universal` and selected global tool agents.
 
 When Claude Code is selected for a local install, the installer materialises selected skills through the `universal` agent and then synchronises available selected skills from `.agents/skills/` into `.claude/skills/` so Claude Code can load them from its project-specific skills directory. This avoids asking `skills add` and the installer to manage the same Claude Code target directory. If a selected skill was not materialised by `skills add`, the installer reports a warning instead of failing the project installation.
+
+For local installs, selected official skills are installed first. If `.localRules/skills/<skill-name>/SKILL.md` exists, the installer compares `metadata.version` from the installed official skill with the saved local shadow. Matching versions are restored automatically into `.agents/skills/<skill-name>/`. Different or unknown versions keep the newly installed official skill active and emit a non-fatal warning so the local shadow can be migrated manually.
+
+New repository-specific skills are restored from configured `localSkills` entries. The config entry does not store runtime path or version; `metadata.version` remains inside the skill's `SKILL.md`.
 
 The generated command shape is:
 
