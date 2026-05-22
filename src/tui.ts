@@ -3,6 +3,7 @@ import {
   CAPABILITIES,
   type CapabilityCategory,
   type CapabilityId,
+  type CapabilitySkill,
   getCapabilities,
   getCapabilitySkills,
   getInitialCapabilityIds,
@@ -17,6 +18,7 @@ import {
   getLocalFiles,
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
+  restoreLocalSkillOverrides,
   runCommand,
   syncClaudeCodeSkills,
   updateGitignore,
@@ -303,6 +305,11 @@ export async function run(): Promise<void> {
   let written = 0;
   let skipped = 0;
   let executed = 0;
+  let restoredLocalSkillOverrides = 0;
+  let skippedLocalSkillOverrides = 0;
+  let missingLocalSkillOverrides: string[] = [];
+  let localSkillOverrideWarnings: string[] = [];
+  let localSkillsToSync: CapabilitySkill[] = [];
   let claudeSkillsCopied = 0;
   let missingClaudeSkills: string[] = [];
 
@@ -325,8 +332,26 @@ export async function run(): Promise<void> {
     executed++;
   }
 
+  if (!isGlobal) {
+    const restoreResult = restoreLocalSkillOverrides(cwd, selectedSkills);
+    restoredLocalSkillOverrides = restoreResult.restored.length;
+    skippedLocalSkillOverrides = restoreResult.skipped.length;
+    missingLocalSkillOverrides = restoreResult.missing;
+    localSkillOverrideWarnings = restoreResult.warnings.map(
+      (warning) => warning.message,
+    );
+    localSkillsToSync = restoreResult.restored.map((skillName) => ({
+      source: "local",
+      skillName,
+      scopes: ["local"],
+    }));
+  }
+
   if (!isGlobal && selectedTools.includes("claude-code")) {
-    const syncResult = syncClaudeCodeSkills(cwd, selectedSkills);
+    const syncResult = syncClaudeCodeSkills(cwd, [
+      ...selectedSkills,
+      ...localSkillsToSync,
+    ]);
     claudeSkillsCopied = syncResult.copied.length;
     missingClaudeSkills = syncResult.missing;
   }
@@ -360,6 +385,21 @@ export async function run(): Promise<void> {
   if (executed > 0)
     p.log.success(
       `${executed} install command${executed > 1 ? "s" : ""} executed`,
+    );
+  if (restoredLocalSkillOverrides > 0)
+    p.log.success(
+      `${restoredLocalSkillOverrides} local skill override${restoredLocalSkillOverrides > 1 ? "s" : ""} restored from .localRules/skills/`,
+    );
+  if (skippedLocalSkillOverrides > 0)
+    p.log.warn(
+      `${skippedLocalSkillOverrides} local skill override${skippedLocalSkillOverrides > 1 ? "s" : ""} kept for manual migration`,
+    );
+  for (const warning of localSkillOverrideWarnings) {
+    p.log.warn(warning);
+  }
+  if (missingLocalSkillOverrides.length > 0)
+    p.log.warn(
+      `Local skill overrides could not be compared because runtime skills were missing: ${missingLocalSkillOverrides.join(", ")}`,
     );
   if (claudeSkillsCopied > 0)
     p.log.success(

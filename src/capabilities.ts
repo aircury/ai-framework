@@ -199,6 +199,13 @@ export interface CapabilityProfile {
   language: {
     britishEnglish: boolean;
   };
+  localSkills?: LocalSkillProfileEntry[];
+}
+
+export interface LocalSkillProfileEntry {
+  name: string;
+  kind: "local-skill";
+  source: string;
 }
 
 interface StandardManifest {
