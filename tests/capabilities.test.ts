@@ -52,6 +52,7 @@ describe("capabilities", () => {
       "spec-kit",
       "airsync",
       "git",
+      "aircury-aws-sso",
       "ddd-hexagonal",
       "clean-architecture",
       "layered-architecture",

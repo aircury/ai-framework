@@ -152,6 +152,7 @@ export type CapabilityId =
   | "spec-kit"
   | "airsync"
   | "git"
+  | "aircury-aws-sso"
   | "ddd-hexagonal"
   | "clean-architecture"
   | "layered-architecture"
@@ -507,6 +508,23 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
     ],
   },
+  "aircury-aws-sso": {
+    id: "aircury-aws-sso",
+    label: "Aircury AWS SSO",
+    hint: "IAM Identity Center login and cross-account CLI profiles",
+    description:
+      "Aircury AWS SSO setup for CLI access via IAM Identity Center and cross-account AssumeRole profiles",
+    category: "workflow",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "aircury-aws-sso",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
   "ddd-hexagonal": {
     id: "ddd-hexagonal",
     label: "DDD+Hexagonal",
@@ -728,6 +746,7 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "spec-kit",
   "airsync",
   "git",
+  "aircury-aws-sso",
   "ddd-hexagonal",
   "clean-architecture",
   "layered-architecture",
