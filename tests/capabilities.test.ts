@@ -24,6 +24,7 @@ describe("capabilities", () => {
       "token-efficiency",
       "resilience",
       "specs",
+      "ask-question",
     ]);
   });
 
@@ -41,6 +42,7 @@ describe("capabilities", () => {
       "resilience",
       "specs",
       "language",
+      "ask-question",
     ]);
   });
 
@@ -62,6 +64,7 @@ describe("capabilities", () => {
       "resilience",
       "specs",
       "language",
+      "ask-question",
     ]);
   });
 

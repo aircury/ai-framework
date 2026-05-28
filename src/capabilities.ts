@@ -163,7 +163,8 @@ export type CapabilityId =
   | "token-efficiency"
   | "resilience"
   | "specs"
-  | "language";
+  | "language"
+  | "ask-question";
 
 export interface CapabilitySkill {
   source: string;
@@ -721,6 +722,23 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
     ],
   },
+  "ask-question": {
+    id: "ask-question",
+    label: "Ask Question",
+    hint: "use the IDE AskQuestion tool instead of plain chat for choices",
+    description:
+      "Requires agents to use the IDE AskQuestion tool when asking the user to choose between options",
+    category: "communication",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "ask-question",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
 };
 
 const CAPABILITY_ORDER: CapabilityId[] = [
@@ -740,6 +758,7 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "resilience",
   "specs",
   "language",
+  "ask-question",
 ];
 
 const EXCLUSIVE_ARCHITECTURE_CAPABILITIES: CapabilityId[] = [
