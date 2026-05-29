@@ -489,6 +489,12 @@ describe("getLocalCommands", () => {
     expect(commands[0].args).toContain("dbml-database-docs");
   });
 
+  it("installs the blind db debugging skill when selected", () => {
+    const commands = getLocalCommands([], ["blind-db-debugging"]);
+    expect(commands).toHaveLength(1);
+    expect(commands[0].args).toContain("blind-db-debugging");
+  });
+
   it("installs the frontend skills from the Aircury source", () => {
     const commands = getLocalCommands([], ["frontend"]);
     expect(commands).toHaveLength(2);
@@ -826,9 +832,9 @@ describe("syncClaudeCodeSkills", () => {
     ]);
 
     expect(result).toEqual({ copied: ["caveman"], missing: [] });
-    expect(
-      readFileSync(join(targetDir, "SKILL.md"), "utf-8"),
-    ).toBe("# Caveman");
+    expect(readFileSync(join(targetDir, "SKILL.md"), "utf-8")).toBe(
+      "# Caveman",
+    );
 
     rmSync(dir, { recursive: true });
   });

@@ -164,7 +164,8 @@ export type CapabilityId =
   | "resilience"
   | "specs"
   | "language"
-  | "ask-question";
+  | "ask-question"
+  | "blind-db-debugging";
 
 export interface CapabilitySkill {
   source: string;
@@ -739,6 +740,23 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
     ],
   },
+  "blind-db-debugging": {
+    id: "blind-db-debugging",
+    label: "Blind DB Debugging",
+    hint: "diagnose database issues via SQL row counts without seeing data values",
+    description:
+      "Structured workflow for diagnosing database issues through hypothesis-driven SQL queries where the user reports only row counts",
+    category: "workflow",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "blind-db-debugging",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
 };
 
 const CAPABILITY_ORDER: CapabilityId[] = [
@@ -759,6 +777,7 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "specs",
   "language",
   "ask-question",
+  "blind-db-debugging",
 ];
 
 const EXCLUSIVE_ARCHITECTURE_CAPABILITIES: CapabilityId[] = [
