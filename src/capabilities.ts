@@ -165,7 +165,8 @@ export type CapabilityId =
   | "specs"
   | "language"
   | "ask-question"
-  | "blind-db-debugging";
+  | "blind-db-debugging"
+  | "db-schema-design";
 
 export interface CapabilitySkill {
   source: string;
@@ -757,6 +758,23 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
     ],
   },
+  "db-schema-design": {
+    id: "db-schema-design",
+    label: "DB Schema Design",
+    hint: "design and review relational database schemas",
+    description:
+      "Expert database schema design workflow for relational models, migrations, and schema reviews",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "db-schema-design",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
 };
 
 const CAPABILITY_ORDER: CapabilityId[] = [
@@ -778,6 +796,7 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "language",
   "ask-question",
   "blind-db-debugging",
+  "db-schema-design",
 ];
 
 const EXCLUSIVE_ARCHITECTURE_CAPABILITIES: CapabilityId[] = [

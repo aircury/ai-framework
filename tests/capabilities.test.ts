@@ -66,6 +66,7 @@ describe("capabilities", () => {
       "language",
       "ask-question",
       "blind-db-debugging",
+      "db-schema-design",
     ]);
   });
 

@@ -495,6 +495,12 @@ describe("getLocalCommands", () => {
     expect(commands[0].args).toContain("blind-db-debugging");
   });
 
+  it("installs the db schema design skill when selected", () => {
+    const commands = getLocalCommands([], ["db-schema-design"]);
+    expect(commands).toHaveLength(1);
+    expect(commands[0].args).toContain("db-schema-design");
+  });
+
   it("installs the frontend skills from the Aircury source", () => {
     const commands = getLocalCommands([], ["frontend"]);
     expect(commands).toHaveLength(2);
