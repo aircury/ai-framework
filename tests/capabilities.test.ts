@@ -65,9 +65,18 @@ describe("capabilities", () => {
       "specs",
       "language",
       "ask-question",
-      "blind-db-debugging",
-      "db-schema-design",
+      "database",
     ]);
+  });
+
+  it("maps legacy database capability ids to the database pack", () => {
+    expect(resolveCapabilityIds(["blind-db-debugging"])).toEqual(["database"]);
+    expect(resolveCapabilityIds(["db-schema-design"])).toEqual(["database"]);
+    expect(
+      getCapabilitySkills(["blind-db-debugging", "db-schema-design"], "local").map(
+        (skill) => skill.skillName,
+      ),
+    ).toEqual(["blind-db-debugging", "db-schema-design"]);
   });
 
   it("expands selected capabilities into unique installable skills", () => {

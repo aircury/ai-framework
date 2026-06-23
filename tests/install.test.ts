@@ -489,15 +489,10 @@ describe("getLocalCommands", () => {
     expect(commands[0].args).toContain("dbml-database-docs");
   });
 
-  it("installs the blind db debugging skill when selected", () => {
-    const commands = getLocalCommands([], ["blind-db-debugging"]);
+  it("installs both database skills when the database capability is selected", () => {
+    const commands = getLocalCommands([], ["database"]);
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toContain("blind-db-debugging");
-  });
-
-  it("installs the db schema design skill when selected", () => {
-    const commands = getLocalCommands([], ["db-schema-design"]);
-    expect(commands).toHaveLength(1);
     expect(commands[0].args).toContain("db-schema-design");
   });
 
