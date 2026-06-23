@@ -165,8 +165,14 @@ export type CapabilityId =
   | "specs"
   | "language"
   | "ask-question"
+  | "database"
   | "blind-db-debugging"
   | "db-schema-design";
+
+type VisibleCapabilityId = Exclude<
+  CapabilityId,
+  "blind-db-debugging" | "db-schema-design"
+>;
 
 export interface CapabilitySkill {
   source: string;
@@ -397,7 +403,7 @@ function createCapabilityDetailFile(
   };
 }
 
-const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
+const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
   "open-spec": {
     id: "open-spec",
     label: "OpenSpec",
@@ -741,13 +747,13 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
     ],
   },
-  "blind-db-debugging": {
-    id: "blind-db-debugging",
-    label: "Blind DB Debugging",
-    hint: "diagnose database issues via SQL row counts without seeing data values",
+  database: {
+    id: "database",
+    label: "Database",
+    hint: "schema design and blind debugging workflows",
     description:
-      "Structured workflow for diagnosing database issues through hypothesis-driven SQL queries where the user reports only row counts",
-    category: "workflow",
+      "Database schema design and blind debugging workflows for relational systems",
+    category: "engineering",
     defaultSelected: false,
     scopes: ["local", "global"],
     skills: [
@@ -756,18 +762,6 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
         skillName: "blind-db-debugging",
         scopes: ["local", "global"],
       },
-    ],
-  },
-  "db-schema-design": {
-    id: "db-schema-design",
-    label: "DB Schema Design",
-    hint: "design and review relational database schemas",
-    description:
-      "Expert database schema design workflow for relational models, migrations, and schema reviews",
-    category: "engineering",
-    defaultSelected: false,
-    scopes: ["local", "global"],
-    skills: [
       {
         source: "aircury/ai-framework",
         skillName: "db-schema-design",
@@ -795,9 +789,17 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "specs",
   "language",
   "ask-question",
-  "blind-db-debugging",
-  "db-schema-design",
+  "database",
 ];
+
+const LEGACY_CAPABILITY_ALIASES: Partial<Record<CapabilityId, VisibleCapabilityId>> = {
+  "blind-db-debugging": "database",
+  "db-schema-design": "database",
+};
+
+function normalizeCapabilityId(capabilityId: CapabilityId): VisibleCapabilityId {
+  return LEGACY_CAPABILITY_ALIASES[capabilityId] ?? capabilityId;
+}
 
 const EXCLUSIVE_ARCHITECTURE_CAPABILITIES: CapabilityId[] = [
   "ddd-hexagonal",
@@ -827,10 +829,10 @@ export const CAPABILITIES: CapabilityManifest[] = CAPABILITY_ORDER.map(
   (id) => CAPABILITY_REGISTRY[id],
 );
 
-export const DEFAULT_LOCAL_CAPABILITY_IDS: CapabilityId[] = CAPABILITIES.filter(
-  (capability) =>
-    capability.scopes.includes("local") && capability.defaultSelected,
-).map((capability) => capability.id);
+export const DEFAULT_LOCAL_CAPABILITY_IDS: VisibleCapabilityId[] =
+  CAPABILITIES.filter(
+    (capability) => capability.scopes.includes("local") && capability.defaultSelected,
+  ).map((capability) => capability.id);
 
 export function getCapabilities(scope: CapabilityScope): CapabilityManifest[] {
   return CAPABILITIES.filter((capability) => capability.scopes.includes(scope));
@@ -839,16 +841,17 @@ export function getCapabilities(scope: CapabilityScope): CapabilityManifest[] {
 export function getCapabilityById(
   capabilityId: CapabilityId,
 ): CapabilityManifest {
-  return CAPABILITY_REGISTRY[capabilityId];
+  return CAPABILITY_REGISTRY[normalizeCapabilityId(capabilityId)];
 }
 
 export function resolveCapabilityIds(
   capabilityIds: CapabilityId[] = DEFAULT_LOCAL_CAPABILITY_IDS,
-): CapabilityId[] {
-  const resolved = new Set<CapabilityId>();
+) : VisibleCapabilityId[] {
+  const resolved = new Set<VisibleCapabilityId>();
   const visit = (capabilityId: CapabilityId) => {
-    if (resolved.has(capabilityId)) return;
-    resolved.add(capabilityId);
+    const normalizedCapabilityId = normalizeCapabilityId(capabilityId);
+    if (resolved.has(normalizedCapabilityId)) return;
+    resolved.add(normalizedCapabilityId);
   };
 
   for (const capabilityId of normalizeExclusiveArchitectures(capabilityIds)) {
@@ -863,7 +866,7 @@ export function createCapabilityProfile(
   options?: { britishEnglish?: boolean },
 ): CapabilityProfile {
   const britishEnglish = options?.britishEnglish ?? false;
-  const selected = new Set(resolveCapabilityIds(capabilityIds));
+  const selected = new Set<VisibleCapabilityId>(resolveCapabilityIds(capabilityIds));
 
   if (britishEnglish) {
     selected.add("language");
