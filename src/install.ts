@@ -11,6 +11,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   type CapabilityId,
+  type CapabilityProfile,
   type CapabilityScope,
   type CapabilitySkill,
   createCapabilityProfile,
@@ -51,6 +52,7 @@ type SkillsRunner = "npx" | "bunx";
 let cachedSkillsRunner: SkillsRunner | null = null;
 
 const AIRCURY_SKILLS_SOURCE = "aircury/ai-framework";
+const PROJECT_PROFILE_PATH = ".aircury/framework.config.json";
 
 function getLocalAircurySkillsSource(): string | null {
   const moduleDir = dirname(fileURLToPath(import.meta.url));
@@ -118,6 +120,8 @@ export function getLocalFiles(
 ): InstallFile[] {
   const profile = createCapabilityProfile(capabilityIds, {
     britishEnglish: options?.britishEnglish,
+    scope: "local",
+    tools,
   });
   const files: InstallFile[] = [
     {
@@ -136,7 +140,7 @@ export function getLocalFiles(
       description: "Agent instructions (standard convention)",
     },
     {
-      path: ".aircury/framework.config.json",
+      path: PROJECT_PROFILE_PATH,
       content: `${JSON.stringify(profile, null, 2)}\n`,
       description: "Installed capability profile",
     },
@@ -161,6 +165,34 @@ export function getLocalFiles(
   }
 
   return files;
+}
+
+export function readProjectProfile(cwd: string): CapabilityProfile | null {
+  const profilePath = join(cwd, PROJECT_PROFILE_PATH);
+  if (!existsSync(profilePath)) return null;
+
+  try {
+    const parsed = JSON.parse(readFileSync(profilePath, "utf-8"));
+    if (!isProjectProfile(parsed)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function isProjectProfile(value: unknown): value is CapabilityProfile {
+  if (!value || typeof value !== "object") return false;
+  const profile = value as Partial<CapabilityProfile>;
+
+  return (
+    profile.version === 2 &&
+    Array.isArray(profile.capabilities) &&
+    typeof profile.language === "object" &&
+    profile.language !== null &&
+    typeof profile.language.britishEnglish === "boolean" &&
+    (profile.tools === undefined || Array.isArray(profile.tools)) &&
+    (profile.scope === undefined || profile.scope === "local")
+  );
 }
 
 export function getGlobalFiles(tools: Tool[]): InstallFile[] {
@@ -441,7 +473,31 @@ export function runCommand(
   };
 }
 
-const GITIGNORE_ENTRY = "# Aircury AI Framework\nspecs/changes/";
+const GITIGNORE_ENTRY = `# Aircury AI Framework generated files
+FRAMEWORK.md
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.cursorrules
+docs/aircury/
+.agents/
+.claude/
+specs/features/README.md
+!specs/features/
+!specs/features/**/*.md
+specs/decisions/README.md
+!specs/decisions/
+!specs/decisions/ADR-*.md
+specs/ui/README.md
+specs/ui/frontend-workflow.md
+!specs/ui/
+!specs/ui/style-guide.md
+specs/changes/
+!db/schema.dbml
+
+# Aircury AI Framework shared profile
+!.aircury/
+!.aircury/framework.config.json`;
 
 export function updateGitignore(cwd: string): {
   updated: boolean;
@@ -456,7 +512,7 @@ export function updateGitignore(cwd: string): {
   }
 
   const content = readFileSync(gitignorePath, "utf-8");
-  if (content.includes("specs/changes/")) {
+  if (content.includes("# Aircury AI Framework generated files")) {
     return { updated: false, created: false };
   }
 

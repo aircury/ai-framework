@@ -25,8 +25,10 @@ import {
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
   mergeFrameworkReferenceIntoAgents,
+  readProjectProfile,
   runCommand,
   syncClaudeCodeSkills,
+  updateGitignore,
   writeFile,
 } from "../src/install";
 
@@ -153,6 +155,10 @@ describe("getLocalFiles", () => {
   it("persists selected capabilities in the config file", () => {
     const files = getLocalFiles([], ["decision-records", "testing"]);
     const config = getFileByPath(files, ".aircury/framework.config.json");
+    const profile = JSON.parse(config.content);
+
+    expect(profile.scope).toBe("local");
+    expect(profile.tools).toEqual([]);
     expect(config.content).toContain('"capabilities": [');
     expect(config.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
     expect(config.content).toContain('"decision-records"');
@@ -165,6 +171,16 @@ describe("getLocalFiles", () => {
     const config = getFileByPath(files, ".aircury/framework.config.json");
     expect(config.content).toContain('"britishEnglish": true');
     expect(config.content).toContain('"language"');
+  });
+
+  it("persists selected tools in the config file", () => {
+    const files = getLocalFiles(["claude-code", "cursor"], ["git"]);
+    const config = getFileByPath(files, ".aircury/framework.config.json");
+    const profile = JSON.parse(config.content);
+
+    expect(profile.scope).toBe("local");
+    expect(profile.tools).toEqual(["claude-code", "cursor"]);
+    expect(profile.capabilities).toEqual(["git"]);
   });
 
   it("generates framework content from the selected capabilities", () => {
@@ -325,6 +341,129 @@ describe("getLocalFiles", () => {
 describe("getGlobalFiles", () => {
   it("does not install any global files", () => {
     expect(getGlobalFiles(["claude-code"])).toHaveLength(0);
+  });
+});
+
+describe("readProjectProfile", () => {
+  it("reads a valid shared project profile", () => {
+    const dir = `${tmpdir()}/sdd-profile-${Date.now()}`;
+    const profileDir = join(dir, ".aircury");
+    mkdirSync(profileDir, { recursive: true });
+    writeFileSync(
+      join(profileDir, "framework.config.json"),
+      JSON.stringify(
+        {
+          version: 2,
+          _notice: FRAMEWORK_MAINTAINED_NOTICE,
+          scope: "local",
+          tools: ["claude-code", "cursor"],
+          capabilities: ["git", "testing"],
+          language: { britishEnglish: true },
+        },
+        null,
+        2,
+      ),
+      "utf-8",
+    );
+
+    expect(readProjectProfile(dir)).toEqual({
+      version: 2,
+      _notice: FRAMEWORK_MAINTAINED_NOTICE,
+      scope: "local",
+      tools: ["claude-code", "cursor"],
+      capabilities: ["git", "testing"],
+      language: { britishEnglish: true },
+    });
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("accepts existing profiles without tools or scope", () => {
+    const dir = `${tmpdir()}/sdd-legacy-profile-${Date.now()}`;
+    const profileDir = join(dir, ".aircury");
+    mkdirSync(profileDir, { recursive: true });
+    writeFileSync(
+      join(profileDir, "framework.config.json"),
+      JSON.stringify({
+        version: 2,
+        _notice: FRAMEWORK_MAINTAINED_NOTICE,
+        capabilities: ["git"],
+        language: { britishEnglish: false },
+      }),
+      "utf-8",
+    );
+
+    expect(readProjectProfile(dir)?.capabilities).toEqual(["git"]);
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("ignores invalid project profiles", () => {
+    const dir = `${tmpdir()}/sdd-invalid-profile-${Date.now()}`;
+    const profileDir = join(dir, ".aircury");
+    mkdirSync(profileDir, { recursive: true });
+    writeFileSync(
+      join(profileDir, "framework.config.json"),
+      JSON.stringify({ version: 2, capabilities: ["git"] }),
+      "utf-8",
+    );
+
+    expect(readProjectProfile(dir)).toBeNull();
+
+    rmSync(dir, { recursive: true });
+  });
+});
+
+describe("updateGitignore", () => {
+  it("ignores generated framework files but keeps the shared profile and local companion versionable", () => {
+    const dir = `${tmpdir()}/sdd-gitignore-${Date.now()}`;
+    mkdirSync(dir, { recursive: true });
+
+    const result = updateGitignore(dir);
+    const content = readFileSync(join(dir, ".gitignore"), "utf-8");
+
+    expect(result).toEqual({ updated: true, created: true });
+    expect(content).toContain("FRAMEWORK.md");
+    expect(content).toContain("AGENTS.md");
+    expect(content).toContain("CLAUDE.md");
+    expect(content).toContain("GEMINI.md");
+    expect(content).toContain(".cursorrules");
+    expect(content).toContain("docs/aircury/");
+    expect(content).toContain(".agents/");
+    expect(content).toContain(".claude/");
+    expect(content).toContain("specs/features/README.md");
+    expect(content).toContain("!specs/features/");
+    expect(content).toContain("!specs/features/**/*.md");
+    expect(content).toContain("specs/decisions/README.md");
+    expect(content).toContain("!specs/decisions/");
+    expect(content).toContain("!specs/decisions/ADR-*.md");
+    expect(content).toContain("specs/ui/README.md");
+    expect(content).toContain("specs/ui/frontend-workflow.md");
+    expect(content).toContain("!specs/ui/");
+    expect(content).toContain("!specs/ui/style-guide.md");
+    expect(content).toContain("specs/changes/");
+    expect(content).toContain("!db/schema.dbml");
+    expect(content).toContain("!.aircury/");
+    expect(content).toContain("!.aircury/framework.config.json");
+    expect(content).not.toContain("FRAMEWORK.local.md");
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("does not duplicate the generated framework ignore block", () => {
+    const dir = `${tmpdir()}/sdd-gitignore-idempotent-${Date.now()}`;
+    mkdirSync(dir, { recursive: true });
+
+    updateGitignore(dir);
+    const result = updateGitignore(dir);
+    const content = readFileSync(join(dir, ".gitignore"), "utf-8");
+
+    expect(result).toEqual({ updated: false, created: false });
+    expect(
+      content.match(/# Aircury AI Framework generated files/g)?.length,
+    ).toBe(1);
+
+    rmSync(dir, { recursive: true });
   });
 });
 
