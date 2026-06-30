@@ -70,3 +70,4 @@ Use a throwaway project first if you want to verify the generated files before i
 | [`docs/implementation.md`](docs/implementation.md) | Installer flow, generated files, capabilities, skill installation, and conflict handling. |
 | [`docs/playbook.md`](docs/playbook.md) | Workflow selection guide, examples, and operating rules for installed projects. |
 | [`docs/contribution.md`](docs/contribution.md) | How to contribute modules, templates, skills, and installer wiring. |
+| [`docs/improvements.md`](docs/improvements.md) | Prioritised framework improvements from the June 2026 feedback synthesis. |
