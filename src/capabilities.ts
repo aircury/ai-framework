@@ -792,12 +792,16 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "database",
 ];
 
-const LEGACY_CAPABILITY_ALIASES: Partial<Record<CapabilityId, VisibleCapabilityId>> = {
+const LEGACY_CAPABILITY_ALIASES: Partial<
+  Record<CapabilityId, VisibleCapabilityId>
+> = {
   "blind-db-debugging": "database",
   "db-schema-design": "database",
 };
 
-function normalizeCapabilityId(capabilityId: CapabilityId): VisibleCapabilityId {
+function normalizeCapabilityId(
+  capabilityId: CapabilityId,
+): VisibleCapabilityId {
   return LEGACY_CAPABILITY_ALIASES[capabilityId] ?? capabilityId;
 }
 
@@ -831,7 +835,8 @@ export const CAPABILITIES: CapabilityManifest[] = CAPABILITY_ORDER.map(
 
 export const DEFAULT_LOCAL_CAPABILITY_IDS: VisibleCapabilityId[] =
   CAPABILITIES.filter(
-    (capability) => capability.scopes.includes("local") && capability.defaultSelected,
+    (capability) =>
+      capability.scopes.includes("local") && capability.defaultSelected,
   ).map((capability) => capability.id);
 
 export function getCapabilities(scope: CapabilityScope): CapabilityManifest[] {
@@ -846,7 +851,7 @@ export function getCapabilityById(
 
 export function resolveCapabilityIds(
   capabilityIds: CapabilityId[] = DEFAULT_LOCAL_CAPABILITY_IDS,
-) : VisibleCapabilityId[] {
+): VisibleCapabilityId[] {
   const resolved = new Set<VisibleCapabilityId>();
   const visit = (capabilityId: CapabilityId) => {
     const normalizedCapabilityId = normalizeCapabilityId(capabilityId);
@@ -866,7 +871,9 @@ export function createCapabilityProfile(
   options?: { britishEnglish?: boolean },
 ): CapabilityProfile {
   const britishEnglish = options?.britishEnglish ?? false;
-  const selected = new Set<VisibleCapabilityId>(resolveCapabilityIds(capabilityIds));
+  const selected = new Set<VisibleCapabilityId>(
+    resolveCapabilityIds(capabilityIds),
+  );
 
   if (britishEnglish) {
     selected.add("language");

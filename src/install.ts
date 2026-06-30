@@ -14,7 +14,6 @@ import {
   type CapabilityScope,
   type CapabilitySkill,
   createCapabilityProfile,
-  FRAMEWORK_MAINTAINED_NOTICE,
   getCapabilityFiles,
   getCapabilitySkills,
 } from "./capabilities";

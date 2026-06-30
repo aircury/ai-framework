@@ -21,6 +21,7 @@ import {
   getGlobalFiles,
   getLocalCommands,
   getLocalFiles,
+  getSkillsRunner,
   type InstallFile,
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
@@ -51,6 +52,7 @@ function getCommandBySource(
 
 const aircurySkillsSource = getAircurySkillsSource();
 const aircurySkillsDescription = `Install selected skills from ${aircurySkillsSource}`;
+const skillsRunner = getSkillsRunner();
 
 describe("getLocalFiles", () => {
   it("always includes the core framework files", () => {
@@ -500,7 +502,7 @@ describe("getLocalCommands", () => {
     const commands = getLocalCommands([], ["frontend"]);
     expect(commands).toHaveLength(2);
     expect(getCommandBySource(commands, aircurySkillsSource)).toEqual({
-      command: "npx",
+      command: skillsRunner,
       args: [
         "-y",
         "skills",
@@ -520,7 +522,7 @@ describe("getLocalCommands", () => {
         "https://github.com/vercel-labs/agent-skills",
       ),
     ).toEqual({
-      command: "npx",
+      command: skillsRunner,
       args: [
         "-y",
         "skills",
@@ -579,7 +581,7 @@ describe("runCommand", () => {
     const commands = getGlobalCommands([], ["frontend"]);
     expect(commands).toHaveLength(2);
     expect(getCommandBySource(commands, aircurySkillsSource)).toEqual({
-      command: "npx",
+      command: skillsRunner,
       args: [
         "-y",
         "skills",
@@ -600,7 +602,7 @@ describe("runCommand", () => {
         "https://github.com/vercel-labs/agent-skills",
       ),
     ).toEqual({
-      command: "npx",
+      command: skillsRunner,
       args: [
         "-y",
         "skills",

@@ -73,9 +73,10 @@ describe("capabilities", () => {
     expect(resolveCapabilityIds(["blind-db-debugging"])).toEqual(["database"]);
     expect(resolveCapabilityIds(["db-schema-design"])).toEqual(["database"]);
     expect(
-      getCapabilitySkills(["blind-db-debugging", "db-schema-design"], "local").map(
-        (skill) => skill.skillName,
-      ),
+      getCapabilitySkills(
+        ["blind-db-debugging", "db-schema-design"],
+        "local",
+      ).map((skill) => skill.skillName),
     ).toEqual(["blind-db-debugging", "db-schema-design"]);
   });
 
