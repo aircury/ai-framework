@@ -29,6 +29,7 @@ Aircury installs a project operating system for AI-assisted delivery:
 - **Project-scoped rules**: generated `FRAMEWORK.md` and `AGENTS.md` make standards explicit for future AI sessions.
 - **Composable capabilities**: teams can enable ADRs, DDD+Hexagonal, testing, frontend, logging, error handling, memory, token efficiency, and workflow skills independently.
 - **Skill wiring**: selected capabilities install curated skills through `npx skills add`, so workflows are executable rather than only documented.
+- **Greenfield bootstrap**: the optional Walking Skeleton capability installs an external ADR-driven bootstrap workflow for new projects.
 - **Reduced intention debt**: ADRs, specs, and optional Airsync memory preserve why decisions were made, not just what code changed.
 
 ## Workflow Routing
@@ -62,6 +63,7 @@ Examples:
 - `resilience` adds error-handling and structured-logging rules and installs related recovery/logging skills.
 - `specs` installs skills for extracting and interpreting canonical specs.
 - `open-spec` and `spec-kit` mainly install workflow skills.
+- `walking-skeleton` installs the external `aircury/walking-skeleton` skill for greenfield project bootstrap from selected ADRs.
 
 Capability installation is registry-driven from `src/capabilities.ts`, so project rules and installable skills are selected through the same flow.
 

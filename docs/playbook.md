@@ -10,6 +10,7 @@ This playbook shows how to use Aircury after installation. If you are unsure whi
 | Complex but clear change | `propose-apply-complete` | OpenSpec proposal artifacts, implementation, and final sync to `specs/features/`. |
 | Unknown root cause | `explore-propose-apply-complete` | Investigation first, then proposal, implementation, and completion. |
 | New feature or formal requirements | `spec-kit` | Specification, clarification, plan, analysis, tasks, implementation, and optional checklist. |
+| New project bootstrap | `walking-skeleton` | ADR selection, first end-to-end spec, runnable baseline, and clean rebuild verification. |
 | Understand existing behavior | `specs-extractor` | Behavior-first specs extracted from the current codebase. |
 | Rewrite from frozen specs | `specs-interpreter` | New implementation direction constrained by `specs/features/`. |
 
@@ -93,6 +94,30 @@ Skills involved:
 - `spec-kit-tasks`
 - `spec-kit-implement`
 - `spec-kit-checklist`
+
+### Start A New Project
+
+Use this when a greenfield repository needs a runnable baseline before normal feature delivery begins.
+
+```text
+Bootstrap this project with the walking skeleton workflow. Start by selecting the ADRs with the team, then define the smallest end-to-end slice, build it, and verify it from a clean rebuild.
+```
+
+Recommended skill:
+
+- `walking-skeleton`
+
+Expected flow:
+
+1. Run `/walking-skeleton plan` to choose ADRs, validate dependencies and conflicts, and write `specs/decisions/ADR-0000` plus the selected ADRs.
+2. Run `/walking-skeleton spec` to define the first tiny end-to-end behaviour that proves the selected architecture seams.
+3. Run `/walking-skeleton build` to create tasks, implement the baseline, and verify it with rebuild, linting, tests, and smoke checks.
+
+Important constraints:
+
+- The bundled ADRs are proposals and flavours, not mandatory architecture.
+- The walking skeleton is not a silver bullet; the generated baseline must be reviewed and corrected by the team.
+- After the skeleton is complete, return to normal framework delivery with TDD where automated testing is feasible.
 
 ### Extract Specs From Existing Code
 
