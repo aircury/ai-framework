@@ -181,6 +181,8 @@ Guidance:
 
 New projects need a minimum executable end-to-end slice before strict TDD becomes productive. The framework should provide a `walking-skeleton` flow that turns reviewed ADRs into a runnable baseline.
 
+Initial integration should keep the implementation in the external `aircury/walking-skeleton` repository and make the framework reference or install it as an optional capability. The framework should not vendor a particular ADR catalogue or present one stack as mandatory core.
+
 Proposed flow:
 
 1. Choose a skeleton flavour or combine ADRs.

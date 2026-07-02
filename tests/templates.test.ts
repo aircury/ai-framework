@@ -159,6 +159,18 @@ describe("templates", () => {
       );
     });
 
+    it("adds Walking Skeleton guidance only when the capability is enabled", () => {
+      expect(generateFramework(["walking-skeleton"])).toContain(
+        "docs/aircury/capabilities/walking-skeleton.md",
+      );
+      expect(generateFramework(["walking-skeleton"])).toContain(
+        "external walking-skeleton skill",
+      );
+      expect(generateFramework()).not.toContain(
+        "docs/aircury/capabilities/walking-skeleton.md",
+      );
+    });
+
     it("adds architecture rules only when DDD+Hexagonal is enabled", () => {
       expect(generateFramework(["ddd-hexagonal"])).toContain(
         "docs/aircury/capabilities/ddd-hexagonal.md",

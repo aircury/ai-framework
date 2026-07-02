@@ -281,6 +281,21 @@ describe("getLocalFiles", () => {
     expect(paths).toContain("specs/decisions/README.md");
   });
 
+  it("generates Walking Skeleton capability guidance when selected", () => {
+    const files = getLocalFiles([], ["walking-skeleton"]);
+    const paths = files.map((file) => file.path);
+    const walkingSkeleton = getFileByPath(
+      files,
+      "docs/aircury/capabilities/walking-skeleton.md",
+    );
+
+    expect(paths).toContain("docs/aircury/capabilities/walking-skeleton.md");
+    expect(walkingSkeleton.content).toContain(
+      "The walking-skeleton implementation lives outside this framework",
+    );
+    expect(walkingSkeleton.content).toContain("/walking-skeleton plan");
+  });
+
   it("requires searching the existing design system in the frontend workflow", () => {
     const files = getLocalFiles([], ["frontend"]);
     const workflow = getFileByPath(files, "specs/ui/frontend-workflow.md");
@@ -410,6 +425,27 @@ describe("getLocalCommands", () => {
       getCommandBySource(commands, "https://github.com/jezweb/claude-skills")
         .args,
     ).toContain("uk-business-english");
+  });
+
+  it("installs the external Walking Skeleton skill", () => {
+    const commands = getLocalCommands([], ["walking-skeleton"]);
+
+    expect(commands).toHaveLength(1);
+    expect(getCommandBySource(commands, "aircury/walking-skeleton")).toEqual({
+      command: skillsRunner,
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "aircury/walking-skeleton",
+        "--skill",
+        "walking-skeleton",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description: "Install selected skills from aircury/walking-skeleton",
+    });
   });
 
   it("installs the caveman skill when token-efficiency capability is selected", () => {

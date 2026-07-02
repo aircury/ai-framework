@@ -115,6 +115,15 @@ import tokenEfficiencyFramework from "../standards/modules/token-efficiency/fram
 import tokenEfficiencyManifest from "../standards/modules/token-efficiency/module.json" with {
   type: "json",
 };
+import walkingSkeletonAgents from "../standards/modules/walking-skeleton/agents.md" with {
+  type: "text",
+};
+import walkingSkeletonFramework from "../standards/modules/walking-skeleton/framework.md" with {
+  type: "text",
+};
+import walkingSkeletonManifest from "../standards/modules/walking-skeleton/module.json" with {
+  type: "json",
+};
 import decisionsReadme from "./install-content/specs/decisions/README.md" with {
   type: "text",
 };
@@ -145,11 +154,13 @@ type StandardModuleId =
   | "structured-logging"
   | "frontend"
   | "testing"
-  | "token-efficiency";
+  | "token-efficiency"
+  | "walking-skeleton";
 
 export type CapabilityId =
   | "open-spec"
   | "spec-kit"
+  | "walking-skeleton"
   | "airsync"
   | "git"
   | "ddd-hexagonal"
@@ -355,6 +366,13 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
       tokenEfficiencyAgents,
     ),
   },
+  "walking-skeleton": {
+    ...createStandardModule(
+      walkingSkeletonManifest as StandardManifest,
+      walkingSkeletonFramework,
+      walkingSkeletonAgents,
+    ),
+  },
 };
 
 function composeModules(
@@ -479,6 +497,24 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       {
         source: "aircury/ai-framework",
         skillName: "spec-kit-checklist",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
+  "walking-skeleton": {
+    id: "walking-skeleton",
+    label: "Walking Skeleton",
+    hint: "greenfield bootstrap from ADR bundles",
+    description:
+      "Greenfield bootstrap workflow that plans ADRs, specifies a tiny end-to-end slice, and builds a runnable baseline from the external walking-skeleton skill",
+    category: "workflow",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    ...composeModules(["walking-skeleton"]),
+    skills: [
+      {
+        source: "aircury/walking-skeleton",
+        skillName: "walking-skeleton",
         scopes: ["local", "global"],
       },
     ],
@@ -774,6 +810,7 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
 const CAPABILITY_ORDER: CapabilityId[] = [
   "open-spec",
   "spec-kit",
+  "walking-skeleton",
   "airsync",
   "git",
   "ddd-hexagonal",

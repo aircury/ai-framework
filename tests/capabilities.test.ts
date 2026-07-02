@@ -52,6 +52,7 @@ describe("capabilities", () => {
     ).toEqual([
       "open-spec",
       "spec-kit",
+      "walking-skeleton",
       "airsync",
       "git",
       "ddd-hexagonal",
@@ -99,6 +100,27 @@ describe("capabilities", () => {
       "specs-interpreter",
       "semantic-line-breaks",
       "dbml-database-docs",
+    ]);
+  });
+
+  it("wires Walking Skeleton as an optional external skill", () => {
+    expect(getInitialCapabilityIds("local")).not.toContain("walking-skeleton");
+    expect(getInitialCapabilityIds("global")).not.toContain("walking-skeleton");
+    expect(getCapabilityById("walking-skeleton")).toMatchObject({
+      label: "Walking Skeleton",
+      category: "workflow",
+      defaultSelected: false,
+      modules: ["walking-skeleton"],
+    });
+    expect(getCapabilityById("walking-skeleton").framework).toContain(
+      "## Walking Skeleton Bootstrap",
+    );
+    expect(getCapabilitySkills(["walking-skeleton"], "local")).toEqual([
+      {
+        source: "aircury/walking-skeleton",
+        skillName: "walking-skeleton",
+        scopes: ["local", "global"],
+      },
     ]);
   });
 
@@ -318,9 +340,11 @@ describe("capabilities", () => {
     expect(localDefaults).not.toContain("clean-architecture");
     expect(localDefaults).not.toContain("layered-architecture");
     expect(localDefaults).not.toContain("custom-architecture");
+    expect(localDefaults).not.toContain("walking-skeleton");
     expect(globalDefaults).not.toContain("ddd-hexagonal");
     expect(globalDefaults).not.toContain("clean-architecture");
     expect(globalDefaults).not.toContain("layered-architecture");
     expect(globalDefaults).not.toContain("custom-architecture");
+    expect(globalDefaults).not.toContain("walking-skeleton");
   });
 });
