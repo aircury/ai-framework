@@ -60,6 +60,7 @@ This installation uses Custom Architecture. The project-specific architecture so
 {{#if enforceBritishEnglish}}
 - Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy.
 - Prefer British English identifiers and names when introducing new code, unless an external API, tool, or established project interface requires a different spelling.
+- Order date entry controls Day-before-Month in UI: date pickers, recurrence editors, and numeric day/month selectors. Expose date entry through a shared date primitive with this order built in; do not hand-roll date control ordering per screen.
 {{/if}}
 - Use explicit names that reflect the problem space.
 - Keep functions small, cohesive, and intention-revealing.
@@ -108,6 +109,7 @@ While executing work:
 
 {{#if enforceBritishEnglish}}
 - Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy unless an external interface requires a different spelling.
+- Order date entry controls Day-before-Month in any UI you generate or modify, preferably via the project's shared date primitive.
 {{/if}}
 - All observable behaviour changes MUST update `specs/features/` before the work is done.
 - Follow TDD for observable behaviour changes when automated testing is feasible: failing test, minimum implementation, refactor.

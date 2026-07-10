@@ -71,6 +71,7 @@ Mark a section as `[pending analysis]` if there is not enough data. Do not omit 
 - Keep one-off UI and narrowly specific helpers local to the feature until real reuse exists.
 - Generate or update `implementation-plan.md` before creating substantial new UI components.
 - Keep orchestration, presentational rendering, form state, and conditional branches separated when combining them would produce a giant component.
+- Render date entry through a shared date primitive so control order matches the target locale. For UK-locale UI, order controls Day-before-Month in date pickers, recurrence editors, and numeric day/month selectors. Do not hand-roll date control ordering per screen.
 - Create new animations using the library already present in the project.
 - Add an ADR before introducing a new UI dependency such as an animation, component, or icon library.
 
@@ -85,6 +86,7 @@ Before finishing substantial frontend work, verify:
 - Component responsibility boundaries, state ownership, JSX structure, conditional rendering, and naming from `implementation-plan.md`.
 - Hooks and common components are reused or created where repeated behaviour or UI structure would otherwise drift.
 - Feature hooks are created where non-trivial local orchestration would otherwise make components hard to read.
+- Date entry controls (date pickers, recurrence editors, numeric day/month selectors) follow the target locale's day/month order — Day-before-Month for UK locales — through the shared date primitive.
 - Accessibility and responsive behaviour.
 - Relevant tests, lint, typecheck, or build checks when feasible.
 
