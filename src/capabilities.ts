@@ -481,12 +481,12 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       },
       {
         source: "aircury/ai-framework",
-        skillName: "spec-kit-analyse",
+        skillName: "spec-kit-tasks",
         scopes: ["local", "global"],
       },
       {
         source: "aircury/ai-framework",
-        skillName: "spec-kit-tasks",
+        skillName: "spec-kit-analyse",
         scopes: ["local", "global"],
       },
       {

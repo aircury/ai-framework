@@ -1,6 +1,6 @@
 ---
 name: spec-kit-tasks
-description: Generate a dependency-ordered, phase-based task list from spec.md and plan.md. Run after spec-kit-plan (and spec-kit-analyse if available).
+description: Generate a dependency-ordered, phase-based task list from spec.md and plan.md. Run after spec-kit-plan and before spec-kit-analyse.
 license: MIT
 compatibility: No external workflow CLI required.
 metadata:
@@ -69,9 +69,8 @@ Generate an actionable, dependency-ordered task list from the feature spec and p
 After writing tasks.md:
 - Task count per phase.
 - MVP scope summary.
-- Next step: "Use the `spec-kit-implement` skill to execute the task list."
+- Next step: "Use the `spec-kit-analyse` skill to validate consistency and user-story coverage before implementation."
 
 **Guardrails**
-- If unresolved FRAMEWORK.md violations exist from the `spec-kit-analyse` skill, warn before generating tasks.
 - Never generate tasks that violate the dependency rule.
 - Domain and application tasks must precede infrastructure tasks in ordering.
