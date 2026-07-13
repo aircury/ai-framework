@@ -9,7 +9,7 @@ This playbook shows how to use Aircury after installation. If you are unsure whi
 | Small, well-understood change | `plan-build` | Short plan, implementation, verification, and spec update if behavior changes. |
 | Complex but clear change | `propose-apply-complete` | OpenSpec proposal artifacts, implementation, and final sync to `specs/features/`. |
 | Unknown root cause | `explore-propose-apply-complete` | Investigation first, then proposal, implementation, and completion. |
-| New feature or formal requirements | `spec-kit` | Specification, clarification, plan, analysis, tasks, implementation, and optional checklist. |
+| New feature or formal requirements | `spec-kit` | Specification, clarification, plan, tasks, analysis, implementation, and optional checklist. |
 | New project bootstrap | `walking-skeleton` | ADR selection, first end-to-end spec, runnable baseline, and clean rebuild verification. |
 | Understand existing behavior | `specs-extractor` | Behavior-first specs extracted from the current codebase. |
 | Rewrite from frozen specs | `specs-interpreter` | New implementation direction constrained by `specs/features/`. |
@@ -90,8 +90,8 @@ Skills involved:
 - `spec-kit-specify`
 - `spec-kit-clarify`
 - `spec-kit-plan`
-- `spec-kit-analyse`
 - `spec-kit-tasks`
+- `spec-kit-analyse`
 - `spec-kit-implement`
 - `spec-kit-checklist`
 

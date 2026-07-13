@@ -51,15 +51,15 @@ describe("templates", () => {
       expect(FRAMEWORK).not.toContain("atomic deployment");
     });
 
-    it("enforces the strict Spec Kit dual-analysis sequence", () => {
+    it("enforces analysis after Spec Kit task generation", () => {
       expect(FRAMEWORK).toContain(
-        "Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-analyse` → `spec-kit-tasks` → `spec-kit-analyse` → `spec-kit-implement`.",
+        "Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-tasks` → `spec-kit-analyse` → `spec-kit-implement`.",
       );
       expect(FRAMEWORK).toContain(
-        "`spec-kit-analyse` MUST run before tasks to catch spec/plan/FRAMEWORK drift, and after tasks to validate user-story coverage.",
+        "`spec-kit-analyse` MUST run after tasks to validate consistency across all artifacts and user-story coverage.",
       );
       expect(FRAMEWORK).toContain(
-        "CRITICAL findings from either `spec-kit-analyse` run block progress.",
+        "CRITICAL findings from `spec-kit-analyse` block implementation.",
       );
       expect(FRAMEWORK).toContain(
         "`spec-kit-checklist` may be used as a review or quality gate, but it does not replace required sequence steps.",
