@@ -56,7 +56,7 @@ describe("templates", () => {
         "Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-tasks` → `spec-kit-analyse` → `spec-kit-implement`.",
       );
       expect(FRAMEWORK).toContain(
-        "`spec-kit-analyse` MUST run after tasks to validate consistency across all artifacts and user-story coverage.",
+        "`spec-kit-analyse` MUST run after tasks to validate consistency across all artefacts and user-story coverage.",
       );
       expect(FRAMEWORK).toContain(
         "CRITICAL findings from `spec-kit-analyse` block implementation.",
