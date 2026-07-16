@@ -177,6 +177,7 @@ export type CapabilityId =
   | "language"
   | "ask-question"
   | "database"
+  | "reflect"
   | "blind-db-debugging"
   | "db-schema-design";
 
@@ -805,6 +806,23 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       },
     ],
   },
+  reflect: {
+    id: "reflect",
+    label: "Reflect",
+    hint: "end-of-chat HTML report: metrics grid, secrets check, summary",
+    description:
+      "Generates a per-chat HTML reflection report with a fixed metrics widget grid, a mandatory secrets and PII check, and a free-form session summary",
+    category: "workflow",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "reflect",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
 };
 
 const CAPABILITY_ORDER: CapabilityId[] = [
@@ -827,6 +845,7 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "language",
   "ask-question",
   "database",
+  "reflect",
 ];
 
 const LEGACY_CAPABILITY_ALIASES: Partial<

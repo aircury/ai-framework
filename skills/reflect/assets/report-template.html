@@ -1,0 +1,274 @@
+<title>{{TITLE}} — chat report</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #F6F6F1; --surface: #FFFFFF; --surface-2: #EFF0E8;
+    --ink: #20241F; --ink-2: #4E554E; --muted: #7A8078;
+    --border: #DFE1D6; --hairline: #E9EADF;
+    --accent: #147D5B; --accent-ink: #116A4E; --accent-soft: #E2EFE9;
+    --warn-ink: #8A4A22; --warn-bg: #F9EBE2;
+    --good-ink: #1E5A1E; --good-bg: #E1F0E1;
+    --idea-ink: #4A3AA7; --idea-bg: #EBE8F8;
+    --bad-ink: #A32626; --bad-bg: #FBE7E5; --bad-strong: #C0392B;
+    --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --font-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --bg: #131614; --surface: #1B1F1C; --surface-2: #232823;
+      --ink: #E9ECE7; --ink-2: #B8BFB6; --muted: #8B948A;
+      --border: #2F352F; --hairline: #272C27;
+      --accent: #34A87D; --accent-ink: #4FBE94; --accent-soft: #20342B;
+      --warn-ink: #E8A97E; --warn-bg: #3A2A1E;
+      --good-ink: #8FD08F; --good-bg: #1E3320;
+      --idea-ink: #B3A9F2; --idea-bg: #292544;
+      --bad-ink: #F09A93; --bad-bg: #3D211E; --bad-strong: #E06055;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #131614; --surface: #1B1F1C; --surface-2: #232823;
+    --ink: #E9ECE7; --ink-2: #B8BFB6; --muted: #8B948A;
+    --border: #2F352F; --hairline: #272C27;
+    --accent: #34A87D; --accent-ink: #4FBE94; --accent-soft: #20342B;
+    --warn-ink: #E8A97E; --warn-bg: #3A2A1E;
+    --good-ink: #8FD08F; --good-bg: #1E3320;
+    --idea-ink: #B3A9F2; --idea-bg: #292544;
+    --bad-ink: #F09A93; --bad-bg: #3D211E; --bad-strong: #E06055;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #F6F6F1; --surface: #FFFFFF; --surface-2: #EFF0E8;
+    --ink: #20241F; --ink-2: #4E554E; --muted: #7A8078;
+    --border: #DFE1D6; --hairline: #E9EADF;
+    --accent: #147D5B; --accent-ink: #116A4E; --accent-soft: #E2EFE9;
+    --warn-ink: #8A4A22; --warn-bg: #F9EBE2;
+    --good-ink: #1E5A1E; --good-bg: #E1F0E1;
+    --idea-ink: #4A3AA7; --idea-bg: #EBE8F8;
+    --bad-ink: #A32626; --bad-bg: #FBE7E5; --bad-strong: #C0392B;
+  }
+
+  body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); margin: 0; line-height: 1.5; }
+  .wrap { max-width: 1010px; margin: 0 auto; padding: 36px 20px 72px; }
+
+  .r-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-bottom: 16px; }
+  .r-date { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .r-title { font-family: var(--font-display); font-size: 23px; font-weight: 600; }
+  .r-proj { font-family: var(--font-mono); font-size: 12px; color: var(--accent-ink); }
+
+  .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 560px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .w {
+    background: var(--surface); border: 1px solid var(--hairline); border-radius: 9px;
+    padding: 11px 13px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0;
+  }
+  .w .lbl { font-size: 10px; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .w .val { font-family: var(--font-mono); font-size: 19px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.15; color: var(--ink); overflow-wrap: anywhere; }
+  .w .sub { font-size: 11.5px; color: var(--muted); }
+
+  .w.feature { grid-column: span 2; background: var(--surface-2); border-color: var(--border); padding: 13px 15px 14px; }
+  .w.feature .val { font-family: var(--font-display); font-size: 42px; font-weight: 500; letter-spacing: -.01em; }
+  .w.w-agents.hot { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .w.w-agents.hot .val { color: var(--accent-ink); }
+  .w.w-agents.zero .val { color: var(--muted); }
+
+  .w.w-skills { grid-column: span 2; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+  .chip { font-family: var(--font-mono); font-size: 11.5px; padding: 2px 8px; border-radius: 5px; background: var(--accent-soft); color: var(--accent-ink); white-space: nowrap; }
+  .chip.failed { background: var(--warn-bg); color: var(--warn-ink); text-decoration: line-through; }
+
+  .w.w-waste .val { color: var(--warn-ink); font-size: 16.5px; }
+  .w.w-waste.none .val { color: var(--muted); }
+  .w.w-outcome .val { font-size: 15px; color: var(--good-ink); text-transform: uppercase; letter-spacing: .04em; }
+  .w.w-ideas .val { color: var(--idea-ink); }
+  .w.w-kept .val { font-size: 13.5px; }
+  .w.w-kept.yes .val { color: var(--good-ink); }
+  .w.w-kept.no .val { color: var(--warn-ink); }
+  .w.w-model .val { font-size: 14px; }
+  .w.w-duration .val { font-size: 15px; }
+
+  .w.w-out { grid-column: span 2; }
+  .w.w-out .val { font-size: 13.5px; font-family: var(--font-ui); font-weight: 500; }
+  .w.w-out a { color: var(--accent-ink); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent); text-underline-offset: 2px; }
+  .w.w-out a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  .est { border-bottom: 1px dotted var(--muted); cursor: help; }
+
+  /* ---------- secrets & PII check — always present, right below the grid ---------- */
+  .secrets { margin-top: 12px; border-radius: 9px; }
+  .secrets.clear {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px;
+    padding: 12px 16px;
+    background: color-mix(in srgb, var(--good-bg) 55%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--good-ink) 30%, transparent);
+    font-size: 13.5px; color: var(--ink-2);
+  }
+  .secrets.clear .s-chip {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+    letter-spacing: .11em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 5px;
+    background: var(--good-bg); color: var(--good-ink);
+    border: 1px solid color-mix(in srgb, var(--good-ink) 35%, transparent);
+    white-space: nowrap;
+  }
+  .secrets.alert {
+    padding: 18px 20px;
+    background: var(--bad-bg);
+    border: 2px solid var(--bad-strong);
+  }
+  .secrets.alert .s-chip {
+    display: inline-block;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 6px;
+    background: var(--bad-strong); color: #FFFFFF;
+    margin-bottom: 8px;
+  }
+  .secrets.alert .s-head {
+    font-family: var(--font-display); font-size: 21px; font-weight: 600;
+    color: var(--bad-ink); margin: 0 0 10px; line-height: 1.25;
+  }
+  .secrets.alert ul { margin: 0; padding-left: 20px; font-size: 14px; color: var(--ink); }
+  .secrets.alert li { margin-bottom: 7px; }
+  .secrets.alert li b { color: var(--bad-ink); }
+  .secrets.alert .s-do {
+    font-family: var(--font-mono); font-size: 12.5px; font-weight: 700;
+    color: var(--bad-ink);
+  }
+
+  /* ---------- summary section ---------- */
+  .summary { max-width: 760px; margin-top: 34px; }
+  .summary h2 { font-family: var(--font-display); font-weight: 500; font-size: 22px; margin: 26px 0 8px; }
+  .summary h3 { font-size: 13px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-ink); margin: 22px 0 6px; }
+  .summary p { color: var(--ink-2); font-size: 14.5px; margin: 0 0 9px; }
+  .summary strong { color: var(--ink); }
+  .summary ul { margin: 0 0 10px; padding-left: 20px; color: var(--ink-2); font-size: 14px; }
+  .summary li { margin-bottom: 4px; }
+  .summary a { color: var(--accent-ink); }
+  .summary code { font-family: var(--font-mono); font-size: 12.5px; background: var(--surface-2); border-radius: 4px; padding: 1px 5px; }
+
+  .summary blockquote {
+    margin: 10px 0; padding: 6px 14px;
+    border-left: 3px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    font-family: var(--font-display); font-style: italic; font-size: 14.5px; color: var(--ink-2);
+  }
+
+  /* timeline rows — for investigations / step-by-step flows */
+  .timeline { list-style: none; margin: 8px 0 14px; padding: 0; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 2px; border-radius: 1px; background: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .timeline li { position: relative; padding: 0 0 10px 24px; font-size: 14px; color: var(--ink-2); }
+  .timeline li::before { content: ""; position: absolute; left: 0; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--bg); }
+  .timeline li.detour::before { background: var(--warn-ink); }
+  .timeline li b { color: var(--ink); }
+  .timeline li .t-note { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); display: block; }
+
+  /* idea rows — harvestable patterns */
+  .idea { display: flex; gap: 10px; align-items: baseline; margin: 0 0 8px; font-size: 14px; color: var(--ink-2); }
+  .idea .tag { flex: none; font-family: var(--font-mono); font-size: 11px; padding: 2px 8px; border-radius: 5px; background: var(--idea-bg); color: var(--idea-ink); }
+  .idea code { user-select: all; }
+
+  .foot { margin-top: 34px; padding-top: 14px; border-top: 1px solid var(--hairline); color: var(--muted); font-size: 12px; max-width: 72ch; }
+</style>
+
+<div class="wrap">
+  <header class="r-head">
+    <span class="r-date">{{DATE}}</span>
+    <span class="r-title">{{TITLE}}</span>
+    <span class="r-proj">{{PROJECT}}</span>
+  </header>
+
+  <div class="grid">
+    <div class="w feature w-agents {{AGENTS_CLASS}}">
+      <span class="lbl">Subagents</span>
+      <span class="val">{{SUBAGENTS}}</span>
+      <span class="sub">{{SUBAGENTS_SUB}}</span>
+    </div>
+    <div class="w feature w-cost">
+      <span class="lbl">Est. cost</span>
+      <span class="val">{{COST}}</span>
+      <span class="sub">API-equivalent · {{MODEL}} rates</span>
+    </div>
+    <div class="w w-skills">
+      <span class="lbl">Skills invoked</span>
+      <div class="chips">{{SKILL_CHIPS}}</div>
+      <span class="sub">{{SKILLS_SUB}}</span>
+    </div>
+
+    <div class="w">
+      <span class="lbl">Tokens generated</span>
+      <span class="val">{{GENERATED}}</span>
+    </div>
+    <div class="w">
+      <span class="lbl">Tokens processed</span>
+      <span class="val">{{PROCESSED}}</span>
+      <span class="sub">incl. {{CACHE_READS}} cache reads</span>
+    </div>
+    <div class="w w-waste {{WASTE_CLASS}}">
+      <span class="lbl">Tokens wasted</span>
+      <span class="val">{{WASTED}}</span>
+      <span class="sub">{{WASTED_SUB}}</span>
+    </div>
+    <div class="w w-model">
+      <span class="lbl">Model · effort</span>
+      <span class="val">{{MODEL_EFFORT}}</span>
+    </div>
+    <div class="w w-outcome">
+      <span class="lbl">Outcome</span>
+      <span class="val">{{OUTCOME}}</span>
+    </div>
+    <div class="w w-ideas">
+      <span class="lbl">Ideas spotted</span>
+      <span class="val">{{IDEAS}}</span>
+    </div>
+
+    <div class="w">
+      <span class="lbl">Stepped in</span>
+      <span class="val">{{STEPPED_IN}}</span>
+      <span class="sub">{{STEPPED_IN_SUB}}</span>
+    </div>
+    <div class="w w-duration">
+      <span class="lbl">Hands-on / wall</span>
+      <span class="val">{{DURATION}}</span>
+    </div>
+    <div class="w">
+      <span class="lbl">Lost waiting</span>
+      <span class="val">{{WAITING}}</span>
+    </div>
+    <div class="w">
+      <span class="lbl">Permission prompts</span>
+      <span class="val">{{PROMPTS}}</span>
+    </div>
+    <div class="w">
+      <span class="lbl">Follow-ups open</span>
+      <span class="val">{{FOLLOWUPS}}</span>
+      <span class="sub">{{FOLLOWUPS_SUB}}</span>
+    </div>
+    <div class="w w-kept {{KEPT_CLASS}}">
+      <span class="lbl">Kept for later</span>
+      <span class="val">{{KEPT}}</span>
+    </div>
+
+    <div class="w w-out">
+      <span class="lbl">Deliverables</span>
+      <span class="val">{{DELIVERABLES}}</span>
+    </div>
+  </div>
+
+  <section class="secrets {{SECRETS_CLASS}}">
+{{SECRETS_BODY}}
+  </section>
+
+  <section class="summary">
+{{SUMMARY}}
+  </section>
+
+  <footer class="foot">
+    Solid numbers are measured from the session transcript; dotted numbers are
+    the agent's end-of-chat estimate. Cost is the API-equivalent at {{MODEL}}
+    rates including 1-hour cache writes — a size signal, not a bill.
+  </footer>
+</div>
