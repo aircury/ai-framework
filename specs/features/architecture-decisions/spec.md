@@ -5,10 +5,23 @@ The framework MUST require agents to create a new ADR when a task introduces, ch
 - **WHEN** an agent defines a new rule that affects architecture, workflow governance, or delivery standards
 - **THEN** the agent creates a new ADR under `specs/decisions/` that records the context, decision, and consequences
 
+### Requirement: ADRs SHALL use descriptive names without sequence numbers
+The framework MUST identify each ADR by a unique descriptive name derived from the decision rather than by a sequence number, timestamp, or other shared counter.
+
+#### Scenario: An agent creates an ADR
+- **WHEN** an agent records a decision named "Use Redis-backed sessions"
+- **THEN** the ADR is stored as `specs/decisions/use-redis-backed-sessions.md`
+- **AND** its heading contains the decision title without a numeric identifier
+
+#### Scenario: Agents create ADRs in parallel
+- **WHEN** multiple agents create ADRs concurrently
+- **THEN** each agent chooses a unique descriptive name for its decision
+- **AND** no agent reads or updates a shared sequence to allocate the name
+
 #### Scenario: A task changes an existing architectural direction
 - **WHEN** an agent changes a previously recorded architectural or workflow decision
-- **THEN** the agent creates a new ADR with `Supersedes: ADR-XXXX` if the new decision completely replaces or invalidates the old one
-- **AND** the agent creates a new ADR with `Amends: ADR-XXXX` if the new decision only modifies, clarifies, or adds to the old one without completely invalidating it
+- **THEN** the agent creates a new ADR with `Supersedes: <decision-name>` if the new decision completely replaces or invalidates the old one
+- **AND** the agent creates a new ADR with `Amends: <decision-name>` if the new decision only modifies, clarifies, or adds to the old one without completely invalidating it
 
 ### Requirement: Agents SHALL treat non-draft ADRs as immutable
 The framework MUST require agents to edit ADRs only while their status is exactly `Draft`.
@@ -16,8 +29,8 @@ The framework MUST require agents to edit ADRs only while their status is exactl
 #### Scenario: A task attempts to alter a non-draft ADR
 - **GIVEN** an ADR has a status other than `Draft`, no status, or an unknown status
 - **WHEN** an agent detects that the recorded decision needs to change
-- **THEN** the agent creates a new ADR with `Supersedes: ADR-XXXX` if the new decision completely replaces or invalidates the old one
-- **AND** the agent creates a new ADR with `Amends: ADR-XXXX` if the new decision only modifies, clarifies, or adds to the old one without completely invalidating it
+- **THEN** the agent creates a new ADR with `Supersedes: <decision-name>` if the new decision completely replaces or invalidates the old one
+- **AND** the agent creates a new ADR with `Amends: <decision-name>` if the new decision only modifies, clarifies, or adds to the old one without completely invalidating it
 - **AND** the agent updates the prior ADR only to state that it has changed and that the changes are recorded in the new ADR
 - **AND** the agent does not modify the prior ADR's original Context, Decision, Reason, or Consequences
 
@@ -62,7 +75,7 @@ The framework MUST require agents to propose every ADR created or superseded to 
 
 #### Scenario: A new ADR is created
 - **WHEN** an agent creates an ADR under `specs/decisions/`
-- **THEN** the agent proposes a corresponding entry to Airsync INBOX with `memory_kind: "note"`, `scope: "team"`, and tags including `"adr"` and the ADR number
+- **THEN** the agent proposes a corresponding entry to Airsync INBOX with `memory_kind: "note"`, `scope: "team"`, and tags including `"adr"` and the descriptive ADR name
 
 #### Scenario: An existing ADR is superseded
 - **WHEN** an agent supersedes an ADR by creating a new one
