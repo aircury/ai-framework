@@ -191,20 +191,21 @@ describe("getLocalFiles", () => {
       "After every modification to a draft ADR, ask the user whether they want to publish it now.",
     );
     expect(decisions.content).toContain(
-      "`Supersedes: ADR-XXXX` or `Amends: ADR-XXXX`",
+      "`Supersedes: <decision-name>` or `Amends: <decision-name>`",
     );
     expect(decisions.content).toContain(
       "update the prior non-draft ADR only to mark that it was changed and where the new decision lives",
     );
     expect(decisions.content).toContain(
-      "Use `Supersedes: ADR-XXXX` when the new decision completely replaces or invalidates the old one.",
+      "Use `Supersedes: <decision-name>` when the new decision completely replaces or invalidates the old one.",
     );
     expect(decisions.content).toContain(
-      "Use `Amends: ADR-XXXX` when the new decision modifies, clarifies, or adds to the old one without completely invalidating it.",
+      "Use `Amends: <decision-name>` when the new decision modifies, clarifies, or adds to the old one without completely invalidating it.",
     );
     expect(decisions.content).toContain(
-      "- Superseded by: ADR-YYYY (only when updating a prior ADR marker)",
+      "- Superseded by: <decision-name> (only when updating a prior ADR marker)",
     );
+    expect(decisions.content).not.toContain("ADR-XXXX");
     expect(framework.content).not.toContain("## TDD Workflow");
     expect(framework.content).not.toContain(
       "## Non-Negotiable Architecture Rules",
@@ -294,6 +295,10 @@ describe("getLocalFiles", () => {
       "The walking-skeleton implementation lives outside this framework",
     );
     expect(walkingSkeleton.content).toContain("/walking-skeleton plan");
+    expect(walkingSkeleton.content).toContain(
+      "selected ADRs are copied into `specs/decisions/` with descriptive names",
+    );
+    expect(walkingSkeleton.content).not.toContain("ADR-0000");
   });
 
   it("requires searching the existing design system in the frontend workflow", () => {

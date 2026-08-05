@@ -1,7 +1,8 @@
-# ADR-0001: Modular framework standards and persistent ADR governance
+# Modular framework standards and persistent ADR governance
 
 - Status: Accepted
 - Date: 2026-04-08
+- Amended by: use-descriptive-names-for-architecture-decision-records
 
 ## Context
 

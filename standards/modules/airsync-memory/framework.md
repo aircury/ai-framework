@@ -37,7 +37,7 @@ When proposing an ADR to Airsync:
 
 - Use `memory_kind: "note"`
 - Use `scope: "team"`
-- Include tags: `["adr", "ADR-XXXX"]` (replace XXXX with the ADR number)
+- Include tags: `["adr", "<decision-name>"]` using the descriptive ADR filename without `.md`
 - Include `source_refs` pointing to the ADR file path in the repository
 - Copy the ADR's Context, Decision, and Consequences sections as the memory content
 

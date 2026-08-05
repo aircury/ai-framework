@@ -1,4 +1,4 @@
-# ADR-0004: Add a testing standards module and default testing skills
+# Add a testing standards module and default testing skills
 
 - Status: Accepted
 - Date: 2026-04-20

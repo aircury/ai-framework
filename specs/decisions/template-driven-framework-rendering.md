@@ -1,4 +1,4 @@
-# ADR-0002: Render framework documents from templates and module manifests
+# Render framework documents from templates and module manifests
 
 - Status: Accepted
 - Date: 2026-04-08

@@ -231,7 +231,7 @@ describe("capabilities", () => {
     ]);
   });
 
-  it("documents ADR immutability after draft status", () => {
+  it("documents descriptive ADR names and immutability after draft status", () => {
     const files = getCapabilityFiles(["decision-records"], "local");
     const capabilityRules = files.find(
       (file) => file.path === "docs/aircury/capabilities/decision-records.md",
@@ -254,21 +254,27 @@ describe("capabilities", () => {
     );
     expect(capabilityRules?.content).toContain("Do not edit non-draft ADRs.");
     expect(capabilityRules?.content).toContain(
+      "Name each ADR file after the decision in lowercase, hyphen-separated form, without a sequence number or timestamp.",
+    );
+    expect(capabilityRules?.content).toContain(
       "update the prior non-draft ADR only to mark that it was changed and where the new decision lives",
     );
     expect(capabilityRules?.content).toContain(
-      "Use `Supersedes: ADR-XXXX` when the new decision completely replaces or invalidates the old one.",
+      "Use `Supersedes: <decision-name>` when the new decision completely replaces or invalidates the old one.",
     );
     expect(capabilityRules?.content).toContain(
-      "Use `Amends: ADR-XXXX` when the new decision modifies, clarifies, or adds to the old one without completely invalidating it.",
+      "Use `Amends: <decision-name>` when the new decision modifies, clarifies, or adds to the old one without completely invalidating it.",
     );
     expect(capabilityRules?.content).toContain(
-      "- Superseded by: ADR-YYYY (only when updating a prior ADR marker)",
+      "- Superseded by: <decision-name> (only when updating a prior ADR marker)",
     );
     expect(capabilityRules?.content).toContain(
       "- Status: Draft | Accepted | Superseded | Deprecated",
     );
-    expect(capabilityRules?.content).toContain("- Amends: ADR-XXXX (optional)");
+    expect(capabilityRules?.content).toContain(
+      "- Amends: <decision-name> (optional)",
+    );
+    expect(capabilityRules?.content).not.toContain("ADR-XXXX");
     expect(starterGuide?.content).toContain(
       "ADRs are editable only while `Status: Draft`.",
     );
@@ -279,17 +285,30 @@ describe("capabilities", () => {
       "After every draft ADR modification, ask the user whether they want to publish it now",
     );
     expect(starterGuide?.content).toContain(
-      "`Supersedes: ADR-XXXX` or `Amends: ADR-XXXX`",
+      "`Supersedes: <decision-name>` or `Amends: <decision-name>`",
     );
     expect(starterGuide?.content).toContain(
       "update the prior ADR only to say that it changed and where the new ADR is",
     );
     expect(starterGuide?.content).toContain(
-      "Use `Supersedes: ADR-XXXX` when the new decision completely replaces or invalidates the old one.",
+      "Use `Supersedes: <decision-name>` when the new decision completely replaces or invalidates the old one.",
     );
     expect(starterGuide?.content).toContain(
-      "Use `Amends: ADR-XXXX` when the new decision modifies, clarifies, or adds to the old one without completely invalidating it.",
+      "Use `Amends: <decision-name>` when the new decision modifies, clarifies, or adds to the old one without completely invalidating it.",
     );
+    expect(starterGuide?.content).not.toContain("ADR-XXXX");
+  });
+
+  it("tags Airsync ADR memories with the descriptive decision name", () => {
+    const files = getCapabilityFiles(["airsync"], "local");
+    const capabilityRules = files.find(
+      (file) => file.path === "docs/aircury/capabilities/airsync.md",
+    );
+
+    expect(capabilityRules?.content).toContain(
+      'Include tags: `["adr", "<decision-name>"]`',
+    );
+    expect(capabilityRules?.content).not.toContain("ADR-XXXX");
   });
 
   it("creates a version 2 capability profile", () => {

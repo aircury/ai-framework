@@ -1,4 +1,4 @@
-# ADR-0005: Add a project-scoped token-efficiency module backed by Caveman
+# Add a project-scoped token-efficiency module backed by Caveman
 
 - Status: Accepted
 - Date: 2026-04-21

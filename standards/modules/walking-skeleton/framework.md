@@ -8,7 +8,7 @@ This installation can use the external `walking-skeleton` skill to bootstrap gre
 - Treat bundled skeleton ADRs as proposals and flavours, not as mandatory company architecture.
 - Select ADRs deliberately with the team, ideally during project kickoff when stack, infrastructure, database, frontend, authentication, testing, and deployment assumptions can be reviewed together.
 - Prefer a known ADR flavour when one fits the project; otherwise combine individual ADRs and resolve conflicts explicitly before building.
-- Use `/walking-skeleton plan` before writing code so selected ADRs are copied into `specs/decisions/` with project constants centralised in `ADR-0000`.
+- Use `/walking-skeleton plan` before writing code so selected ADRs are copied into `specs/decisions/` with descriptive names and project constants centralised in `project-constants.md`.
 - Use `/walking-skeleton spec` to define the smallest useful end-to-end behaviour that proves the selected architectural seams.
 - Use `/walking-skeleton build` only after ADRs and the walking-skeleton spec have been reviewed.
 - The bootstrap phase may build without strict TDD when the objective is proving the executable stack. After the walking skeleton is complete, normal framework rules apply, including TDD where automated testing is feasible.

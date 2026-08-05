@@ -109,7 +109,7 @@ Recommended skill:
 
 Expected flow:
 
-1. Run `/walking-skeleton plan` to choose ADRs, validate dependencies and conflicts, and write `specs/decisions/ADR-0000` plus the selected ADRs.
+1. Run `/walking-skeleton plan` to choose ADRs, validate dependencies and conflicts, and write descriptively named ADRs under `specs/decisions/`.
 2. Run `/walking-skeleton spec` to define the first tiny end-to-end behaviour that proves the selected architecture seams.
 3. Run `/walking-skeleton build` to create tasks, implement the baseline, and verify it with rebuild, linting, tests, and smoke checks.
 
@@ -205,7 +205,7 @@ Record the decision to use Redis-backed sessions so sessions can be revoked in r
 
 Required module: `decision-records`.
 
-Output: `specs/decisions/ADR-XXXX-*.md`.
+Output: `specs/decisions/<decision-name>.md`.
 
 If `airsync` is also enabled, the generated framework requires proposing reusable ADR knowledge to Airsync INBOX.
 
