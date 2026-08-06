@@ -198,7 +198,7 @@ export interface CapabilityFile {
 }
 
 export interface CapabilityManifest {
-  id: CapabilityId;
+  id: VisibleCapabilityId;
   label: string;
   hint: string;
   description: string;
@@ -215,6 +215,7 @@ export interface CapabilityManifest {
 export interface CapabilityProfile {
   version: 2;
   _notice: string;
+  tools?: string[];
   capabilities: CapabilityId[];
   language: {
     britishEnglish: boolean;
@@ -807,7 +808,7 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
   },
 };
 
-const CAPABILITY_ORDER: CapabilityId[] = [
+const CAPABILITY_ORDER: VisibleCapabilityId[] = [
   "open-spec",
   "spec-kit",
   "walking-skeleton",
@@ -839,7 +840,10 @@ const LEGACY_CAPABILITY_ALIASES: Partial<
 function normalizeCapabilityId(
   capabilityId: CapabilityId,
 ): VisibleCapabilityId {
-  return LEGACY_CAPABILITY_ALIASES[capabilityId] ?? capabilityId;
+  return (
+    LEGACY_CAPABILITY_ALIASES[capabilityId] ??
+    (capabilityId as VisibleCapabilityId)
+  );
 }
 
 const EXCLUSIVE_ARCHITECTURE_CAPABILITIES: CapabilityId[] = [
@@ -905,7 +909,7 @@ export function resolveCapabilityIds(
 
 export function createCapabilityProfile(
   capabilityIds?: CapabilityId[],
-  options?: { britishEnglish?: boolean },
+  options?: { britishEnglish?: boolean; tools?: string[] },
 ): CapabilityProfile {
   const britishEnglish = options?.britishEnglish ?? false;
   const selected = new Set<VisibleCapabilityId>(
@@ -919,6 +923,7 @@ export function createCapabilityProfile(
   return {
     version: 2,
     _notice: FRAMEWORK_MAINTAINED_NOTICE,
+    tools: options?.tools,
     capabilities: CAPABILITY_ORDER.filter((capabilityId) =>
       selected.has(capabilityId),
     ),
@@ -940,12 +945,18 @@ export function getSelectedCapabilities(
 
 export function getInitialCapabilityIds(
   scope: CapabilityScope,
-  options?: { britishEnglish?: boolean },
+  options?: {
+    britishEnglish?: boolean;
+    installedCapabilityIds?: CapabilityId[];
+  },
 ): CapabilityId[] {
-  const selected = new Set<CapabilityId>(
+  const initialCapabilityIds =
+    options?.installedCapabilityIds ??
     getCapabilities(scope)
       .filter((capability) => capability.defaultSelected)
-      .map((capability) => capability.id),
+      .map((capability) => capability.id);
+  const selected = new Set<CapabilityId>(
+    resolveCapabilityIds(initialCapabilityIds),
   );
 
   if (options?.britishEnglish) {

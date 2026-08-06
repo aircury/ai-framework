@@ -26,6 +26,7 @@ import {
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
   mergeFrameworkReferenceIntoAgents,
+  readProjectProfile,
   runCommand,
   syncClaudeCodeSkills,
   writeFile,
@@ -160,6 +161,13 @@ describe("getLocalFiles", () => {
     expect(config.content).toContain('"decision-records"');
     expect(config.content).toContain('"testing"');
     expect(config.content).not.toContain('"git"');
+  });
+
+  it("persists selected tools in the config file", () => {
+    const files = getLocalFiles(["claude-code"], ["git"]);
+    const config = getFileByPath(files, ".aircury/framework.config.json");
+
+    expect(JSON.parse(config.content).tools).toEqual(["claude-code"]);
   });
 
   it("persists the British English preference in the config file", () => {
@@ -347,6 +355,70 @@ describe("getLocalFiles", () => {
 describe("getGlobalFiles", () => {
   it("does not install any global files", () => {
     expect(getGlobalFiles(["claude-code"])).toHaveLength(0);
+  });
+});
+
+describe("readProjectProfile", () => {
+  it("reads a valid saved project profile", () => {
+    const dir = `${tmpdir()}/ai-framework-profile-${Date.now()}`;
+    const profileDir = join(dir, ".aircury");
+    mkdirSync(profileDir, { recursive: true });
+    writeFileSync(
+      join(profileDir, "framework.config.json"),
+      JSON.stringify({
+        version: 2,
+        _notice: FRAMEWORK_MAINTAINED_NOTICE,
+        tools: ["claude-code"],
+        capabilities: ["git", "frontend"],
+        language: { britishEnglish: true },
+      }),
+      "utf-8",
+    );
+
+    expect(readProjectProfile(dir)).toEqual({
+      version: 2,
+      _notice: FRAMEWORK_MAINTAINED_NOTICE,
+      tools: ["claude-code"],
+      capabilities: ["git", "frontend"],
+      language: { britishEnglish: true },
+    });
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("accepts a legacy profile without saved tools", () => {
+    const dir = `${tmpdir()}/ai-framework-legacy-profile-${Date.now()}`;
+    const profileDir = join(dir, ".aircury");
+    mkdirSync(profileDir, { recursive: true });
+    writeFileSync(
+      join(profileDir, "framework.config.json"),
+      JSON.stringify({
+        version: 2,
+        _notice: FRAMEWORK_MAINTAINED_NOTICE,
+        capabilities: ["git"],
+        language: { britishEnglish: false },
+      }),
+      "utf-8",
+    );
+
+    expect(readProjectProfile(dir)?.tools).toBeUndefined();
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("ignores an invalid saved project profile", () => {
+    const dir = `${tmpdir()}/ai-framework-invalid-profile-${Date.now()}`;
+    const profileDir = join(dir, ".aircury");
+    mkdirSync(profileDir, { recursive: true });
+    writeFileSync(
+      join(profileDir, "framework.config.json"),
+      JSON.stringify({ version: 2, capabilities: ["git"] }),
+      "utf-8",
+    );
+
+    expect(readProjectProfile(dir)).toBeNull();
+
+    rmSync(dir, { recursive: true });
   });
 });
 

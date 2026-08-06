@@ -46,6 +46,23 @@ describe("capabilities", () => {
     ]);
   });
 
+  it("uses installed capabilities instead of registry defaults", () => {
+    expect(
+      getInitialCapabilityIds("local", {
+        installedCapabilityIds: ["git", "frontend"],
+      }),
+    ).toEqual(["git", "frontend"]);
+  });
+
+  it("keeps British English enabled for an installed profile", () => {
+    expect(
+      getInitialCapabilityIds("local", {
+        britishEnglish: true,
+        installedCapabilityIds: ["git"],
+      }),
+    ).toEqual(["git", "language"]);
+  });
+
   it("lists the visible global capabilities", () => {
     expect(
       getCapabilities("global").map((capability) => capability.id),

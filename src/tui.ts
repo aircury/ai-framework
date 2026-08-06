@@ -17,11 +17,20 @@ import {
   getLocalFiles,
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
+  readProjectProfile,
   runCommand,
   syncClaudeCodeSkills,
   updateGitignore,
   writeFile,
 } from "./install";
+
+const LOCAL_TOOL_VALUES: Tool[] = ["claude-code", "gemini-cli"];
+
+function getInstalledTools(tools: string[]): Tool[] {
+  return tools.filter((tool): tool is Tool =>
+    LOCAL_TOOL_VALUES.includes(tool as Tool),
+  );
+}
 
 function getCategoryTag(category: CapabilityCategory): string {
   switch (category) {
@@ -76,6 +85,8 @@ function isArchitectureCapabilityId(
 export async function run(): Promise<void> {
   p.intro("Aircury AI Framework Installer");
 
+  const cwd = process.cwd();
+
   const scope = await p.select<Scope>({
     message: "What do you want to configure?",
     options: [
@@ -85,6 +96,8 @@ export async function run(): Promise<void> {
   });
 
   if (p.isCancel(scope)) return p.cancel("Cancelled.");
+
+  const existingProfile = scope === "local" ? readProjectProfile(cwd) : null;
 
   if (scope === "local") {
     const universalTools = [
@@ -125,7 +138,11 @@ export async function run(): Promise<void> {
         : "Additional tools",
     options: toolOptions,
     initialValues:
-      scope === "global" ? [] : toolOptions.map((option) => option.value),
+      scope === "global"
+        ? []
+        : existingProfile?.tools === undefined
+          ? toolOptions.map((option) => option.value)
+          : getInstalledTools(existingProfile.tools),
     required: false,
   });
 
@@ -136,7 +153,7 @@ export async function run(): Promise<void> {
     const britishEnglish = await p.confirm({
       message:
         "Use British English in generated rules and include the language capability?",
-      initialValue: true,
+      initialValue: existingProfile?.language.britishEnglish ?? true,
     });
 
     if (p.isCancel(britishEnglish)) return p.cancel("Cancelled.");
@@ -146,6 +163,7 @@ export async function run(): Promise<void> {
   const availableCapabilities = getCapabilities(scope);
   const initialCapabilityIds = getInitialCapabilityIds(scope, {
     britishEnglish: enforceBritishEnglish,
+    installedCapabilityIds: existingProfile?.capabilities,
   });
   const availableArchitectureCapabilities =
     ARCHITECTURE_CAPABILITY_OPTIONS.filter((option) =>
@@ -156,6 +174,7 @@ export async function run(): Promise<void> {
   const selectedArchitecture = await p.select<CapabilityId>({
     message: "Architecture capability (required)",
     options: availableArchitectureCapabilities,
+    initialValue: initialCapabilityIds.find(isArchitectureCapabilityId),
   });
 
   if (p.isCancel(selectedArchitecture)) return p.cancel("Cancelled.");
@@ -205,7 +224,6 @@ export async function run(): Promise<void> {
     );
   }
 
-  const cwd = process.cwd();
   const isGlobal = scope === "global";
   const files = isGlobal
     ? getGlobalFiles(selectedTools)
