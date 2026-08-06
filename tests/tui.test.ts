@@ -1,8 +1,19 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Readable, Writable } from "node:stream";
+import {
+  type CapabilityProfile,
+  createCapabilityProfile,
+} from "../src/capabilities";
 import type { InstallCommand } from "../src/install";
 import { runInstaller } from "../src/tui";
 
@@ -134,6 +145,72 @@ describe("runInstaller", () => {
           args.includes("gemini-cli"),
       ),
     ).toBe(true);
+    expect(output.text).toContain("Aircury AI Framework ready.");
+  });
+
+  it("retains saved selections when reconfiguring a project", async () => {
+    const cwd = createTemporaryDirectory("ai-framework-reconfigure");
+    const profileDirectory = join(cwd, ".aircury");
+    const savedProfile = createCapabilityProfile(
+      ["clean-architecture", "git"],
+      {
+        britishEnglish: false,
+        tools: ["claude-code"],
+      },
+    );
+    mkdirSync(profileDirectory, { recursive: true });
+    writeFileSync(
+      join(profileDirectory, "framework.config.json"),
+      `${JSON.stringify(savedProfile, null, 2)}\n`,
+      "utf-8",
+    );
+
+    const input = new InstallerInput();
+    const output = new InstallerOutput();
+    const executedCommands: InstallCommand[] = [];
+    const installation = runInstaller({
+      cwd,
+      input,
+      output,
+      executeCommand: (command) => {
+        executedCommands.push(command);
+        return { success: true, stdout: "", stderr: "" };
+      },
+    });
+
+    await answerPrompt(output, input, "What do you want to configure?");
+    await answerPrompt(output, input, "Additional tools");
+    await answerPrompt(output, input, "Use British English");
+    await answerPrompt(output, input, "Architecture capability");
+    await answerPrompt(output, input, "Other capabilities");
+    await answerPrompt(output, input, "Proceed with installation?", "y", "y");
+    await output.waitFor("Some files already exist");
+    input.press("down");
+    input.press("return");
+    await installation;
+
+    const installedProfile = JSON.parse(
+      readFileSync(join(profileDirectory, "framework.config.json"), "utf-8"),
+    ) as CapabilityProfile;
+    expect(installedProfile.tools).toEqual(["claude-code"]);
+    expect(installedProfile.capabilities).toEqual([
+      "git",
+      "clean-architecture",
+    ]);
+    expect(installedProfile.language.britishEnglish).toBe(false);
+    expect(existsSync(join(cwd, "CLAUDE.md"))).toBe(true);
+    expect(existsSync(join(cwd, "GEMINI.md"))).toBe(false);
+    expect(
+      executedCommands.every(
+        ({ args }) =>
+          args.includes("universal") &&
+          args.includes("claude-code") &&
+          !args.includes("gemini-cli"),
+      ),
+    ).toBe(true);
+    expect(executedCommands.flatMap(({ args }) => args)).toContain(
+      "commit-changes",
+    );
     expect(output.text).toContain("Aircury AI Framework ready.");
   });
 });

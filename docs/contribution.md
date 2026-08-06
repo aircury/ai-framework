@@ -38,6 +38,12 @@ If you only changed templates, modules, generated files, or skill wiring, this l
 `bun test` includes stream-driven installer workflow tests.
 These tests send keypress events through Clack's injectable input stream and capture its output stream while using a temporary working directory and an in-memory command executor.
 They verify prompt decisions, generated commands, cancellation, and filesystem effects without network access or user-level changes.
+A reconfiguration case seeds a non-default saved profile and accepts each prompt unchanged.
+This verifies that saved tools, architecture, capabilities, and language preferences remain preselected throughout the interactive workflow.
+
+The regular suite also invokes the pinned development version of the Skills CLI against this repository as a local skill source in a temporary project.
+It verifies that the Universal skill is installed canonically and that Claude Code receives an actual filesystem symlink to it.
+Telemetry is disabled, and the integration test does not use the network or write to user-level directories.
 
 `bun run test:e2e` builds the published CLI and runs a smoke test through a real pseudo-terminal.
 The harness uses `@lydell/node-pty` with Node's built-in test runner, while the regular suite remains on Bun.
