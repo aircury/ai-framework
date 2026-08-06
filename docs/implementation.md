@@ -91,9 +91,11 @@ Re-run the installer or edit the profile and regenerate files if project standar
 
 Installable skills are defined on capabilities in `src/capabilities.ts`. The installer expands selected capabilities into individual skills and groups them by source before running `skills add` through `npx` when available, or `bunx` otherwise.
 
-Local skill commands include the `universal` agent and any selected tool-specific agents except Claude Code. Global skill commands include `universal` and selected global tool agents.
+Local and global skill commands include the `universal` agent and every selected tool-specific agent.
+The installer delegates agent-specific installation paths and links to `skills add`.
 
-When Claude Code is selected for a local install, the installer materialises selected skills through the `universal` agent and then synchronises available selected skills from `.agents/skills/` into `.claude/skills/` so Claude Code can load them from its project-specific skills directory. This avoids asking `skills add` and the installer to manage the same Claude Code target directory. If a selected skill was not materialised by `skills add`, the installer reports a warning instead of failing the project installation.
+When Claude Code is selected alongside `universal`, `skills add` materialises the canonical project skills in `.agents/skills/` and links them into `.claude/skills/`.
+The framework installer does not copy or synchronise agent-specific skill directories itself.
 
 The generated command shape is:
 

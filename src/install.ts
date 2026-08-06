@@ -1,19 +1,11 @@
 import { spawnSync } from "node:child_process";
-import {
-  cpSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  realpathSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   type CapabilityId,
   type CapabilityProfile,
   type CapabilityScope,
-  type CapabilitySkill,
   createCapabilityProfile,
   getCapabilityFiles,
   getCapabilitySkills,
@@ -40,11 +32,6 @@ export interface InstallCommand {
 
 export interface InstallOptions {
   britishEnglish?: boolean;
-}
-
-export interface ClaudeSkillsSyncResult {
-  copied: string[];
-  missing: string[];
 }
 
 type SkillsRunner = "npx" | "bunx";
@@ -204,6 +191,7 @@ export function getGlobalFiles(tools: Tool[]): InstallFile[] {
 function getLocalSkillAgents(tools: Tool[]): string[] {
   const agents = new Set<string>(["universal"]);
 
+  if (tools.includes("claude-code")) agents.add("claude-code");
   if (tools.includes("gemini-cli")) agents.add("gemini-cli");
 
   return [...agents];
@@ -362,70 +350,6 @@ export function writeFile(
 
   mkdirSync(dirname(fullPath), { recursive: true });
   writeFileSync(fullPath, file.content, "utf-8");
-}
-
-export function syncClaudeCodeSkills(
-  cwd: string,
-  skills: CapabilitySkill[],
-): ClaudeSkillsSyncResult {
-  const copied: string[] = [];
-  const missing: string[] = [];
-  const uniqueSkills = [
-    ...new Map(skills.map((skill) => [skill.skillName, skill])).values(),
-  ].sort((left, right) => left.skillName.localeCompare(right.skillName));
-
-  if (uniqueSkills.length === 0) {
-    return { copied, missing };
-  }
-
-  const sourceRoot = join(cwd, ".agents", "skills");
-  const targetRoot = join(cwd, ".claude", "skills");
-  mkdirSync(targetRoot, { recursive: true });
-
-  for (const skill of uniqueSkills) {
-    const source = join(sourceRoot, skill.skillName);
-    if (!existsSync(source)) {
-      const fallbackSource = getAircurySkillFallbackSource(skill);
-      if (!fallbackSource) {
-        missing.push(skill.skillName);
-        continue;
-      }
-
-      cpSync(fallbackSource, source, {
-        recursive: true,
-        force: true,
-      });
-    }
-
-    const target = join(targetRoot, skill.skillName);
-    if (areSamePath(source, target)) {
-      copied.push(skill.skillName);
-      continue;
-    }
-
-    cpSync(source, target, {
-      recursive: true,
-      force: true,
-    });
-    copied.push(skill.skillName);
-  }
-
-  return { copied, missing };
-}
-
-function areSamePath(source: string, target: string): boolean {
-  if (!existsSync(source) || !existsSync(target)) return false;
-
-  return realpathSync(source) === realpathSync(target);
-}
-
-function getAircurySkillFallbackSource(skill: CapabilitySkill): string | null {
-  if (skill.source !== AIRCURY_SKILLS_SOURCE) return null;
-
-  const source = join(getAircurySkillsSource(), "skills", skill.skillName);
-  if (!existsSync(source)) return null;
-
-  return source;
 }
 
 export function mergeFrameworkReferenceIntoAgents(

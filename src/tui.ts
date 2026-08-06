@@ -19,7 +19,6 @@ import {
   isProtectedLocalCompanion,
   readProjectProfile,
   runCommand,
-  syncClaudeCodeSkills,
   updateGitignore,
   writeFile,
 } from "./install";
@@ -321,8 +320,6 @@ export async function run(): Promise<void> {
   let written = 0;
   let skipped = 0;
   let executed = 0;
-  let claudeSkillsCopied = 0;
-  let missingClaudeSkills: string[] = [];
 
   for (const command of commands) {
     const result = runCommand(command, cwd);
@@ -341,12 +338,6 @@ export async function run(): Promise<void> {
     }
 
     executed++;
-  }
-
-  if (!isGlobal && selectedTools.includes("claude-code")) {
-    const syncResult = syncClaudeCodeSkills(cwd, selectedSkills);
-    claudeSkillsCopied = syncResult.copied.length;
-    missingClaudeSkills = syncResult.missing;
   }
 
   for (const { file, exists } of conflicts) {
@@ -379,15 +370,6 @@ export async function run(): Promise<void> {
     p.log.success(
       `${executed} install command${executed > 1 ? "s" : ""} executed`,
     );
-  if (claudeSkillsCopied > 0)
-    p.log.success(
-      `${claudeSkillsCopied} Claude Code skill${claudeSkillsCopied > 1 ? "s" : ""} synced to .claude/skills/`,
-    );
-  if (missingClaudeSkills.length > 0)
-    p.log.warn(
-      `Claude Code skills not found in .agents/skills/: ${missingClaudeSkills.join(", ")}`,
-    );
-
   if (!isGlobal) {
     const gitignoreResult = updateGitignore(cwd);
     if (gitignoreResult.created) {

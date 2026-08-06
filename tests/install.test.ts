@@ -4,14 +4,12 @@ import {
   mkdirSync,
   readFileSync,
   rmSync,
-  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   FRAMEWORK_MAINTAINED_NOTICE,
-  getCapabilitySkills,
   getInitialCapabilityIds,
 } from "../src/capabilities";
 import {
@@ -28,7 +26,6 @@ import {
   mergeFrameworkReferenceIntoAgents,
   readProjectProfile,
   runCommand,
-  syncClaudeCodeSkills,
   writeFile,
 } from "../src/install";
 
@@ -470,7 +467,7 @@ describe("getLocalCommands", () => {
     ).toContain("vercel-react-best-practices");
   });
 
-  it("installs local skills through universal and non-Claude tool agents", () => {
+  it("installs local skills through universal and selected tool agents", () => {
     const commands = getLocalCommands(["claude-code", "gemini-cli"], ["git"]);
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toEqual([
@@ -483,17 +480,20 @@ describe("getLocalCommands", () => {
       "-a",
       "universal",
       "-a",
+      "claude-code",
+      "-a",
       "gemini-cli",
       "-y",
     ]);
   });
 
-  it("does not ask skills add to install local Claude Code skills directly", () => {
+  it("asks skills add to link local Claude Code skills", () => {
     const commands = getLocalCommands(["claude-code"], ["git"]);
 
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toContain("universal");
-    expect(commands[0].args).not.toContain("claude-code");
+    expect(commands[0].args).toContain("claude-code");
+    expect(commands[0].args).not.toContain("--copy");
   });
 
   it("installs the external UK business English skill", () => {
@@ -859,100 +859,6 @@ describe("isProtectedLocalCompanion", () => {
   it("marks FRAMEWORK.local.md as protected", () => {
     expect(isProtectedLocalCompanion("FRAMEWORK.local.md")).toBe(true);
     expect(isProtectedLocalCompanion("FRAMEWORK.md")).toBe(false);
-  });
-});
-
-describe("syncClaudeCodeSkills", () => {
-  it("copies selected skills from .agents/skills to .claude/skills", () => {
-    const dir = `${tmpdir()}/sdd-claude-skills-${Date.now()}`;
-    const skillDir = join(dir, ".agents", "skills", "commit-changes");
-    mkdirSync(skillDir, { recursive: true });
-    writeFileSync(join(skillDir, "SKILL.md"), "# Commit Changes", "utf-8");
-
-    const result = syncClaudeCodeSkills(dir, [
-      {
-        source: "aircury/ai-framework",
-        skillName: "commit-changes",
-        scopes: ["local"],
-      },
-    ]);
-
-    expect(result).toEqual({ copied: ["commit-changes"], missing: [] });
-    expect(
-      readFileSync(
-        join(dir, ".claude", "skills", "commit-changes", "SKILL.md"),
-        "utf-8",
-      ),
-    ).toBe("# Commit Changes");
-
-    rmSync(dir, { recursive: true });
-  });
-
-  it("reports selected skills missing from .agents/skills", () => {
-    const dir = `${tmpdir()}/sdd-claude-skills-missing-${Date.now()}`;
-
-    const result = syncClaudeCodeSkills(dir, [
-      {
-        source: "unknown/source",
-        skillName: "missing-skill",
-        scopes: ["local"],
-      },
-    ]);
-
-    expect(result).toEqual({ copied: [], missing: ["missing-skill"] });
-    expect(existsSync(join(dir, ".claude", "skills"))).toBe(true);
-
-    rmSync(dir, { recursive: true });
-  });
-
-  it("falls back to the Aircury source for selected local skills", () => {
-    const dir = `${tmpdir()}/sdd-claude-aircury-skill-${Date.now()}`;
-    const skills = getCapabilitySkills(["frontend"], "local").filter(
-      (skill) => skill.skillName === "frontend-ui-workflow",
-    );
-
-    const result = syncClaudeCodeSkills(dir, skills);
-
-    expect(result).toEqual({ copied: ["frontend-ui-workflow"], missing: [] });
-    expect(
-      readFileSync(
-        join(dir, ".agents", "skills", "frontend-ui-workflow", "SKILL.md"),
-        "utf-8",
-      ),
-    ).toContain("name: frontend-ui-workflow");
-    expect(
-      readFileSync(
-        join(dir, ".claude", "skills", "frontend-ui-workflow", "SKILL.md"),
-        "utf-8",
-      ),
-    ).toContain("name: frontend-ui-workflow");
-
-    rmSync(dir, { recursive: true });
-  });
-
-  it("skips copying when the source and Claude target are the same directory", () => {
-    const dir = `${tmpdir()}/sdd-claude-same-skill-${Date.now()}`;
-    const sourceRoot = join(dir, ".agents", "skills");
-    const targetDir = join(dir, ".claude", "skills", "caveman");
-    mkdirSync(sourceRoot, { recursive: true });
-    mkdirSync(targetDir, { recursive: true });
-    writeFileSync(join(targetDir, "SKILL.md"), "# Caveman", "utf-8");
-    symlinkSync(targetDir, join(sourceRoot, "caveman"), "dir");
-
-    const result = syncClaudeCodeSkills(dir, [
-      {
-        source: "https://github.com/juliusbrussee/caveman",
-        skillName: "caveman",
-        scopes: ["local"],
-      },
-    ]);
-
-    expect(result).toEqual({ copied: ["caveman"], missing: [] });
-    expect(readFileSync(join(targetDir, "SKILL.md"), "utf-8")).toBe(
-      "# Caveman",
-    );
-
-    rmSync(dir, { recursive: true });
   });
 });
 
