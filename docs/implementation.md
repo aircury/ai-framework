@@ -38,7 +38,7 @@ Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and Open
 | `CLAUDE.md` | Claude Code instructions, when Claude Code is selected. Existing non-Aircury content is preserved by appending the framework reference. |
 | `.cursorrules` | Cursor rules, when Cursor is selected. Existing content is preserved by appending Aircury commit rules. |
 | `GEMINI.md` | Gemini CLI instructions, when Gemini CLI is selected. |
-| `.aircury/framework.config.json` | Installed profile with selected capabilities and language settings. |
+| `.aircury/framework.config.json` | Installed profile with selected capabilities, additional tools, and language settings. |
 | `specs/features/README.md` | Starter guide for canonical living specifications. |
 | `specs/decisions/README.md` | Starter ADR guide when `decision-records` is enabled. |
 | `specs/ui/README.md` | Starter frontend design-system guide when `frontend` is enabled. |
@@ -82,7 +82,10 @@ The current built-in capabilities are:
 
 For example, the architecture capabilities install one selected architecture standard. `ddd-hexagonal` includes the DDD+Hexagonal standard modules plus the curated `clean-ddd-hexagonal` skill. `custom-architecture` installs a discovery skill that analyses the repository and writes the project-specific architecture section to `FRAMEWORK.local.md`. `walking-skeleton` installs the external `aircury/walking-skeleton` skill for greenfield bootstrap from ADR bundles and a tiny end-to-end slice. `testing` includes testing rules plus Playwright and E2E skills. `resilience` includes error-handling and structured-logging rules plus related skills. `specs` includes skills for extracting behaviour specs, interpreting specs, applying semantic line breaks, and using DBML as the standard for database schema documentation in `db/schema.dbml`. `database` installs both the blind database debugging workflow for hypothesis-driven SQL diagnosis via row counts and the database schema design workflow for relational schemas and migrations.
 
-The installer stores the selected capability ids in `.aircury/framework.config.json`. Re-run the installer or edit the profile and regenerate files if project standards need to change.
+The installer stores the selected capability ids, additional tools, and language preference in `.aircury/framework.config.json`.
+When a valid local profile exists, the installer uses it to initialise the reconfiguration prompts instead of restoring registry defaults.
+Profiles created before tool selections were persisted remain valid and use the default tool selections on their next run.
+Re-run the installer or edit the profile and regenerate files if project standards need to change.
 
 ## Skill Installation
 
