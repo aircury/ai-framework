@@ -33,6 +33,17 @@ Use a throwaway directory because local installation writes framework files such
 
 If you only changed templates, modules, generated files, or skill wiring, this local installer run is the fastest way to confirm the TUI, rendered output, conflict handling, and generated `npx skills add` commands still match expectations.
 
+## Automated Installer Tests
+
+`bun test` includes stream-driven installer workflow tests.
+These tests send keypress events through Clack's injectable input stream and capture its output stream while using a temporary working directory and an in-memory command executor.
+They verify prompt decisions, generated commands, cancellation, and filesystem effects without network access or user-level changes.
+
+`bun run test:e2e` builds the published CLI and runs a smoke test through a real pseudo-terminal.
+The harness uses `@lydell/node-pty` with Node's built-in test runner, while the regular suite remains on Bun.
+The smoke test drives the complete prompt sequence, runs in a temporary project directory, and places a recording `npx` substitute first on `PATH` so no external skills are downloaded.
+It verifies the executable, terminal interaction, generated files, and requested skill agents together.
+
 ## Project Structure
 
 | Path | Purpose |
@@ -168,8 +179,9 @@ Before publishing or opening a release PR:
 
 1. Run `bun run build`.
 2. Run `bun test`.
-3. Run `bun run lint`.
-4. Confirm generated docs still match the installer behavior.
-5. Confirm new skills can be resolved by `npx skills add <source> --skill <skill-name>`.
+3. Run `bun run test:e2e`.
+4. Run `bun run lint`.
+5. Confirm generated docs still match the installer behavior.
+6. Confirm new skills can be resolved by `npx skills add <source> --skill <skill-name>`.
 
 Publishing is handled by the repository release workflow and the npm package metadata in `package.json`.
