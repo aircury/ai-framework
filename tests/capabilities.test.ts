@@ -84,6 +84,7 @@ describe("capabilities", () => {
       "language",
       "ask-question",
       "database",
+      "reflect",
     ]);
   });
 
