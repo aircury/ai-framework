@@ -176,6 +176,7 @@ export type CapabilityId =
   | "specs"
   | "language"
   | "ask-question"
+  | "goal-crafting"
   | "database"
   | "blind-db-debugging"
   | "db-schema-design";
@@ -784,6 +785,23 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       },
     ],
   },
+  "goal-crafting": {
+    id: "goal-crafting",
+    label: "Goal Crafting",
+    hint: "generate and validate Claude Code /goal prompts",
+    description:
+      "Generates, improves, and validates Claude Code /goal prompts that are specific, scoped, verifiable, and safe",
+    category: "workflow",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "goal-crafting",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
   database: {
     id: "database",
     label: "Database",
@@ -827,6 +845,7 @@ const CAPABILITY_ORDER: VisibleCapabilityId[] = [
   "specs",
   "language",
   "ask-question",
+  "goal-crafting",
   "database",
 ];
 
