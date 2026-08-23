@@ -178,7 +178,8 @@ export type CapabilityId =
   | "ask-question"
   | "database"
   | "blind-db-debugging"
-  | "db-schema-design";
+  | "db-schema-design"
+  | "extract-rule";
 
 type VisibleCapabilityId = Exclude<
   CapabilityId,
@@ -806,6 +807,23 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       },
     ],
   },
+  "extract-rule": {
+    id: "extract-rule",
+    label: "Extract Rule",
+    hint: "Distil and record coding rules",
+    description:
+        "Distil reusable engineering rules from code changes and record them in the documentation",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "extract-rule",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
 };
 
 const CAPABILITY_ORDER: VisibleCapabilityId[] = [
@@ -828,6 +846,7 @@ const CAPABILITY_ORDER: VisibleCapabilityId[] = [
   "language",
   "ask-question",
   "database",
+  "extract-rule"
 ];
 
 const LEGACY_CAPABILITY_ALIASES: Partial<
