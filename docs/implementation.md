@@ -66,6 +66,7 @@ The current built-in capabilities are:
 - `walking-skeleton`
 - `airsync`
 - `git`
+- `aircury-aws-sso`
 - `ddd-hexagonal`
 - `clean-architecture`
 - `layered-architecture`

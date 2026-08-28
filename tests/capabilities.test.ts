@@ -72,6 +72,7 @@ describe("capabilities", () => {
       "walking-skeleton",
       "airsync",
       "git",
+      "aircury-aws-sso",
       "ddd-hexagonal",
       "clean-architecture",
       "layered-architecture",
