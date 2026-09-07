@@ -1,6 +1,6 @@
 # Drop OpenSpec workflow capability
 
-- Status: Draft
+- Status: Accepted
 - Date: 2026-09-07
 
 ## Context
