@@ -72,7 +72,7 @@ describe("templates", () => {
     it("uses British English spelling in generated framework content", () => {
       expect(FRAMEWORK).toContain("observable behaviour");
       expect(FRAMEWORK).toContain("Analyse the request");
-      expect(FRAMEWORK).toContain("working artefacts");
+      expect(FRAMEWORK).toContain("validate consistency across all artefacts");
       expect(FRAMEWORK).not.toMatch(
         /\b(behavior|Behavior|analyze|Analyze|artifact|Artifact|artifacts|Artifacts)\b/,
       );

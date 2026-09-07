@@ -61,7 +61,6 @@ Each content module contains:
 
 The current built-in capabilities are:
 
-- `open-spec`
 - `spec-kit`
 - `walking-skeleton`
 - `airsync`
@@ -113,7 +112,6 @@ Global installs also add `-g`:
 
 Default selected capabilities are:
 
-- `open-spec`
 - `spec-kit`
 - `airsync`
 - `git`
@@ -141,7 +139,6 @@ Agents should read `AGENTS.md` first, then `FRAMEWORK.md`. For non-trivial chang
 All workflow modes converge on `specs/features/`:
 
 - `plan-build` can update specs directly after behavior changes.
-- OpenSpec flows use temporary artifacts in `specs/changes/<name>/` and then sync final behavior into `specs/features/`.
 - Spec Kit flows create formal artifacts before implementation and still finish by updating `specs/features/`.
 
 ## Conflict Handling

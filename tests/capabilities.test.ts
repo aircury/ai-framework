@@ -13,7 +13,6 @@ import {
 describe("capabilities", () => {
   it("preselects the default local capabilities", () => {
     expect(getInitialCapabilityIds("local")).toEqual([
-      "open-spec",
       "spec-kit",
       "airsync",
       "git",
@@ -30,7 +29,6 @@ describe("capabilities", () => {
 
   it("adds the language capability when British English is enabled", () => {
     expect(getInitialCapabilityIds("local", { britishEnglish: true })).toEqual([
-      "open-spec",
       "spec-kit",
       "airsync",
       "git",
@@ -67,7 +65,6 @@ describe("capabilities", () => {
     expect(
       getCapabilities("global").map((capability) => capability.id),
     ).toEqual([
-      "open-spec",
       "spec-kit",
       "walking-skeleton",
       "airsync",
@@ -102,14 +99,10 @@ describe("capabilities", () => {
   it("expands selected capabilities into unique installable skills", () => {
     expect(
       getCapabilitySkills(
-        ["open-spec", "git", "frontend", "specs", "ddd-hexagonal"],
+        ["git", "frontend", "specs", "ddd-hexagonal"],
         "local",
       ).map((skill) => skill.skillName),
     ).toEqual([
-      "open-spec-propose",
-      "open-spec-apply",
-      "open-spec-complete",
-      "open-spec-explore",
       "commit-changes",
       "clean-ddd-hexagonal",
       "frontend-ui-workflow",

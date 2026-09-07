@@ -425,7 +425,6 @@ describe("getLocalCommands", () => {
 
     expect(commands).toHaveLength(6);
     const aircury = getCommandBySource(commands, aircurySkillsSource);
-    expect(aircury.args).toContain("open-spec-propose");
     expect(aircury.args).toContain("spec-kit-specify");
     expect(aircury.args).toContain("airsync");
     expect(aircury.args).toContain("commit-changes");

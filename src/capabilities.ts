@@ -158,7 +158,6 @@ type StandardModuleId =
   | "walking-skeleton";
 
 export type CapabilityId =
-  | "open-spec"
   | "spec-kit"
   | "walking-skeleton"
   | "airsync"
@@ -424,38 +423,6 @@ function createCapabilityDetailFile(
 }
 
 const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
-  "open-spec": {
-    id: "open-spec",
-    label: "OpenSpec",
-    hint: "structured propose/apply/complete workflow",
-    description:
-      "Structured propose/apply/complete workflow for complex changes",
-    category: "workflow",
-    defaultSelected: true,
-    scopes: ["local", "global"],
-    skills: [
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-propose",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-apply",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-complete",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-explore",
-        scopes: ["local", "global"],
-      },
-    ],
-  },
   "spec-kit": {
     id: "spec-kit",
     label: "Spec Kit",
@@ -827,7 +794,6 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
 };
 
 const CAPABILITY_ORDER: VisibleCapabilityId[] = [
-  "open-spec",
   "spec-kit",
   "walking-skeleton",
   "airsync",

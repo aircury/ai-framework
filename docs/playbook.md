@@ -7,8 +7,7 @@ This playbook shows how to use Aircury after installation. If you are unsure whi
 | Need | Recommended mode | Expected result |
 |---|---|---|
 | Small, well-understood change | `plan-build` | Short plan, implementation, verification, and spec update if behavior changes. |
-| Complex but clear change | `propose-apply-complete` | OpenSpec proposal artifacts, implementation, and final sync to `specs/features/`. |
-| Unknown root cause | `explore-propose-apply-complete` | Investigation first, then proposal, implementation, and completion. |
+| Complex or cross-cutting change | `spec-kit` | Specification, clarification, plan, tasks, analysis, implementation, and optional checklist. |
 | New feature or formal requirements | `spec-kit` | Specification, clarification, plan, tasks, analysis, implementation, and optional checklist. |
 | New project bootstrap | `walking-skeleton` | ADR selection, first end-to-end spec, runnable baseline, and clean rebuild verification. |
 | Understand existing behavior | `specs-extractor` | Behavior-first specs extracted from the current codebase. |
@@ -33,47 +32,6 @@ Expected steps:
 3. Implement the fix.
 4. Run focused verification.
 5. Update `specs/features/` if observable behavior changed.
-
-### Change Core Logic
-
-Use this when the scope is clear but crosses boundaries.
-
-```text
-Migrate email delivery from Sendgrid to Resend. Assess impact first, create an OpenSpec proposal, implement from the approved tasks, then sync the final behavior into specs.
-```
-
-Recommended mode: `propose-apply-complete`.
-
-Skills involved:
-
-- `open-spec-propose`
-- `open-spec-apply`
-- `open-spec-complete`
-
-Expected artifacts:
-
-- `specs/changes/<name>/proposal.md`
-- `specs/changes/<name>/design.md`
-- `specs/changes/<name>/tasks.md`
-- updated `specs/features/` after completion
-
-### Investigate A Ghost Bug
-
-Use this when the root cause is not known.
-
-```text
-Users report that the shopping cart sometimes clears itself after reload. Investigate the state management first, identify the root cause, then propose the smallest safe fix.
-```
-
-Recommended mode: `explore-propose-apply-complete`.
-
-Expected steps:
-
-1. Run `open-spec-explore` without implementing.
-2. Summarize findings and scope.
-3. Continue with `open-spec-propose`.
-4. Implement with `open-spec-apply`.
-5. Close with `open-spec-complete`.
 
 ### Add A Large Feature
 
@@ -224,7 +182,7 @@ If `airsync` is also enabled, the generated framework requires proposing reusabl
 
 Ask the agent to recommend a mode. The generated framework requires routing before non-trivial implementation.
 
-**Do all tasks need OpenSpec or Spec Kit?**
+**Do all tasks need Spec Kit?**
 
 No. `plan-build` is enough for clear, small-to-medium work.
 

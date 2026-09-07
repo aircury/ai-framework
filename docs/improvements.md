@@ -47,7 +47,7 @@ Recommended direction:
 1. Add a `walking-skeleton` skill for new projects.
 2. Add reusable skeleton flavours as ADR bundles, starting with one opinionated web application flavour.
 3. Add an ADR for splitting the framework core from optional skeleton flavours.
-4. Make `open-spec-complete` and `spec-kit-implement` suggest `extract-rules` when a diff introduces reusable implementation patterns.
+4. Make `spec-kit-implement` suggest `extract-rules` when a diff introduces reusable implementation patterns.
 5. Add an explicit "look for similar code first" step to implementation workflows.
 6. Evolve `FRAMEWORK.md` towards a constitution plus capability index, moving detailed capability guidance into linked docs.
 
@@ -70,7 +70,7 @@ Example rows:
 |---|---|---|
 | Small code change | `FRAMEWORK.md`, affected specs | `plan-build` |
 | Ambiguous feature | `FRAMEWORK.md`, `specs/features/` | `spec-kit` |
-| Clear cross-cutting change | `FRAMEWORK.md`, relevant ADRs | `open-spec` |
+| Clear cross-cutting change | `FRAMEWORK.md`, relevant ADRs | `spec-kit` |
 | UI work | `specs/ui/`, feature layout and experience docs | `frontend-ui-workflow` |
 | Existing project pattern work | `FRAMEWORK.local.md`, similar code, `specs/rules/` | `extract-rules` if patterns are missing |
 | Unknown domain concept | `specs/language/` | `extract-language` if definitions are missing |

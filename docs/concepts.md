@@ -18,7 +18,7 @@ Aircury separates three concerns:
 - **Installable capabilities**: selected modules and skills that add project standards, starter files, and executable workflows.
 - **Canonical behavior specs**: `specs/features/` stores observable behavior independently of the workflow that produced it.
 
-The important point is that OpenSpec, Spec Kit, and direct `plan-build` work are not competing sources of truth. They are different paths into the same canonical behavior record.
+The important point is that Spec Kit and direct `plan-build` work are not competing sources of truth. They are different paths into the same canonical behavior record.
 
 ## What The Framework Adds
 
@@ -39,8 +39,6 @@ The framework asks agents to choose a mode based on complexity and ambiguity:
 | Mode | Use when |
 |---|---|
 | `plan-build` | The change is clear and does not need formal workflow artifacts. |
-| `propose-apply-complete` | The change is complex or cross-cutting but understood. |
-| `explore-propose-apply-complete` | The root cause or scope is unclear and needs investigation first. |
 | `spec-kit` | A feature needs formal requirements, clarification, planning, and delivery governance. |
 
 The agent recommends a mode and the user decides. Once a mode is selected, the agent follows that mode and finishes by updating canonical specs when behavior changes.
@@ -62,7 +60,7 @@ Examples:
 - `testing` adds testing rules and installs curated Playwright and E2E testing skills.
 - `resilience` adds error-handling and structured-logging rules and installs related recovery/logging skills.
 - `specs` installs skills for extracting and interpreting canonical specs.
-- `open-spec` and `spec-kit` mainly install workflow skills.
+- `spec-kit` mainly installs workflow skills.
 - `walking-skeleton` installs the external `aircury/walking-skeleton` skill for greenfield project bootstrap from selected ADRs.
 
 Capability installation is registry-driven from `src/capabilities.ts`, so project rules and installable skills are selected through the same flow.
