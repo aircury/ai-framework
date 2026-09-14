@@ -28,7 +28,6 @@ interface RendererViewModel {
   includesLayeredArchitecture: boolean;
   includesCustomArchitecture: boolean;
   includesCodeStyle: boolean;
-  includesAirsyncMemory: boolean;
   includesErrorHandling: boolean;
   includesStructuredLogging: boolean;
   includesFrontend: boolean;
@@ -50,10 +49,6 @@ function createViewModel(
   const selectedIds = new Set(
     selectedCapabilities.map((capability) => capability.id),
   );
-  const selectedModuleIds = new Set(
-    selectedCapabilities.flatMap((capability) => capability.modules ?? []),
-  );
-
   return {
     installedCapabilities: selectedCapabilities.map((capability) => ({
       id: capability.id,
@@ -70,9 +65,8 @@ function createViewModel(
     includesLayeredArchitecture: selectedIds.has("layered-architecture"),
     includesCustomArchitecture: selectedIds.has("custom-architecture"),
     includesCodeStyle: selectedIds.has("code-style"),
-    includesAirsyncMemory: selectedModuleIds.has("airsync-memory"),
-    includesErrorHandling: selectedModuleIds.has("error-handling"),
-    includesStructuredLogging: selectedModuleIds.has("structured-logging"),
+    includesErrorHandling: selectedIds.has("resilience"),
+    includesStructuredLogging: selectedIds.has("resilience"),
     includesFrontend: selectedIds.has("frontend"),
     enforceBritishEnglish: options?.britishEnglish ?? false,
   };

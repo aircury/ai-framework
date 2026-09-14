@@ -63,7 +63,6 @@ The current built-in capabilities are:
 
 - `spec-kit`
 - `walking-skeleton`
-- `airsync`
 - `git`
 - `ddd-hexagonal`
 - `clean-architecture`
@@ -112,7 +111,6 @@ Global installs also add `-g`:
 Default selected capabilities are:
 
 - `spec-kit`
-- `airsync`
 - `git`
 - `resilience`
 - `testing`

@@ -13,10 +13,6 @@ This installation uses ADRs to preserve current architectural and workflow inten
 - Include `Context`, `Decision`, and `Consequences` sections.
 - Read relevant ADRs before implementing work in an area governed by prior decisions.
 
-## ADR Dual-Write to Airsync
-
-If Airsync is enabled, follow the Airsync module's canonical ADR dual-write rule when an ADR is created or revised.
-
 ## ADR Template
 
 ```md

@@ -28,7 +28,6 @@ Recommended direction:
 | `specs/rules/` | How do we write code in this project? | Controller rules, service boundaries, fixture style, testing conventions. |
 | `specs/language/` | What do domain words mean here? | Terms, invariants, common confusions, related concepts. |
 | `specs/decisions/` | Why did we choose this? | ADRs for architecture, tooling, deployment, testing, skeleton choices. |
-| Airsync or shared memory | What knowledge is reusable across repositories? | Team-wide patterns, reusable playbooks, lessons from prior projects. |
 
 ## Priority Backlog
 

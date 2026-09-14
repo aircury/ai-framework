@@ -165,8 +165,6 @@ Required module: `decision-records`.
 
 Output: `specs/decisions/<decision-name>.md`.
 
-If `airsync` is also enabled, the generated framework requires proposing reusable ADR knowledge to Airsync INBOX.
-
 ## Non-Negotiable Rules
 
 - `specs/features/` is the canonical behavior source.

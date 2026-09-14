@@ -1,12 +1,3 @@
-import airsyncMemoryAgents from "../standards/modules/airsync-memory/agents.md" with {
-  type: "text",
-};
-import airsyncMemoryFramework from "../standards/modules/airsync-memory/framework.md" with {
-  type: "text",
-};
-import airsyncMemoryManifest from "../standards/modules/airsync-memory/module.json" with {
-  type: "json",
-};
 import cleanArchitectureAgents from "../standards/modules/clean-architecture/agents.md" with {
   type: "text",
 };
@@ -140,7 +131,6 @@ type StandardModuleId =
   | "custom-architecture"
   | "ddd"
   | "code-style"
-  | "airsync-memory"
   | "error-handling"
   | "structured-logging"
   | "frontend"
@@ -150,7 +140,6 @@ type StandardModuleId =
 export type CapabilityId =
   | "spec-kit"
   | "walking-skeleton"
-  | "airsync"
   | "git"
   | "ddd-hexagonal"
   | "clean-architecture"
@@ -300,13 +289,6 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
       codeStyleManifest as StandardManifest,
       codeStyleFramework,
       codeStyleAgents,
-    ),
-  },
-  "airsync-memory": {
-    ...createStandardModule(
-      airsyncMemoryManifest as StandardManifest,
-      airsyncMemoryFramework,
-      airsyncMemoryAgents,
     ),
   },
   "error-handling": {
@@ -466,23 +448,6 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       {
         source: "aircury/walking-skeleton",
         skillName: "walking-skeleton",
-        scopes: ["local", "global"],
-      },
-    ],
-  },
-  airsync: {
-    id: "airsync",
-    label: "Airsync",
-    hint: "collaborative memory workflow and shared memory rules",
-    description: "Collaborative memory workflow with project Airsync rules",
-    category: "workflow",
-    defaultSelected: true,
-    scopes: ["local", "global"],
-    ...composeModules(["airsync-memory"]),
-    skills: [
-      {
-        source: "aircury/ai-framework",
-        skillName: "airsync",
         scopes: ["local", "global"],
       },
     ],
@@ -760,7 +725,6 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
 const CAPABILITY_ORDER: VisibleCapabilityId[] = [
   "spec-kit",
   "walking-skeleton",
-  "airsync",
   "git",
   "ddd-hexagonal",
   "clean-architecture",

@@ -27,10 +27,10 @@ Aircury installs a project operating system for AI-assisted delivery:
 - **One source of truth**: observable behavior is captured in `specs/features/`.
 - **Workflow routing**: agents recommend the lightest safe mode instead of forcing every task through the same process.
 - **Project-scoped rules**: generated `FRAMEWORK.md` and `AGENTS.md` make standards explicit for future AI sessions.
-- **Composable capabilities**: teams can enable ADRs, DDD+Hexagonal, testing, frontend, logging, error handling, memory, and workflow skills independently.
+- **Composable capabilities**: teams can enable ADRs, DDD+Hexagonal, testing, frontend, logging, error handling, and workflow skills independently.
 - **Skill wiring**: selected capabilities install curated skills through `npx skills add`, so workflows are executable rather than only documented.
 - **Greenfield bootstrap**: the optional Walking Skeleton capability installs an external ADR-driven bootstrap workflow for new projects.
-- **Reduced intention debt**: ADRs, specs, and optional Airsync memory preserve why decisions were made, not just what code changed.
+- **Reduced intention debt**: ADRs and specs preserve why decisions were made, not just what code changed.
 
 ## Workflow Routing
 

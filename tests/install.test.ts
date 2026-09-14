@@ -394,7 +394,6 @@ describe("getLocalCommands", () => {
     expect(commands).toHaveLength(5);
     const aircury = getCommandBySource(commands, aircurySkillsSource);
     expect(aircury.args).toContain("spec-kit-specify");
-    expect(aircury.args).toContain("airsync");
     expect(aircury.args).toContain("commit-changes");
     expect(aircury.args).toContain("frontend-ui-workflow");
     expect(aircury.args).toContain("specs-extractor");

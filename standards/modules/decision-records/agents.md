@@ -3,4 +3,3 @@
 - Agents MUST keep one ADR for each decision and revise it when the decision evolves.
 - ADR links MUST use explicit repository-relative Markdown paths, such as `[Use Redis-backed sessions](specs/decisions/use-redis-backed-sessions.md)`.
 - Each ADR MUST include `Context`, `Decision`, and `Consequences` sections.
-- If Airsync is enabled and an ADR is created or revised, agents MUST follow the Airsync module's canonical ADR dual-write rule.

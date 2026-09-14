@@ -14,7 +14,6 @@ describe("capabilities", () => {
   it("preselects the default local capabilities", () => {
     expect(getInitialCapabilityIds("local")).toEqual([
       "spec-kit",
-      "airsync",
       "git",
       "decision-records",
       "testing",
@@ -29,7 +28,6 @@ describe("capabilities", () => {
   it("adds the language capability when British English is enabled", () => {
     expect(getInitialCapabilityIds("local", { britishEnglish: true })).toEqual([
       "spec-kit",
-      "airsync",
       "git",
       "decision-records",
       "testing",
@@ -65,7 +63,6 @@ describe("capabilities", () => {
     ).toEqual([
       "spec-kit",
       "walking-skeleton",
-      "airsync",
       "git",
       "ddd-hexagonal",
       "clean-architecture",
@@ -259,18 +256,6 @@ describe("capabilities", () => {
       expect(content).not.toContain("Supersedes:");
       expect(content).not.toContain("Amends:");
     }
-  });
-
-  it("tags Airsync ADR memories with the descriptive decision name", () => {
-    const files = getCapabilityFiles(["airsync"], "local");
-    const capabilityRules = files.find(
-      (file) => file.path === "docs/aircury/capabilities/airsync.md",
-    );
-
-    expect(capabilityRules?.content).toContain(
-      'Include tags: `["adr", "<decision-name>"]`',
-    );
-    expect(capabilityRules?.content).not.toContain("ADR-XXXX");
   });
 
   it("creates a version 2 capability profile", () => {
