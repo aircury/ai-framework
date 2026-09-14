@@ -139,13 +139,13 @@ describe("templates", () => {
     it("keeps ADR dual-write details out of the compact framework", () => {
       const framework = generateFramework(["decision-records", "airsync"]);
       expect(framework).toContain(
-        "If an ADR is created or superseded, propose it to Airsync when Airsync is enabled.",
+        "If an ADR is created or revised, propose it to Airsync when Airsync is enabled.",
       );
       expect(framework).not.toContain("### ADR Dual-Write Rule");
       expect(framework).not.toContain("memory_kind");
       expect(framework).not.toContain("source_refs");
       expect(framework).not.toContain(
-        "Every ADR created or superseded MUST also be proposed to Airsync",
+        "Every ADR created or revised MUST also be proposed to Airsync",
       );
     });
 

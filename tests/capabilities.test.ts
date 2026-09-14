@@ -242,7 +242,7 @@ describe("capabilities", () => {
     ]);
   });
 
-  it("documents descriptive ADR names and immutability after draft status", () => {
+  it("documents current ADRs with descriptive names and explicit paths", () => {
     const files = getCapabilityFiles(["decision-records"], "local");
     const capabilityRules = files.find(
       (file) => file.path === "docs/aircury/capabilities/decision-records.md",
@@ -251,63 +251,17 @@ describe("capabilities", () => {
       (file) => file.path === "specs/decisions/README.md",
     );
 
-    expect(capabilityRules?.content).toContain(
-      "ADRs are mutable only while their status is `Draft`.",
-    );
-    expect(capabilityRules?.content).toContain(
-      "An ADR leaves `Draft` only when the user explicitly confirms that the functionality or change is complete and that the ADR should no longer be a draft.",
-    );
-    expect(capabilityRules?.content).toContain(
-      "Agents must not promote draft ADRs on their own.",
-    );
-    expect(capabilityRules?.content).toContain(
-      "After every modification to a draft ADR, ask the user whether they want to publish it now.",
-    );
-    expect(capabilityRules?.content).toContain("Do not edit non-draft ADRs.");
-    expect(capabilityRules?.content).toContain(
-      "Name each ADR file after the decision in lowercase, hyphen-separated form, without a sequence number or timestamp.",
-    );
-    expect(capabilityRules?.content).toContain(
-      "update the prior non-draft ADR only to mark that it was changed and where the new decision lives",
-    );
-    expect(capabilityRules?.content).toContain(
-      "Use `Supersedes: <decision-name>` when the new decision completely replaces or invalidates the old one.",
-    );
-    expect(capabilityRules?.content).toContain(
-      "Use `Amends: <decision-name>` when the new decision modifies, clarifies, or adds to the old one without completely invalidating it.",
-    );
-    expect(capabilityRules?.content).toContain(
-      "- Superseded by: <decision-name> (only when updating a prior ADR marker)",
-    );
-    expect(capabilityRules?.content).toContain(
-      "- Status: Draft | Accepted | Superseded | Deprecated",
-    );
-    expect(capabilityRules?.content).toContain(
-      "- Amends: <decision-name> (optional)",
-    );
-    expect(capabilityRules?.content).not.toContain("ADR-XXXX");
-    expect(starterGuide?.content).toContain(
-      "ADRs are editable only while `Status: Draft`.",
-    );
-    expect(starterGuide?.content).toContain(
-      "An ADR leaves `Draft` only when the user explicitly confirms that the functionality or change is complete and that the ADR should be published now.",
-    );
-    expect(starterGuide?.content).toContain(
-      "After every draft ADR modification, ask the user whether they want to publish it now",
-    );
-    expect(starterGuide?.content).toContain(
-      "`Supersedes: <decision-name>` or `Amends: <decision-name>`",
-    );
-    expect(starterGuide?.content).toContain(
-      "update the prior ADR only to say that it changed and where the new ADR is",
-    );
-    expect(starterGuide?.content).toContain(
-      "Use `Supersedes: <decision-name>` when the new decision completely replaces or invalidates the old one.",
-    );
-    expect(starterGuide?.content).toContain(
-      "Use `Amends: <decision-name>` when the new decision modifies, clarifies, or adds to the old one without completely invalidating it.",
-    );
-    expect(starterGuide?.content).not.toContain("ADR-XXXX");
+    for (const content of [capabilityRules?.content, starterGuide?.content]) {
+      expect(content).toContain(
+        "Keep one ADR for each decision and revise it when the decision evolves.",
+      );
+      expect(content).toContain(
+        "[Use Redis-backed sessions](specs/decisions/use-redis-backed-sessions.md)",
+      );
+      expect(content).not.toContain("Status:");
+      expect(content).not.toContain("Supersedes:");
+      expect(content).not.toContain("Amends:");
+    }
   });
 
   it("tags Airsync ADR memories with the descriptive decision name", () => {

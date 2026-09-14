@@ -158,7 +158,7 @@ Expected artifacts:
 Use this when a decision affects architecture, workflow, dependencies, or long-term project direction.
 
 ```text
-Record the decision to use Redis-backed sessions so sessions can be revoked in real time. Include context, decision, consequences, and whether any prior ADR is superseded.
+Record the decision to use Redis-backed sessions so sessions can be revoked in real time. Include context, decision, and consequences. Revise the existing ADR if this decision changes.
 ```
 
 Required module: `decision-records`.

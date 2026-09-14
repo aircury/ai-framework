@@ -1,7 +1,5 @@
 # Add resilience modules and default resilience skills
 
-- Status: Accepted
-- Date: 2026-04-19
 
 ## Context
 
