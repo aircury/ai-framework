@@ -72,7 +72,6 @@ The current built-in capabilities are:
 - `testing`
 - `code-style`
 - `frontend`
-- `token-efficiency`
 - `resilience`
 - `specs`
 - `language`
@@ -119,7 +118,6 @@ Default selected capabilities are:
 - `testing`
 - `code-style`
 - `frontend`
-- `token-efficiency`
 - `ddd-hexagonal`
 - `specs`
 - `ask-question`

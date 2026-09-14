@@ -20,7 +20,6 @@ describe("capabilities", () => {
       "testing",
       "code-style",
       "frontend",
-      "token-efficiency",
       "resilience",
       "specs",
       "ask-question",
@@ -36,7 +35,6 @@ describe("capabilities", () => {
       "testing",
       "code-style",
       "frontend",
-      "token-efficiency",
       "resilience",
       "specs",
       "language",
@@ -75,13 +73,12 @@ describe("capabilities", () => {
       "custom-architecture",
       "testing",
       "frontend",
-      "token-efficiency",
       "resilience",
       "specs",
       "language",
       "ask-question",
       "database",
-      "extract-rule"
+      "extract-rule",
     ]);
   });
 

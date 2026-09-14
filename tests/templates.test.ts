@@ -28,9 +28,6 @@ describe("templates", () => {
     it("matches the generated default profile", () => {
       expect(generateFramework()).toBe(FRAMEWORK);
       expect(renderFramework()).toBe(FRAMEWORK);
-      expect(FRAMEWORK).toContain(
-        "docs/aircury/capabilities/token-efficiency.md",
-      );
       expect(FRAMEWORK).not.toContain("## Token Efficiency");
     });
 
@@ -100,8 +97,6 @@ describe("templates", () => {
     it("matches the generated default profile", () => {
       expect(generateAgents()).toBe(AGENTS);
       expect(renderAgents()).toBe(AGENTS);
-      expect(AGENTS).toContain("`caveman` is already active by default");
-      expect(AGENTS).toContain("Start every new session in `caveman full`");
     });
   });
 
@@ -257,27 +252,6 @@ describe("templates", () => {
       );
     });
 
-    it("keeps AGENTS.md stable across non-token-efficiency module selections", () => {
-      expect(generateAgents(["decision-records"])).toBe(
-        generateAgents(["code-style"]),
-      );
-      expect(generateAgents(["decision-records", "frontend"])).toBe(
-        generateAgents(["code-style", "frontend"]),
-      );
-    });
-
-    it("adds token-efficiency guidance to AGENTS.md only when the module is enabled", () => {
-      expect(generateAgents(["token-efficiency"])).toContain(
-        "Start every new session in `caveman full`",
-      );
-      expect(generateAgents()).toContain(
-        "Start every new session in `caveman full`",
-      );
-      expect(generateAgents(["decision-records"])).not.toContain(
-        "Start every new session in `caveman full`",
-      );
-    });
-
     it("adds code style header to FRAMEWORK.md when enabled", () => {
       expect(generateFramework(["code-style"])).toContain(
         "docs/aircury/capabilities/code-style.md",
@@ -297,19 +271,6 @@ describe("templates", () => {
       );
       expect(generateFramework([])).not.toContain(
         "Use British English spelling",
-      );
-    });
-
-    it("adds token-efficiency guidance only when the capability is enabled", () => {
-      expect(generateFramework(["token-efficiency"])).toContain(
-        "docs/aircury/capabilities/token-efficiency.md",
-      );
-      expect(generateFramework([])).not.toContain("## Token Efficiency");
-      expect(generateFramework([])).not.toContain(
-        "docs/aircury/capabilities/token-efficiency.md",
-      );
-      expect(generateFramework(["token-efficiency"])).not.toContain(
-        "Load and apply the `caveman` skill in `full` mode",
       );
     });
   });

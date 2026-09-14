@@ -252,9 +252,6 @@ describe("getLocalFiles", () => {
     expect(framework.content).toContain(
       "docs/aircury/capabilities/decision-records.md",
     );
-    expect(framework.content).toContain(
-      "docs/aircury/capabilities/token-efficiency.md",
-    );
     expect(framework.content).toContain("## Engineering Non-Negotiables");
     expect(framework.content).not.toContain("## TDD Workflow");
     expect(framework.content).not.toContain(
@@ -317,19 +314,6 @@ describe("getLocalFiles", () => {
     );
     expect(frontend.content).toContain("frontend-ui-workflow");
     expect(frontend.content).toContain("implementation-plan.md");
-  });
-
-  it("includes terse-response guidance in the token-efficiency capability doc", () => {
-    const files = getLocalFiles([], ["token-efficiency"]);
-    const tokenEfficiency = getFileByPath(
-      files,
-      "docs/aircury/capabilities/token-efficiency.md",
-    );
-    expect(tokenEfficiency.content).toContain(
-      "Load and apply the `caveman` skill in `full` mode",
-    );
-    expect(tokenEfficiency.content).toContain("ACTIVE EVERY RESPONSE");
-    expect(tokenEfficiency.content).toContain("stop caveman");
   });
 });
 
@@ -407,7 +391,7 @@ describe("getLocalCommands", () => {
   it("installs the skills derived from the default capabilities for universal", () => {
     const commands = getLocalCommands([], getInitialCapabilityIds("local"));
 
-    expect(commands).toHaveLength(6);
+    expect(commands).toHaveLength(5);
     const aircury = getCommandBySource(commands, aircurySkillsSource);
     expect(aircury.args).toContain("spec-kit-specify");
     expect(aircury.args).toContain("airsync");
@@ -432,10 +416,6 @@ describe("getLocalCommands", () => {
         "https://github.com/currents-dev/playwright-best-practices-skill",
       ).args,
     ).toContain("playwright-best-practices");
-    expect(
-      getCommandBySource(commands, "https://github.com/juliusbrussee/caveman")
-        .args,
-    ).toContain("caveman");
     expect(
       getCommandBySource(commands, "https://github.com/wshobson/agents").args,
     ).toContain("error-handling-patterns");
@@ -508,14 +488,6 @@ describe("getLocalCommands", () => {
     });
   });
 
-  it("installs the caveman skill when token-efficiency capability is selected", () => {
-    const commands = getLocalCommands([], ["token-efficiency"]);
-    expect(
-      getCommandBySource(commands, "https://github.com/juliusbrussee/caveman")
-        .args,
-    ).toContain("caveman");
-  });
-
   it("installs the DDD+Hexagonal skill only for DDD+Hexagonal", () => {
     const hexagonalCommands = getLocalCommands([], ["ddd-hexagonal"]);
     expect(
@@ -562,20 +534,6 @@ describe("getLocalCommands", () => {
         command.args.includes("https://github.com/ccheney/robust-skills"),
       ),
     ).toBe(false);
-  });
-
-  it("installs capability-required skills without a separate skill selection", () => {
-    const commands = getLocalCommands([], ["frontend", "token-efficiency"]);
-
-    expect(commands).toHaveLength(3);
-    expect(commands[0].args).toContain("frontend-ui-workflow");
-    expect(commands[1].args).toContain("caveman");
-    expect(
-      getCommandBySource(
-        commands,
-        "https://github.com/vercel-labs/agent-skills",
-      ).args,
-    ).toContain("vercel-react-best-practices");
   });
 
   it("installs the specs skills from the Aircury source", () => {

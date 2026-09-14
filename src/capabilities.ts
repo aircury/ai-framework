@@ -106,15 +106,6 @@ import testingFramework from "../standards/modules/testing/framework.md" with {
 import testingManifest from "../standards/modules/testing/module.json" with {
   type: "json",
 };
-import tokenEfficiencyAgents from "../standards/modules/token-efficiency/agents.md" with {
-  type: "text",
-};
-import tokenEfficiencyFramework from "../standards/modules/token-efficiency/framework.md" with {
-  type: "text",
-};
-import tokenEfficiencyManifest from "../standards/modules/token-efficiency/module.json" with {
-  type: "json",
-};
 import walkingSkeletonAgents from "../standards/modules/walking-skeleton/agents.md" with {
   type: "text",
 };
@@ -154,7 +145,6 @@ type StandardModuleId =
   | "structured-logging"
   | "frontend"
   | "testing"
-  | "token-efficiency"
   | "walking-skeleton";
 
 export type CapabilityId =
@@ -170,7 +160,6 @@ export type CapabilityId =
   | "testing"
   | "code-style"
   | "frontend"
-  | "token-efficiency"
   | "resilience"
   | "specs"
   | "language"
@@ -358,13 +347,6 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
       testingManifest as StandardManifest,
       testingFramework,
       testingAgents,
-    ),
-  },
-  "token-efficiency": {
-    ...createStandardModule(
-      tokenEfficiencyManifest as StandardManifest,
-      tokenEfficiencyFramework,
-      tokenEfficiencyAgents,
     ),
   },
   "walking-skeleton": {
@@ -646,24 +628,6 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       },
     ],
   },
-  "token-efficiency": {
-    id: "token-efficiency",
-    label: "Token Efficiency",
-    hint: "terse default responses through Caveman",
-    description:
-      "Project token-efficiency rules plus the Caveman skill for terse responses",
-    category: "communication",
-    defaultSelected: true,
-    scopes: ["local", "global"],
-    ...composeModules(["token-efficiency"]),
-    skills: [
-      {
-        source: "https://github.com/juliusbrussee/caveman",
-        skillName: "caveman",
-        scopes: ["local", "global"],
-      },
-    ],
-  },
   resilience: {
     id: "resilience",
     label: "Resilience",
@@ -779,7 +743,7 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
     label: "Extract Rule",
     hint: "Distil and record coding rules",
     description:
-        "Distil reusable engineering rules from code changes and record them in the documentation",
+      "Distil reusable engineering rules from code changes and record them in the documentation",
     category: "engineering",
     defaultSelected: false,
     scopes: ["local", "global"],
@@ -806,13 +770,12 @@ const CAPABILITY_ORDER: VisibleCapabilityId[] = [
   "testing",
   "code-style",
   "frontend",
-  "token-efficiency",
   "resilience",
   "specs",
   "language",
   "ask-question",
   "database",
-  "extract-rule"
+  "extract-rule",
 ];
 
 const LEGACY_CAPABILITY_ALIASES: Partial<
