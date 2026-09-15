@@ -4,7 +4,7 @@ Use this reference before substantial frontend code is written.
 
 ## Goal
 
-Produce `specs/features/<feature-name>/implementation-plan.md` so new frontend work is shippable from the first implementation pass without a cleanup refactor unless requirements change.
+Produce `specs/changes/<change-name>/implementation-plan.md` so new frontend work is shippable from the first implementation pass without a cleanup refactor unless requirements change.
 
 This is a structure and maintainability step, not a visual design step and not a React performance step.
 
@@ -21,7 +21,9 @@ This planning step is frontend-only. Do not plan backend edits, API changes, ser
 
 ## Output File
 
-Save the result to `specs/features/<feature-name>/implementation-plan.md`. Create the directory if needed.
+Save the result to `specs/changes/<change-name>/implementation-plan.md`. Create the directory if needed.
+
+The plan is temporary working state, not a feature specification. Record only material architectural decisions that must outlive the change in `specs/decisions/`.
 
 Use this structure:
 

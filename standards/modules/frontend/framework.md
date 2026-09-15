@@ -23,7 +23,7 @@ For new UI, rebuilds, non-trivial forms, role-gated UI, restyles, or substantial
 
 - `specs/features/<feature-name>/layout.md`: structural source of truth for fields, labels, sections, actions, and static content.
 - `specs/features/<feature-name>/experience.md`: behavioral source of truth for flows, micro-interactions, validation, loading/error/empty states, and visibility rules.
-- `specs/features/<feature-name>/implementation-plan.md`: clean implementation source of truth for component responsibilities, file organization, state ownership, JSX structure, local primitive reuse, and conditional rendering strategy.
+- `specs/changes/<change-name>/implementation-plan.md`: temporary structure plan for component responsibilities, file organization, state ownership, JSX structure, local primitive reuse, and conditional rendering strategy.
 - `specs/ui/style-guide.md`: canonical source of truth for design tokens, reusable primitives, variants, states, responsive conventions, accessibility-related visual conventions, gaps, and strict reuse rules.
 
 Small safe UI edits may skip the full artefact pipeline when nearby code and `specs/ui/style-guide.md` are sufficient.
@@ -35,8 +35,8 @@ Use `frontend-ui-workflow` for this pipeline. The skill decides which bundled re
 1. Produce or update `layout.md` to capture what must render with full field parity.
 2. Produce or update `experience.md` to capture how the UI behaves and when fields, sections, and actions render, hide, disable, or become read-only.
 3. Produce or update `specs/ui/style-guide.md` from the real frontend codebase before writing substantial UI code.
-4. Produce or update `implementation-plan.md` before implementing substantial UI.
-5. Implement the UI from `layout.md`, `experience.md`, `implementation-plan.md`, and `specs/ui/style-guide.md`.
+4. Produce and review `specs/changes/<change-name>/implementation-plan.md` before implementing substantial UI.
+5. Implement the UI from `layout.md`, `experience.md`, the current change's `implementation-plan.md`, and `specs/ui/style-guide.md`.
 6. Update the canonical feature spec in `specs/features/` when observable behaviour changes.
 
 For existing UI rebuilds, extract `layout.md` and `experience.md` from the source UI. For new UI, derive them from the feature spec, requirements, designs, and verified product conventions.
@@ -69,7 +69,7 @@ Mark a section as `[pending analysis]` if there is not enough data. Do not omit 
 - Create or update common hooks and shared components when repeated behaviour or UI structure has stable reuse across screens or features. Shared hooks require stable reuse or a clearly reusable project convention.
 - Keep simple visual state in the component when extraction would only hide obvious markup behaviour.
 - Keep one-off UI and narrowly specific helpers local to the feature until real reuse exists.
-- Generate or update `implementation-plan.md` before creating substantial new UI components.
+- Produce and review `specs/changes/<change-name>/implementation-plan.md` before creating substantial new UI components.
 - Keep orchestration, presentational rendering, form state, and conditional branches separated when combining them would produce a giant component.
 - Render date entry through a shared date primitive so control order matches the target locale. For UK-locale UI, order controls Day-before-Month in date pickers, recurrence editors, and numeric day/month selectors. Do not hand-roll date control ordering per screen.
 - Create new animations using the library already present in the project.
@@ -83,7 +83,7 @@ Before finishing substantial frontend work, verify:
 - Experience parity with `experience.md`.
 - Hidden, disabled, read-only, role-gated, owner-gated, tenant-gated, plan-gated, and feature-flagged behaviour.
 - Design-token and primitive fidelity with `specs/ui/style-guide.md`.
-- Component responsibility boundaries, state ownership, JSX structure, conditional rendering, and naming from `implementation-plan.md`.
+- Component responsibility boundaries, state ownership, JSX structure, conditional rendering, and naming from the current change's `implementation-plan.md`.
 - Hooks and common components are reused or created where repeated behaviour or UI structure would otherwise drift.
 - Feature hooks are created where non-trivial local orchestration would otherwise make components hard to read.
 - Date entry controls (date pickers, recurrence editors, numeric day/month selectors) follow the target locale's day/month order — Day-before-Month for UK locales — through the shared date primitive.

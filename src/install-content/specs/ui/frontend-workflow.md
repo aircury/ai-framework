@@ -30,8 +30,8 @@ Use this path for new screens/components, high-fidelity rebuilds, changed user f
 1. Use `frontend-ui-workflow` to produce or update `specs/features/<feature-name>/layout.md`.
 2. Use `frontend-ui-workflow` to produce or update `specs/features/<feature-name>/experience.md`.
 3. Use `frontend-ui-workflow` to generate or update `specs/ui/style-guide.md` from the existing design system.
-4. Use `frontend-ui-workflow` to produce or update `specs/features/<feature-name>/implementation-plan.md`.
-5. Use `frontend-ui-workflow` to implement the UI from `layout.md`, `experience.md`, `implementation-plan.md`, and the extracted style guide.
+4. Use `frontend-ui-workflow` to produce and review `specs/changes/<change-name>/implementation-plan.md`.
+5. Use `frontend-ui-workflow` to implement the UI from `layout.md`, `experience.md`, the current change's `implementation-plan.md`, and the extracted style guide.
 6. Update the canonical feature spec in `specs/features/` before finishing the task.
 
 ## Fidelity rules
@@ -71,7 +71,7 @@ For each meaningful UI change, the corresponding feature spec should capture:
 - variants and visual differences
 - functional and visual states
 - tokens used from `specs/ui/style-guide.md`
-- implementation-quality checks from `implementation-plan.md` when the full frontend workflow applies
+- implementation-quality checks from the current change's `implementation-plan.md` when the full frontend workflow applies
 - acceptance criteria covering visual behaviour, functional behaviour, and accessibility
 - explicit out-of-scope notes when they prevent ambiguity
 

@@ -12,8 +12,10 @@ For new UI, high-fidelity rebuilds, non-trivial forms, role-gated UI, or substan
 
 - `layout.md`: structural source of truth for fields, labels, sections, actions, and static content.
 - `experience.md`: behavioral source of truth for flows, micro-interactions, validation, loading/error/empty states, and visibility rules.
-- `implementation-plan.md`: clean implementation source of truth for component responsibilities, file organization, state ownership, JSX structure, local primitive reuse, and conditional rendering strategy.
 
 These files complement `spec.md`. They do not replace the canonical behaviour spec.
+
+Keep temporary frontend structure plans in `specs/changes/`.
+Record material architectural decisions in `specs/decisions/`.
 
 Visual tokens, reusable primitives, and composition patterns live in `specs/ui/style-guide.md`.
