@@ -43,7 +43,7 @@ For substantial frontend work, explicitly decide which behavior belongs in hooks
 - A frontend task from the user.
 - The target frontend codebase or relevant path when available.
 - Existing requirements, specs, designs, screenshots, or source code when provided.
-- Existing `specs/features/<feature-name>/spec.md`, `layout.md`, `experience.md`, `implementation-plan.md`, and `specs/ui/style-guide.md` when present.
+- Existing `specs/features/<feature-name>/spec.md`, `layout.md`, `experience.md`, `specs/changes/<change-name>/implementation-plan.md`, and `specs/ui/style-guide.md` when present.
 
 ## Workflow Router
 
@@ -66,8 +66,8 @@ Use this path when existing UI structure or behavior must be preserved while imp
 1. Read `references/layout-extraction.md` and produce or update `specs/features/<feature-name>/layout.md` from the source UI.
 2. Read `references/experience-extraction.md` and produce or update `specs/features/<feature-name>/experience.md` from the source UI.
 3. Read `references/style-extraction.md` and produce or update `specs/ui/style-guide.md` from the target frontend design system.
-4. Read `references/clean-implementation.md` and produce or update `specs/features/<feature-name>/implementation-plan.md`.
-5. Read `references/ui-generation.md` and implement the UI using `layout.md`, `experience.md`, `implementation-plan.md`, and `specs/ui/style-guide.md`.
+4. Read `references/clean-implementation.md` and produce or update `specs/changes/<change-name>/implementation-plan.md`.
+5. Read `references/ui-generation.md` and implement the UI using `layout.md`, `experience.md`, the current change's `implementation-plan.md`, and `specs/ui/style-guide.md`.
 6. Update the canonical feature spec in `specs/features/` when observable behavior changes.
 
 ### New UI Or Substantial Behavior Change
@@ -76,7 +76,7 @@ Use this path for new screens/components, non-trivial forms, role-gated UI, chan
 1. Derive `specs/features/<feature-name>/layout.md` from the feature spec, requirements, design, and nearby product conventions. Use `references/layout-extraction.md` for the required output structure and field-parity rules.
 2. Derive `specs/features/<feature-name>/experience.md` from the feature spec, requirements, access rules, validation, loading/error/empty states, and expected flows. Use `references/experience-extraction.md` for the required output structure and behavioral-parity rules.
 3. Read `references/style-extraction.md` and produce or update `specs/ui/style-guide.md` from the existing frontend codebase before writing UI code.
-4. Read `references/clean-implementation.md` and produce or update `specs/features/<feature-name>/implementation-plan.md`.
+4. Read `references/clean-implementation.md` and produce or update `specs/changes/<change-name>/implementation-plan.md`.
 5. Read `references/ui-generation.md` and implement the UI using the generated artifacts.
 6. Update the canonical feature spec in `specs/features/` before finishing when behavior is added or changed.
 
@@ -99,7 +99,7 @@ For substantial frontend work, keep these artifacts current:
 
 - `specs/features/<feature-name>/layout.md`: what must render.
 - `specs/features/<feature-name>/experience.md`: how it behaves and when it renders.
-- `specs/features/<feature-name>/implementation-plan.md`: how the UI code stays clean from the first pass.
+- `specs/changes/<change-name>/implementation-plan.md`: temporary structure plan for keeping the UI code clean from the first pass.
 - `specs/ui/style-guide.md`: canonical design tokens, primitives, variants, and composition patterns.
 - `specs/features/<feature-name>/spec.md`: canonical observable behavior when behavior changes.
 
@@ -111,7 +111,7 @@ Before finishing substantial frontend work, verify:
 - Experience parity: every flow, validation, loading/error/empty state, transition intent, and micro-interaction required by `experience.md` works.
 - Visibility integrity: hidden, disabled, read-only, and role/permission-gated states match `experience.md` exactly.
 - Token fidelity: UI uses the project's real tokens, primitives, variants, and composition patterns from `specs/ui/style-guide.md`.
-- Clean implementation: component responsibilities, state ownership, conditional rendering, JSX structure, and naming match `implementation-plan.md`.
+- Clean implementation: component responsibilities, state ownership, conditional rendering, JSX structure, and naming match the current change's `implementation-plan.md`.
 - Reuse discipline: common hooks and shared components are created or reused when repeated state, behavior, or UI structure would otherwise drift.
 - Hook clarity: feature hooks are created for non-trivial local orchestration, while shared hooks are reserved for stable reuse.
 - Accessibility and responsiveness: requirements from `layout.md`, `experience.md`, and project conventions are implemented.

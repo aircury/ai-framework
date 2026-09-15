@@ -122,7 +122,7 @@ Expected artifacts:
 
 - `specs/features/<feature>/layout.md`
 - `specs/features/<feature>/experience.md`
-- `specs/features/<feature>/implementation-plan.md`
+- `specs/changes/<change-name>/implementation-plan.md`
 - `specs/ui/style-guide.md`
 
 ### Restyle An Existing App Into A New Design System
@@ -142,14 +142,14 @@ Expected flow:
 1. Use `frontend-ui-workflow` to extract `layout.md` from the existing screen to capture structure, hierarchy, and content slots.
 2. Use `frontend-ui-workflow` to extract `experience.md` from the existing screen to capture behavior, states, flows, and micro-interactions.
 3. Use `frontend-ui-workflow` to extract or update `specs/ui/style-guide.md` from the current project so the target design system is explicit.
-4. Use `frontend-ui-workflow` to produce `implementation-plan.md` before writing substantial UI code.
-5. Use `frontend-ui-workflow` to implement the restyled UI, using `layout.md`, `experience.md`, `implementation-plan.md`, and `specs/ui/style-guide.md` as sources of truth.
+4. Use `frontend-ui-workflow` to produce and review `specs/changes/<change-name>/implementation-plan.md` before writing substantial UI code.
+5. Use `frontend-ui-workflow` to implement the restyled UI, using `layout.md`, `experience.md`, the current change's `implementation-plan.md`, and `specs/ui/style-guide.md` as sources of truth.
 
 Expected artifacts:
 
 - `specs/features/<feature>/layout.md` from the existing implementation.
 - `specs/features/<feature>/experience.md` from the existing implementation.
-- `specs/features/<feature>/implementation-plan.md` for clean implementation boundaries.
+- `specs/changes/<change-name>/implementation-plan.md` for temporary clean implementation boundaries.
 - `specs/ui/style-guide.md` from the target project.
 - Restyled UI code that preserves existing behavior but follows the current design system.
 

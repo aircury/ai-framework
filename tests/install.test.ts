@@ -304,6 +304,12 @@ describe("getLocalFiles", () => {
     expect(framework?.content).toContain(
       "extracted from the existing frontend through `frontend-ui-workflow`",
     );
+    expect(framework.content).toContain(
+      "New UI and substantial frontend changes have a reviewed structure plan before implementation.",
+    );
+    expect(framework.content).not.toContain(
+      "specs/features/<feature>/implementation-plan.md",
+    );
   });
 
   it("includes frontend workflow guidance in FRAMEWORK.md when frontend is enabled", () => {
@@ -313,7 +319,12 @@ describe("getLocalFiles", () => {
       "docs/aircury/capabilities/frontend.md",
     );
     expect(frontend.content).toContain("frontend-ui-workflow");
-    expect(frontend.content).toContain("implementation-plan.md");
+    expect(frontend.content).toContain(
+      "specs/changes/<change-name>/implementation-plan.md",
+    );
+    expect(frontend.content).not.toContain(
+      "specs/features/<feature-name>/implementation-plan.md",
+    );
   });
 });
 
