@@ -71,6 +71,7 @@ The current built-in capabilities are:
 - `testing`
 - `code-style`
 - `frontend`
+- `shared-ui`
 - `resilience`
 - `specs`
 - `language`
@@ -123,6 +124,7 @@ Default selected capabilities are:
 Additional automatic selection:
 
 - `language` is selected when British English is enabled.
+- `frontend` is selected when `shared-ui` is selected, because the shared UI rules build on the frontend workflow.
 
 Architecture is selected interactively and is not part of the default non-interactive profile.
 

@@ -48,6 +48,18 @@ The framework MUST represent capabilities as a registry so that new capabilities
 - **WHEN** maintainers register a new capability
 - **THEN** the installer prompt and generated framework content can include it through the shared composition system
 
+### Requirement: Capabilities SHALL include the capabilities they require
+The framework MUST add a required capability whenever a capability that depends on it is selected.
+
+#### Scenario: A project selects Shared UI without Frontend
+- **WHEN** capability resolution receives `shared-ui` without `frontend`
+- **THEN** the resolved capability set contains both `frontend` and `shared-ui`
+- **AND** the saved project configuration records both capabilities
+
+#### Scenario: A project does not select Shared UI
+- **WHEN** capability resolution receives the default capabilities
+- **THEN** `shared-ui` is not included and the generated framework content has no shared UI rules
+
 ### Requirement: Capabilities SHALL be declarative packages with metadata
 The framework MUST store each capability as metadata plus optional content, files, and installable skills instead of embedding capability rules directly in application code.
 
