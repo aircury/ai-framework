@@ -27,7 +27,8 @@ The capability standardises on:
 
 - shadcn/ui components built on Base UI, styled with Tailwind CSS v4.
 - A private shadcn registry under the `@aircury` namespace. Its source is the private [aircury/ui](https://github.com/aircury/ui) repository, not this framework. The built registry files in `public/r/` are served straight from GitHub at `https://raw.githubusercontent.com/aircury/ui/main/public/r`, authenticated with a GitHub token that can read the repository. Projects configure the registry in `components.json` through the `AIRCURY_UI_REGISTRY_URL` and `AIRCURY_UI_REGISTRY_TOKEN` environment variables, so the hosting can move later without changing project files.
-- A two-layer theme. The `@aircury/base` registry item owns the semantic token names, the default values (taken from `boards`), and the light and dark values. Each product overrides values in its own stylesheet, loaded after the stylesheet that the shadcn CLI manages, and must not rename, remove, or bypass the shared token names.
+- The Aircury brand file, adapted to shadcn/ui token names, as `DESIGN.md` in `aircury/ui`. It is the source of truth for the registry, and `@aircury/base` installs a copy at `specs/ui/DESIGN.md` in each product so agents read the same brand rules everywhere.
+- A two-layer theme. The `@aircury/base` registry item owns the semantic token names and the brand values for light and dark mode. Each product overrides values in its own stylesheet, loaded after the stylesheet that the shadcn CLI manages, and must not rename, remove, or bypass the shared token names.
 - `specs/ui/shared-ui.md` as the per-project record of the registry configuration, the installed registry items, and the product theme overrides. `specs/ui/style-guide.md` keeps describing the project's full visual language and marks which parts come from the registry.
 
 The `frontend` capability stays unchanged for projects that do not select `shared-ui`.
@@ -37,7 +38,8 @@ The `frontend` capability stays unchanged for projects that do not select `share
 - Existing installations generate the same `FRAMEWORK.md`, `AGENTS.md`, and capability files as before, because `shared-ui` is opt-in.
 - Projects that select `shared-ui` look in the `@aircury` registry before creating a shared primitive, and they pull upstream changes deliberately with `shadcn add --diff`.
 - Product branding stays possible through value overrides, while token names and primitives converge across products.
-- The registry is maintained outside this framework. It starts with `@aircury/base` and `@aircury/button`; further primitives are extracted from `boards` and the other products as they are needed.
+- The registry is maintained outside this framework. It starts with `@aircury/base`, the brand fonts, `@aircury/button`, and `@aircury/badge`; further primitives are built to `DESIGN.md` as products need them.
+- Products that adopt `@aircury/base` switch to the Aircury brand palette (deep blue primary, warm stone neutrals) unless they override values in their product theme stylesheet.
 - `link-go` needs Tailwind CSS v4 and a token rename before it can adopt the capability. `boards` and `tasks` need little change beyond consuming registry items.
 - `link-ai` and `linky` need a Radix to Base UI migration before they can adopt the capability. The migration can run one component at a time with the shadcn migration skill.
 - `ADR-0501` in `aircury/walking-skeleton` should point new projects at the `@aircury` registry, so greenfield projects start from the shared design system.

@@ -4,6 +4,8 @@ Activate this module when a project must share the Aircury visual identity with 
 
 This module extends the `frontend` capability. Keep following `frontend-ui-workflow` for layout, experience, style-guide, and implementation planning. The registry becomes the first source for shared primitives and design tokens.
 
+`@aircury/base` installs the brand rules at `specs/ui/DESIGN.md`. Read it before any UI work: it defines the voice and copy rules, the colour roles, typography, spacing, radii, elevation, motion, iconography, and component behaviour. Treat it as registry-owned: do not edit it in the project; propose changes to `aircury/ui`.
+
 ## 2. Registry Configuration
 
 Configure the registry in `components.json` under the `@aircury` namespace. Read the URL and token from the environment, and never commit either value:
@@ -33,13 +35,14 @@ Configure the registry in `components.json` under the `@aircury` namespace. Read
 
 The shared base owns the token names. Products own token values.
 
-Required semantic tokens, each defined for light and dark mode:
+The shared tokens use shadcn/ui names, each defined for light and dark mode. `specs/ui/DESIGN.md` lists every token and its role; the groups are:
 
-- Surfaces: `--background`, `--foreground`, `--card`, `--card-foreground`, `--popover`, `--popover-foreground`, `--muted`, `--muted-foreground`, `--accent`, `--accent-foreground`.
-- Actions: `--primary`, `--primary-foreground`, `--secondary`, `--secondary-foreground`, `--destructive`, `--destructive-foreground`.
-- Status: `--success`, `--success-foreground`, `--warning`, `--warning-foreground`, `--info`, `--info-foreground`.
-- Controls: `--border`, `--input`, `--ring`.
-- Shape: `--radius`, and the derived `--radius-*` scale.
+- Surfaces and text: `background`, `foreground`, `card`, `popover`, `muted`, `muted-foreground`, `accent`, `border`, `input`, `ring`, and their `*-foreground` pairs.
+- Actions: `primary`, `primary-hover`, `secondary`, `destructive`, `destructive-hover`, and `link` for any blue text.
+- Status: `success`, `warning`, `info`, `destructive`, each with a `*-tint` background and a `*-tint-foreground` text colour that is AA-safe on that tint.
+- Brand accents: `brand-green`, `brand-green-tint`, `brand-soft`. Never on buttons or as text.
+- shadcn extras: `sidebar-*` and `chart-1` to `chart-5`.
+- Shape, depth, and motion: `--radius` and the `rounded-*` scale capped at 16px, `shadow-card`, `shadow-modal`, and `ease-out`.
 
 Rules:
 
@@ -84,6 +87,7 @@ Before finishing frontend work in a project with this module, verify:
 
 - New shared primitives come from the `@aircury` registry, or `specs/ui/shared-ui.md` explains why none fits.
 - No shared token was renamed, removed, or aliased, and every product-only token is listed in `specs/ui/shared-ui.md`.
+- The change follows `specs/ui/DESIGN.md`: sentence case and concrete verbs in copy, no green or turquoise buttons, `text-link` for blue text, tint backgrounds paired with their `*-tint-foreground` text, Lucide icons, and spacing and radii on the scale.
 - Product theme overrides live in the product theme stylesheet, not in the stylesheet that the shadcn CLI manages.
 - Light and dark mode both render with the overridden values.
 - Local edits to registry components are recorded in `specs/ui/shared-ui.md`.

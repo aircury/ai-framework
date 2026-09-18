@@ -1,3 +1,4 @@
+- Read `specs/ui/DESIGN.md` before UI work; it holds the Aircury brand rules and is owned by the registry, so do not edit it in the project.
 - Treat the private `@aircury` shadcn registry as the first source for shared UI primitives and design tokens; search it before creating a shared primitive.
 - Install registry items with `shadcn add @aircury/<name>`, and pull updates with `--diff` after checking the local changes recorded in `specs/ui/shared-ui.md`.
 - Keep shared token names from the registry base; override values only in the product theme layer, and list product-only tokens in `specs/ui/shared-ui.md`.
