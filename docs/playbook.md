@@ -153,31 +153,23 @@ Expected artifacts:
 - `specs/ui/style-guide.md` from the target project.
 - Restyled UI code that preserves existing behavior but follows the current design system.
 
-### Adopt The Shared Aircury Design System
+### Adopt An External Design System
 
-Use this when a project must share the Aircury visual identity with other products. Select the optional `shared-ui` capability first; it also selects `frontend`.
+Use this when a project should follow a design system maintained outside the project, such as a shared component registry or a themed package.
 
-```text
-Adopt the shared Aircury design system in this project. Configure the @aircury registry, install the shared base, move our brand colours into the product theme layer, and record the result in specs/ui/shared-ui.md.
-```
+The framework does not install or configure the library. The design system provides its own installer, usually a skill or a CLI command. It also delivers two files that the `frontend` rules recognise:
 
-Recommended skills:
-
-- `frontend-ui-workflow`
+- `specs/ui/DESIGN.md`: the brand and token rules. It takes precedence over conventions extracted from the code.
+- `specs/ui/design-system.md`: how to install, update, and override the library's components and tokens.
 
 Expected flow:
 
-1. Set `AIRCURY_UI_REGISTRY_URL=https://raw.githubusercontent.com/aircury/ui/main/public/r` and `AIRCURY_UI_REGISTRY_TOKEN=$(gh auth token)` in the local environment, and add the `@aircury` entry to `components.json`. Run `shadcn init -b base` first if the project has no `components.json`.
-2. Install the shared base with `shadcn add @aircury/base`.
-3. Map the project's existing tokens to the shared token names, and keep product values in a theme stylesheet imported right after `globals.css`.
-4. Replace local primitives with `@aircury` items where equivalents exist, one primitive at a time.
-5. Create `specs/ui/shared-ui.md` and mark registry-owned parts in `specs/ui/style-guide.md`.
+1. Record the adoption in an ADR.
+2. Install the design system with its own installer so both files land in `specs/ui/`.
+3. Use `frontend-ui-workflow` to update `specs/ui/style-guide.md`, marking what comes from the design system and recording gaps against `DESIGN.md`.
+4. Migrate local primitives to the library's components one at a time.
 
-Expected artifacts:
-
-- `components.json` with the `@aircury` registry.
-- `specs/ui/shared-ui.md` with installed items, theme overrides, product-only tokens, and local edits.
-- `specs/ui/style-guide.md` that separates registry-owned and product-owned parts.
+Do not edit `DESIGN.md` or `design-system.md` in the project; change them in the design system's source.
 
 ### Record An Architectural Decision
 

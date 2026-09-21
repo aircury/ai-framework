@@ -239,17 +239,11 @@ describe("templates", () => {
       );
     });
 
-    it("adds shared UI verification only when Shared UI is enabled", () => {
-      const sharedUiRule =
-        "Shared primitives and tokens come from the `@aircury` registry";
-      expect(generateFramework(["shared-ui"])).toContain(sharedUiRule);
-      expect(generateFramework(["shared-ui"])).toContain(
-        "docs/aircury/capabilities/shared-ui.md",
+    it("defines the external design system contract only in the frontend module", () => {
+      expect(generateFramework(["frontend"])).toContain(
+        "and with `specs/ui/DESIGN.md` when an external design system provides it",
       );
-      expect(generateFramework(["frontend"])).not.toContain(sharedUiRule);
-      expect(generateFramework(["frontend"])).not.toContain(
-        "docs/aircury/capabilities/shared-ui.md",
-      );
+      expect(generateFramework([])).not.toContain("specs/ui/DESIGN.md");
     });
 
     it("adds code style header to FRAMEWORK.md when enabled", () => {

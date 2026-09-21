@@ -12,6 +12,7 @@ This is an extraction task, not a redesign task.
 
 - The target frontend codebase or a path to the relevant frontend area.
 - Existing `specs/ui/style-guide.md` if present.
+- `specs/ui/DESIGN.md` and `specs/ui/design-system.md` if present. They come from an external design system: treat `DESIGN.md` as the intended visual system, extract how the code currently realises it, mark what comes from the design system, and record any gap between the code and `DESIGN.md` under known gaps.
 - Token files, theme files, component folders, CSS files, utility layers, and representative screens.
 
 ## Output File

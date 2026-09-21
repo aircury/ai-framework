@@ -70,52 +70,12 @@ describe("capabilities", () => {
       "custom-architecture",
       "testing",
       "frontend",
-      "shared-ui",
       "resilience",
       "specs",
       "language",
       "ask-question",
       "database",
       "extract-rule",
-    ]);
-  });
-
-  it("wires Shared UI as an optional capability that requires Frontend", () => {
-    expect(getInitialCapabilityIds("local")).not.toContain("shared-ui");
-    expect(getInitialCapabilityIds("global")).not.toContain("shared-ui");
-    expect(getCapabilityById("shared-ui")).toMatchObject({
-      label: "Shared UI",
-      category: "frontend",
-      defaultSelected: false,
-      modules: ["shared-ui"],
-    });
-    expect(getCapabilityById("shared-ui").framework).toContain(
-      "## 3. Token Contract",
-    );
-    expect(resolveCapabilityIds(["shared-ui"])).toEqual([
-      "frontend",
-      "shared-ui",
-    ]);
-    expect(createCapabilityProfile(["git", "shared-ui"]).capabilities).toEqual([
-      "git",
-      "frontend",
-      "shared-ui",
-    ]);
-    expect(
-      getCapabilitySkills(["shared-ui"], "local").map(
-        (skill) => skill.skillName,
-      ),
-    ).toEqual(["frontend-ui-workflow", "vercel-react-best-practices"]);
-  });
-
-  it("keeps the shared UI record project-owned", () => {
-    expect(
-      getCapabilityFiles(["shared-ui"], "local").map((file) => file.path),
-    ).toEqual([
-      "docs/aircury/capabilities/frontend.md",
-      "specs/ui/README.md",
-      "specs/ui/frontend-workflow.md",
-      "docs/aircury/capabilities/shared-ui.md",
     ]);
   });
 
@@ -274,6 +234,16 @@ describe("capabilities", () => {
         description: "Frontend workflow reference",
       },
     ]);
+  });
+
+  it("defines the external design system contract without naming a library", () => {
+    const frontend = getCapabilityById("frontend");
+    expect(frontend.framework).toContain("## 3. Shared Design System");
+    expect(frontend.framework).toContain("specs/ui/design-system.md");
+    expect(frontend.agents).toContain("specs/ui/DESIGN.md");
+    for (const content of [frontend.framework, frontend.agents]) {
+      expect(content).not.toMatch(/aircury/i);
+    }
   });
 
   it("documents current ADRs with descriptive names and explicit paths", () => {

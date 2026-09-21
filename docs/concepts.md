@@ -55,7 +55,6 @@ Capabilities are the unit of composition. Each capability can contribute one or 
 Examples:
 
 - `frontend` adds frontend rules, writes UI spec starters, and installs frontend extraction/generation skills.
-- `shared-ui` is optional and adds rules for consuming the shared Aircury design system from the private `@aircury` shadcn registry; selecting it also selects `frontend`.
 - Architecture capabilities add one selected architecture standard and related skills, including `ddd-hexagonal` for DDD+Hexagonal projects.
 - `testing` adds testing rules and installs curated Playwright and E2E testing skills.
 - `resilience` adds error-handling and structured-logging rules and installs related recovery/logging skills.

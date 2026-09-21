@@ -191,12 +191,9 @@ A change is not done unless all of the following are true:
 - The code style is consistent with the project's configured tools.
 {{/if}}
 {{#if includesFrontend}}
-- Visual modifications align with the project design system tokens in `specs/ui/style-guide.md`, extracted from the existing frontend through `frontend-ui-workflow`.
+- Visual modifications align with the project design system tokens in `specs/ui/style-guide.md`, extracted from the existing frontend through `frontend-ui-workflow`, and with `specs/ui/DESIGN.md` when an external design system provides it.
 - New UI and substantial frontend changes follow `specs/features/<feature>/implementation-plan.md` or an equivalent reviewed structure plan.
 - Frontend code is shippable without a cleanup refactor: component responsibilities are clear, state ownership is simple, conditional rendering is readable, local primitives are reused, and unnecessary abstractions are absent.
-{{/if}}
-{{#if includesSharedUi}}
-- Shared primitives and tokens come from the `@aircury` registry, product values stay in the product theme layer, and deviations are recorded in `specs/ui/shared-ui.md`.
 {{/if}}
 
 ## Living Specifications

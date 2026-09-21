@@ -1,7 +1,0 @@
-{
-  "id": "shared-ui",
-  "label": "Shared UI",
-  "hint": "Aircury shadcn registry, shared tokens, and product theme overrides",
-  "description": "Aligns the frontend with the shared Aircury design system: shadcn/ui on Base UI, distributed through the private @aircury registry, with product-level theme overrides.",
-  "defaultEnabled": false
-}

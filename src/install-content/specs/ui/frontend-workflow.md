@@ -34,6 +34,15 @@ Use this path for new screens/components, high-fidelity rebuilds, changed user f
 5. Use `frontend-ui-workflow` to implement the UI from `layout.md`, `experience.md`, `implementation-plan.md`, and the extracted style guide.
 6. Update the canonical feature spec in `specs/features/` before finishing the task.
 
+## External design systems
+
+When `specs/ui/DESIGN.md` or `specs/ui/design-system.md` exists, the project uses an external design system that delivered those files.
+
+- Read both before UI work.
+- `DESIGN.md` is the source of truth for visual decisions and takes precedence over conventions extracted from code.
+- `design-system.md` explains how to install, update, and override the library's components and tokens.
+- Do not edit either file here; change them in the design system's source.
+
 ## Fidelity rules
 
 - Match the existing product structure, behaviour, and visual language before introducing new patterns.

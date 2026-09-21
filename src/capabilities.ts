@@ -79,15 +79,6 @@ import layeredArchitectureFramework from "../standards/modules/layered-architect
 import layeredArchitectureManifest from "../standards/modules/layered-architecture/module.json" with {
   type: "json",
 };
-import sharedUiAgents from "../standards/modules/shared-ui/agents.md" with {
-  type: "text",
-};
-import sharedUiFramework from "../standards/modules/shared-ui/framework.md" with {
-  type: "text",
-};
-import sharedUiManifest from "../standards/modules/shared-ui/module.json" with {
-  type: "json",
-};
 import structuredLoggingAgents from "../standards/modules/structured-logging/agents.md" with {
   type: "text",
 };
@@ -143,7 +134,6 @@ type StandardModuleId =
   | "error-handling"
   | "structured-logging"
   | "frontend"
-  | "shared-ui"
   | "testing"
   | "walking-skeleton";
 
@@ -159,7 +149,6 @@ export type CapabilityId =
   | "testing"
   | "code-style"
   | "frontend"
-  | "shared-ui"
   | "resilience"
   | "specs"
   | "language"
@@ -333,13 +322,6 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
           description: "Frontend workflow reference",
         },
       ],
-    ),
-  },
-  "shared-ui": {
-    ...createStandardModule(
-      sharedUiManifest as StandardManifest,
-      sharedUiFramework,
-      sharedUiAgents,
     ),
   },
   testing: {
@@ -611,17 +593,6 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       },
     ],
   },
-  "shared-ui": {
-    id: "shared-ui",
-    label: "Shared UI",
-    hint: "Aircury shadcn registry, shared tokens, and product themes",
-    description:
-      "Shared Aircury design system: shadcn/ui on Base UI from the private @aircury registry, with product theme overrides. Requires Frontend.",
-    category: "frontend",
-    defaultSelected: false,
-    scopes: ["local", "global"],
-    ...composeModules(["shared-ui"]),
-  },
   resilience: {
     id: "resilience",
     label: "Resilience",
@@ -763,7 +734,6 @@ const CAPABILITY_ORDER: VisibleCapabilityId[] = [
   "testing",
   "code-style",
   "frontend",
-  "shared-ui",
   "resilience",
   "specs",
   "language",
@@ -787,12 +757,6 @@ function normalizeCapabilityId(
     (capabilityId as VisibleCapabilityId)
   );
 }
-
-const CAPABILITY_REQUIREMENTS: Partial<
-  Record<VisibleCapabilityId, VisibleCapabilityId[]>
-> = {
-  "shared-ui": ["frontend"],
-};
 
 const EXCLUSIVE_ARCHITECTURE_CAPABILITIES: CapabilityId[] = [
   "ddd-hexagonal",
@@ -846,10 +810,6 @@ export function resolveCapabilityIds(
     const normalizedCapabilityId = normalizeCapabilityId(capabilityId);
     if (resolved.has(normalizedCapabilityId)) return;
     resolved.add(normalizedCapabilityId);
-    for (const requiredId of CAPABILITY_REQUIREMENTS[normalizedCapabilityId] ??
-      []) {
-      visit(requiredId);
-    }
   };
 
   for (const capabilityId of normalizeExclusiveArchitectures(capabilityIds)) {

@@ -31,7 +31,6 @@ interface RendererViewModel {
   includesErrorHandling: boolean;
   includesStructuredLogging: boolean;
   includesFrontend: boolean;
-  includesSharedUi: boolean;
   enforceBritishEnglish: boolean;
 }
 
@@ -69,7 +68,6 @@ function createViewModel(
     includesErrorHandling: selectedIds.has("resilience"),
     includesStructuredLogging: selectedIds.has("resilience"),
     includesFrontend: selectedIds.has("frontend"),
-    includesSharedUi: selectedIds.has("shared-ui"),
     enforceBritishEnglish: options?.britishEnglish ?? false,
   };
 }

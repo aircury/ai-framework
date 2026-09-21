@@ -1,9 +1,0 @@
-- Read `specs/ui/DESIGN.md` before UI work; it holds the Aircury brand rules and is owned by the registry, so do not edit it in the project.
-- Treat the private `@aircury` shadcn registry as the first source for shared UI primitives and design tokens; search it before creating a shared primitive.
-- Install registry items with `shadcn add @aircury/<name>`, and pull updates with `--diff` after checking the local changes recorded in `specs/ui/shared-ui.md`.
-- Keep shared token names from the registry base; override values only in the product theme layer, and list product-only tokens in `specs/ui/shared-ui.md`.
-- Prefer composition, variants, and wrappers over editing copied registry source; record any unavoidable local edit in `specs/ui/shared-ui.md`.
-- Read the registry URL and token from `AIRCURY_UI_REGISTRY_URL` (default `https://raw.githubusercontent.com/aircury/ui/main/public/r`) and `AIRCURY_UI_REGISTRY_TOKEN` (a GitHub token that can read `aircury/ui`); never commit the token.
-- Keep product token values in a product theme stylesheet imported right after the stylesheet that the shadcn CLI manages.
-- In `specs/ui/style-guide.md`, mark what comes from the registry and what is a product override or addition.
-- Propose changes that would help other products to the registry repository instead of keeping a private fork.

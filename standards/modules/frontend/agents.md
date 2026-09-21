@@ -5,6 +5,7 @@
 - For substantial frontend work, read `specs/ui/frontend-workflow.md` before implementing.
 
 - Maintain `specs/ui/style-guide.md` as the canonical source for all visual tokens and reusable patterns.
+- When `specs/ui/DESIGN.md` or `specs/ui/design-system.md` exists, the project uses an external design system: read both before UI work, follow `DESIGN.md` for visual decisions and `design-system.md` for installing, updating, and overriding library components, and do not edit either file in the project.
 - Frontend work is frontend-only by default: do not modify backend files, API endpoints, server actions, schemas, migrations, services, jobs, queues, auth policies, or infrastructure unless the user explicitly authorizes backend work.
 - If backend support appears necessary, ask permission before touching backend files and name the exact backend layer or files required.
 - Before creating substantial UI, inspect existing shared components, hooks, utilities, form patterns, and local primitives.
