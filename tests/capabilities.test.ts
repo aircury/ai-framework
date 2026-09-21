@@ -236,6 +236,16 @@ describe("capabilities", () => {
     ]);
   });
 
+  it("defines the external design system contract without naming a library", () => {
+    const frontend = getCapabilityById("frontend");
+    expect(frontend.framework).toContain("## 3. Shared Design System");
+    expect(frontend.framework).toContain("specs/ui/design-system.md");
+    expect(frontend.agents).toContain("specs/ui/DESIGN.md");
+    for (const content of [frontend.framework, frontend.agents]) {
+      expect(content).not.toMatch(/aircury/i);
+    }
+  });
+
   it("documents current ADRs with descriptive names and explicit paths", () => {
     const files = getCapabilityFiles(["decision-records"], "local");
     const capabilityRules = files.find(
