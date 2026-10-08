@@ -21,10 +21,12 @@ Use the lightest workflow that controls risk.
 
 For new UI, rebuilds, non-trivial forms, role-gated UI, restyles, or substantial behaviour changes, maintain these files:
 
-- `specs/features/<feature-name>/layout.md`: structural source of truth for fields, labels, sections, actions, and static content.
-- `specs/features/<feature-name>/experience.md`: behavioral source of truth for flows, micro-interactions, validation, loading/error/empty states, and visibility rules.
-- `specs/features/<feature-name>/implementation-plan.md`: clean implementation source of truth for component responsibilities, file organization, state ownership, JSX structure, local primitive reuse, and conditional rendering strategy.
+- `specs/changes/<name>/layout.md`: structural source of truth for fields, labels, sections, actions, and static content.
+- `specs/changes/<name>/experience.md`: behavioral source of truth for flows, micro-interactions, validation, loading/error/empty states, and visibility rules.
+- `specs/changes/<name>/implementation-plan.md`: clean implementation source of truth for component responsibilities, file organization, state ownership, JSX structure, local primitive reuse, and conditional rendering strategy.
 - `specs/ui/style-guide.md`: canonical source of truth for design tokens, reusable primitives, variants, states, responsive conventions, accessibility-related visual conventions, gaps, and strict reuse rules.
+
+The first three are the change's artefacts: write them under `specs/changes/<name>/` beside the change's plan, creating the directory when it does not exist, one set per change, and let them end with the change. `specs/features/<feature-name>/spec.md` is the only feature-level document frontend work maintains.
 
 Small safe UI edits may skip the full artefact pipeline when nearby code and `specs/ui/style-guide.md` are sufficient.
 

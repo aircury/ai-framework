@@ -4,7 +4,7 @@ Use this reference to extract or derive the exact behavioral and UX contract of 
 
 ## Goal
 
-Produce `specs/features/<feature-name>/experience.md` describing how the UI behaves, how it responds to input, what flows it supports, and when each field, section, or action is rendered, hidden, disabled, or read-only.
+Produce `specs/changes/<name>/experience.md` describing how the UI behaves, how it responds to input, what flows it supports, and when each field, section, or action is rendered, hidden, disabled, or read-only.
 
 `layout.md` says what exists. `experience.md` says how it works and when it appears.
 
@@ -16,7 +16,7 @@ Produce `specs/features/<feature-name>/experience.md` describing how the UI beha
 
 ## Output File
 
-Save the result to `specs/features/<feature-name>/experience.md`. Create the directory if needed.
+Save the result to `specs/changes/<name>/experience.md`. Create the directory if needed.
 
 Use this structure:
 

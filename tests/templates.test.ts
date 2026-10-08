@@ -227,6 +227,18 @@ describe("templates", () => {
       expect(generateAgents(["code-style"])).toBe(generateAgents([]));
     });
 
+    it("places the implementation plan with the change", () => {
+      expect(generateFramework(["frontend"])).toContain(
+        "specs/changes/<name>/implementation-plan.md",
+      );
+      expect(generateFramework(["frontend"])).toContain(
+        "the only feature-level document",
+      );
+      expect(generateFramework(["frontend"])).not.toMatch(
+        /specs\/features\/<[a-z-]+>\/(layout|experience|implementation-plan)\.md/,
+      );
+    });
+
     it("adds design-system search guidance when the frontend module is enabled", () => {
       expect(generateFramework(["frontend"])).toContain(
         "docs/aircury/capabilities/frontend.md",

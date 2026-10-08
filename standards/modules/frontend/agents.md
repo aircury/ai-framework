@@ -1,6 +1,7 @@
 - Use the `frontend-ui-workflow` skill for frontend UI work that needs layout, experience, design-system extraction, clean implementation planning, or UI generation.
 - The `frontend-ui-workflow` skill is self-contained and includes bundled references for structural extraction, behavioral extraction, style extraction, clean implementation planning, and final UI generation.
-- Use it to generate or update `specs/features/<name>/layout.md`, `specs/features/<name>/experience.md`, `specs/features/<name>/implementation-plan.md`, and `specs/ui/style-guide.md` when the task is substantial.
+- Use it to generate or update `specs/changes/<name>/layout.md`, `specs/changes/<name>/experience.md`, `specs/changes/<name>/implementation-plan.md`, and `specs/ui/style-guide.md` when the task is substantial.
+- The layout, experience and implementation plan are the change's artefacts and end with it; `specs/features/<feature-name>/spec.md` is the only feature-level document frontend work maintains.
 - Load `vercel-react-best-practices` only when React/Next performance, hooks, rendering, data-fetching, bundle, or server/client boundary patterns matter.
 - For substantial frontend work, read `specs/ui/frontend-workflow.md` before implementing.
 
