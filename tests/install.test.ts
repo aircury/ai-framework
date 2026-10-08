@@ -29,6 +29,9 @@ import {
   writeFile,
 } from "../src/install";
 
+const FEATURE_FOLDER_DESIGN_DOCUMENT =
+  /specs\/features\/<[a-z-]+>\/(layout|experience|implementation-plan)\.md/;
+
 function getFileByPath(files: InstallFile[], path: string): InstallFile {
   const file = files.find((entry) => entry.path === path);
   if (!file) {
@@ -303,6 +306,43 @@ describe("getLocalFiles", () => {
     );
     expect(framework?.content).toContain(
       "extracted from the existing frontend through `frontend-ui-workflow`",
+    );
+  });
+
+  it("keeps front-end design documents with the change, not the feature", () => {
+    const files = getLocalFiles([], ["frontend"]);
+    for (const path of [
+      "specs/ui/README.md",
+      "specs/ui/frontend-workflow.md",
+      "specs/features/README.md",
+      "docs/aircury/capabilities/frontend.md",
+    ]) {
+      const file = getFileByPath(files, path);
+      expect(file.content).toContain("specs/changes/<name>/");
+      expect(file.content).toContain("the only feature-level document");
+      expect(file.content).not.toMatch(FEATURE_FOLDER_DESIGN_DOCUMENT);
+    }
+  });
+
+  it("ships a frontend workflow skill that writes the design documents with the change", () => {
+    const skillDir = join(
+      import.meta.dir,
+      "..",
+      "skills",
+      "frontend-ui-workflow",
+    );
+    for (const file of [
+      "SKILL.md",
+      "references/layout-extraction.md",
+      "references/experience-extraction.md",
+      "references/clean-implementation.md",
+      "references/ui-generation.md",
+    ]) {
+      const text = readFileSync(join(skillDir, file), "utf8");
+      expect(text).not.toMatch(FEATURE_FOLDER_DESIGN_DOCUMENT);
+    }
+    expect(readFileSync(join(skillDir, "SKILL.md"), "utf8")).toContain(
+      "specs/changes/<name>/layout.md",
     );
   });
 
