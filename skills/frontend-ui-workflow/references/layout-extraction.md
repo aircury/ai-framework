@@ -4,7 +4,7 @@ Use this reference to extract or derive the exact structural contract of a front
 
 ## Goal
 
-Produce `specs/features/<feature-name>/layout.md` describing what is in the UI while ignoring styling and deep behavioral orchestration.
+Produce `specs/changes/<name>/layout.md` describing what is in the UI while ignoring styling and deep behavioral orchestration.
 
 The result must let an agent or developer reconstruct the functional layout with full field parity.
 
@@ -16,7 +16,7 @@ The result must let an agent or developer reconstruct the functional layout with
 
 ## Output File
 
-Save the result to `specs/features/<feature-name>/layout.md`. Create the directory if needed.
+Save the result to `specs/changes/<name>/layout.md`. Create the directory if needed.
 
 Use this structure:
 

@@ -120,9 +120,9 @@ Recommended skills:
 
 Expected artifacts:
 
-- `specs/features/<feature>/layout.md`
-- `specs/features/<feature>/experience.md`
-- `specs/features/<feature>/implementation-plan.md`
+- `specs/changes/<name>/layout.md`
+- `specs/changes/<name>/experience.md`
+- `specs/changes/<name>/implementation-plan.md`
 - `specs/ui/style-guide.md`
 
 ### Restyle An Existing App Into A New Design System
@@ -147,9 +147,9 @@ Expected flow:
 
 Expected artifacts:
 
-- `specs/features/<feature>/layout.md` from the existing implementation.
-- `specs/features/<feature>/experience.md` from the existing implementation.
-- `specs/features/<feature>/implementation-plan.md` for clean implementation boundaries.
+- `specs/changes/<name>/layout.md` from the existing implementation.
+- `specs/changes/<name>/experience.md` from the existing implementation.
+- `specs/changes/<name>/implementation-plan.md` for clean implementation boundaries.
 - `specs/ui/style-guide.md` from the target project.
 - Restyled UI code that preserves existing behavior but follows the current design system.
 

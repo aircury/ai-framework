@@ -6,9 +6,9 @@
 - Keep `spec.md` focused on requirements and scenarios.
 - Update these specs whenever observable behaviour changes.
 
-## Frontend Feature Contract
+## Frontend Design Documents
 
-For new UI, high-fidelity rebuilds, non-trivial forms, role-gated UI, or substantial frontend behaviour changes, use `frontend-ui-workflow` to keep feature-level frontend contracts beside the feature spec:
+For new UI, high-fidelity rebuilds, non-trivial forms, role-gated UI, or substantial frontend behaviour changes, use `frontend-ui-workflow` to write the change's design documents under `specs/changes/<name>/`, beside the change's plan; they end with the change, and `specs/features/<feature-name>/spec.md` is the only feature-level document frontend work maintains:
 
 - `layout.md`: structural source of truth for fields, labels, sections, actions, and static content.
 - `experience.md`: behavioral source of truth for flows, micro-interactions, validation, loading/error/empty states, and visibility rules.
