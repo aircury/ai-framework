@@ -549,6 +549,7 @@ describe("getLocalCommands", () => {
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toContain("blind-db-debugging");
     expect(commands[0].args).toContain("db-schema-design");
+    expect(commands[0].args).toContain("supervised-db-debugging");
   });
 
   it("installs the frontend skills from the Aircury source", () => {
