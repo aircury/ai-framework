@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Runs the Proxy Diablo CLI installed by this skill's Makefile, with all state kept in .runtime/.
+set -euo pipefail
+SKILL_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+RUNTIME="$SKILL_DIR/.runtime"
+if [ ! -x "$RUNTIME/app/bin/proxydiablo" ] || [ ! -d "$RUNTIME/app/dist-server" ]; then
+  echo "Proxy Diablo is not installed. Run: make -C \"$SKILL_DIR\" install" >&2
+  exit 3
+fi
+export XDG_CONFIG_HOME="$RUNTIME/config"
+export PROXYDIABLO_ENVIRONMENTS="$RUNTIME/environments.json"
+export PROXYDIABLO_PROJECT_DIR="$RUNTIME/app"
+exec "$RUNTIME/app/bin/proxydiablo" "$@"
