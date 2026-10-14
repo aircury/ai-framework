@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { spawnSync } from "node:child_process";
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -205,5 +206,22 @@ describe("supervised-db-debugging environments manager", () => {
     expect(result.stderr).toContain(
       "/mnt/c/Users/me/missing/.idea/dataSources.xml",
     );
+  });
+});
+
+describe("PhpStorm import user hints", () => {
+  it("suggests the user from a user@host name and applies it only on request", () => {
+    const project = writeProject(
+      source(
+        "app@db.example.com",
+        "n1",
+        "jdbc:postgresql://db.example.com:5432/app",
+      ),
+    );
+    const first = run("import-phpstorm", "--project", project);
+    expect(first.stdout).toContain('the name suggests user "app"');
+    expect(existsSync(envFile)).toBe(false);
+    run("import-phpstorm", "--project", project, "--use-name-hint", "yes");
+    expect(readEnvironments()[0]).toMatchObject({ user: "app" });
   });
 });

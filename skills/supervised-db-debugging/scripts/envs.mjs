@@ -128,9 +128,11 @@ if (command === 'list') {
       continue;
     }
     const details = local.get(source.uuid) ?? {};
-    const user = details.user || flags.user;
+    const nameHint = source.name?.match(/^([^@\s]+)@/)?.[1];
+    const user = details.user || flags.user || (flags['use-name-hint'] === 'yes' ? nameHint : undefined);
     if (!user) {
-      console.log(`skip: ${label} (no user found; pass --user <name> or use env-add)`);
+      const hint = nameHint ? `; the name suggests user "${nameHint}" (re-run with NAMEHINT=1 to use it)` : '';
+      console.log(`skip: ${label} (no user found; pass DBUSER=<name> or use env-add${hint})`);
       continue;
     }
     const entry = { name: label, host: url.host, user };

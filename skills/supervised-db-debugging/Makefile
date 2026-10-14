@@ -25,7 +25,7 @@ help:
 	@echo "ui           start the server and open the approval UI"
 	@echo "env-add      NAME= HOST= DBUSER= [PORT= DB= PASSWORD_ENV= SSLMODE=]"
 	@echo "             IAM: add AUTH=rds-iam AWSPROFILE=<profile> [REGION=]"
-	@echo "env-import-phpstorm  PROJECT=<dir> [AWSPROFILE= DBUSER=] import PostgreSQL data sources"
+	@echo "env-import-phpstorm  PROJECT=<dir> [DBUSER= NAMEHINT=1 AWSPROFILE=]"
 	@echo "env-list     list configured environments"
 	@echo "env-remove   NAME="
 	@echo "clean        delete .runtime (app, config and environments)"
@@ -67,7 +67,7 @@ env-add:
 
 env-import-phpstorm:
 	@node "$(SKILL_DIR)/scripts/envs.mjs" import-phpstorm "$(RUNTIME)/environments.json" \
-	  --project "$(PROJECT)" $(if $(DBUSER),--user "$(DBUSER)") \
+	  --project "$(PROJECT)" $(if $(DBUSER),--user "$(DBUSER)") $(if $(NAMEHINT),--use-name-hint yes) \
 	  $(if $(AWSPROFILE),--aws-profile "$(AWSPROFILE)") $(if $(REGION),--region "$(REGION)")
 
 env-list:
