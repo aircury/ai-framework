@@ -20,13 +20,17 @@ Same method as `blind-db-debugging` (code-grounded hypotheses, PASS/FAIL expecta
 
 1. Run `make -C "$SKILL_DIR" doctor`.
 2. If the build is missing, tell the user it will clone and build Proxy Diablo (about a minute, needs Node 20.19+ or 22.12+, git and network), then run `make -C "$SKILL_DIR" install`.
-3. If no environment exists for the database in question, ask the user for host, port, database, user and where the password comes from. **Never ask for the password itself in chat.** Then:
+3. If no environment exists for the database in question, create one. **Never ask for the password itself in chat.**
+   - **From PhpStorm** (preferred when the project has data sources): `make -C "$SKILL_DIR" env-import-phpstorm PROJECT=<project dir>`. It reads `.idea/dataSources.xml` and the user names from `dataSources.local.xml`, never PhpStorm's stored passwords, and names entries `<project>/<data source>`. Windows paths such as `C:\Users\me\proj` are converted to `/mnt/c/...`. Add `DBUSER=<user>` for sources without a stored user. The password is asked for in the UI when first needed.
+   - **By hand**: ask for host, port, database, user and where the password comes from, then:
 
 ```bash
 make -C "$SKILL_DIR" env-add NAME=<name> HOST=<host> DBUSER=<user> PORT=<port> DB=<database> [PASSWORD_ENV=<VAR>] [SSLMODE=require]
 ```
 
-   With no `PASSWORD_ENV` the UI asks the human for the password the first time it is needed. Opening any tunnel (SSM, bastion) is the user's job; the host in the environment is whatever address they reach the database on.
+   - **AWS IAM databases** (no password at all): `make -C "$SKILL_DIR" env-add NAME=<name> HOST=<rds host> DBUSER=<iam user> DB=<database> AUTH=rds-iam AWSPROFILE=<aws profile>` (add `REGION=` if the host is not an RDS hostname, e.g. a tunnel to localhost). Tokens are minted per connection with the `aws` CLI inside the WSL/Linux environment where this skill runs, so that environment needs AWS CLI v2 and an `~/.aws/config` with the developer profile (see the `aircury-aws-sso` skill). If the error says to run `aws sso login --profile X`, ask the user to run it, then retry. IAM access is read-only by default.
+
+   With no `PASSWORD_ENV` the UI asks the human for the password the first time it is needed. Opening any tunnel (SSM, bastion, PhpStorm SSH tunnel) is the user's job; the host in the environment is whatever address the *Linux side* reaches the database on. A `localhost` host imported from PhpStorm only works from WSL if that port is forwarded there.
 4. Tell the user to open the approval UI (`make -C "$SKILL_DIR" ui`, then http://localhost:17871) and keep it visible. Nothing runs until they approve.
 
 Call the CLI only through the wrapper, which sets all paths: `"$SKILL_DIR/scripts/diablo" ...`. It does not need to be on `PATH`.
@@ -114,5 +118,6 @@ source / seed data
 | `Proxy Diablo is not installed` | `make -C "$SKILL_DIR" install` |
 | `server: could not start` | Read `$SKILL_DIR/.runtime/config/proxydiablo/server.log`; check Node version |
 | Password prompt in the UI | Expected when no `PASSWORD_ENV` is set; the human types it, kept in memory only |
-| Connection refused / timeout | The user's tunnel or network is down |
+| Connection refused / timeout | The user's tunnel or network is down, or an imported `localhost` port is not forwarded into WSL |
+| `aws sso login` message | Ask the user to run the command it names, then retry |
 | Update Proxy Diablo | `make -C "$SKILL_DIR" update` (the pinned ref lives at the top of the Makefile) |

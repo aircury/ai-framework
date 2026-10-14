@@ -10,26 +10,33 @@ RUNTIME   := $(SKILL_DIR)/.runtime
 APP       := $(RUNTIME)/app
 DIABLO    := $(SKILL_DIR)/scripts/diablo
 
-# Pinned to the commit that adds environments.json support (amoserlu/proxydiablo#2).
+# Pinned to the commit of amoserlu/proxydiablo#2 (environments.json, rds-iam).
 # Move to the merge commit once that PR lands.
 PROXYDIABLO_REPO ?= https://github.com/amoserlu/proxydiablo.git
-PROXYDIABLO_REF  ?= 73bf15053f84dfe378362ae73145e98b8c5b5bd9
+PROXYDIABLO_REF  ?= af773a6297dfc5c7abfb3ed49572ec21a85d9b8e
 
-.PHONY: install update doctor ui env-add env-list env-remove clean help
+.PHONY: install update stop doctor ui env-add env-list env-remove env-import-phpstorm clean help
 
 help:
 	@echo "install      clone the pinned Proxy Diablo, npm ci, build (about 2-3 minutes)"
 	@echo "update       re-fetch the pinned ref and rebuild"
+	@echo "stop         stop the Proxy Diablo server started from this skill"
 	@echo "doctor       check Node, the build, environments and the server"
 	@echo "ui           start the server and open the approval UI"
 	@echo "env-add      NAME= HOST= DBUSER= [PORT= DB= PASSWORD_ENV= SSLMODE=]"
+	@echo "             IAM: add AUTH=rds-iam AWSPROFILE=<profile> [REGION=]"
+	@echo "env-import-phpstorm  PROJECT=<dir> [AWSPROFILE= DBUSER=] import PostgreSQL data sources"
 	@echo "env-list     list configured environments"
 	@echo "env-remove   NAME="
 	@echo "clean        delete .runtime (app, config and environments)"
 
 install: update
 
-update:
+# Stops the server recorded in this skill's bridge file so a rebuilt app is not shadowed by an old process.
+stop:
+	@node -e 'const fs=require("fs");try{const b=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(b.pid){process.kill(b.pid);console.log("Stopped Proxy Diablo (pid "+b.pid+")")}}catch{}' "$(RUNTIME)/config/proxydiablo/bridge.json"
+
+update: stop
 	@node -e 'const [a,b]=process.versions.node.split(".").map(Number); if(!((a===20&&b>=19)||(a===22&&b>=12)||a>22)){console.error("Node 20.19+ or 22.12+ is required, found "+process.version);process.exit(1)}'
 	@command -v git >/dev/null || { echo "git is required" >&2; exit 1; }
 	@mkdir -p "$(APP)" "$(RUNTIME)/config"
@@ -55,7 +62,13 @@ env-add:
 	@node "$(SKILL_DIR)/scripts/envs.mjs" add "$(RUNTIME)/environments.json" \
 	  --name "$(NAME)" --host "$(HOST)" --user "$(DBUSER)" \
 	  $(if $(PORT),--port "$(PORT)") $(if $(DB),--database "$(DB)") \
-	  $(if $(PASSWORD_ENV),--password-env "$(PASSWORD_ENV)") $(if $(SSLMODE),--sslmode "$(SSLMODE)")
+	  $(if $(PASSWORD_ENV),--password-env "$(PASSWORD_ENV)") $(if $(SSLMODE),--sslmode "$(SSLMODE)") \
+	  $(if $(AUTH),--auth "$(AUTH)") $(if $(AWSPROFILE),--aws-profile "$(AWSPROFILE)") $(if $(REGION),--region "$(REGION)")
+
+env-import-phpstorm:
+	@node "$(SKILL_DIR)/scripts/envs.mjs" import-phpstorm "$(RUNTIME)/environments.json" \
+	  --project "$(PROJECT)" $(if $(DBUSER),--user "$(DBUSER)") \
+	  $(if $(AWSPROFILE),--aws-profile "$(AWSPROFILE)") $(if $(REGION),--region "$(REGION)")
 
 env-list:
 	@node "$(SKILL_DIR)/scripts/envs.mjs" list "$(RUNTIME)/environments.json"
