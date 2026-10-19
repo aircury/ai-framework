@@ -13,7 +13,7 @@ DIABLO    := $(SKILL_DIR)/scripts/diablo
 # Pinned to the commit of amoserlu/proxydiablo#2 (environments.json, rds-iam).
 # Move to the merge commit once that PR lands.
 PROXYDIABLO_REPO ?= https://github.com/amoserlu/proxydiablo.git
-PROXYDIABLO_REF  ?= 26d925556b57d7341375bb390ead6b5e3e942947
+PROXYDIABLO_REF  ?= ab4b0e1cae04219c41e8d8a2903ac52bd7bb14c1
 
 .PHONY: install update stop doctor ui env-add env-list env-remove env-import-phpstorm clean help
 

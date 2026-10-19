@@ -99,10 +99,37 @@ Handle the proxy's replies:
 - `cancelled` -- stop; do not resubmit. Exception: if the tab says the requester disconnected (your own CLI call was interrupted), resubmit the same query once and tell the user.
 - `error` -- explain it. For connection errors say whether the tunnel or the password is the likely cause. Never look for output outside the proxy.
 
+## Writes -- log block first
+
+Before submitting any write (declared `write`, or any SQL that changes data, schema, sequences or settings), the **very first thing** you do is print the exact request as a raw JSON code block in your reply, so the user can paste it into the intervention log. Nothing else comes before it, and you submit only after printing it.
+
+```json
+{
+  "type": "proxydiablo.write",
+  "requestedAt": "<ISO 8601 timestamp, UTC>",
+  "ticket": "<ticket id or null>",
+  "environment": "<environment name>",
+  "host": "<host>",
+  "database": "<database>",
+  "user": "<database user>",
+  "classification": "write",
+  "description": "<the exact --description text>",
+  "sql": "<the exact --sql text>"
+}
+```
+
+- `description` and `sql` must be byte-for-byte what you pass to `pgsql submit`. If the reviewer asks for a revision, print a new block before resubmitting.
+- Never put a password, token or other secret in the block.
+- When the proxy answers, print a second block with the outcome, without row data:
+
+```json
+{ "type": "proxydiablo.write.outcome", "tabId": "<tabId>", "status": "<released|cancelled|revision_requested|error>", "command": "<e.g. UPDATE>", "rowCount": <n>, "completedAt": "<ISO 8601 timestamp, UTC>" }
+```
+
 ## Phase 4 -- Fix and verify
 
 - Never propose a fix until a hypothesis is CONFIRMED.
-- Apply the fix in code. Run data-changing SQL only if the user asked for it, classified `write` (two approvals).
+- Apply the fix in code. Run data-changing SQL only if the user asked for it, classified `write` (two approvals), and print the write log block first (see above).
 - Verify with the same queries; the fix is proven only when they return the healthy result.
 
 ## Phase 5 -- Iterate
@@ -130,7 +157,7 @@ source / seed data
 |---------|-----|
 | `Proxy Diablo is not installed` | `make -C "$SKILL_DIR" install` |
 | `server: could not start` | Read `$SKILL_DIR/.runtime/config/proxydiablo/server.log`; check Node version |
-| Password prompt in the UI | Expected when no `PASSWORD_ENV` is set; the human types it, kept in memory only |
+| Password prompt in the UI | Expected when no `PASSWORD_ENV` is set; the human types it, kept in memory only. A mistyped password is rejected and the prompt comes back, no restart needed |
 | Connection refused / timeout | The user's tunnel or network is down, or an imported `localhost` port is not forwarded into WSL |
 | `aws sso login` message | Ask the user to run the command it names, then retry |
 | A new environment is missing from the UI list | The list refreshes within a second of `env-add`; reload the page if it still is not there |
