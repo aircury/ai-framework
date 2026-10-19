@@ -16,11 +16,24 @@ Same method as `blind-db-debugging` (code-grounded hypotheses, PASS/FAIL expecta
 
 `SKILL_DIR` below is the folder containing this `SKILL.md`. Everything generated lives in `$SKILL_DIR/.runtime/` and is safe to delete.
 
+## Stage 1 -- Identify the database first
+
+Before installing, starting the server or writing any query, settle **which database** the problem happens in and **which environment** reaches it. Nothing here needs the server.
+
+1. **Pin down where it happens** from the ticket or the user's words: production, staging, a preview, a client instance, or local. If the user said it, that wins.
+2. **Read what the project already says**, without touching secrets:
+   - `README*`, `docs/`, `CLAUDE.md`/`AGENTS.md`, the llm-wiki if there is one, `docker-compose*.yml`, deploy/infra config, and app config that names hosts or database names (e.g. `config/packages/doctrine.yaml`, `database.yml`, `settings.py`).
+   - Never open `.env` files or anything holding credentials; a variable *name* such as `DATABASE_URL` is enough to know where to ask.
+3. **Check existing environments**: `make -C "$SKILL_DIR" env-list` (reads the file only). Propose one only if it is clearly the same target: same host *and* database, or a name that unambiguously matches the place from step 1. Names imported from PhpStorm may carry a guessed user; say so.
+4. **Confirm with the user** before going further, in one message: the environment you intend to use (or the one you need to create), host, database and user, and that a production target means every query is read-only unless they ask otherwise. If nothing matched, ask for host, port, database and user, and how the password is provided -- never the password itself.
+
+Only when the user has confirmed the target, continue.
+
 ## Phase A -- Make sure the tool works
 
-1. Run `make -C "$SKILL_DIR" doctor`.
+1. Run `make -C "$SKILL_DIR" doctor` (this starts the local server).
 2. If the build is missing, tell the user it will clone and build Proxy Diablo (about a minute, needs Node 20.19+ or 22.12+, git and network), then run `make -C "$SKILL_DIR" install`.
-3. If no environment exists for the database in question, create one. **Never ask for the password itself in chat.**
+3. If Stage 1 ended without an existing environment, create the confirmed one. **Never ask for the password itself in chat.**
    - **From PhpStorm** (preferred when the project has data sources): `make -C "$SKILL_DIR" env-import-phpstorm PROJECT=<project dir>`. It reads `.idea/dataSources.xml` and the user names from `dataSources.local.xml`, never PhpStorm's stored passwords, and names entries `<project>/<data source>`. Windows paths such as `C:\Users\me\proj` are converted to `/mnt/c/...`. Add `DBUSER=<user>` for sources without a stored user. The password is asked for in the UI when first needed.
    - **By hand**: ask for host, port, database, user and where the password comes from, then:
 
@@ -57,7 +70,7 @@ Write 3-5 falsifiable hypotheses (A, B, C...), each plausible given Phase 0. No 
 
 ## Phase 2 -- Run the queries
 
-Submit one query per hypothesis, in order of how cheaply each one can be ruled out. Every submission blocks until the human decides:
+Submit one query per hypothesis, in order of how cheaply each one can be ruled out. Every submission blocks until the human decides, which can take many minutes: never wrap it in a short `timeout`, and run it in the background if your tool has a time limit. If the submitting process dies, its tab is cancelled and the result cannot reach you:
 
 ```bash
 "$SKILL_DIR/scripts/diablo" pgsql submit "<environment>" "<database>" \
@@ -83,7 +96,7 @@ Handle the proxy's replies:
 
 - `released` -- use only that output. Mention `filteredColumns`; treat placeholders as final and never try to reconstruct them.
 - `revision_requested` -- follow the explanation, narrow the query, reclassify, resubmit. Never broaden scope.
-- `cancelled` -- stop; do not resubmit.
+- `cancelled` -- stop; do not resubmit. Exception: if the tab says the requester disconnected (your own CLI call was interrupted), resubmit the same query once and tell the user.
 - `error` -- explain it. For connection errors say whether the tunnel or the password is the likely cause. Never look for output outside the proxy.
 
 ## Phase 4 -- Fix and verify
@@ -120,4 +133,5 @@ source / seed data
 | Password prompt in the UI | Expected when no `PASSWORD_ENV` is set; the human types it, kept in memory only |
 | Connection refused / timeout | The user's tunnel or network is down, or an imported `localhost` port is not forwarded into WSL |
 | `aws sso login` message | Ask the user to run the command it names, then retry |
+| A new environment is missing from the UI list | The list refreshes within a second of `env-add`; reload the page if it still is not there |
 | Update Proxy Diablo | `make -C "$SKILL_DIR" update` (the pinned ref lives at the top of the Makefile) |
