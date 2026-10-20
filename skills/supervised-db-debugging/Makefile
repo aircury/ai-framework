@@ -10,12 +10,12 @@ RUNTIME   := $(SKILL_DIR)/.runtime
 APP       := $(RUNTIME)/app
 DIABLO    := $(SKILL_DIR)/scripts/diablo
 
-# Pinned to the head of amoserlu/proxydiablo#3 (environments.json, UI password prompt).
+# Pinned to the head of amoserlu/proxydiablo#4 (environments.json, UI password prompt, rds-iam).
 # Move to the merge commit once that PR lands.
 PROXYDIABLO_REPO ?= https://github.com/amoserlu/proxydiablo.git
-PROXYDIABLO_REF  ?= a9632a2a8d85d517476c4cf25309d51aa6b16635
+PROXYDIABLO_REF  ?= c9fa953964d6c623f754c152a6efae58c572160d
 
-.PHONY: install update stop doctor ui env-add env-list env-remove clean help
+.PHONY: install update stop doctor ui env-add env-list env-remove env-import-phpstorm clean help
 
 help:
 	@echo "install      clone the pinned Proxy Diablo, npm ci, build (about 2-3 minutes)"
@@ -24,6 +24,8 @@ help:
 	@echo "doctor       check Node, the build, environments and the server"
 	@echo "ui           start the server and open the approval UI"
 	@echo "env-add      NAME= HOST= DBUSER= [PORT= DB= PASSWORD_ENV= SSLMODE=]"
+	@echo "             IAM: add AUTH=rds-iam AWSPROFILE=<profile> [REGION=]"
+	@echo "env-import-phpstorm  PROJECT=<dir> [DBUSER= NAMEHINT=1 AWSPROFILE=]"
 	@echo "env-list     list configured environments"
 	@echo "env-remove   NAME="
 	@echo "clean        delete .runtime (app, config and environments)"
@@ -60,7 +62,13 @@ env-add:
 	@node "$(SKILL_DIR)/scripts/envs.mjs" add "$(RUNTIME)/environments.json" \
 	  --name "$(NAME)" --host "$(HOST)" --user "$(DBUSER)" \
 	  $(if $(PORT),--port "$(PORT)") $(if $(DB),--database "$(DB)") \
-	  $(if $(PASSWORD_ENV),--password-env "$(PASSWORD_ENV)") $(if $(SSLMODE),--sslmode "$(SSLMODE)")
+	  $(if $(PASSWORD_ENV),--password-env "$(PASSWORD_ENV)") $(if $(SSLMODE),--sslmode "$(SSLMODE)") \
+	  $(if $(AUTH),--auth "$(AUTH)") $(if $(AWSPROFILE),--aws-profile "$(AWSPROFILE)") $(if $(REGION),--region "$(REGION)")
+
+env-import-phpstorm:
+	@node "$(SKILL_DIR)/scripts/envs.mjs" import-phpstorm "$(RUNTIME)/environments.json" \
+	  --project "$(PROJECT)" $(if $(DBUSER),--user "$(DBUSER)") $(if $(NAMEHINT),--use-name-hint yes) \
+	  $(if $(AWSPROFILE),--aws-profile "$(AWSPROFILE)") $(if $(REGION),--region "$(REGION)")
 
 env-list:
 	@node "$(SKILL_DIR)/scripts/envs.mjs" list "$(RUNTIME)/environments.json"
