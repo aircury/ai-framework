@@ -698,6 +698,11 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       },
       {
         source: "aircury/ai-framework",
+        skillName: "supervised-db-debugging",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
         skillName: "db-schema-design",
         scopes: ["local", "global"],
       },
