@@ -16,6 +16,14 @@ Same method as `blind-db-debugging` (code-grounded hypotheses, PASS/FAIL expecta
 
 `SKILL_DIR` below is the folder containing this `SKILL.md`. Everything generated lives in `$SKILL_DIR/.runtime/` and is safe to delete.
 
+## Progress percentage
+
+Start every progress message to the user with a bold percentage, `**[NN%]**`, and start every `--description` you submit with the same `[NN%]`, so the user can see at a glance where the investigation stands without reading the detail.
+
+- **0%** means you have just picked up the ticket; **99%** means the cause is confirmed and you are ready for the fix. Never claim 100%.
+- Rough anchors: about 10% when the target database is confirmed, 30% when the code path is traced and hypotheses are written, 50-70% while they are being tested, 85% when *what* happened is confirmed, 95% when *why* it happened is confirmed too.
+- Move it backwards when a lead turns out wrong or the user points out a gap (for example from 90% to 85% when the cause is known but the reason is not), and say in one line why it dropped.
+
 ## Stage 1 -- Identify the database first
 
 Before installing, starting the server or writing any query, settle **which database** the problem happens in and **which environment** reaches it. Nothing here needs the server.
@@ -75,7 +83,7 @@ Submit one query per hypothesis, in order of how cheaply each one can be ruled o
 ```bash
 "$SKILL_DIR/scripts/diablo" pgsql submit "<environment>" "<database>" \
   --classification read \
-  --description "HYPOTHESIS A: orders for tenant 42 lose their status after import. PASS: 0 rows. FAIL: rows with NULL status." \
+  --description "[40%] HYPOTHESIS A: orders for tenant 42 lose their status after import. PASS: 0 rows. FAIL: rows with NULL status." \
   --sql "select id, status from public.orders where tenant_id = 42 and status is null limit 20;"
 ```
 
