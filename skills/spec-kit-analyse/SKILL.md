@@ -8,7 +8,7 @@ metadata:
   version: "1.0"
 ---
 
-Perform a read-only consistency analysis across all available change artifacts.
+Perform a read-only consistency analysis after the task list has been generated.
 
 **Input**: Optionally specify a change name. If omitted, infer from context or ask.
 
@@ -18,10 +18,12 @@ Perform a read-only consistency analysis across all available change artifacts.
 
 1. **Load artifacts**
 
-   Load what exists under `specs/changes/<name>/`:
+   Load the change artifacts under `specs/changes/<name>/`:
    - `spec.md` (required)
-   - `plan.md` (if present)
-   - `tasks.md` (if present)
+   - `plan.md` (required)
+   - `tasks.md` (required)
+
+   If `tasks.md` is missing, prompt to use the `spec-kit-tasks` skill first.
 
    Also load FRAMEWORK.md as the governing principles baseline.
 
@@ -70,8 +72,8 @@ Perform a read-only consistency analysis across all available change artifacts.
 **Output**
 
 After the analysis:
-- If CRITICAL findings exist: "Fix FRAMEWORK.md violations before proceeding. Do not use the `spec-kit-tasks` or `spec-kit-implement` skills until these are resolved."
-- If no critical findings: "Use the `spec-kit-tasks` skill to generate the implementation task list."
+- If CRITICAL findings exist: "Fix FRAMEWORK.md violations before proceeding. Do not use the `spec-kit-implement` skill until these are resolved."
+- If no critical findings: "Use the `spec-kit-implement` skill to execute the validated task list."
 
 **Guardrails**
 - Read-only. Never modify any file.

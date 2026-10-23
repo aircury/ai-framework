@@ -7,9 +7,9 @@ This playbook shows how to use Aircury after installation. If you are unsure whi
 | Need | Recommended mode | Expected result |
 |---|---|---|
 | Small, well-understood change | `plan-build` | Short plan, implementation, verification, and spec update if behavior changes. |
-| Complex but clear change | `propose-apply-complete` | OpenSpec proposal artifacts, implementation, and final sync to `specs/features/`. |
-| Unknown root cause | `explore-propose-apply-complete` | Investigation first, then proposal, implementation, and completion. |
-| New feature or formal requirements | `spec-kit` | Specification, clarification, plan, analysis, tasks, implementation, and optional checklist. |
+| Complex or cross-cutting change | `spec-kit` | Specification, clarification, plan, tasks, analysis, implementation, and optional checklist. |
+| New feature or formal requirements | `spec-kit` | Specification, clarification, plan, tasks, analysis, implementation, and optional checklist. |
+| New project bootstrap | `walking-skeleton` | ADR selection, first end-to-end spec, runnable baseline, and clean rebuild verification. |
 | Understand existing behavior | `specs-extractor` | Behavior-first specs extracted from the current codebase. |
 | Rewrite from frozen specs | `specs-interpreter` | New implementation direction constrained by `specs/features/`. |
 
@@ -33,47 +33,6 @@ Expected steps:
 4. Run focused verification.
 5. Update `specs/features/` if observable behavior changed.
 
-### Change Core Logic
-
-Use this when the scope is clear but crosses boundaries.
-
-```text
-Migrate email delivery from Sendgrid to Resend. Assess impact first, create an OpenSpec proposal, implement from the approved tasks, then sync the final behavior into specs.
-```
-
-Recommended mode: `propose-apply-complete`.
-
-Skills involved:
-
-- `open-spec-propose`
-- `open-spec-apply`
-- `open-spec-complete`
-
-Expected artifacts:
-
-- `specs/changes/<name>/proposal.md`
-- `specs/changes/<name>/design.md`
-- `specs/changes/<name>/tasks.md`
-- updated `specs/features/` after completion
-
-### Investigate A Ghost Bug
-
-Use this when the root cause is not known.
-
-```text
-Users report that the shopping cart sometimes clears itself after reload. Investigate the state management first, identify the root cause, then propose the smallest safe fix.
-```
-
-Recommended mode: `explore-propose-apply-complete`.
-
-Expected steps:
-
-1. Run `open-spec-explore` without implementing.
-2. Summarize findings and scope.
-3. Continue with `open-spec-propose`.
-4. Implement with `open-spec-apply`.
-5. Close with `open-spec-complete`.
-
 ### Add A Large Feature
 
 Use this for new capabilities with requirements risk or multiple dependencies.
@@ -89,10 +48,34 @@ Skills involved:
 - `spec-kit-specify`
 - `spec-kit-clarify`
 - `spec-kit-plan`
-- `spec-kit-analyse`
 - `spec-kit-tasks`
+- `spec-kit-analyse`
 - `spec-kit-implement`
 - `spec-kit-checklist`
+
+### Start A New Project
+
+Use this when a greenfield repository needs a runnable baseline before normal feature delivery begins.
+
+```text
+Bootstrap this project with the walking skeleton workflow. Start by selecting the ADRs with the team, then define the smallest end-to-end slice, build it, and verify it from a clean rebuild.
+```
+
+Recommended skill:
+
+- `walking-skeleton`
+
+Expected flow:
+
+1. Run `/walking-skeleton plan` to choose ADRs, validate dependencies and conflicts, and write descriptively named ADRs under `specs/decisions/`.
+2. Run `/walking-skeleton spec` to define the first tiny end-to-end behaviour that proves the selected architecture seams.
+3. Run `/walking-skeleton build` to create tasks, implement the baseline, and verify it with rebuild, linting, tests, and smoke checks.
+
+Important constraints:
+
+- The bundled ADRs are proposals and flavours, not mandatory architecture.
+- The walking skeleton is not a silver bullet; the generated baseline must be reviewed and corrected by the team.
+- After the skeleton is complete, return to normal framework delivery with TDD where automated testing is feasible.
 
 ### Extract Specs From Existing Code
 
@@ -175,14 +158,12 @@ Expected artifacts:
 Use this when a decision affects architecture, workflow, dependencies, or long-term project direction.
 
 ```text
-Record the decision to use Redis-backed sessions so sessions can be revoked in real time. Include context, decision, consequences, and whether any prior ADR is superseded.
+Record the decision to use Redis-backed sessions so sessions can be revoked in real time. Include context, decision, and consequences. Revise the existing ADR if this decision changes.
 ```
 
 Required module: `decision-records`.
 
-Output: `specs/decisions/ADR-XXXX-*.md`.
-
-If `airsync` is also enabled, the generated framework requires proposing reusable ADR knowledge to Airsync INBOX.
+Output: `specs/decisions/<decision-name>.md`.
 
 ## Non-Negotiable Rules
 
@@ -199,7 +180,7 @@ If `airsync` is also enabled, the generated framework requires proposing reusabl
 
 Ask the agent to recommend a mode. The generated framework requires routing before non-trivial implementation.
 
-**Do all tasks need OpenSpec or Spec Kit?**
+**Do all tasks need Spec Kit?**
 
 No. `plan-build` is enough for clear, small-to-medium work.
 

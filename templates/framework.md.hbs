@@ -60,6 +60,7 @@ This installation uses Custom Architecture. The project-specific architecture so
 {{#if enforceBritishEnglish}}
 - Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy.
 - Prefer British English identifiers and names when introducing new code, unless an external API, tool, or established project interface requires a different spelling.
+- Order date entry controls Day-before-Month in UI: date pickers, recurrence editors, and numeric day/month selectors. Expose date entry through a shared date primitive with this order built in; do not hand-roll date control ordering per screen.
 {{/if}}
 - Use explicit names that reflect the problem space.
 - Keep functions small, cohesive, and intention-revealing.
@@ -94,9 +95,6 @@ Before starting any task:
 {{#if includesCapabilityDetails}}
 - Read the linked capability docs in `docs/aircury/capabilities/` for the enabled standards that apply to your task.
 {{/if}}
-{{#if includesAirsyncMemory}}
-- Search Airsync memory for relevant context before making decisions. Use `memory_search` with targeted queries about the area you are working on.
-{{/if}}
 {{#if includesDecisionRecords}}
 - Read the relevant ADRs in `specs/decisions/` when the area is governed by prior decisions.
 {{/if}}
@@ -109,6 +107,7 @@ While executing work:
 
 {{#if enforceBritishEnglish}}
 - Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy unless an external interface requires a different spelling.
+- Order date entry controls Day-before-Month in any UI you generate or modify, preferably via the project's shared date primitive.
 {{/if}}
 - All observable behaviour changes MUST update `specs/features/` before the work is done.
 - Follow TDD for observable behaviour changes when automated testing is feasible: failing test, minimum implementation, refactor.
@@ -119,12 +118,6 @@ While executing work:
 {{#if includesSpecKit}}
 - Selecting `spec-kit` requires following the full Spec Kit sequence in order unless the user explicitly changes modes.
 {{/if}}
-{{#if includesOpenSpec}}
-- Selecting an OpenSpec workflow requires following its named sequence in order unless the user explicitly changes modes.
-{{/if}}
-{{#if includesAirsyncMemory}}
-- Capture reusable knowledge in Airsync INBOX when you discover validated patterns, repeated pitfalls, or team conventions. Search before proposing to avoid duplicates.
-{{/if}}
 
 ## Workflow Framework
 
@@ -133,10 +126,6 @@ This framework uses a framework-agnostic change workflow.
 ### Supported modes
 
 - `plan-build`: complete a planning step first, then implement only after the plan is finished and the user asks to proceed.
-{{#if includesOpenSpec}}
-- `propose-apply-complete`: create working artefacts, implement from them, then sync canonical specs.
-- `explore-propose-apply-complete`: explore first when the problem is unclear, then formalise and implement.
-{{/if}}
 {{#if includesSpecKit}}
 - `spec-kit`: spec-driven development using the Spec Kit workflow. Best for new features, cross-cutting concerns, or work requiring formal spec governance.
 {{/if}}
@@ -162,22 +151,11 @@ Once the user selects a mode, the agent MUST follow that mode strictly. Do not m
   1. Plan first.
   2. Stop after the plan and present it clearly.
   3. Do not start building in the same step unless the user explicitly asks to continue with implementation after seeing the plan.
-{{#if includesOpenSpec}}
-- `propose-apply-complete`:
-  1. Run `open-spec-propose` first.
-  2. Only after proposal artefacts exist, run `open-spec-apply`.
-  3. After implementation is done, run `open-spec-complete`.
-  4. Do not jump directly to apply or complete if the selected workflow has not reached that step.
-- `explore-propose-apply-complete`:
-  1. Run `open-spec-explore` first.
-  2. Do not implement during explore mode.
-  3. After exploration, continue with `open-spec-propose`, then `open-spec-apply`, then `open-spec-complete` in order.
-{{/if}}
 {{#if includesSpecKit}}
 - `spec-kit`:
-  1. Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-analyse` → `spec-kit-tasks` → `spec-kit-analyse` → `spec-kit-implement`.
-  2. `spec-kit-analyse` MUST run before tasks to catch spec/plan/FRAMEWORK drift, and after tasks to validate user-story coverage.
-  3. CRITICAL findings from either `spec-kit-analyse` run block progress. Stop the workflow and fix them before continuing to any later Spec Kit step.
+  1. Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-tasks` → `spec-kit-analyse` → `spec-kit-implement`.
+  2. `spec-kit-analyse` MUST run after tasks to validate consistency across all artefacts and user-story coverage.
+  3. CRITICAL findings from `spec-kit-analyse` block implementation. Stop the workflow and fix them before continuing to `spec-kit-implement`.
   4. `spec-kit-checklist` may be used as a review or quality gate, but it does not replace required sequence steps.
   5. Do not skip ahead when an earlier required Spec Kit step has not been completed.
 {{/if}}
@@ -208,13 +186,7 @@ A change is not done unless all of the following are true:
 - The project-specific architecture section in `.localRules/framework.local.md` exists, reflects the current repository structure, and was updated if architectural boundaries changed.
 {{/if}}
 {{#if includesDecisionRecords}}
-- Material architectural decisions are captured or superseded in `specs/decisions/`.
-{{#if includesAirsyncMemory}}
-- If an ADR is created or superseded, propose it to Airsync when Airsync is enabled.
-{{/if}}
-{{/if}}
-{{#if includesAirsyncMemory}}
-- Relevant Airsync memory has been searched and new learnings have been captured in INBOX.
+- Material architectural decisions are captured and revised in `specs/decisions/`.
 {{/if}}
 {{#if includesErrorHandling}}
 - Error paths distinguish operational failures from programmer errors and handle them accordingly.

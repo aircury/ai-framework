@@ -94,6 +94,7 @@ type SkillsRunner = "npx" | "bunx";
 let cachedSkillsRunner: SkillsRunner | null = null;
 
 const AIRCURY_SKILLS_SOURCE = "aircury/ai-framework";
+const PROJECT_PROFILE_PATH = ".aircury/framework.config.json";
 
 function getLocalAircurySkillsSource(): string | null {
   const moduleDir = dirname(fileURLToPath(import.meta.url));
@@ -425,6 +426,7 @@ export function getLocalFiles(
 ): InstallFile[] {
   const profile = createCapabilityProfile(capabilityIds, {
     britishEnglish: options?.britishEnglish,
+    tools,
   });
   const files: InstallFile[] = [
     {
@@ -443,7 +445,7 @@ export function getLocalFiles(
       description: "Agent instructions (standard convention)",
     },
     {
-      path: ".aircury/framework.config.json",
+      path: PROJECT_PROFILE_PATH,
       content: `${JSON.stringify(profile, null, 2)}\n`,
       description: "Installed capability profile",
     },
@@ -470,6 +472,37 @@ export function getLocalFiles(
   return files;
 }
 
+export function readProjectProfile(cwd: string): CapabilityProfile | null {
+  const profilePath = join(cwd, PROJECT_PROFILE_PATH);
+  if (!existsSync(profilePath)) return null;
+
+  try {
+    const profile: unknown = JSON.parse(readFileSync(profilePath, "utf-8"));
+    return isProjectProfile(profile) ? profile : null;
+  } catch {
+    return null;
+  }
+}
+
+function isProjectProfile(value: unknown): value is CapabilityProfile {
+  if (!value || typeof value !== "object") return false;
+
+  const profile = value as Partial<CapabilityProfile>;
+  return (
+    profile.version === 2 &&
+    Array.isArray(profile.capabilities) &&
+    profile.capabilities.every(
+      (capability) => typeof capability === "string",
+    ) &&
+    (profile.tools === undefined ||
+      (Array.isArray(profile.tools) &&
+        profile.tools.every((tool) => typeof tool === "string"))) &&
+    typeof profile.language === "object" &&
+    profile.language !== null &&
+    typeof profile.language.britishEnglish === "boolean"
+  );
+}
+
 export function getGlobalFiles(tools: Tool[]): InstallFile[] {
   void tools;
   return [];
@@ -478,6 +511,7 @@ export function getGlobalFiles(tools: Tool[]): InstallFile[] {
 function getLocalSkillAgents(tools: Tool[]): string[] {
   const agents = new Set<string>(["universal"]);
 
+  if (tools.includes("claude-code")) agents.add("claude-code");
   if (tools.includes("gemini-cli")) agents.add("gemini-cli");
 
   return [...agents];
