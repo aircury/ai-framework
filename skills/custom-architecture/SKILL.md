@@ -1,21 +1,24 @@
 ---
 name: custom-architecture
-description: Analyse a repository's real architecture and write or refresh the Project Architecture section in FRAMEWORK.local.md for projects using the Custom Architecture capability.
+description: Analyse a repository's real architecture and write or refresh the Project Architecture section in .localRules/framework.local.md for projects using the Custom Architecture capability.
+metadata:
+  author: Aircury
+  version: "1.0"
 ---
 
 # Custom Architecture Discovery
 
-Use this skill when a project selected the `custom-architecture` capability, or when the user asks to analyse the repository architecture and record the findings in `FRAMEWORK.local.md`.
+Use this skill when a project selected the `custom-architecture` capability, or when the user asks to analyse the repository architecture and record the findings in `.localRules/framework.local.md`.
 
 ## Goal
 
-Discover the architecture that actually exists in the repository and persist concise, actionable guidance for future agents in `FRAMEWORK.local.md`.
+Discover the architecture that actually exists in the repository and persist concise, actionable guidance for future agents in `.localRules/framework.local.md`.
 
 Do not force DDD, Hexagonal, Clean Architecture, or Layered Architecture terminology unless the codebase clearly uses those patterns.
 
 ## Workflow
 
-1. Read `FRAMEWORK.md` and existing `FRAMEWORK.local.md` when present.
+1. Read `FRAMEWORK.md` and existing `.localRules/framework.local.md` when present.
 2. Inspect the repository structure before editing:
    - Package manifests and workspace files.
    - Source directories and feature/module boundaries.
@@ -23,7 +26,7 @@ Do not force DDD, Hexagonal, Clean Architecture, or Layered Architecture termino
    - Import/dependency direction between folders.
    - Configuration files that reveal frameworks, build systems, or runtime boundaries.
 3. Summarise only discoveries supported by files in the repository.
-4. Write or replace the managed section in `FRAMEWORK.local.md`:
+4. Write or replace the managed section in `.localRules/framework.local.md`:
 
 ```md
 ## Project Architecture
@@ -69,4 +72,4 @@ Inside the managed block, use this structure:
 - Prefer paths and concrete boundaries over vague labels.
 - Mark uncertainty explicitly instead of guessing.
 - Do not edit generated `FRAMEWORK.md`.
-- Do not rewrite unrelated `FRAMEWORK.local.md` content.
+- Do not rewrite unrelated `.localRules/framework.local.md` content.

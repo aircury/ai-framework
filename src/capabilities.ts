@@ -198,6 +198,13 @@ export interface CapabilityProfile {
   language: {
     britishEnglish: boolean;
   };
+  localSkills?: LocalSkillProfileEntry[];
+}
+
+export interface LocalSkillProfileEntry {
+  name: string;
+  kind: "local-skill";
+  source: string;
 }
 
 interface StandardManifest {
@@ -217,7 +224,7 @@ interface StandardModule {
 }
 
 export const FRAMEWORK_MAINTAINED_NOTICE =
-  "This file is maintained by Aircury AI Framework. Do not edit it directly. Add project-specific rules in FRAMEWORK.local.md.";
+  "This file is maintained by Aircury AI Framework. Do not edit it directly. Add project-specific rules in .localRules/framework.local.md.";
 
 function createStandardModule(
   manifest: StandardManifest,
@@ -512,7 +519,7 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
     label: "Custom Architecture",
     hint: "discover and document this project's real architecture",
     description:
-      "Custom architecture discovery that records project-specific boundaries in FRAMEWORK.local.md",
+      "Custom architecture discovery that records project-specific boundaries in .localRules/framework.local.md",
     category: "engineering",
     defaultSelected: false,
     scopes: ["local", "global"],
@@ -644,6 +651,11 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       {
         source: "aircury/ai-framework",
         skillName: "dbml-database-docs",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
+        skillName: "local-customization",
         scopes: ["local", "global"],
       },
     ],
