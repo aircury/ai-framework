@@ -76,6 +76,7 @@ describe("capabilities", () => {
       "ask-question",
       "database",
       "extract-rule",
+      "reflect",
     ]);
   });
 
