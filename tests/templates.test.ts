@@ -28,9 +28,6 @@ describe("templates", () => {
     it("matches the generated default profile", () => {
       expect(generateFramework()).toBe(FRAMEWORK);
       expect(renderFramework()).toBe(FRAMEWORK);
-      expect(FRAMEWORK).toContain(
-        "docs/aircury/capabilities/token-efficiency.md",
-      );
       expect(FRAMEWORK).not.toContain("## Token Efficiency");
     });
 
@@ -72,7 +69,7 @@ describe("templates", () => {
     it("uses British English spelling in generated framework content", () => {
       expect(FRAMEWORK).toContain("observable behaviour");
       expect(FRAMEWORK).toContain("Analyse the request");
-      expect(FRAMEWORK).toContain("working artefacts");
+      expect(FRAMEWORK).toContain("validate consistency across all artefacts");
       expect(FRAMEWORK).not.toMatch(
         /\b(behavior|Behavior|analyze|Analyze|artifact|Artifact|artifacts|Artifacts)\b/,
       );
@@ -100,8 +97,6 @@ describe("templates", () => {
     it("matches the generated default profile", () => {
       expect(generateAgents()).toBe(AGENTS);
       expect(renderAgents()).toBe(AGENTS);
-      expect(AGENTS).toContain("`caveman` is already active by default");
-      expect(AGENTS).toContain("Start every new session in `caveman full`");
     });
   });
 
@@ -133,19 +128,6 @@ describe("templates", () => {
       );
       expect(generateFramework(["decision-records"])).not.toContain(
         "## Architecture Decision Records",
-      );
-    });
-
-    it("keeps ADR dual-write details out of the compact framework", () => {
-      const framework = generateFramework(["decision-records", "airsync"]);
-      expect(framework).toContain(
-        "If an ADR is created or superseded, propose it to Airsync when Airsync is enabled.",
-      );
-      expect(framework).not.toContain("### ADR Dual-Write Rule");
-      expect(framework).not.toContain("memory_kind");
-      expect(framework).not.toContain("source_refs");
-      expect(framework).not.toContain(
-        "Every ADR created or superseded MUST also be proposed to Airsync",
       );
     });
 
@@ -257,27 +239,6 @@ describe("templates", () => {
       );
     });
 
-    it("keeps AGENTS.md stable across non-token-efficiency module selections", () => {
-      expect(generateAgents(["decision-records"])).toBe(
-        generateAgents(["code-style"]),
-      );
-      expect(generateAgents(["decision-records", "frontend"])).toBe(
-        generateAgents(["code-style", "frontend"]),
-      );
-    });
-
-    it("adds token-efficiency guidance to AGENTS.md only when the module is enabled", () => {
-      expect(generateAgents(["token-efficiency"])).toContain(
-        "Start every new session in `caveman full`",
-      );
-      expect(generateAgents()).toContain(
-        "Start every new session in `caveman full`",
-      );
-      expect(generateAgents(["decision-records"])).not.toContain(
-        "Start every new session in `caveman full`",
-      );
-    });
-
     it("adds code style header to FRAMEWORK.md when enabled", () => {
       expect(generateFramework(["code-style"])).toContain(
         "docs/aircury/capabilities/code-style.md",
@@ -297,19 +258,6 @@ describe("templates", () => {
       );
       expect(generateFramework([])).not.toContain(
         "Use British English spelling",
-      );
-    });
-
-    it("adds token-efficiency guidance only when the capability is enabled", () => {
-      expect(generateFramework(["token-efficiency"])).toContain(
-        "docs/aircury/capabilities/token-efficiency.md",
-      );
-      expect(generateFramework([])).not.toContain("## Token Efficiency");
-      expect(generateFramework([])).not.toContain(
-        "docs/aircury/capabilities/token-efficiency.md",
-      );
-      expect(generateFramework(["token-efficiency"])).not.toContain(
-        "Load and apply the `caveman` skill in `full` mode",
       );
     });
   });

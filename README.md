@@ -4,7 +4,7 @@
 
 The Aircury AI Framework is a meta-routing framework for AI-assisted software engineering. Its main job is to decide which workflow an AI agent should use for each request.
 
-You normally do not choose a mode. Ask for the work you need, and the framework tells the agent whether to use `plan-build`, OpenSpec, Spec Kit, or a direct implementation flow. Only specify a mode when you explicitly want to force that workflow.
+You normally do not choose a mode. Ask for the work you need, and the framework tells the agent whether to use `plan-build`, Spec Kit, or a direct implementation flow. Only specify a mode when you explicitly want to force that workflow.
 
 It also installs project rules, agent entrypoints, living specification folders, mandatory engineering non-negotiables, optional standards, greenfield bootstrap guidance, and curated skills while separating a shared workflow constitution from installable capabilities.
 
@@ -13,7 +13,6 @@ It also installs project rules, agent entrypoints, living specification folders,
 Aircury gives agents enough structure to work consistently without forcing every change through a heavy process. The default behavior is automatic routing:
 
 - Use `plan-build` for clear day-to-day changes.
-- Use OpenSpec when a change needs proposal, implementation, and completion artifacts.
 - Use Spec Kit when requirements need formal clarification and planning before code.
 - Keep durable behavior knowledge in `specs/features/`.
 
