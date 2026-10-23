@@ -1,0 +1,7 @@
+{
+  "id": "walking-skeleton",
+  "label": "Walking Skeleton",
+  "hint": "greenfield bootstrap from reviewable ADR bundles",
+  "description": "Recommends the external walking-skeleton skill for bootstrapping new projects from selected ADRs and a tiny end-to-end slice.",
+  "defaultEnabled": false
+}

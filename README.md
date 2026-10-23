@@ -4,16 +4,15 @@
 
 The Aircury AI Framework is a meta-routing framework for AI-assisted software engineering. Its main job is to decide which workflow an AI agent should use for each request.
 
-You normally do not choose a mode. Ask for the work you need, and the framework tells the agent whether to use `plan-build`, OpenSpec, Spec Kit, or a direct implementation flow. Only specify a mode when you explicitly want to force that workflow.
+You normally do not choose a mode. Ask for the work you need, and the framework tells the agent whether to use `plan-build`, Spec Kit, or a direct implementation flow. Only specify a mode when you explicitly want to force that workflow.
 
-It also installs project rules, agent entrypoints, living specification folders, mandatory engineering non-negotiables, optional standards, and curated skills while separating a shared workflow constitution from installable capabilities.
+It also installs project rules, agent entrypoints, living specification folders, mandatory engineering non-negotiables, optional standards, greenfield bootstrap guidance, and curated skills while separating a shared workflow constitution from installable capabilities.
 
 ## Why Aircury
 
 Aircury gives agents enough structure to work consistently without forcing every change through a heavy process. The default behavior is automatic routing:
 
 - Use `plan-build` for clear day-to-day changes.
-- Use OpenSpec when a change needs proposal, implementation, and completion artifacts.
 - Use Spec Kit when requirements need formal clarification and planning before code.
 - Keep durable behavior knowledge in `specs/features/`.
 
@@ -62,6 +61,22 @@ Use a throwaway project first if you want to verify the generated files before i
 | Local | `FRAMEWORK.md`, `AGENTS.md`, `.aircury/framework.config.json`, starter `specs/` folders, optional tool files, selected skills, and a `.gitignore` entry for `specs/changes/`. |
 | Global | Selected skills for the chosen global agent integrations. |
 
+## Walking Skeleton
+
+For greenfield projects, Aircury can install the external [`aircury/walking-skeleton`](https://github.com/aircury/walking-skeleton) skill as an optional capability.
+
+It is recommended when a team wants to start from reviewed ADRs, define a tiny end-to-end slice, and build a runnable baseline before normal feature delivery begins.
+
+The skill stays in its own repository. This framework only references and installs it through `skills add`; it does not vendor the ADR catalogue or generated example code.
+
+Use the workflow in order:
+
+```text
+/walking-skeleton plan
+/walking-skeleton spec
+/walking-skeleton build
+```
+
 ## Documentation
 
 | Document | Purpose |
@@ -70,3 +85,4 @@ Use a throwaway project first if you want to verify the generated files before i
 | [`docs/implementation.md`](docs/implementation.md) | Installer flow, generated files, capabilities, skill installation, and conflict handling. |
 | [`docs/playbook.md`](docs/playbook.md) | Workflow selection guide, examples, and operating rules for installed projects. |
 | [`docs/contribution.md`](docs/contribution.md) | How to contribute modules, templates, skills, and installer wiring. |
+| [`docs/improvements.md`](docs/improvements.md) | Prioritised framework improvements from the June 2026 feedback synthesis. |

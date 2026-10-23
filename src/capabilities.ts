@@ -1,12 +1,3 @@
-import airsyncMemoryAgents from "../standards/modules/airsync-memory/agents.md" with {
-  type: "text",
-};
-import airsyncMemoryFramework from "../standards/modules/airsync-memory/framework.md" with {
-  type: "text",
-};
-import airsyncMemoryManifest from "../standards/modules/airsync-memory/module.json" with {
-  type: "json",
-};
 import cleanArchitectureAgents from "../standards/modules/clean-architecture/agents.md" with {
   type: "text",
 };
@@ -106,13 +97,13 @@ import testingFramework from "../standards/modules/testing/framework.md" with {
 import testingManifest from "../standards/modules/testing/module.json" with {
   type: "json",
 };
-import tokenEfficiencyAgents from "../standards/modules/token-efficiency/agents.md" with {
+import walkingSkeletonAgents from "../standards/modules/walking-skeleton/agents.md" with {
   type: "text",
 };
-import tokenEfficiencyFramework from "../standards/modules/token-efficiency/framework.md" with {
+import walkingSkeletonFramework from "../standards/modules/walking-skeleton/framework.md" with {
   type: "text",
 };
-import tokenEfficiencyManifest from "../standards/modules/token-efficiency/module.json" with {
+import walkingSkeletonManifest from "../standards/modules/walking-skeleton/module.json" with {
   type: "json",
 };
 import decisionsReadme from "./install-content/specs/decisions/README.md" with {
@@ -140,17 +131,15 @@ type StandardModuleId =
   | "custom-architecture"
   | "ddd"
   | "code-style"
-  | "airsync-memory"
   | "error-handling"
   | "structured-logging"
   | "frontend"
   | "testing"
-  | "token-efficiency";
+  | "walking-skeleton";
 
 export type CapabilityId =
-  | "open-spec"
   | "spec-kit"
-  | "airsync"
+  | "walking-skeleton"
   | "git"
   | "aircury-aws-sso"
   | "ddd-hexagonal"
@@ -161,10 +150,19 @@ export type CapabilityId =
   | "testing"
   | "code-style"
   | "frontend"
-  | "token-efficiency"
   | "resilience"
   | "specs"
-  | "language";
+  | "language"
+  | "ask-question"
+  | "database"
+  | "blind-db-debugging"
+  | "db-schema-design"
+  | "extract-rule";
+
+type VisibleCapabilityId = Exclude<
+  CapabilityId,
+  "blind-db-debugging" | "db-schema-design"
+>;
 
 export interface CapabilitySkill {
   source: string;
@@ -179,7 +177,7 @@ export interface CapabilityFile {
 }
 
 export interface CapabilityManifest {
-  id: CapabilityId;
+  id: VisibleCapabilityId;
   label: string;
   hint: string;
   description: string;
@@ -196,6 +194,7 @@ export interface CapabilityManifest {
 export interface CapabilityProfile {
   version: 2;
   _notice: string;
+  tools?: string[];
   capabilities: CapabilityId[];
   language: {
     britishEnglish: boolean;
@@ -293,13 +292,6 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
       codeStyleAgents,
     ),
   },
-  "airsync-memory": {
-    ...createStandardModule(
-      airsyncMemoryManifest as StandardManifest,
-      airsyncMemoryFramework,
-      airsyncMemoryAgents,
-    ),
-  },
   "error-handling": {
     ...createStandardModule(
       errorHandlingManifest as StandardManifest,
@@ -340,11 +332,11 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
       testingAgents,
     ),
   },
-  "token-efficiency": {
+  "walking-skeleton": {
     ...createStandardModule(
-      tokenEfficiencyManifest as StandardManifest,
-      tokenEfficiencyFramework,
-      tokenEfficiencyAgents,
+      walkingSkeletonManifest as StandardManifest,
+      walkingSkeletonFramework,
+      walkingSkeletonAgents,
     ),
   },
 };
@@ -395,39 +387,7 @@ function createCapabilityDetailFile(
   };
 }
 
-const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
-  "open-spec": {
-    id: "open-spec",
-    label: "OpenSpec",
-    hint: "structured propose/apply/complete workflow",
-    description:
-      "Structured propose/apply/complete workflow for complex changes",
-    category: "workflow",
-    defaultSelected: true,
-    scopes: ["local", "global"],
-    skills: [
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-propose",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-apply",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-complete",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-explore",
-        scopes: ["local", "global"],
-      },
-    ],
-  },
+const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
   "spec-kit": {
     id: "spec-kit",
     label: "Spec Kit",
@@ -455,12 +415,12 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
       {
         source: "aircury/ai-framework",
-        skillName: "spec-kit-analyse",
+        skillName: "spec-kit-tasks",
         scopes: ["local", "global"],
       },
       {
         source: "aircury/ai-framework",
-        skillName: "spec-kit-tasks",
+        skillName: "spec-kit-analyse",
         scopes: ["local", "global"],
       },
       {
@@ -475,19 +435,20 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
     ],
   },
-  airsync: {
-    id: "airsync",
-    label: "Airsync",
-    hint: "collaborative memory workflow and shared memory rules",
-    description: "Collaborative memory workflow with project Airsync rules",
+  "walking-skeleton": {
+    id: "walking-skeleton",
+    label: "Walking Skeleton",
+    hint: "greenfield bootstrap from ADR bundles",
+    description:
+      "Greenfield bootstrap workflow that plans ADRs, specifies a tiny end-to-end slice, and builds a runnable baseline from the external walking-skeleton skill",
     category: "workflow",
-    defaultSelected: true,
+    defaultSelected: false,
     scopes: ["local", "global"],
-    ...composeModules(["airsync-memory"]),
+    ...composeModules(["walking-skeleton"]),
     skills: [
       {
-        source: "aircury/ai-framework",
-        skillName: "airsync",
+        source: "aircury/walking-skeleton",
+        skillName: "walking-skeleton",
         scopes: ["local", "global"],
       },
     ],
@@ -650,24 +611,6 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
     ],
   },
-  "token-efficiency": {
-    id: "token-efficiency",
-    label: "Token Efficiency",
-    hint: "terse default responses through Caveman",
-    description:
-      "Project token-efficiency rules plus the Caveman skill for terse responses",
-    category: "communication",
-    defaultSelected: true,
-    scopes: ["local", "global"],
-    ...composeModules(["token-efficiency"]),
-    skills: [
-      {
-        source: "https://github.com/juliusbrussee/caveman",
-        skillName: "caveman",
-        scopes: ["local", "global"],
-      },
-    ],
-  },
   resilience: {
     id: "resilience",
     label: "Resilience",
@@ -739,12 +682,67 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
     ],
   },
+  "ask-question": {
+    id: "ask-question",
+    label: "Ask Question",
+    hint: "use the IDE AskQuestion tool instead of plain chat for choices",
+    description:
+      "Requires agents to use the IDE AskQuestion tool when asking the user to choose between options",
+    category: "communication",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "ask-question",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
+  database: {
+    id: "database",
+    label: "Database",
+    hint: "schema design and blind debugging workflows",
+    description:
+      "Database schema design and blind debugging workflows for relational systems",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "blind-db-debugging",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
+        skillName: "db-schema-design",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
+  "extract-rule": {
+    id: "extract-rule",
+    label: "Extract Rule",
+    hint: "Distil and record coding rules",
+    description:
+      "Distil reusable engineering rules from code changes and record them in the documentation",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "extract-rule",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
 };
 
-const CAPABILITY_ORDER: CapabilityId[] = [
-  "open-spec",
+const CAPABILITY_ORDER: VisibleCapabilityId[] = [
   "spec-kit",
-  "airsync",
+  "walking-skeleton",
   "git",
   "aircury-aws-sso",
   "ddd-hexagonal",
@@ -755,11 +753,29 @@ const CAPABILITY_ORDER: CapabilityId[] = [
   "testing",
   "code-style",
   "frontend",
-  "token-efficiency",
   "resilience",
   "specs",
   "language",
+  "ask-question",
+  "database",
+  "extract-rule",
 ];
+
+const LEGACY_CAPABILITY_ALIASES: Partial<
+  Record<CapabilityId, VisibleCapabilityId>
+> = {
+  "blind-db-debugging": "database",
+  "db-schema-design": "database",
+};
+
+function normalizeCapabilityId(
+  capabilityId: CapabilityId,
+): VisibleCapabilityId {
+  return (
+    LEGACY_CAPABILITY_ALIASES[capabilityId] ??
+    (capabilityId as VisibleCapabilityId)
+  );
+}
 
 const EXCLUSIVE_ARCHITECTURE_CAPABILITIES: CapabilityId[] = [
   "ddd-hexagonal",
@@ -789,10 +805,11 @@ export const CAPABILITIES: CapabilityManifest[] = CAPABILITY_ORDER.map(
   (id) => CAPABILITY_REGISTRY[id],
 );
 
-export const DEFAULT_LOCAL_CAPABILITY_IDS: CapabilityId[] = CAPABILITIES.filter(
-  (capability) =>
-    capability.scopes.includes("local") && capability.defaultSelected,
-).map((capability) => capability.id);
+export const DEFAULT_LOCAL_CAPABILITY_IDS: VisibleCapabilityId[] =
+  CAPABILITIES.filter(
+    (capability) =>
+      capability.scopes.includes("local") && capability.defaultSelected,
+  ).map((capability) => capability.id);
 
 export function getCapabilities(scope: CapabilityScope): CapabilityManifest[] {
   return CAPABILITIES.filter((capability) => capability.scopes.includes(scope));
@@ -801,16 +818,17 @@ export function getCapabilities(scope: CapabilityScope): CapabilityManifest[] {
 export function getCapabilityById(
   capabilityId: CapabilityId,
 ): CapabilityManifest {
-  return CAPABILITY_REGISTRY[capabilityId];
+  return CAPABILITY_REGISTRY[normalizeCapabilityId(capabilityId)];
 }
 
 export function resolveCapabilityIds(
   capabilityIds: CapabilityId[] = DEFAULT_LOCAL_CAPABILITY_IDS,
-): CapabilityId[] {
-  const resolved = new Set<CapabilityId>();
+): VisibleCapabilityId[] {
+  const resolved = new Set<VisibleCapabilityId>();
   const visit = (capabilityId: CapabilityId) => {
-    if (resolved.has(capabilityId)) return;
-    resolved.add(capabilityId);
+    const normalizedCapabilityId = normalizeCapabilityId(capabilityId);
+    if (resolved.has(normalizedCapabilityId)) return;
+    resolved.add(normalizedCapabilityId);
   };
 
   for (const capabilityId of normalizeExclusiveArchitectures(capabilityIds)) {
@@ -822,10 +840,12 @@ export function resolveCapabilityIds(
 
 export function createCapabilityProfile(
   capabilityIds?: CapabilityId[],
-  options?: { britishEnglish?: boolean },
+  options?: { britishEnglish?: boolean; tools?: string[] },
 ): CapabilityProfile {
   const britishEnglish = options?.britishEnglish ?? false;
-  const selected = new Set(resolveCapabilityIds(capabilityIds));
+  const selected = new Set<VisibleCapabilityId>(
+    resolveCapabilityIds(capabilityIds),
+  );
 
   if (britishEnglish) {
     selected.add("language");
@@ -834,6 +854,7 @@ export function createCapabilityProfile(
   return {
     version: 2,
     _notice: FRAMEWORK_MAINTAINED_NOTICE,
+    tools: options?.tools,
     capabilities: CAPABILITY_ORDER.filter((capabilityId) =>
       selected.has(capabilityId),
     ),
@@ -855,12 +876,18 @@ export function getSelectedCapabilities(
 
 export function getInitialCapabilityIds(
   scope: CapabilityScope,
-  options?: { britishEnglish?: boolean },
+  options?: {
+    britishEnglish?: boolean;
+    installedCapabilityIds?: CapabilityId[];
+  },
 ): CapabilityId[] {
-  const selected = new Set<CapabilityId>(
+  const initialCapabilityIds =
+    options?.installedCapabilityIds ??
     getCapabilities(scope)
       .filter((capability) => capability.defaultSelected)
-      .map((capability) => capability.id),
+      .map((capability) => capability.id);
+  const selected = new Set<CapabilityId>(
+    resolveCapabilityIds(initialCapabilityIds),
   );
 
   if (options?.britishEnglish) {

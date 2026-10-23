@@ -1,0 +1,5 @@
+- Use the `walking-skeleton` skill for greenfield project bootstrap when the user wants a runnable baseline from ADRs.
+- Run the workflow in order: `/walking-skeleton plan`, then `/walking-skeleton spec`, then `/walking-skeleton build`.
+- Do not treat bundled ADRs as mandatory architecture. Help the user or kickoff team choose an ADR flavour or explicit ADR set and resolve conflicts before building.
+- Keep the walking skeleton tiny: it should prove architectural seams end to end, not become a full feature backlog.
+- After the skeleton is complete, return to the normal framework workflow and TDD expectations for feature delivery.

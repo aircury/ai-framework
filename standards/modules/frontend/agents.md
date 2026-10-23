@@ -10,6 +10,7 @@
 - Before creating substantial UI, inspect existing shared components, hooks, utilities, form patterns, and local primitives.
 - Create feature hooks for non-trivial local orchestration, form coordination, filters, derived state, permission gates, query adaptation, data shaping, multi-step flow state, or complex event handlers. Feature hooks do not require cross-feature reuse.
 - Create or update common hooks and shared components when repeated behaviour or UI structure has stable reuse across screens or features; keep one-off UI and simple visual state local to the feature.
+- Render date entry through a shared date primitive matching the target locale's day/month order; for UK-locale UI, order controls Day-before-Month in date pickers, recurrence editors, and numeric day/month selectors.
 - Do not skip extraction, invent unsupported tokens, or hardcode values when the project already defines an equivalent token or primitive.
 - New UI must be shippable without a cleanup refactor unless requirements change.
 - Do not use `vercel-react-best-practices` as a substitute for component responsibility, naming, file organization, or readable JSX structure.

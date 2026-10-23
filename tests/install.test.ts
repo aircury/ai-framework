@@ -4,14 +4,12 @@ import {
   mkdirSync,
   readFileSync,
   rmSync,
-  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   FRAMEWORK_MAINTAINED_NOTICE,
-  getCapabilitySkills,
   getInitialCapabilityIds,
 } from "../src/capabilities";
 import {
@@ -21,12 +19,13 @@ import {
   getGlobalFiles,
   getLocalCommands,
   getLocalFiles,
+  getSkillsRunner,
   type InstallFile,
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
   mergeFrameworkReferenceIntoAgents,
+  readProjectProfile,
   runCommand,
-  syncClaudeCodeSkills,
   writeFile,
 } from "../src/install";
 
@@ -51,6 +50,7 @@ function getCommandBySource(
 
 const aircurySkillsSource = getAircurySkillsSource();
 const aircurySkillsDescription = `Install selected skills from ${aircurySkillsSource}`;
+const skillsRunner = getSkillsRunner();
 
 describe("getLocalFiles", () => {
   it("always includes the core framework files", () => {
@@ -160,6 +160,13 @@ describe("getLocalFiles", () => {
     expect(config.content).not.toContain('"git"');
   });
 
+  it("persists selected tools in the config file", () => {
+    const files = getLocalFiles(["claude-code"], ["git"]);
+    const config = getFileByPath(files, ".aircury/framework.config.json");
+
+    expect(JSON.parse(config.content).tools).toEqual(["claude-code"]);
+  });
+
   it("persists the British English preference in the config file", () => {
     const files = getLocalFiles([], undefined, { britishEnglish: true });
     const config = getFileByPath(files, ".aircury/framework.config.json");
@@ -180,29 +187,14 @@ describe("getLocalFiles", () => {
     expect(framework.content).not.toContain("## Architecture Decision Records");
     expect(decisions.content).toContain("## Architecture Decision Records");
     expect(decisions.content).toContain(
-      "ADRs are mutable only while their status is `Draft`.",
+      "Keep one ADR for each decision and revise it when the decision evolves.",
     );
     expect(decisions.content).toContain(
-      "An ADR leaves `Draft` only when the user explicitly confirms that the functionality or change is complete and that the ADR should no longer be a draft.",
+      "[Use Redis-backed sessions](specs/decisions/use-redis-backed-sessions.md)",
     );
-    expect(decisions.content).toContain(
-      "After every modification to a draft ADR, ask the user whether they want to publish it now.",
-    );
-    expect(decisions.content).toContain(
-      "`Supersedes: ADR-XXXX` or `Amends: ADR-XXXX`",
-    );
-    expect(decisions.content).toContain(
-      "update the prior non-draft ADR only to mark that it was changed and where the new decision lives",
-    );
-    expect(decisions.content).toContain(
-      "Use `Supersedes: ADR-XXXX` when the new decision completely replaces or invalidates the old one.",
-    );
-    expect(decisions.content).toContain(
-      "Use `Amends: ADR-XXXX` when the new decision modifies, clarifies, or adds to the old one without completely invalidating it.",
-    );
-    expect(decisions.content).toContain(
-      "- Superseded by: ADR-YYYY (only when updating a prior ADR marker)",
-    );
+    expect(decisions.content).not.toContain("Status:");
+    expect(decisions.content).not.toContain("Supersedes:");
+    expect(decisions.content).not.toContain("Amends:");
     expect(framework.content).not.toContain("## TDD Workflow");
     expect(framework.content).not.toContain(
       "## Non-Negotiable Architecture Rules",
@@ -260,9 +252,6 @@ describe("getLocalFiles", () => {
     expect(framework.content).toContain(
       "docs/aircury/capabilities/decision-records.md",
     );
-    expect(framework.content).toContain(
-      "docs/aircury/capabilities/token-efficiency.md",
-    );
     expect(framework.content).toContain("## Engineering Non-Negotiables");
     expect(framework.content).not.toContain("## TDD Workflow");
     expect(framework.content).not.toContain(
@@ -277,6 +266,25 @@ describe("getLocalFiles", () => {
     expect(paths).toContain("docs/aircury/capabilities/decision-records.md");
     expect(paths).toContain("specs/ui/README.md");
     expect(paths).toContain("specs/decisions/README.md");
+  });
+
+  it("generates Walking Skeleton capability guidance when selected", () => {
+    const files = getLocalFiles([], ["walking-skeleton"]);
+    const paths = files.map((file) => file.path);
+    const walkingSkeleton = getFileByPath(
+      files,
+      "docs/aircury/capabilities/walking-skeleton.md",
+    );
+
+    expect(paths).toContain("docs/aircury/capabilities/walking-skeleton.md");
+    expect(walkingSkeleton.content).toContain(
+      "The walking-skeleton implementation lives outside this framework",
+    );
+    expect(walkingSkeleton.content).toContain("/walking-skeleton plan");
+    expect(walkingSkeleton.content).toContain(
+      "selected ADRs are copied into `specs/decisions/` with descriptive names",
+    );
+    expect(walkingSkeleton.content).not.toContain("ADR-0000");
   });
 
   it("requires searching the existing design system in the frontend workflow", () => {
@@ -307,19 +315,6 @@ describe("getLocalFiles", () => {
     expect(frontend.content).toContain("frontend-ui-workflow");
     expect(frontend.content).toContain("implementation-plan.md");
   });
-
-  it("includes terse-response guidance in the token-efficiency capability doc", () => {
-    const files = getLocalFiles([], ["token-efficiency"]);
-    const tokenEfficiency = getFileByPath(
-      files,
-      "docs/aircury/capabilities/token-efficiency.md",
-    );
-    expect(tokenEfficiency.content).toContain(
-      "Load and apply the `caveman` skill in `full` mode",
-    );
-    expect(tokenEfficiency.content).toContain("ACTIVE EVERY RESPONSE");
-    expect(tokenEfficiency.content).toContain("stop caveman");
-  });
 });
 
 describe("getGlobalFiles", () => {
@@ -328,15 +323,77 @@ describe("getGlobalFiles", () => {
   });
 });
 
+describe("readProjectProfile", () => {
+  it("reads a valid saved project profile", () => {
+    const dir = `${tmpdir()}/ai-framework-profile-${Date.now()}`;
+    const profileDir = join(dir, ".aircury");
+    mkdirSync(profileDir, { recursive: true });
+    writeFileSync(
+      join(profileDir, "framework.config.json"),
+      JSON.stringify({
+        version: 2,
+        _notice: FRAMEWORK_MAINTAINED_NOTICE,
+        tools: ["claude-code"],
+        capabilities: ["git", "frontend"],
+        language: { britishEnglish: true },
+      }),
+      "utf-8",
+    );
+
+    expect(readProjectProfile(dir)).toEqual({
+      version: 2,
+      _notice: FRAMEWORK_MAINTAINED_NOTICE,
+      tools: ["claude-code"],
+      capabilities: ["git", "frontend"],
+      language: { britishEnglish: true },
+    });
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("accepts a legacy profile without saved tools", () => {
+    const dir = `${tmpdir()}/ai-framework-legacy-profile-${Date.now()}`;
+    const profileDir = join(dir, ".aircury");
+    mkdirSync(profileDir, { recursive: true });
+    writeFileSync(
+      join(profileDir, "framework.config.json"),
+      JSON.stringify({
+        version: 2,
+        _notice: FRAMEWORK_MAINTAINED_NOTICE,
+        capabilities: ["git"],
+        language: { britishEnglish: false },
+      }),
+      "utf-8",
+    );
+
+    expect(readProjectProfile(dir)?.tools).toBeUndefined();
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("ignores an invalid saved project profile", () => {
+    const dir = `${tmpdir()}/ai-framework-invalid-profile-${Date.now()}`;
+    const profileDir = join(dir, ".aircury");
+    mkdirSync(profileDir, { recursive: true });
+    writeFileSync(
+      join(profileDir, "framework.config.json"),
+      JSON.stringify({ version: 2, capabilities: ["git"] }),
+      "utf-8",
+    );
+
+    expect(readProjectProfile(dir)).toBeNull();
+
+    rmSync(dir, { recursive: true });
+  });
+});
+
 describe("getLocalCommands", () => {
   it("installs the skills derived from the default capabilities for universal", () => {
     const commands = getLocalCommands([], getInitialCapabilityIds("local"));
 
-    expect(commands).toHaveLength(6);
+    expect(commands).toHaveLength(5);
     const aircury = getCommandBySource(commands, aircurySkillsSource);
-    expect(aircury.args).toContain("open-spec-propose");
     expect(aircury.args).toContain("spec-kit-specify");
-    expect(aircury.args).toContain("airsync");
     expect(aircury.args).toContain("commit-changes");
     expect(aircury.args).toContain("frontend-ui-workflow");
     expect(aircury.args).toContain("specs-extractor");
@@ -359,10 +416,6 @@ describe("getLocalCommands", () => {
       ).args,
     ).toContain("playwright-best-practices");
     expect(
-      getCommandBySource(commands, "https://github.com/juliusbrussee/caveman")
-        .args,
-    ).toContain("caveman");
-    expect(
       getCommandBySource(commands, "https://github.com/wshobson/agents").args,
     ).toContain("error-handling-patterns");
     expect(
@@ -376,7 +429,7 @@ describe("getLocalCommands", () => {
     ).toContain("vercel-react-best-practices");
   });
 
-  it("installs local skills through universal and non-Claude tool agents", () => {
+  it("installs local skills through universal and selected tool agents", () => {
     const commands = getLocalCommands(["claude-code", "gemini-cli"], ["git"]);
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toEqual([
@@ -389,17 +442,20 @@ describe("getLocalCommands", () => {
       "-a",
       "universal",
       "-a",
+      "claude-code",
+      "-a",
       "gemini-cli",
       "-y",
     ]);
   });
 
-  it("does not ask skills add to install local Claude Code skills directly", () => {
+  it("asks skills add to link local Claude Code skills", () => {
     const commands = getLocalCommands(["claude-code"], ["git"]);
 
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toContain("universal");
-    expect(commands[0].args).not.toContain("claude-code");
+    expect(commands[0].args).toContain("claude-code");
+    expect(commands[0].args).not.toContain("--copy");
   });
 
   it("installs the external UK business English skill", () => {
@@ -410,12 +466,25 @@ describe("getLocalCommands", () => {
     ).toContain("uk-business-english");
   });
 
-  it("installs the caveman skill when token-efficiency capability is selected", () => {
-    const commands = getLocalCommands([], ["token-efficiency"]);
-    expect(
-      getCommandBySource(commands, "https://github.com/juliusbrussee/caveman")
-        .args,
-    ).toContain("caveman");
+  it("installs the external Walking Skeleton skill", () => {
+    const commands = getLocalCommands([], ["walking-skeleton"]);
+
+    expect(commands).toHaveLength(1);
+    expect(getCommandBySource(commands, "aircury/walking-skeleton")).toEqual({
+      command: skillsRunner,
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "aircury/walking-skeleton",
+        "--skill",
+        "walking-skeleton",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description: "Install selected skills from aircury/walking-skeleton",
+    });
   });
 
   it("installs the DDD+Hexagonal skill only for DDD+Hexagonal", () => {
@@ -466,20 +535,6 @@ describe("getLocalCommands", () => {
     ).toBe(false);
   });
 
-  it("installs capability-required skills without a separate skill selection", () => {
-    const commands = getLocalCommands([], ["frontend", "token-efficiency"]);
-
-    expect(commands).toHaveLength(3);
-    expect(commands[0].args).toContain("frontend-ui-workflow");
-    expect(commands[1].args).toContain("caveman");
-    expect(
-      getCommandBySource(
-        commands,
-        "https://github.com/vercel-labs/agent-skills",
-      ).args,
-    ).toContain("vercel-react-best-practices");
-  });
-
   it("installs the specs skills from the Aircury source", () => {
     const commands = getLocalCommands([], ["specs"]);
     expect(commands).toHaveLength(1);
@@ -489,11 +544,18 @@ describe("getLocalCommands", () => {
     expect(commands[0].args).toContain("dbml-database-docs");
   });
 
+  it("installs both database skills when the database capability is selected", () => {
+    const commands = getLocalCommands([], ["database"]);
+    expect(commands).toHaveLength(1);
+    expect(commands[0].args).toContain("blind-db-debugging");
+    expect(commands[0].args).toContain("db-schema-design");
+  });
+
   it("installs the frontend skills from the Aircury source", () => {
     const commands = getLocalCommands([], ["frontend"]);
     expect(commands).toHaveLength(2);
     expect(getCommandBySource(commands, aircurySkillsSource)).toEqual({
-      command: "npx",
+      command: skillsRunner,
       args: [
         "-y",
         "skills",
@@ -513,7 +575,7 @@ describe("getLocalCommands", () => {
         "https://github.com/vercel-labs/agent-skills",
       ),
     ).toEqual({
-      command: "npx",
+      command: skillsRunner,
       args: [
         "-y",
         "skills",
@@ -572,7 +634,7 @@ describe("runCommand", () => {
     const commands = getGlobalCommands([], ["frontend"]);
     expect(commands).toHaveLength(2);
     expect(getCommandBySource(commands, aircurySkillsSource)).toEqual({
-      command: "npx",
+      command: skillsRunner,
       args: [
         "-y",
         "skills",
@@ -593,7 +655,7 @@ describe("runCommand", () => {
         "https://github.com/vercel-labs/agent-skills",
       ),
     ).toEqual({
-      command: "npx",
+      command: skillsRunner,
       args: [
         "-y",
         "skills",
@@ -737,100 +799,6 @@ describe("isProtectedLocalCompanion", () => {
   it("marks FRAMEWORK.local.md as protected", () => {
     expect(isProtectedLocalCompanion("FRAMEWORK.local.md")).toBe(true);
     expect(isProtectedLocalCompanion("FRAMEWORK.md")).toBe(false);
-  });
-});
-
-describe("syncClaudeCodeSkills", () => {
-  it("copies selected skills from .agents/skills to .claude/skills", () => {
-    const dir = `${tmpdir()}/sdd-claude-skills-${Date.now()}`;
-    const skillDir = join(dir, ".agents", "skills", "commit-changes");
-    mkdirSync(skillDir, { recursive: true });
-    writeFileSync(join(skillDir, "SKILL.md"), "# Commit Changes", "utf-8");
-
-    const result = syncClaudeCodeSkills(dir, [
-      {
-        source: "aircury/ai-framework",
-        skillName: "commit-changes",
-        scopes: ["local"],
-      },
-    ]);
-
-    expect(result).toEqual({ copied: ["commit-changes"], missing: [] });
-    expect(
-      readFileSync(
-        join(dir, ".claude", "skills", "commit-changes", "SKILL.md"),
-        "utf-8",
-      ),
-    ).toBe("# Commit Changes");
-
-    rmSync(dir, { recursive: true });
-  });
-
-  it("reports selected skills missing from .agents/skills", () => {
-    const dir = `${tmpdir()}/sdd-claude-skills-missing-${Date.now()}`;
-
-    const result = syncClaudeCodeSkills(dir, [
-      {
-        source: "unknown/source",
-        skillName: "missing-skill",
-        scopes: ["local"],
-      },
-    ]);
-
-    expect(result).toEqual({ copied: [], missing: ["missing-skill"] });
-    expect(existsSync(join(dir, ".claude", "skills"))).toBe(true);
-
-    rmSync(dir, { recursive: true });
-  });
-
-  it("falls back to the Aircury source for selected local skills", () => {
-    const dir = `${tmpdir()}/sdd-claude-aircury-skill-${Date.now()}`;
-    const skills = getCapabilitySkills(["frontend"], "local").filter(
-      (skill) => skill.skillName === "frontend-ui-workflow",
-    );
-
-    const result = syncClaudeCodeSkills(dir, skills);
-
-    expect(result).toEqual({ copied: ["frontend-ui-workflow"], missing: [] });
-    expect(
-      readFileSync(
-        join(dir, ".agents", "skills", "frontend-ui-workflow", "SKILL.md"),
-        "utf-8",
-      ),
-    ).toContain("name: frontend-ui-workflow");
-    expect(
-      readFileSync(
-        join(dir, ".claude", "skills", "frontend-ui-workflow", "SKILL.md"),
-        "utf-8",
-      ),
-    ).toContain("name: frontend-ui-workflow");
-
-    rmSync(dir, { recursive: true });
-  });
-
-  it("skips copying when the source and Claude target are the same directory", () => {
-    const dir = `${tmpdir()}/sdd-claude-same-skill-${Date.now()}`;
-    const sourceRoot = join(dir, ".agents", "skills");
-    const targetDir = join(dir, ".claude", "skills", "caveman");
-    mkdirSync(sourceRoot, { recursive: true });
-    mkdirSync(targetDir, { recursive: true });
-    writeFileSync(join(targetDir, "SKILL.md"), "# Caveman", "utf-8");
-    symlinkSync(targetDir, join(sourceRoot, "caveman"), "dir");
-
-    const result = syncClaudeCodeSkills(dir, [
-      {
-        source: "https://github.com/juliusbrussee/caveman",
-        skillName: "caveman",
-        scopes: ["local"],
-      },
-    ]);
-
-    expect(result).toEqual({ copied: ["caveman"], missing: [] });
-    expect(
-      readFileSync(join(targetDir, "SKILL.md"), "utf-8"),
-    ).toBe("# Caveman");
-
-    rmSync(dir, { recursive: true });
   });
 });
 
