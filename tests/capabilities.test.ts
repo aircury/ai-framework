@@ -74,6 +74,7 @@ describe("capabilities", () => {
       "specs",
       "language",
       "ask-question",
+      "goal-crafting",
       "database",
       "extract-rule",
     ]);
