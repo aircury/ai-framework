@@ -193,6 +193,7 @@ export interface CapabilityManifest {
 export interface CapabilityProfile {
   version: 2;
   _notice: string;
+  scope?: CapabilityScope;
   tools?: string[];
   capabilities: CapabilityId[];
   language: {
@@ -821,7 +822,11 @@ export function resolveCapabilityIds(
 
 export function createCapabilityProfile(
   capabilityIds?: CapabilityId[],
-  options?: { britishEnglish?: boolean; tools?: string[] },
+  options?: {
+    britishEnglish?: boolean;
+    scope?: CapabilityScope;
+    tools?: string[];
+  },
 ): CapabilityProfile {
   const britishEnglish = options?.britishEnglish ?? false;
   const selected = new Set<VisibleCapabilityId>(
@@ -835,6 +840,7 @@ export function createCapabilityProfile(
   return {
     version: 2,
     _notice: FRAMEWORK_MAINTAINED_NOTICE,
+    scope: options?.scope,
     tools: options?.tools,
     capabilities: CAPABILITY_ORDER.filter((capabilityId) =>
       selected.has(capabilityId),

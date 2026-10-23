@@ -178,7 +178,9 @@ describe("runInstaller", () => {
       },
     });
 
-    await answerPrompt(output, input, "What do you want to configure?");
+    await output.waitFor("Found an Aircury project profile");
+    input.press("down");
+    input.press("return");
     await answerPrompt(output, input, "Additional tools");
     await answerPrompt(output, input, "Use British English");
     await answerPrompt(output, input, "Architecture capability");

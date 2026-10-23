@@ -115,18 +115,44 @@ export async function runInstaller({
 
   p.intro("Aircury AI Framework Installer", promptOptions);
 
-  const scope = await p.select<Scope>({
-    ...promptOptions,
-    message: "What do you want to configure?",
-    options: [
-      { value: "local", label: "Local", hint: "configure this project" },
-      { value: "global", label: "Global", hint: "configure this machine" },
-    ],
-  });
+  const projectProfile = readProjectProfile(cwd);
 
-  if (p.isCancel(scope)) return p.cancel("Cancelled.", promptOptions);
+  let useExistingProfile = false;
+  let scope: Scope;
 
-  const existingProfile = scope === "local" ? readProjectProfile(cwd) : null;
+  if (projectProfile) {
+    const profileAction = await p.select<"profile" | Scope>({
+      ...promptOptions,
+      message: "Found an Aircury project profile. What do you want to do?",
+      options: [
+        {
+          value: "profile",
+          label: "Install from project profile",
+          hint: "use .aircury/framework.config.json",
+        },
+        { value: "local", label: "Reconfigure local project" },
+        { value: "global", label: "Global", hint: "configure this machine" },
+      ],
+    });
+
+    if (p.isCancel(profileAction)) return p.cancel("Cancelled.", promptOptions);
+    useExistingProfile = profileAction === "profile";
+    scope = profileAction === "profile" ? "local" : profileAction;
+  } else {
+    const selectedScope = await p.select<Scope>({
+      ...promptOptions,
+      message: "What do you want to configure?",
+      options: [
+        { value: "local", label: "Local", hint: "configure this project" },
+        { value: "global", label: "Global", hint: "configure this machine" },
+      ],
+    });
+
+    if (p.isCancel(selectedScope)) return p.cancel("Cancelled.", promptOptions);
+    scope = selectedScope;
+  }
+
+  const existingProfile = scope === "local" ? projectProfile : null;
 
   if (scope === "local") {
     const universalTools = [
@@ -161,26 +187,33 @@ export async function runInstaller({
           { value: "gemini-cli", label: "Gemini CLI", hint: "GEMINI.md" },
         ];
 
-  const selectedTools = await p.multiselect<Tool>({
-    ...promptOptions,
-    message:
-      scope === "global"
-        ? "Additional agent integrations — also install global agent-specific skills"
-        : "Additional tools",
-    options: toolOptions,
-    initialValues:
-      scope === "global"
-        ? []
-        : existingProfile?.tools === undefined
-          ? toolOptions.map((option) => option.value)
-          : getInstalledTools(existingProfile.tools),
-    required: false,
-  });
+  let selectedTools: Tool[];
+  if (useExistingProfile && existingProfile) {
+    selectedTools = getInstalledTools(existingProfile.tools ?? []);
+  } else {
+    const selectedToolValues = await p.multiselect<Tool>({
+      ...promptOptions,
+      message:
+        scope === "global"
+          ? "Additional agent integrations — also install global agent-specific skills"
+          : "Additional tools",
+      options: toolOptions,
+      initialValues:
+        scope === "global"
+          ? []
+          : existingProfile?.tools === undefined
+            ? toolOptions.map((option) => option.value)
+            : getInstalledTools(existingProfile.tools),
+      required: false,
+    });
 
-  if (p.isCancel(selectedTools)) return p.cancel("Cancelled.", promptOptions);
+    if (p.isCancel(selectedToolValues))
+      return p.cancel("Cancelled.", promptOptions);
+    selectedTools = selectedToolValues;
+  }
 
-  let enforceBritishEnglish = false;
-  if (scope === "local") {
+  let enforceBritishEnglish = existingProfile?.language.britishEnglish ?? false;
+  if (scope === "local" && !useExistingProfile) {
     const britishEnglish = await p.confirm({
       ...promptOptions,
       message:
@@ -194,60 +227,74 @@ export async function runInstaller({
   }
 
   const availableCapabilities = getCapabilities(scope);
-  const initialCapabilityIds = getInitialCapabilityIds(scope, {
-    britishEnglish: enforceBritishEnglish,
-    installedCapabilityIds: existingProfile?.capabilities,
-  });
-  const availableArchitectureCapabilities =
-    ARCHITECTURE_CAPABILITY_OPTIONS.filter((option) =>
+  let selectedCapabilities: CapabilityId[];
+  let resolvedCapabilities: CapabilityId[];
+
+  if (useExistingProfile && existingProfile) {
+    selectedCapabilities = existingProfile.capabilities;
+    resolvedCapabilities = resolveCapabilityIds(selectedCapabilities).filter(
+      (capabilityId) =>
+        availableCapabilities.some(
+          (capability) => capability.id === capabilityId,
+        ),
+    );
+  } else {
+    const initialCapabilityIds = getInitialCapabilityIds(scope, {
+      britishEnglish: enforceBritishEnglish,
+      installedCapabilityIds: existingProfile?.capabilities,
+    });
+    const availableArchitectureCapabilities =
+      ARCHITECTURE_CAPABILITY_OPTIONS.filter((option) =>
+        availableCapabilities.some(
+          (capability) => capability.id === option.value,
+        ),
+      );
+    const selectedArchitecture = await p.select<CapabilityId>({
+      ...promptOptions,
+      message: "Architecture capability (required)",
+      options: availableArchitectureCapabilities,
+      initialValue: initialCapabilityIds.find(isArchitectureCapabilityId),
+    });
+
+    if (p.isCancel(selectedArchitecture))
+      return p.cancel("Cancelled.", promptOptions);
+
+    const availableNonArchitectureCapabilities = availableCapabilities.filter(
+      (capability) => !isArchitectureCapabilityId(capability.id),
+    );
+    const selectedNonArchitectureCapabilities =
+      await p.multiselect<CapabilityId>({
+        ...promptOptions,
+        message: "Other capabilities",
+        options: availableNonArchitectureCapabilities.map((capability) => ({
+          value: capability.id,
+          label: `[${getCategoryTag(capability.category)}] ${capability.label}`,
+          hint: capability.hint,
+        })),
+        initialValues: initialCapabilityIds.filter(
+          (capabilityId) => !isArchitectureCapabilityId(capabilityId),
+        ),
+        required: false,
+      });
+
+    if (p.isCancel(selectedNonArchitectureCapabilities))
+      return p.cancel("Cancelled.", promptOptions);
+
+    selectedCapabilities = [
+      selectedArchitecture,
+      ...selectedNonArchitectureCapabilities,
+    ];
+
+    resolvedCapabilities = resolveCapabilityIds(
+      enforceBritishEnglish && !selectedCapabilities.includes("language")
+        ? [...selectedCapabilities, "language"]
+        : selectedCapabilities,
+    ).filter((capabilityId) =>
       availableCapabilities.some(
-        (capability) => capability.id === option.value,
+        (capability) => capability.id === capabilityId,
       ),
     );
-  const selectedArchitecture = await p.select<CapabilityId>({
-    ...promptOptions,
-    message: "Architecture capability (required)",
-    options: availableArchitectureCapabilities,
-    initialValue: initialCapabilityIds.find(isArchitectureCapabilityId),
-  });
-
-  if (p.isCancel(selectedArchitecture))
-    return p.cancel("Cancelled.", promptOptions);
-
-  const availableNonArchitectureCapabilities = availableCapabilities.filter(
-    (capability) => !isArchitectureCapabilityId(capability.id),
-  );
-  const selectedNonArchitectureCapabilities = await p.multiselect<CapabilityId>(
-    {
-      ...promptOptions,
-      message: "Other capabilities",
-      options: availableNonArchitectureCapabilities.map((capability) => ({
-        value: capability.id,
-        label: `[${getCategoryTag(capability.category)}] ${capability.label}`,
-        hint: capability.hint,
-      })),
-      initialValues: initialCapabilityIds.filter(
-        (capabilityId) => !isArchitectureCapabilityId(capabilityId),
-      ),
-      required: false,
-    },
-  );
-
-  if (p.isCancel(selectedNonArchitectureCapabilities))
-    return p.cancel("Cancelled.", promptOptions);
-
-  const selectedCapabilities = [
-    selectedArchitecture,
-    ...selectedNonArchitectureCapabilities,
-  ];
-
-  const resolvedCapabilities = resolveCapabilityIds(
-    enforceBritishEnglish && !selectedCapabilities.includes("language")
-      ? [...selectedCapabilities, "language"]
-      : selectedCapabilities,
-  ).filter((capabilityId) =>
-    availableCapabilities.some((capability) => capability.id === capabilityId),
-  );
+  }
 
   const implicitCapabilities = resolvedCapabilities.filter(
     (capabilityId) => !selectedCapabilities.includes(capabilityId),

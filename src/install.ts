@@ -106,6 +106,7 @@ export function getLocalFiles(
 ): InstallFile[] {
   const profile = createCapabilityProfile(capabilityIds, {
     britishEnglish: options?.britishEnglish,
+    scope: "local",
     tools,
   });
   const files: InstallFile[] = [
@@ -179,7 +180,8 @@ function isProjectProfile(value: unknown): value is CapabilityProfile {
         profile.tools.every((tool) => typeof tool === "string"))) &&
     typeof profile.language === "object" &&
     profile.language !== null &&
-    typeof profile.language.britishEnglish === "boolean"
+    typeof profile.language.britishEnglish === "boolean" &&
+    (profile.scope === undefined || profile.scope === "local")
   );
 }
 
@@ -398,7 +400,31 @@ export function runCommand(
   };
 }
 
-const GITIGNORE_ENTRY = "# Aircury AI Framework\nspecs/changes/";
+const GITIGNORE_ENTRY = `# Aircury AI Framework generated files
+FRAMEWORK.md
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.cursorrules
+docs/aircury/
+.agents/
+.claude/
+specs/features/README.md
+!specs/features/
+!specs/features/**/*.md
+!specs/decisions/
+!specs/decisions/*.md
+specs/decisions/README.md
+specs/ui/README.md
+specs/ui/frontend-workflow.md
+!specs/ui/
+!specs/ui/style-guide.md
+specs/changes/
+!db/schema.dbml
+
+# Aircury AI Framework shared profile
+!.aircury/
+!.aircury/framework.config.json`;
 
 export function updateGitignore(cwd: string): {
   updated: boolean;
@@ -413,7 +439,7 @@ export function updateGitignore(cwd: string): {
   }
 
   const content = readFileSync(gitignorePath, "utf-8");
-  if (content.includes("specs/changes/")) {
+  if (content.includes("# Aircury AI Framework generated files")) {
     return { updated: false, created: false };
   }
 
