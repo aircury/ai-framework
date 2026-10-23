@@ -395,6 +395,7 @@ describe("getLocalCommands", () => {
     const aircury = getCommandBySource(commands, aircurySkillsSource);
     expect(aircury.args).toContain("spec-kit-specify");
     expect(aircury.args).toContain("commit-changes");
+    expect(aircury.args).toContain("requesting-code-review");
     expect(aircury.args).toContain("frontend-ui-workflow");
     expect(aircury.args).toContain("specs-extractor");
     expect(aircury.args).toContain("dbml-database-docs");
@@ -439,6 +440,8 @@ describe("getLocalCommands", () => {
       aircurySkillsSource,
       "--skill",
       "commit-changes",
+      "--skill",
+      "requesting-code-review",
       "-a",
       "universal",
       "-a",
@@ -602,6 +605,9 @@ describe("getGlobalCommands", () => {
     );
     expect(getCommandBySource(commands, aircurySkillsSource).args).toContain(
       "commit-changes",
+    );
+    expect(getCommandBySource(commands, aircurySkillsSource).args).toContain(
+      "requesting-code-review",
     );
   });
 

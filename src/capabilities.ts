@@ -466,6 +466,11 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
         skillName: "commit-changes",
         scopes: ["local", "global"],
       },
+      {
+        source: "aircury/ai-framework",
+        skillName: "requesting-code-review",
+        scopes: ["local", "global"],
+      },
     ],
   },
   "ddd-hexagonal": {

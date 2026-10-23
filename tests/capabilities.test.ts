@@ -98,6 +98,7 @@ describe("capabilities", () => {
       ).map((skill) => skill.skillName),
     ).toEqual([
       "commit-changes",
+      "requesting-code-review",
       "clean-ddd-hexagonal",
       "frontend-ui-workflow",
       "vercel-react-best-practices",
