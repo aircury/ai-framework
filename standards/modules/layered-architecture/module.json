@@ -1,0 +1,7 @@
+{
+  "id": "layered-architecture",
+  "label": "Layered Architecture",
+  "hint": "controllers, services, and repositories",
+  "description": "Requires simple layered boundaries for projects that need clear separation without Clean or Hexagonal overhead.",
+  "defaultEnabled": false
+}

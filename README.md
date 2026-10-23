@@ -2,16 +2,17 @@
 
 [![npm](https://img.shields.io/npm/v/@aircury/ai-framework)](https://www.npmjs.com/package/@aircury/ai-framework)
 
-The Aircury AI Framework is a meta-framework for AI-assisted software engineering. It defines how AI agents should think, plan, and deliver code across all Aircury projects while separating a shared workflow constitution from installable capabilities.
+The Aircury AI Framework is a meta-routing framework for AI-assisted software engineering. Its main job is to decide which workflow an AI agent should use for each request.
 
-It installs project rules, agent entrypoints, living specification folders, optional engineering standards, and curated skills. The canonical source of truth for behavior is always `specs/features/`, whether a task uses `plan-build`, OpenSpec, Spec Kit, or a direct implementation flow.
+You normally do not choose a mode. Ask for the work you need, and the framework tells the agent whether to use `plan-build`, Spec Kit, or a direct implementation flow. Only specify a mode when you explicitly want to force that workflow.
+
+It also installs project rules, agent entrypoints, living specification folders, mandatory engineering non-negotiables, optional standards, greenfield bootstrap guidance, and curated skills while separating a shared workflow constitution from installable capabilities.
 
 ## Why Aircury
 
-Aircury gives agents enough structure to work consistently without forcing every change through a heavy process:
+Aircury gives agents enough structure to work consistently without forcing every change through a heavy process. The default behavior is automatic routing:
 
 - Use `plan-build` for clear day-to-day changes.
-- Use OpenSpec when a change needs proposal, implementation, and completion artifacts.
 - Use Spec Kit when requirements need formal clarification and planning before code.
 - Keep durable behavior knowledge in `specs/features/`.
 
@@ -34,12 +35,47 @@ The TUI asks for:
 
 If files already exist, the installer asks whether to skip or overwrite them. Skills are installed through the skills ecosystem with `npx` or `bunx`, so they can be updated later.
 
+Every local installation includes non-negotiable engineering rules in `FRAMEWORK.md`: TDD where automated testing is feasible, SOLID design constraints, Clean Code, explicit architecture boundaries, and justified tradeoffs for any exception.
+
+## Install From A Local Branch
+
+To test an unpublished branch, build the CLI from your local checkout:
+
+```bash
+bun install
+bun run build
+```
+
+Then run the built installer from the project you want to configure:
+
+```bash
+node /absolute/path/to/ai-framework/dist/cli.js
+```
+
+Use a throwaway project first if you want to verify the generated files before installing into a real repository.
+
 ## What It Installs
 
 | Scope | Outputs |
 |---|---|
 | Local | `FRAMEWORK.md`, `AGENTS.md`, `.aircury/framework.config.json`, starter `specs/` folders, optional tool files, selected skills, and a `.gitignore` entry for `specs/changes/`. |
 | Global | Selected skills for the chosen global agent integrations. |
+
+## Walking Skeleton
+
+For greenfield projects, Aircury can install the external [`aircury/walking-skeleton`](https://github.com/aircury/walking-skeleton) skill as an optional capability.
+
+It is recommended when a team wants to start from reviewed ADRs, define a tiny end-to-end slice, and build a runnable baseline before normal feature delivery begins.
+
+The skill stays in its own repository. This framework only references and installs it through `skills add`; it does not vendor the ADR catalogue or generated example code.
+
+Use the workflow in order:
+
+```text
+/walking-skeleton plan
+/walking-skeleton spec
+/walking-skeleton build
+```
 
 ## Documentation
 
@@ -49,3 +85,4 @@ If files already exist, the installer asks whether to skip or overwrite them. Sk
 | [`docs/implementation.md`](docs/implementation.md) | Installer flow, generated files, capabilities, skill installation, and conflict handling. |
 | [`docs/playbook.md`](docs/playbook.md) | Workflow selection guide, examples, and operating rules for installed projects. |
 | [`docs/contribution.md`](docs/contribution.md) | How to contribute modules, templates, skills, and installer wiring. |
+| [`docs/improvements.md`](docs/improvements.md) | Prioritised framework improvements from the June 2026 feedback synthesis. |

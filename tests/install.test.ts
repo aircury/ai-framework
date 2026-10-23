@@ -1,16 +1,30 @@
 import { describe, expect, it } from "bun:test";
-import { existsSync, readFileSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { getInitialCapabilityIds } from "../src/capabilities";
+import {
+  FRAMEWORK_MAINTAINED_NOTICE,
+  getInitialCapabilityIds,
+} from "../src/capabilities";
 import {
   checkConflicts,
+  getAircurySkillsSource,
   getGlobalCommands,
   getGlobalFiles,
   getLocalCommands,
   getLocalFiles,
+  getSkillsRunner,
   type InstallFile,
+  isMergeableFrameworkEntrypoint,
+  isProtectedLocalCompanion,
   mergeFrameworkReferenceIntoAgents,
+  readProjectProfile,
   runCommand,
   writeFile,
 } from "../src/install";
@@ -34,6 +48,10 @@ function getCommandBySource(
   return command;
 }
 
+const aircurySkillsSource = getAircurySkillsSource();
+const aircurySkillsDescription = `Install selected skills from ${aircurySkillsSource}`;
+const skillsRunner = getSkillsRunner();
+
 describe("getLocalFiles", () => {
   it("always includes the core framework files", () => {
     const files = getLocalFiles([]);
@@ -42,6 +60,78 @@ describe("getLocalFiles", () => {
     expect(paths).toContain("AGENTS.md");
     expect(paths).toContain(".aircury/framework.config.json");
     expect(paths).toContain("specs/features/README.md");
+    expect(paths).toContain("FRAMEWORK.local.md");
+  });
+
+  it("installs FRAMEWORK.local.md as an editable local companion", () => {
+    const files = getLocalFiles([]);
+    const local = getFileByPath(files, "FRAMEWORK.local.md");
+
+    expect(local.description).toBe("Project-specific framework instructions");
+    expect(local.content).toContain("Project-specific instructions");
+    expect(local.content).toContain("never overwrites it during updates");
+    expect(local.content).not.toContain(FRAMEWORK_MAINTAINED_NOTICE);
+  });
+
+  it("adds maintained-file warnings to strict framework files", () => {
+    const files = getLocalFiles([], ["testing"]);
+    const framework = getFileByPath(files, "FRAMEWORK.md");
+    const config = getFileByPath(files, ".aircury/framework.config.json");
+    const capability = getFileByPath(
+      files,
+      "docs/aircury/capabilities/testing.md",
+    );
+
+    expect(framework.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
+    expect(JSON.parse(config.content)._notice).toBe(
+      FRAMEWORK_MAINTAINED_NOTICE,
+    );
+    expect(capability.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
+  });
+
+  it("preserves an existing FRAMEWORK.local.md during install writes", () => {
+    const dir = `${tmpdir()}/sdd-framework-local-${Date.now()}`;
+    const localPath = join(dir, "FRAMEWORK.local.md");
+    const localContent = "# Local framework rules\n\nKeep this.";
+
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(localPath, localContent, "utf-8");
+
+    for (const file of getLocalFiles([])) {
+      writeFile(file, dir, false);
+    }
+
+    expect(readFileSync(localPath, "utf-8")).toBe(localContent);
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("generates detailed capability docs for selected capabilities", () => {
+    const files = getLocalFiles(
+      [],
+      [
+        "testing",
+        "ddd-hexagonal",
+        "clean-architecture",
+        "layered-architecture",
+      ],
+    );
+    const paths = files.map((file) => file.path);
+    expect(paths).toContain("docs/aircury/capabilities/testing.md");
+    expect(paths).not.toContain("docs/aircury/capabilities/ddd-hexagonal.md");
+    expect(paths).not.toContain(
+      "docs/aircury/capabilities/clean-architecture.md",
+    );
+    expect(paths).toContain(
+      "docs/aircury/capabilities/layered-architecture.md",
+    );
+    expect(
+      getFileByPath(files, "docs/aircury/capabilities/testing.md").content,
+    ).toContain("## TDD Workflow");
+    expect(
+      getFileByPath(files, "docs/aircury/capabilities/layered-architecture.md")
+        .content,
+    ).toContain("## Layered Architecture Rules");
   });
 
   it("includes CLAUDE.md when Claude Code is selected", () => {
@@ -54,13 +144,27 @@ describe("getLocalFiles", () => {
     expect(files.map((file) => file.path)).toContain("GEMINI.md");
   });
 
+  it("does not include .cursorrules", () => {
+    const files = getLocalFiles([]);
+
+    expect(files.map((file) => file.path)).not.toContain(".cursorrules");
+  });
+
   it("persists selected capabilities in the config file", () => {
     const files = getLocalFiles([], ["decision-records", "testing"]);
     const config = getFileByPath(files, ".aircury/framework.config.json");
     expect(config.content).toContain('"capabilities": [');
+    expect(config.content).toContain(FRAMEWORK_MAINTAINED_NOTICE);
     expect(config.content).toContain('"decision-records"');
     expect(config.content).toContain('"testing"');
     expect(config.content).not.toContain('"git"');
+  });
+
+  it("persists selected tools in the config file", () => {
+    const files = getLocalFiles(["claude-code"], ["git"]);
+    const config = getFileByPath(files, ".aircury/framework.config.json");
+
+    expect(JSON.parse(config.content).tools).toEqual(["claude-code"]);
   });
 
   it("persists the British English preference in the config file", () => {
@@ -73,10 +177,44 @@ describe("getLocalFiles", () => {
   it("generates framework content from the selected capabilities", () => {
     const files = getLocalFiles([], ["decision-records"]);
     const framework = getFileByPath(files, "FRAMEWORK.md");
-    expect(framework.content).toContain("## Architecture Decision Records");
+    const decisions = getFileByPath(
+      files,
+      "docs/aircury/capabilities/decision-records.md",
+    );
+    expect(framework.content).toContain(
+      "docs/aircury/capabilities/decision-records.md",
+    );
+    expect(framework.content).not.toContain("## Architecture Decision Records");
+    expect(decisions.content).toContain("## Architecture Decision Records");
+    expect(decisions.content).toContain(
+      "Keep one ADR for each decision and revise it when the decision evolves.",
+    );
+    expect(decisions.content).toContain(
+      "[Use Redis-backed sessions](specs/decisions/use-redis-backed-sessions.md)",
+    );
+    expect(decisions.content).not.toContain("Status:");
+    expect(decisions.content).not.toContain("Supersedes:");
+    expect(decisions.content).not.toContain("Amends:");
     expect(framework.content).not.toContain("## TDD Workflow");
     expect(framework.content).not.toContain(
       "## Non-Negotiable Architecture Rules",
+    );
+  });
+
+  it("always includes core engineering non-negotiables", () => {
+    const files = getLocalFiles([], []);
+    const framework = getFileByPath(files, "FRAMEWORK.md");
+
+    expect(framework.content).toContain("## Engineering Non-Negotiables");
+    expect(framework.content).toContain(
+      "TDD is the default implementation discipline",
+    );
+    expect(framework.content).toContain(
+      "SOLID principles are mandatory design constraints",
+    );
+    expect(framework.content).toContain("Clean Code is mandatory");
+    expect(framework.content).toContain(
+      "Architecture boundaries must remain explicit",
     );
   });
 
@@ -98,20 +236,63 @@ describe("getLocalFiles", () => {
     expect(agentsWithCapabilities.content).toContain("single source of truth");
   });
 
-  it("uses the full recommended profile by default", () => {
+  it("uses the non-architecture capability profile by default", () => {
     const files = getLocalFiles([]);
     const framework = getFileByPath(files, "FRAMEWORK.md");
-    expect(framework.content).toContain("## TDD Workflow");
-    expect(framework.content).toContain("## Non-Negotiable Architecture Rules");
-    expect(framework.content).toContain("## Architecture Decision Records");
-    expect(framework.content).toContain("## Token Efficiency");
+    expect(framework.content).toContain("docs/aircury/capabilities/testing.md");
+    expect(framework.content).not.toContain(
+      "docs/aircury/capabilities/ddd-hexagonal.md",
+    );
+    expect(framework.content).not.toContain(
+      "docs/aircury/capabilities/clean-architecture.md",
+    );
+    expect(framework.content).not.toContain(
+      "docs/aircury/capabilities/layered-architecture.md",
+    );
+    expect(framework.content).toContain(
+      "docs/aircury/capabilities/decision-records.md",
+    );
+    expect(framework.content).toContain("## Engineering Non-Negotiables");
+    expect(framework.content).not.toContain("## TDD Workflow");
+    expect(framework.content).not.toContain(
+      "## Non-Negotiable Architecture Rules",
+    );
   });
 
   it("adds capability-owned files when selected", () => {
     const files = getLocalFiles([], ["frontend", "decision-records"]);
     const paths = files.map((file) => file.path);
+    expect(paths).toContain("docs/aircury/capabilities/frontend.md");
+    expect(paths).toContain("docs/aircury/capabilities/decision-records.md");
     expect(paths).toContain("specs/ui/README.md");
     expect(paths).toContain("specs/decisions/README.md");
+  });
+
+  it("generates Walking Skeleton capability guidance when selected", () => {
+    const files = getLocalFiles([], ["walking-skeleton"]);
+    const paths = files.map((file) => file.path);
+    const walkingSkeleton = getFileByPath(
+      files,
+      "docs/aircury/capabilities/walking-skeleton.md",
+    );
+
+    expect(paths).toContain("docs/aircury/capabilities/walking-skeleton.md");
+    expect(walkingSkeleton.content).toContain(
+      "The walking-skeleton implementation lives outside this framework",
+    );
+    expect(walkingSkeleton.content).toContain("/walking-skeleton plan");
+    expect(walkingSkeleton.content).toContain(
+      "selected ADRs are copied into `specs/decisions/` with descriptive names",
+    );
+    expect(walkingSkeleton.content).not.toContain("ADR-0000");
+  });
+
+  it("requires searching the existing design system in the frontend workflow", () => {
+    const files = getLocalFiles([], ["frontend"]);
+    const workflow = getFileByPath(files, "specs/ui/frontend-workflow.md");
+    expect(workflow.content).toContain(
+      "Use `frontend-ui-workflow` to generate or update `specs/ui/style-guide.md`",
+    );
   });
 
   it("adds frontend-specific check to FRAMEWORK.md when enabled", () => {
@@ -120,22 +301,19 @@ describe("getLocalFiles", () => {
     expect(framework.content).toContain(
       "Visual modifications align with the project design system tokens",
     );
-  });
-
-  it("includes experience extractor in FRAMEWORK.md when frontend is enabled", () => {
-    const files = getLocalFiles([], ["frontend"]);
-    const framework = getFileByPath(files, "FRAMEWORK.md");
-    expect(framework.content).toContain("frontend-experience-extractor");
-  });
-
-  it("includes terse-response guidance in FRAMEWORK.md when token-efficiency is enabled", () => {
-    const files = getLocalFiles([], ["token-efficiency"]);
-    const framework = getFileByPath(files, "FRAMEWORK.md");
-    expect(framework.content).toContain(
-      "Load and apply the `caveman` skill in `full` mode",
+    expect(framework?.content).toContain(
+      "extracted from the existing frontend through `frontend-ui-workflow`",
     );
-    expect(framework.content).toContain("ACTIVE EVERY RESPONSE");
-    expect(framework.content).toContain("stop caveman");
+  });
+
+  it("includes frontend workflow guidance in FRAMEWORK.md when frontend is enabled", () => {
+    const files = getLocalFiles([], ["frontend"]);
+    const frontend = getFileByPath(
+      files,
+      "docs/aircury/capabilities/frontend.md",
+    );
+    expect(frontend.content).toContain("frontend-ui-workflow");
+    expect(frontend.content).toContain("implementation-plan.md");
   });
 });
 
@@ -145,19 +323,82 @@ describe("getGlobalFiles", () => {
   });
 });
 
+describe("readProjectProfile", () => {
+  it("reads a valid saved project profile", () => {
+    const dir = `${tmpdir()}/ai-framework-profile-${Date.now()}`;
+    const profileDir = join(dir, ".aircury");
+    mkdirSync(profileDir, { recursive: true });
+    writeFileSync(
+      join(profileDir, "framework.config.json"),
+      JSON.stringify({
+        version: 2,
+        _notice: FRAMEWORK_MAINTAINED_NOTICE,
+        tools: ["claude-code"],
+        capabilities: ["git", "frontend"],
+        language: { britishEnglish: true },
+      }),
+      "utf-8",
+    );
+
+    expect(readProjectProfile(dir)).toEqual({
+      version: 2,
+      _notice: FRAMEWORK_MAINTAINED_NOTICE,
+      tools: ["claude-code"],
+      capabilities: ["git", "frontend"],
+      language: { britishEnglish: true },
+    });
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("accepts a legacy profile without saved tools", () => {
+    const dir = `${tmpdir()}/ai-framework-legacy-profile-${Date.now()}`;
+    const profileDir = join(dir, ".aircury");
+    mkdirSync(profileDir, { recursive: true });
+    writeFileSync(
+      join(profileDir, "framework.config.json"),
+      JSON.stringify({
+        version: 2,
+        _notice: FRAMEWORK_MAINTAINED_NOTICE,
+        capabilities: ["git"],
+        language: { britishEnglish: false },
+      }),
+      "utf-8",
+    );
+
+    expect(readProjectProfile(dir)?.tools).toBeUndefined();
+
+    rmSync(dir, { recursive: true });
+  });
+
+  it("ignores an invalid saved project profile", () => {
+    const dir = `${tmpdir()}/ai-framework-invalid-profile-${Date.now()}`;
+    const profileDir = join(dir, ".aircury");
+    mkdirSync(profileDir, { recursive: true });
+    writeFileSync(
+      join(profileDir, "framework.config.json"),
+      JSON.stringify({ version: 2, capabilities: ["git"] }),
+      "utf-8",
+    );
+
+    expect(readProjectProfile(dir)).toBeNull();
+
+    rmSync(dir, { recursive: true });
+  });
+});
+
 describe("getLocalCommands", () => {
   it("installs the skills derived from the default capabilities for universal", () => {
     const commands = getLocalCommands([], getInitialCapabilityIds("local"));
 
-    expect(commands).toHaveLength(6);
-    const aircury = getCommandBySource(commands, "aircury/ai-framework");
-    expect(aircury.args).toContain("open-spec-propose");
+    expect(commands).toHaveLength(5);
+    const aircury = getCommandBySource(commands, aircurySkillsSource);
     expect(aircury.args).toContain("spec-kit-specify");
-    expect(aircury.args).toContain("airsync");
     expect(aircury.args).toContain("commit-changes");
     expect(aircury.args).toContain("requesting-code-review");
-    expect(aircury.args).toContain("frontend-layout-extractor");
+    expect(aircury.args).toContain("frontend-ui-workflow");
     expect(aircury.args).toContain("specs-extractor");
+    expect(aircury.args).toContain("dbml-database-docs");
     expect(
       getCommandBySource(
         commands,
@@ -165,9 +406,10 @@ describe("getLocalCommands", () => {
       ).args,
     ).toContain("logging-best-practices");
     expect(
-      getCommandBySource(commands, "https://github.com/ccheney/robust-skills")
-        .args,
-    ).toContain("clean-ddd-hexagonal");
+      commands.some((command) =>
+        command.args.includes("https://github.com/ccheney/robust-skills"),
+      ),
+    ).toBe(false);
     expect(
       getCommandBySource(
         commands,
@@ -175,25 +417,27 @@ describe("getLocalCommands", () => {
       ).args,
     ).toContain("playwright-best-practices");
     expect(
-      getCommandBySource(commands, "https://github.com/juliusbrussee/caveman")
-        .args,
-    ).toContain("caveman");
-    expect(
       getCommandBySource(commands, "https://github.com/wshobson/agents").args,
     ).toContain("error-handling-patterns");
     expect(
       getCommandBySource(commands, "https://github.com/wshobson/agents").args,
     ).toContain("e2e-testing-patterns");
+    expect(
+      getCommandBySource(
+        commands,
+        "https://github.com/vercel-labs/agent-skills",
+      ).args,
+    ).toContain("vercel-react-best-practices");
   });
 
-  it("installs multiple selected agents in each derived command", () => {
+  it("installs local skills through universal and selected tool agents", () => {
     const commands = getLocalCommands(["claude-code", "gemini-cli"], ["git"]);
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toEqual([
       "-y",
       "skills",
       "add",
-      "aircury/ai-framework",
+      aircurySkillsSource,
       "--skill",
       "commit-changes",
       "--skill",
@@ -208,7 +452,16 @@ describe("getLocalCommands", () => {
     ]);
   });
 
-  it("installs the UK business English skill from its external source", () => {
+  it("asks skills add to link local Claude Code skills", () => {
+    const commands = getLocalCommands(["claude-code"], ["git"]);
+
+    expect(commands).toHaveLength(1);
+    expect(commands[0].args).toContain("universal");
+    expect(commands[0].args).toContain("claude-code");
+    expect(commands[0].args).not.toContain("--copy");
+  });
+
+  it("installs the external UK business English skill", () => {
     const commands = getLocalCommands([], ["language"]);
     expect(
       getCommandBySource(commands, "https://github.com/jezweb/claude-skills")
@@ -216,22 +469,73 @@ describe("getLocalCommands", () => {
     ).toContain("uk-business-english");
   });
 
-  it("installs the caveman skill when token-efficiency capability is selected", () => {
-    const commands = getLocalCommands([], ["token-efficiency"]);
-    expect(
-      getCommandBySource(commands, "https://github.com/juliusbrussee/caveman")
-        .args,
-    ).toContain("caveman");
+  it("installs the external Walking Skeleton skill", () => {
+    const commands = getLocalCommands([], ["walking-skeleton"]);
+
+    expect(commands).toHaveLength(1);
+    expect(getCommandBySource(commands, "aircury/walking-skeleton")).toEqual({
+      command: skillsRunner,
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "aircury/walking-skeleton",
+        "--skill",
+        "walking-skeleton",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description: "Install selected skills from aircury/walking-skeleton",
+    });
   });
 
-  it("installs capability-required skills without a separate skill selection", () => {
-    const commands = getLocalCommands([], ["frontend", "token-efficiency"]);
+  it("installs the DDD+Hexagonal skill only for DDD+Hexagonal", () => {
+    const hexagonalCommands = getLocalCommands([], ["ddd-hexagonal"]);
+    expect(
+      getCommandBySource(
+        hexagonalCommands,
+        "https://github.com/ccheney/robust-skills",
+      ).args,
+    ).toContain("clean-ddd-hexagonal");
 
-    expect(commands).toHaveLength(2);
-    expect(commands[0].args).toContain("frontend-layout-extractor");
-    expect(commands[0].args).toContain("frontend-experience-extractor");
-    expect(commands[0].args).toContain("frontend-ui-generator");
-    expect(commands[1].args).toContain("caveman");
+    const cleanCommands = getLocalCommands([], ["clean-architecture"]);
+    expect(
+      cleanCommands.some((command) =>
+        command.args.includes("https://github.com/ccheney/robust-skills"),
+      ),
+    ).toBe(false);
+
+    const layeredCommands = getLocalCommands([], ["layered-architecture"]);
+    expect(
+      layeredCommands.some((command) =>
+        command.args.includes("https://github.com/ccheney/robust-skills"),
+      ),
+    ).toBe(false);
+  });
+
+  it("installs the custom architecture skill only for Custom Architecture", () => {
+    const customCommands = getLocalCommands([], ["custom-architecture"]);
+    expect(
+      getCommandBySource(customCommands, aircurySkillsSource).args,
+    ).toContain("custom-architecture");
+
+    const cleanCommands = getLocalCommands([], ["clean-architecture"]);
+    expect(
+      cleanCommands.some((command) =>
+        command.args.includes("custom-architecture"),
+      ),
+    ).toBe(false);
+  });
+
+  it("does not install the hexagonal skill from defaults", () => {
+    const commands = getLocalCommands([], getInitialCapabilityIds("local"));
+
+    expect(
+      commands.some((command) =>
+        command.args.includes("https://github.com/ccheney/robust-skills"),
+      ),
+    ).toBe(false);
   });
 
   it("installs the specs skills from the Aircury source", () => {
@@ -239,6 +543,56 @@ describe("getLocalCommands", () => {
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toContain("specs-extractor");
     expect(commands[0].args).toContain("specs-interpreter");
+    expect(commands[0].args).toContain("semantic-line-breaks");
+    expect(commands[0].args).toContain("dbml-database-docs");
+  });
+
+  it("installs both database skills when the database capability is selected", () => {
+    const commands = getLocalCommands([], ["database"]);
+    expect(commands).toHaveLength(1);
+    expect(commands[0].args).toContain("blind-db-debugging");
+    expect(commands[0].args).toContain("db-schema-design");
+  });
+
+  it("installs the frontend skills from the Aircury source", () => {
+    const commands = getLocalCommands([], ["frontend"]);
+    expect(commands).toHaveLength(2);
+    expect(getCommandBySource(commands, aircurySkillsSource)).toEqual({
+      command: skillsRunner,
+      args: [
+        "-y",
+        "skills",
+        "add",
+        aircurySkillsSource,
+        "--skill",
+        "frontend-ui-workflow",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description: aircurySkillsDescription,
+    });
+    expect(
+      getCommandBySource(
+        commands,
+        "https://github.com/vercel-labs/agent-skills",
+      ),
+    ).toEqual({
+      command: skillsRunner,
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "https://github.com/vercel-labs/agent-skills",
+        "--skill",
+        "vercel-react-best-practices",
+        "-a",
+        "universal",
+        "-y",
+      ],
+      description:
+        "Install selected skills from https://github.com/vercel-labs/agent-skills",
+    });
   });
 });
 
@@ -246,13 +600,13 @@ describe("getGlobalCommands", () => {
   it("installs global skills for universal from selected capabilities", () => {
     const commands = getGlobalCommands([], ["git"]);
     expect(commands).toHaveLength(1);
-    expect(getCommandBySource(commands, "aircury/ai-framework").args).toContain(
+    expect(getCommandBySource(commands, aircurySkillsSource).args).toContain(
       "-g",
     );
-    expect(getCommandBySource(commands, "aircury/ai-framework").args).toContain(
+    expect(getCommandBySource(commands, aircurySkillsSource).args).toContain(
       "commit-changes",
     );
-    expect(getCommandBySource(commands, "aircury/ai-framework").args).toContain(
+    expect(getCommandBySource(commands, aircurySkillsSource).args).toContain(
       "requesting-code-review",
     );
   });
@@ -280,6 +634,49 @@ describe("runCommand", () => {
 
     expect(result.success).toBe(false);
     expect(result.stderr).toContain("aircury-missing-command");
+  });
+
+  it("installs the frontend skills globally from the Aircury source", () => {
+    const commands = getGlobalCommands([], ["frontend"]);
+    expect(commands).toHaveLength(2);
+    expect(getCommandBySource(commands, aircurySkillsSource)).toEqual({
+      command: skillsRunner,
+      args: [
+        "-y",
+        "skills",
+        "add",
+        aircurySkillsSource,
+        "--skill",
+        "frontend-ui-workflow",
+        "-a",
+        "universal",
+        "-g",
+        "-y",
+      ],
+      description: aircurySkillsDescription,
+    });
+    expect(
+      getCommandBySource(
+        commands,
+        "https://github.com/vercel-labs/agent-skills",
+      ),
+    ).toEqual({
+      command: skillsRunner,
+      args: [
+        "-y",
+        "skills",
+        "add",
+        "https://github.com/vercel-labs/agent-skills",
+        "--skill",
+        "vercel-react-best-practices",
+        "-a",
+        "universal",
+        "-g",
+        "-y",
+      ],
+      description:
+        "Install selected skills from https://github.com/vercel-labs/agent-skills",
+    });
   });
 });
 
@@ -370,6 +767,45 @@ describe("writeFile", () => {
 
     rmSync(dir, { recursive: true });
   });
+
+  it("merges the framework reference into an existing local CLAUDE.md", () => {
+    const dir = `${tmpdir()}/sdd-claude-merge-${Date.now()}`;
+    const file = getFileByPath(getLocalFiles(["claude-code"]), "CLAUDE.md");
+
+    writeFile(
+      {
+        path: "CLAUDE.md",
+        content: "# Existing Claude\n\nProject-specific Claude instructions.",
+        description: "",
+      },
+      dir,
+      false,
+    );
+    writeFile(file, dir, false);
+
+    const content = readFileSync(join(dir, "CLAUDE.md"), "utf-8");
+    expect(content).toContain("Project-specific Claude instructions.");
+    expect(content).toContain(
+      "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).",
+    );
+
+    rmSync(dir, { recursive: true });
+  });
+});
+
+describe("isMergeableFrameworkEntrypoint", () => {
+  it("marks AGENTS.md and CLAUDE.md as mergeable", () => {
+    expect(isMergeableFrameworkEntrypoint("AGENTS.md")).toBe(true);
+    expect(isMergeableFrameworkEntrypoint("CLAUDE.md")).toBe(true);
+    expect(isMergeableFrameworkEntrypoint("GEMINI.md")).toBe(false);
+  });
+});
+
+describe("isProtectedLocalCompanion", () => {
+  it("marks FRAMEWORK.local.md as protected", () => {
+    expect(isProtectedLocalCompanion("FRAMEWORK.local.md")).toBe(true);
+    expect(isProtectedLocalCompanion("FRAMEWORK.md")).toBe(false);
+  });
 });
 
 describe("mergeFrameworkReferenceIntoAgents", () => {
@@ -406,5 +842,21 @@ describe("mergeFrameworkReferenceIntoAgents", () => {
     );
 
     expect(merged).toBe(existing.endsWith("\n") ? existing : `${existing}\n`);
+  });
+
+  it("adds the managed-section warning to an existing framework section", () => {
+    const existing =
+      "# AGENTS.md\n\n## Framework\n\nThis project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).\n";
+    const merged = mergeFrameworkReferenceIntoAgents(
+      existing,
+      frameworkReference,
+    );
+
+    expect(merged).toContain(
+      "Framework-managed section. Add project-specific instructions outside this section.",
+    );
+    expect(merged).toContain(
+      "This project follows the Aircury engineering framework",
+    );
   });
 });

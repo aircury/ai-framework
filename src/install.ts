@@ -1,8 +1,10 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   type CapabilityId,
+  type CapabilityProfile,
   type CapabilityScope,
   createCapabilityProfile,
   getCapabilityFiles,
@@ -35,8 +37,57 @@ export interface InstallOptions {
 type SkillsRunner = "npx" | "bunx";
 let cachedSkillsRunner: SkillsRunner | null = null;
 
+const AIRCURY_SKILLS_SOURCE = "aircury/ai-framework";
+const PROJECT_PROFILE_PATH = ".aircury/framework.config.json";
+
+function getLocalAircurySkillsSource(): string | null {
+  const moduleDir = dirname(fileURLToPath(import.meta.url));
+  const root = join(moduleDir, "..");
+
+  if (existsSync(join(root, "src")) && existsSync(join(root, "skills"))) {
+    return root;
+  }
+
+  return null;
+}
+
+export function getAircurySkillsSource(): string {
+  return (
+    process.env.AIRCURY_SKILLS_SOURCE?.trim() ||
+    getLocalAircurySkillsSource() ||
+    AIRCURY_SKILLS_SOURCE
+  );
+}
+
+function resolveSkillSource(source: string): string {
+  if (source !== AIRCURY_SKILLS_SOURCE) return source;
+
+  return getAircurySkillsSource();
+}
+
 const FRAMEWORK_REFERENCE_SENTENCE =
   "This project follows the Aircury engineering framework defined in [FRAMEWORK.md](./FRAMEWORK.md).";
+const MERGEABLE_FRAMEWORK_ENTRYPOINTS = new Set(["AGENTS.md", "CLAUDE.md"]);
+const FRAMEWORK_LOCAL_PATH = "FRAMEWORK.local.md";
+const AGENTS_FRAMEWORK_SECTION_HEADING = "## Framework";
+const AGENTS_FRAMEWORK_SECTION_NOTICE =
+  "> Framework-managed section. Add project-specific instructions outside this section.";
+const FRAMEWORK_LOCAL_CONTENT = `# FRAMEWORK.local.md
+
+Project-specific instructions, additions, and overrides for this repository.
+
+This file is intentionally local to the project. Aircury AI Framework installs it as a starter file but never overwrites it during updates.
+
+Add repository-specific rules below.
+`;
+
+export function isMergeableFrameworkEntrypoint(path: string): boolean {
+  return MERGEABLE_FRAMEWORK_ENTRYPOINTS.has(path);
+}
+
+export function isProtectedLocalCompanion(path: string): boolean {
+  return path === FRAMEWORK_LOCAL_PATH;
+}
 
 function getBaseFiles(): InstallFile[] {
   return [
@@ -55,6 +106,7 @@ export function getLocalFiles(
 ): InstallFile[] {
   const profile = createCapabilityProfile(capabilityIds, {
     britishEnglish: options?.britishEnglish,
+    tools,
   });
   const files: InstallFile[] = [
     {
@@ -63,12 +115,17 @@ export function getLocalFiles(
       description: "Framework rules (source of truth)",
     },
     {
+      path: FRAMEWORK_LOCAL_PATH,
+      content: FRAMEWORK_LOCAL_CONTENT,
+      description: "Project-specific framework instructions",
+    },
+    {
       path: "AGENTS.md",
       content: generateAgents(profile.capabilities, options),
       description: "Agent instructions (standard convention)",
     },
     {
-      path: ".aircury/framework.config.json",
+      path: PROJECT_PROFILE_PATH,
       content: `${JSON.stringify(profile, null, 2)}\n`,
       description: "Installed capability profile",
     },
@@ -93,6 +150,37 @@ export function getLocalFiles(
   }
 
   return files;
+}
+
+export function readProjectProfile(cwd: string): CapabilityProfile | null {
+  const profilePath = join(cwd, PROJECT_PROFILE_PATH);
+  if (!existsSync(profilePath)) return null;
+
+  try {
+    const profile: unknown = JSON.parse(readFileSync(profilePath, "utf-8"));
+    return isProjectProfile(profile) ? profile : null;
+  } catch {
+    return null;
+  }
+}
+
+function isProjectProfile(value: unknown): value is CapabilityProfile {
+  if (!value || typeof value !== "object") return false;
+
+  const profile = value as Partial<CapabilityProfile>;
+  return (
+    profile.version === 2 &&
+    Array.isArray(profile.capabilities) &&
+    profile.capabilities.every(
+      (capability) => typeof capability === "string",
+    ) &&
+    (profile.tools === undefined ||
+      (Array.isArray(profile.tools) &&
+        profile.tools.every((tool) => typeof tool === "string"))) &&
+    typeof profile.language === "object" &&
+    profile.language !== null &&
+    typeof profile.language.britishEnglish === "boolean"
+  );
 }
 
 export function getGlobalFiles(tools: Tool[]): InstallFile[] {
@@ -127,7 +215,8 @@ function buildSkillsAddCommand(
   if (agents.length === 0 || skillNames.length === 0) return null;
 
   const command = getSkillsRunner();
-  const args = ["-y", "skills", "add", source];
+  const resolvedSource = resolveSkillSource(source);
+  const args = ["-y", "skills", "add", resolvedSource];
   for (const skillName of skillNames) {
     args.push("--skill", skillName);
   }
@@ -142,7 +231,7 @@ function buildSkillsAddCommand(
   return {
     command,
     args,
-    description: `Install selected skills from ${source}`,
+    description: `Install selected skills from ${resolvedSource}`,
   };
 }
 
@@ -235,7 +324,19 @@ export function writeFile(
   isGlobal: boolean,
 ): void {
   const fullPath = isGlobal ? file.path : join(cwd, file.path);
-  if (!isGlobal && file.path === "AGENTS.md" && existsSync(fullPath)) {
+  if (
+    !isGlobal &&
+    isProtectedLocalCompanion(file.path) &&
+    existsSync(fullPath)
+  ) {
+    return;
+  }
+
+  if (
+    !isGlobal &&
+    isMergeableFrameworkEntrypoint(file.path) &&
+    existsSync(fullPath)
+  ) {
     writeFileSync(
       fullPath,
       mergeFrameworkReferenceIntoAgents(
@@ -263,6 +364,17 @@ export function mergeFrameworkReferenceIntoAgents(
   }
 
   if (trimmedExisting.includes(FRAMEWORK_REFERENCE_SENTENCE)) {
+    if (trimmedExisting.includes(AGENTS_FRAMEWORK_SECTION_NOTICE)) {
+      return `${trimmedExisting}\n`;
+    }
+
+    if (trimmedExisting.includes(AGENTS_FRAMEWORK_SECTION_HEADING)) {
+      return `${trimmedExisting.replace(
+        AGENTS_FRAMEWORK_SECTION_HEADING,
+        `${AGENTS_FRAMEWORK_SECTION_HEADING}\n\n${AGENTS_FRAMEWORK_SECTION_NOTICE}`,
+      )}\n`;
+    }
+
     return `${trimmedExisting}\n`;
   }
 

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import { FRAMEWORK_MAINTAINED_NOTICE } from "../src/capabilities";
 import { renderAgents, renderFramework } from "../src/renderer";
 import {
   AGENTS,
@@ -16,6 +17,8 @@ describe("templates", () => {
     });
 
     it("contains core framework sections", () => {
+      expect(FRAMEWORK).toContain(FRAMEWORK_MAINTAINED_NOTICE);
+      expect(FRAMEWORK).toContain("FRAMEWORK.local.md");
       expect(FRAMEWORK).toContain("## Core Workflow Constitution");
       expect(FRAMEWORK).toContain("## Definition of Done");
       expect(FRAMEWORK).toContain("## Workflow Framework");
@@ -25,7 +28,51 @@ describe("templates", () => {
     it("matches the generated default profile", () => {
       expect(generateFramework()).toBe(FRAMEWORK);
       expect(renderFramework()).toBe(FRAMEWORK);
-      expect(FRAMEWORK).toContain("## Token Efficiency");
+      expect(FRAMEWORK).not.toContain("## Token Efficiency");
+    });
+
+    it("keeps generated framework materially smaller than the old inline version", () => {
+      expect(FRAMEWORK.trimEnd().split("\n").length).toBeLessThan(250);
+    });
+
+    it("does not require commits as part of completion", () => {
+      expect(FRAMEWORK).toContain(
+        "Create git commits only when the user explicitly asks, using [Conventional Commits](https://www.conventionalcommits.org/) format.",
+      );
+      expect(FRAMEWORK).toContain(
+        "When committing, organise changes into atomic Conventional Commits",
+      );
+      expect(FRAMEWORK).not.toContain(
+        "Commit changes using the `commit-changes` skill",
+      );
+      expect(FRAMEWORK).not.toContain("atomic deployment");
+    });
+
+    it("enforces analysis after Spec Kit task generation", () => {
+      expect(FRAMEWORK).toContain(
+        "Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-tasks` → `spec-kit-analyse` → `spec-kit-implement`.",
+      );
+      expect(FRAMEWORK).toContain(
+        "`spec-kit-analyse` MUST run after tasks to validate consistency across all artefacts and user-story coverage.",
+      );
+      expect(FRAMEWORK).toContain(
+        "CRITICAL findings from `spec-kit-analyse` block implementation.",
+      );
+      expect(FRAMEWORK).toContain(
+        "`spec-kit-checklist` may be used as a review or quality gate, but it does not replace required sequence steps.",
+      );
+      expect(FRAMEWORK).toContain(
+        "Do not skip ahead when an earlier required Spec Kit step has not been completed.",
+      );
+    });
+
+    it("uses British English spelling in generated framework content", () => {
+      expect(FRAMEWORK).toContain("observable behaviour");
+      expect(FRAMEWORK).toContain("Analyse the request");
+      expect(FRAMEWORK).toContain("validate consistency across all artefacts");
+      expect(FRAMEWORK).not.toMatch(
+        /\b(behavior|Behavior|analyze|Analyze|artifact|Artifact|artifacts|Artifacts)\b/,
+      );
     });
   });
 
@@ -37,6 +84,10 @@ describe("templates", () => {
 
     it("references FRAMEWORK.md", () => {
       expect(AGENTS).toContain("FRAMEWORK.md");
+      expect(AGENTS).toContain(
+        "Framework-managed section. Add project-specific instructions outside this section.",
+      );
+      expect(AGENTS).toContain("FRAMEWORK.local.md");
       expect(AGENTS).toContain("single source of truth");
       expect(AGENTS).not.toContain(
         "Selecting `plan-build` authorises planning first, not automatic implementation.",
@@ -46,8 +97,6 @@ describe("templates", () => {
     it("matches the generated default profile", () => {
       expect(generateAgents()).toBe(AGENTS);
       expect(renderAgents()).toBe(AGENTS);
-      expect(AGENTS).toContain("`caveman` is already active by default");
-      expect(AGENTS).toContain("Start every new session in `caveman full`");
     });
   });
 
@@ -72,24 +121,104 @@ describe("templates", () => {
   describe("capability-aware generation", () => {
     it("adds ADR guidance only when the ADR capability is enabled", () => {
       expect(generateFramework(["decision-records"])).toContain(
-        "## Architecture Decision Records",
+        "docs/aircury/capabilities/decision-records.md",
       );
       expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/decision-records.md",
+      );
+      expect(generateFramework(["decision-records"])).not.toContain(
         "## Architecture Decision Records",
       );
     });
 
     it("adds testing guidance only when the testing capability is enabled", () => {
-      expect(generateFramework(["testing"])).toContain("## TDD Workflow");
-      expect(generateFramework([])).not.toContain("## TDD Workflow");
+      expect(generateFramework(["testing"])).toContain(
+        "docs/aircury/capabilities/testing.md",
+      );
+      expect(generateFramework(["testing"])).not.toContain("## TDD Workflow");
+      expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/testing.md",
+      );
     });
 
-    it("adds architecture rules only when architecture capabilities are enabled", () => {
-      expect(generateFramework(["architecture"])).toContain(
-        "## Non-Negotiable Architecture Rules",
+    it("adds Walking Skeleton guidance only when the capability is enabled", () => {
+      expect(generateFramework(["walking-skeleton"])).toContain(
+        "docs/aircury/capabilities/walking-skeleton.md",
+      );
+      expect(generateFramework(["walking-skeleton"])).toContain(
+        "external walking-skeleton skill",
+      );
+      expect(generateFramework()).not.toContain(
+        "docs/aircury/capabilities/walking-skeleton.md",
+      );
+    });
+
+    it("adds architecture rules only when DDD+Hexagonal is enabled", () => {
+      expect(generateFramework(["ddd-hexagonal"])).toContain(
+        "docs/aircury/capabilities/ddd-hexagonal.md",
+      );
+      expect(generateFramework(["clean-architecture"])).toContain(
+        "docs/aircury/capabilities/clean-architecture.md",
+      );
+      expect(generateFramework(["layered-architecture"])).toContain(
+        "docs/aircury/capabilities/layered-architecture.md",
+      );
+      expect(generateFramework(["custom-architecture"])).toContain(
+        "docs/aircury/capabilities/custom-architecture.md",
+      );
+      expect(generateFramework(["custom-architecture"])).toContain(
+        "The project-specific architecture source of truth is `FRAMEWORK.local.md` under `## Project Architecture`.",
       );
       expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/ddd-hexagonal.md",
+      );
+      expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/clean-architecture.md",
+      );
+      expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/layered-architecture.md",
+      );
+      expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/custom-architecture.md",
+      );
+      expect(generateFramework([])).not.toContain(
+        "The project-specific architecture source of truth is `FRAMEWORK.local.md`",
+      );
+      expect(generateFramework(["ddd-hexagonal"])).not.toContain(
         "## Non-Negotiable Architecture Rules",
+      );
+      expect(generateFramework(["clean-architecture"])).not.toContain(
+        "## Clean Architecture Rules",
+      );
+      expect(generateFramework(["ddd-hexagonal"])).toContain(
+        "DDD and hexagonal architecture boundaries still hold.",
+      );
+      expect(generateFramework(["ddd-hexagonal"])).not.toContain(
+        "Clean Architecture dependencies still point inward",
+      );
+      expect(generateFramework(["clean-architecture"])).toContain(
+        "Clean Architecture dependencies still point inward and entities/use cases remain framework-independent.",
+      );
+      expect(generateFramework(["clean-architecture"])).not.toContain(
+        "DDD and hexagonal architecture boundaries still hold.",
+      );
+      expect(generateFramework(["layered-architecture"])).toContain(
+        "Layered Architecture boundaries still hold",
+      );
+      expect(generateFramework(["layered-architecture"])).not.toContain(
+        "Clean Architecture dependencies still point inward",
+      );
+      expect(generateFramework(["layered-architecture"])).not.toContain(
+        "DDD and hexagonal architecture boundaries still hold.",
+      );
+      expect(generateFramework(["custom-architecture"])).toContain(
+        "The project-specific architecture section in `FRAMEWORK.local.md` exists",
+      );
+      expect(generateFramework(["custom-architecture"])).not.toContain(
+        "Clean Architecture dependencies still point inward",
+      );
+      expect(generateFramework(["custom-architecture"])).not.toContain(
+        "DDD and hexagonal architecture boundaries still hold.",
       );
     });
 
@@ -98,9 +227,26 @@ describe("templates", () => {
       expect(generateAgents(["code-style"])).toBe(generateAgents([]));
     });
 
+    it("adds design-system search guidance when the frontend module is enabled", () => {
+      expect(generateFramework(["frontend"])).toContain(
+        "docs/aircury/capabilities/frontend.md",
+      );
+      expect(generateFramework(["frontend"])).toContain(
+        "extracted from the existing frontend through `frontend-ui-workflow`",
+      );
+      expect(generateFramework(["frontend"])).not.toContain(
+        "Use the `frontend-style-extractor` skill on the target frontend",
+      );
+    });
+
     it("adds code style header to FRAMEWORK.md when enabled", () => {
-      expect(generateFramework(["code-style"])).toContain("## Code Style");
-      expect(generateFramework([])).not.toContain("## Code Style");
+      expect(generateFramework(["code-style"])).toContain(
+        "docs/aircury/capabilities/code-style.md",
+      );
+      expect(generateFramework(["code-style"])).not.toContain("## Code Style");
+      expect(generateFramework([])).not.toContain(
+        "docs/aircury/capabilities/code-style.md",
+      );
     });
 
     it("adds British English guidance when enabled", () => {
@@ -112,19 +258,6 @@ describe("templates", () => {
       );
       expect(generateFramework([])).not.toContain(
         "Use British English spelling",
-      );
-    });
-
-    it("adds token-efficiency guidance only when the capability is enabled", () => {
-      expect(generateFramework(["token-efficiency"])).toContain(
-        "## Token Efficiency",
-      );
-      expect(generateFramework(["token-efficiency"])).toContain(
-        "Load and apply the `caveman` skill in `full` mode",
-      );
-      expect(generateFramework([])).not.toContain("## Token Efficiency");
-      expect(generateFramework([])).not.toContain(
-        "Load and apply the `caveman` skill in `full` mode",
       );
     });
   });

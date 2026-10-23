@@ -1,6 +1,17 @@
-- Use the `frontend-layout-extractor` skill to generate `specs/features/<name>/layout.md` capturing the structural requirements.
-- Use the `frontend-experience-extractor` skill to generate `specs/features/<name>/experience.md` capturing behavioral and UX requirements.
-- Use the `frontend-ui-generator` skill to build the UI based on both the `layout.md` and `experience.md` found in the feature folder.
+- Use the `frontend-ui-workflow` skill for frontend UI work that needs layout, experience, design-system extraction, clean implementation planning, or UI generation.
+- The `frontend-ui-workflow` skill is self-contained and includes bundled references for structural extraction, behavioral extraction, style extraction, clean implementation planning, and final UI generation.
+- Use it to generate or update `specs/features/<name>/layout.md`, `specs/features/<name>/experience.md`, `specs/features/<name>/implementation-plan.md`, and `specs/ui/style-guide.md` when the task is substantial.
+- Load `vercel-react-best-practices` only when React/Next performance, hooks, rendering, data-fetching, bundle, or server/client boundary patterns matter.
+- For substantial frontend work, read `specs/ui/frontend-workflow.md` before implementing.
 
-- Maintain `specs/ui/style-guide.md` as the canonical source for all visual tokens.
-- For legacy replication: prioritize structural fidelity in `layout.md` and visual consistency in the final implementation.
+- Maintain `specs/ui/style-guide.md` as the canonical source for all visual tokens and reusable patterns.
+- Frontend work is frontend-only by default: do not modify backend files, API endpoints, server actions, schemas, migrations, services, jobs, queues, auth policies, or infrastructure unless the user explicitly authorizes backend work.
+- If backend support appears necessary, ask permission before touching backend files and name the exact backend layer or files required.
+- Before creating substantial UI, inspect existing shared components, hooks, utilities, form patterns, and local primitives.
+- Create feature hooks for non-trivial local orchestration, form coordination, filters, derived state, permission gates, query adaptation, data shaping, multi-step flow state, or complex event handlers. Feature hooks do not require cross-feature reuse.
+- Create or update common hooks and shared components when repeated behaviour or UI structure has stable reuse across screens or features; keep one-off UI and simple visual state local to the feature.
+- Render date entry through a shared date primitive matching the target locale's day/month order; for UK-locale UI, order controls Day-before-Month in date pickers, recurrence editors, and numeric day/month selectors.
+- Do not skip extraction, invent unsupported tokens, or hardcode values when the project already defines an equivalent token or primitive.
+- New UI must be shippable without a cleanup refactor unless requirements change.
+- Do not use `vercel-react-best-practices` as a substitute for component responsibility, naming, file organization, or readable JSX structure.
+- For legacy replication: prioritise structural fidelity in `layout.md` and visual consistency in the final implementation.

@@ -5,7 +5,7 @@
 
 Ensure code consistency by adhering to the project's configured tools.
 
-- Analyze `package.json` to identify the linter and parser used (e.g., Biome, ESLint, Prettier, Oxlint).
+- Analyse `package.json` to identify the linter and parser used (e.g., Biome, ESLint, Prettier, Oxlint).
 - Check `devDependencies` and `dependencies` for tool-specific packages.
 - Locate configuration files (`.eslintrc.*`, `prettier.config.js`, `biome.json`, `oxlint.json`).
 - If a tool is detected, follow its specific rules and formatting conventions.

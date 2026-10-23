@@ -5,22 +5,32 @@ import agentsTemplateSource from "../templates/agents.md.hbs" with {
 import frameworkTemplateSource from "../templates/framework.md.hbs" with {
   type: "text",
 };
-import type { CapabilityId, CapabilityManifest } from "./capabilities";
-import { getSelectedCapabilities } from "./capabilities";
+import type { CapabilityId } from "./capabilities";
+import {
+  getCapabilityDetailPath,
+  getSelectedCapabilities,
+  hasCapabilityDetail,
+} from "./capabilities";
+
+interface InstalledCapabilityView {
+  id: CapabilityId;
+  description: string;
+  detailPath?: string;
+}
 
 interface RendererViewModel {
-  installedCapabilities: Pick<CapabilityManifest, "id" | "description">[];
-  frameworkSections: string[];
-  agentRules: string[];
+  installedCapabilities: InstalledCapabilityView[];
+  includesCapabilityDetails: boolean;
   includesDecisionRecords: boolean;
   includesTesting: boolean;
-  includesArchitecture: boolean;
+  includesDddHexagonalArchitecture: boolean;
+  includesCleanArchitecture: boolean;
+  includesLayeredArchitecture: boolean;
+  includesCustomArchitecture: boolean;
   includesCodeStyle: boolean;
-  includesAirsyncMemory: boolean;
   includesErrorHandling: boolean;
   includesStructuredLogging: boolean;
   includesFrontend: boolean;
-  includesTokenEfficiency: boolean;
   enforceBritishEnglish: boolean;
 }
 
@@ -31,10 +41,6 @@ const renderAgentsTemplate = Handlebars.compile(agentsTemplateSource, {
   noEscape: true,
 });
 
-function isString(value: unknown): value is string {
-  return typeof value === "string";
-}
-
 function createViewModel(
   capabilityIds?: CapabilityId[],
   options?: { britishEnglish?: boolean },
@@ -43,30 +49,25 @@ function createViewModel(
   const selectedIds = new Set(
     selectedCapabilities.map((capability) => capability.id),
   );
-  const selectedModuleIds = new Set(
-    selectedCapabilities.flatMap((capability) => capability.modules ?? []),
-  );
-
   return {
-    installedCapabilities: selectedCapabilities.map(({ id, description }) => ({
-      id,
-      description,
+    installedCapabilities: selectedCapabilities.map((capability) => ({
+      id: capability.id,
+      description: capability.description,
+      detailPath: hasCapabilityDetail(capability)
+        ? getCapabilityDetailPath(capability.id)
+        : undefined,
     })),
-    frameworkSections: selectedCapabilities
-      .map((capability) => capability.framework)
-      .filter(isString),
-    agentRules: selectedCapabilities
-      .map((capability) => capability.agents)
-      .filter(isString),
+    includesCapabilityDetails: selectedCapabilities.some(hasCapabilityDetail),
     includesDecisionRecords: selectedIds.has("decision-records"),
     includesTesting: selectedIds.has("testing"),
-    includesArchitecture: selectedIds.has("architecture"),
+    includesDddHexagonalArchitecture: selectedIds.has("ddd-hexagonal"),
+    includesCleanArchitecture: selectedIds.has("clean-architecture"),
+    includesLayeredArchitecture: selectedIds.has("layered-architecture"),
+    includesCustomArchitecture: selectedIds.has("custom-architecture"),
     includesCodeStyle: selectedIds.has("code-style"),
-    includesAirsyncMemory: selectedModuleIds.has("airsync-memory"),
-    includesErrorHandling: selectedModuleIds.has("error-handling"),
-    includesStructuredLogging: selectedModuleIds.has("structured-logging"),
+    includesErrorHandling: selectedIds.has("resilience"),
+    includesStructuredLogging: selectedIds.has("resilience"),
     includesFrontend: selectedIds.has("frontend"),
-    includesTokenEfficiency: selectedIds.has("token-efficiency"),
     enforceBritishEnglish: options?.britishEnglish ?? false,
   };
 }

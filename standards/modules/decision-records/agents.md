@@ -1,2 +1,5 @@
-- Material architectural or workflow decisions MUST be captured or superseded in `specs/decisions/`.
-- When an ADR is created or superseded, agents MUST also propose a corresponding entry to Airsync INBOX using `memory_kind: "note"` and `scope: "team"` with tags including `"adr"` and the ADR number. This ensures team-wide discoverability beyond the current project.
+- Material architectural or workflow decisions MUST be captured in `specs/decisions/`.
+- ADR filenames MUST use a unique lowercase, hyphen-separated descriptive slug.
+- Agents MUST keep one ADR for each decision and revise it when the decision evolves.
+- ADR links MUST use explicit repository-relative Markdown paths, such as `[Use Redis-backed sessions](specs/decisions/use-redis-backed-sessions.md)`.
+- Each ADR MUST include `Context`, `Decision`, and `Consequences` sections.

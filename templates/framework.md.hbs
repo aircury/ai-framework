@@ -1,5 +1,7 @@
 # FRAMEWORK.md
 
+> This file is maintained by Aircury AI Framework. Do not edit it directly. Add project-specific rules in FRAMEWORK.local.md.
+
 ## Purpose
 
 This framework defines the core workflow, specification, and agent-routing rules for repositories that adopt it.
@@ -8,36 +10,57 @@ Optional standards are composed at install time so teams can keep the shared del
 
 When tradeoffs appear, prefer maintainability, correctness, and explicit intent over hidden conventions or tool-driven shortcuts.
 
+## Project-Specific Instructions
+
+Use `FRAMEWORK.local.md` as the official repository-local companion file for project-specific instructions, additions, and overrides. Install and update operations do not manage or overwrite that file.
+
 ## Core Workflow Constitution
 
 The following rules apply to every installation profile:
 
 - `specs/features/` is canonical and versioned.
 - `specs/changes/` is optional working state and is not versioned.
-- Any workflow mode that changes observable system behavior MUST end with an update to `specs/features/`.
-- Use the `commit-changes` skill to organise working tree changes into atomic, functional, and semantic commits using the [Conventional Commits](https://www.conventionalcommits.org/) format.
+- Any workflow mode that changes observable system behaviour MUST end with an update to `specs/features/`.
+- Prepare working tree changes as atomic, functional, and semantic units. Create git commits only when the user explicitly asks, using [Conventional Commits](https://www.conventionalcommits.org/) format.
 - Before starting any non-trivial change, the agent MUST act as a routing meta-agent and ask the user how to proceed.
 - Optional standards are enabled through `.aircury/framework.config.json`.
+
+## Engineering Non-Negotiables
+
+These rules apply to every installation profile, regardless of selected capabilities:
+
+- TDD is the default implementation discipline when automated testing is feasible: write or update a failing test for one observable behaviour, make it pass with the smallest correct change, then refactor while keeping tests green.
+- Do not bypass TDD for bugs, business logic, regressions, contracts, or high-risk behaviour unless the user explicitly accepts that automated coverage is not feasible.
+- SOLID principles are mandatory design constraints: keep responsibilities focused, dependencies explicit and substitutable, interfaces narrow, and high-level policy independent from low-level details.
+- Clean Code is mandatory: use intention-revealing names, simple control flow, cohesive functions, clear errors, and code that can be reviewed without decoding hidden conventions.
+- Architecture boundaries must remain explicit. UI, transport, persistence, framework, and vendor details must not leak into core business rules.
+- Prefer the simplest design that preserves correctness and future change. Do not add speculative abstractions, dead code, broad public APIs, or clever indirection.
+- Any exception to these rules must be called out with the tradeoff and verification that makes the exception safe.
 
 ## Installed Capabilities
 
 {{#if installedCapabilities}}
 {{#each installedCapabilities}}
-- `{{id}}` — {{description}}
+- `{{id}}` — {{description}}{{#if detailPath}} See [`{{detailPath}}`](./{{detailPath}}).{{/if}}
 {{/each}}
 {{else}}
 No optional capabilities are enabled. The repository still uses the core workflow constitution.
 {{/if}}
 
-{{#each frameworkSections}}
-{{this}}
+{{#if includesCapabilityDetails}}
+Detailed capability rules are generated as separate files under [`docs/aircury/capabilities/`](./docs/aircury/capabilities/). `FRAMEWORK.md` remains the governing entrypoint; linked capability docs define the detailed standards for enabled capabilities.
+{{/if}}
 
-{{/each}}
+{{#if includesCustomArchitecture}}
+This installation uses Custom Architecture. The project-specific architecture source of truth is `FRAMEWORK.local.md` under `## Project Architecture`.
+{{/if}}
+
 ## Coding Standards
 
 {{#if enforceBritishEnglish}}
 - Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy.
 - Prefer British English identifiers and names when introducing new code, unless an external API, tool, or established project interface requires a different spelling.
+- Order date entry controls Day-before-Month in UI: date pickers, recurrence editors, and numeric day/month selectors. Expose date entry through a shared date primitive with this order built in; do not hand-roll date control ordering per screen.
 {{/if}}
 - Use explicit names that reflect the problem space.
 - Keep functions small, cohesive, and intention-revealing.
@@ -45,35 +68,37 @@ No optional capabilities are enabled. The repository still uses the core workflo
 - Fail with clear errors and documented tradeoffs.
 - Avoid boolean flag arguments when a richer type or explicit method is clearer.
 - Prefer composition over inheritance.
-- Keep modules deep: small public surface, meaningful internal behavior.
+- Keep modules deep: small public surface, meaningful internal behaviour.
 - Remove dead code and speculative abstractions.
 
 ## Change Workflow
 
 For any non-trivial change:
 
-1. Identify the affected capability and observable behavior.
-2. Define or confirm the public behavior.
+1. Identify the affected capability and observable behaviour.
+2. Define or confirm the public behaviour.
 3. Choose the workflow mode with the user through meta-agent routing.
 4. Implement inside the selected standards profile.
-5. Refactor for clarity and boundary enforcement.
-6. Run relevant verification, then broader checks.
-7. Commit changes using the `commit-changes` skill for atomic deployment.
+5. Follow the engineering non-negotiables: TDD where feasible, SOLID design, Clean Code, and explicit boundaries.
+6. Refactor for clarity and boundary enforcement.
+7. Run relevant verification, then broader checks.
+8. Prepare atomic working tree changes and summarise what is ready for review.
 
 ## Agent Operating Rules
 
 Before starting any task:
 
 - Read `FRAMEWORK.md` in full if you have not already done so in this session.
+- Read `FRAMEWORK.local.md` when it exists and apply its project-specific instructions alongside this framework.
 - Read the relevant specs in `specs/features/` that relate to the area you are changing.
-{{#if includesAirsyncMemory}}
-- Search Airsync memory for relevant context before making decisions. Use `memory_search` with targeted queries about the area you are working on.
+{{#if includesCapabilityDetails}}
+- Read the linked capability docs in `docs/aircury/capabilities/` for the enabled standards that apply to your task.
 {{/if}}
 {{#if includesDecisionRecords}}
 - Read the relevant ADRs in `specs/decisions/` when the area is governed by prior decisions.
 {{/if}}
 {{#if includesCodeStyle}}
-- Analyze `package.json` and local config files to identify the project's linting and formatting strategy.
+- Analyse `package.json` and local config files to identify the project's linting and formatting strategy.
 {{/if}}
 - Act as a routing meta-agent: analyse the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
 
@@ -81,20 +106,15 @@ While executing work:
 
 {{#if enforceBritishEnglish}}
 - Use British English spelling in documentation, specs, commit messages, skill text, and user-facing copy unless an external interface requires a different spelling.
+- Order date entry controls Day-before-Month in any UI you generate or modify, preferably via the project's shared date primitive.
 {{/if}}
-- All observable behavior changes MUST update `specs/features/` before the work is done.
-- Use the `commit-changes` skill to organise working tree changes into atomic, functional, and semantic commits using Conventional Commit format.
+- All observable behaviour changes MUST update `specs/features/` before the work is done.
+- Follow TDD for observable behaviour changes when automated testing is feasible: failing test, minimum implementation, refactor.
+- Preserve SOLID design, Clean Code, and explicit architecture boundaries in every change.
+- Use the `commit-changes` skill only when the user asks you to create commits. When committing, organise changes into atomic Conventional Commits; until then, keep changes organised in the working tree for review.
 - After the user selects a workflow mode, follow `FRAMEWORK.md § Mode execution rules` exactly.
 - Selecting `plan-build` authorises planning first, not automatic implementation.
 - Selecting `spec-kit` requires following the full Spec Kit sequence in order unless the user explicitly changes modes.
-- Selecting an OpenSpec workflow requires following its named sequence in order unless the user explicitly changes modes.
-{{#if includesAirsyncMemory}}
-- Capture reusable knowledge in Airsync INBOX when you discover validated patterns, repeated pitfalls, or team conventions. Search before proposing to avoid duplicates.
-- Every ADR created or superseded MUST also be proposed to Airsync as a `note` with `scope: "team"` and tags `["adr", "ADR-XXXX"]`.
-{{/if}}
-{{#each agentRules}}
-{{this}}
-{{/each}}
 
 ## Workflow Framework
 
@@ -103,8 +123,6 @@ This framework uses a framework-agnostic change workflow.
 ### Supported modes
 
 - `plan-build`: complete a planning step first, then implement only after the plan is finished and the user asks to proceed.
-- `propose-apply-complete`: create working artifacts, implement from them, then sync canonical specs.
-- `explore-propose-apply-complete`: explore first when the problem is unclear, then formalise and implement.
 - `spec-kit`: spec-driven development using the Spec Kit workflow. Best for new features, cross-cutting concerns, or work requiring formal spec governance.
 
 These are operating modes, not different specification systems. They all converge on the same canonical source of truth: `specs/features/`.
@@ -115,7 +133,7 @@ Before starting any non-trivial change, the agent MUST act as a routing meta-age
 
 **Routing protocol:**
 
-1. Analyze the request for complexity, ambiguity, and scope.
+1. Analyse the request for complexity, ambiguity, and scope.
 2. Recommend one of the supported modes and briefly explain why.
 3. Present the user with explicit workflow choices.
 4. Ask the user how they want to proceed before doing any implementation work.
@@ -128,39 +146,40 @@ Once the user selects a mode, the agent MUST follow that mode strictly. Do not m
   1. Plan first.
   2. Stop after the plan and present it clearly.
   3. Do not start building in the same step unless the user explicitly asks to continue with implementation after seeing the plan.
-- `propose-apply-complete`:
-  1. Run `open-spec-propose` first.
-  2. Only after proposal artifacts exist, run `open-spec-apply`.
-  3. After implementation is done, run `open-spec-complete`.
-  4. Do not jump directly to apply or complete if the selected workflow has not reached that step.
-- `explore-propose-apply-complete`:
-  1. Run `open-spec-explore` first.
-  2. Do not implement during explore mode.
-  3. After exploration, continue with `open-spec-propose`, then `open-spec-apply`, then `open-spec-complete` in order.
 - `spec-kit`:
-  1. Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-analyse` → `spec-kit-tasks` → `spec-kit-implement`.
-  2. `spec-kit-checklist` may be used as a review or quality gate, but it does not replace required sequence steps.
-  3. Do not skip ahead to implementation, planning, or task generation when an earlier required Spec Kit step has not been completed.
+  1. Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-tasks` → `spec-kit-analyse` → `spec-kit-implement`.
+  2. `spec-kit-analyse` MUST run after tasks to validate consistency across all artefacts and user-story coverage.
+  3. CRITICAL findings from `spec-kit-analyse` block implementation. Stop the workflow and fix them before continuing to `spec-kit-implement`.
+  4. `spec-kit-checklist` may be used as a review or quality gate, but it does not replace required sequence steps.
+  5. Do not skip ahead when an earlier required Spec Kit step has not been completed.
 
 ## Definition of Done
 
 A change is not done unless all of the following are true:
 
 - Relevant verification has been run for the affected scope.
+- TDD was followed where automated testing was feasible, or the exception is explicit and justified.
 - Naming matches the chosen problem language of the project.
-- No unnecessary abstractions or framework leakage were introduced.
-- Relevant spec in `specs/features/` reflects the current behavior.
+- SOLID, Clean Code, and explicit architecture boundaries were preserved.
+- No unnecessary abstractions, dead code, or framework leakage were introduced.
+- Relevant spec in `specs/features/` reflects the current behaviour.
 {{#if includesTesting}}
-- Relevant behavior is covered by tests.
+- Relevant behaviour is covered by tests.
 {{/if}}
-{{#if includesArchitecture}}
-- Enabled architecture boundaries still hold.
+{{#if includesDddHexagonalArchitecture}}
+- DDD and hexagonal architecture boundaries still hold.
+{{/if}}
+{{#if includesCleanArchitecture}}
+- Clean Architecture dependencies still point inward and entities/use cases remain framework-independent.
+{{/if}}
+{{#if includesLayeredArchitecture}}
+- Layered Architecture boundaries still hold: controllers do not bypass services for business behaviour, services own application logic, and repositories isolate persistence.
+{{/if}}
+{{#if includesCustomArchitecture}}
+- The project-specific architecture section in `FRAMEWORK.local.md` exists, reflects the current repository structure, and was updated if architectural boundaries changed.
 {{/if}}
 {{#if includesDecisionRecords}}
-- Material architectural decisions are captured or superseded in `specs/decisions/` and proposed to Airsync.
-{{/if}}
-{{#if includesAirsyncMemory}}
-- Relevant Airsync memory has been searched and new learnings have been captured in INBOX.
+- Material architectural decisions are captured and revised in `specs/decisions/`.
 {{/if}}
 {{#if includesErrorHandling}}
 - Error paths distinguish operational failures from programmer errors and handle them accordingly.
@@ -172,21 +191,23 @@ A change is not done unless all of the following are true:
 - The code style is consistent with the project's configured tools.
 {{/if}}
 {{#if includesFrontend}}
-- Visual modifications align with the project design system tokens in `specs/ui/style-guide.md`.
+- Visual modifications align with the project design system tokens in `specs/ui/style-guide.md`, extracted from the existing frontend through `frontend-ui-workflow`.
+- New UI and substantial frontend changes follow `specs/features/<feature>/implementation-plan.md` or an equivalent reviewed structure plan.
+- Frontend code is shippable without a cleanup refactor: component responsibilities are clear, state ownership is simple, conditional rendering is readable, local primitives are reused, and unnecessary abstractions are absent.
 {{/if}}
 
 ## Living Specifications
 
-`specs/features/` is the authoritative, technology-agnostic description of what the system does. It is not a planning artifact. It is a permanent record of system behavior.
+`specs/features/` is the authoritative, technology-agnostic description of what the system does. It is not a planning artefact. It is a permanent record of system behaviour.
 
 ### Non-Negotiable Rule
 
-Every observable behavior change to the codebase MUST update `specs/features/` before the change is considered done.
+Every observable behaviour change to the codebase MUST update `specs/features/` before the change is considered done.
 
 ### Spec format
 
 ```md
-### Requirement: <system behavior as a declarative statement>
+### Requirement: <system behaviour as a declarative statement>
 <One-sentence description using SHALL/MUST.>
 
 #### Scenario: <observable outcome>
@@ -194,20 +215,20 @@ Every observable behavior change to the codebase MUST update `specs/features/` b
 - **THEN** <expected system response>
 ```
 
-Use RFC 2119 language. Do not include implementation details, technology names, or framework references. Specs describe behavior, not code.
+Use RFC 2119 language. Do not include implementation details, technology names, or framework references. Specs describe behaviour, not code.
 
 ## Review Checklist
 
 Before finishing work, verify:
 
-- Is the chosen behavior reflected in `specs/features/`?
+- Is the chosen behaviour reflected in `specs/features/`?
 - Is the code aligned with the enabled capabilities?
 - Are tradeoffs explicit enough that a future agent can continue safely?
 - Would this change still make sense if infrastructure or tooling changed?
 
 If the answer to any of these is "no", the change is not ready.
 
-## Default Agent Behavior
+## Default Agent Behaviour
 
 When contributing:
 

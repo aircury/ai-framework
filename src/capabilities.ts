@@ -1,10 +1,10 @@
-import airsyncMemoryAgents from "../standards/modules/airsync-memory/agents.md" with {
+import cleanArchitectureAgents from "../standards/modules/clean-architecture/agents.md" with {
   type: "text",
 };
-import airsyncMemoryFramework from "../standards/modules/airsync-memory/framework.md" with {
+import cleanArchitectureFramework from "../standards/modules/clean-architecture/framework.md" with {
   type: "text",
 };
-import airsyncMemoryManifest from "../standards/modules/airsync-memory/module.json" with {
+import cleanArchitectureManifest from "../standards/modules/clean-architecture/module.json" with {
   type: "json",
 };
 import codeStyleAgents from "../standards/modules/code-style/agents.md" with {
@@ -16,6 +16,15 @@ import codeStyleFramework from "../standards/modules/code-style/framework.md" wi
 import codeStyleManifest from "../standards/modules/code-style/module.json" with {
   type: "json",
 };
+import customArchitectureAgents from "../standards/modules/custom-architecture/agents.md" with {
+  type: "text",
+};
+import customArchitectureFramework from "../standards/modules/custom-architecture/framework.md" with {
+  type: "text",
+};
+import customArchitectureManifest from "../standards/modules/custom-architecture/module.json" with {
+  type: "json",
+};
 import dddAgents from "../standards/modules/ddd/agents.md" with {
   type: "text",
 };
@@ -23,6 +32,15 @@ import dddFramework from "../standards/modules/ddd/framework.md" with {
   type: "text",
 };
 import dddManifest from "../standards/modules/ddd/module.json" with {
+  type: "json",
+};
+import dddHexagonalAgents from "../standards/modules/ddd-hexagonal/agents.md" with {
+  type: "text",
+};
+import dddHexagonalFramework from "../standards/modules/ddd-hexagonal/framework.md" with {
+  type: "text",
+};
+import dddHexagonalManifest from "../standards/modules/ddd-hexagonal/module.json" with {
   type: "json",
 };
 import decisionRecordsAgents from "../standards/modules/decision-records/agents.md" with {
@@ -52,13 +70,13 @@ import frontendFramework from "../standards/modules/frontend/framework.md" with 
 import frontendManifest from "../standards/modules/frontend/module.json" with {
   type: "json",
 };
-import hexagonalArchitectureAgents from "../standards/modules/hexagonal-architecture/agents.md" with {
+import layeredArchitectureAgents from "../standards/modules/layered-architecture/agents.md" with {
   type: "text",
 };
-import hexagonalArchitectureFramework from "../standards/modules/hexagonal-architecture/framework.md" with {
+import layeredArchitectureFramework from "../standards/modules/layered-architecture/framework.md" with {
   type: "text",
 };
-import hexagonalArchitectureManifest from "../standards/modules/hexagonal-architecture/module.json" with {
+import layeredArchitectureManifest from "../standards/modules/layered-architecture/module.json" with {
   type: "json",
 };
 import structuredLoggingAgents from "../standards/modules/structured-logging/agents.md" with {
@@ -79,13 +97,13 @@ import testingFramework from "../standards/modules/testing/framework.md" with {
 import testingManifest from "../standards/modules/testing/module.json" with {
   type: "json",
 };
-import tokenEfficiencyAgents from "../standards/modules/token-efficiency/agents.md" with {
+import walkingSkeletonAgents from "../standards/modules/walking-skeleton/agents.md" with {
   type: "text",
 };
-import tokenEfficiencyFramework from "../standards/modules/token-efficiency/framework.md" with {
+import walkingSkeletonFramework from "../standards/modules/walking-skeleton/framework.md" with {
   type: "text",
 };
-import tokenEfficiencyManifest from "../standards/modules/token-efficiency/module.json" with {
+import walkingSkeletonManifest from "../standards/modules/walking-skeleton/module.json" with {
   type: "json",
 };
 import decisionsReadme from "./install-content/specs/decisions/README.md" with {
@@ -107,30 +125,43 @@ export type CapabilityCategory =
 
 type StandardModuleId =
   | "decision-records"
-  | "hexagonal-architecture"
+  | "ddd-hexagonal"
+  | "clean-architecture"
+  | "layered-architecture"
+  | "custom-architecture"
   | "ddd"
   | "code-style"
-  | "airsync-memory"
   | "error-handling"
   | "structured-logging"
   | "frontend"
   | "testing"
-  | "token-efficiency";
+  | "walking-skeleton";
 
 export type CapabilityId =
-  | "open-spec"
   | "spec-kit"
-  | "airsync"
+  | "walking-skeleton"
   | "git"
-  | "architecture"
+  | "ddd-hexagonal"
+  | "clean-architecture"
+  | "layered-architecture"
+  | "custom-architecture"
   | "decision-records"
   | "testing"
   | "code-style"
   | "frontend"
-  | "token-efficiency"
   | "resilience"
   | "specs"
-  | "language";
+  | "language"
+  | "ask-question"
+  | "database"
+  | "blind-db-debugging"
+  | "db-schema-design"
+  | "extract-rule";
+
+type VisibleCapabilityId = Exclude<
+  CapabilityId,
+  "blind-db-debugging" | "db-schema-design"
+>;
 
 export interface CapabilitySkill {
   source: string;
@@ -145,7 +176,7 @@ export interface CapabilityFile {
 }
 
 export interface CapabilityManifest {
-  id: CapabilityId;
+  id: VisibleCapabilityId;
   label: string;
   hint: string;
   description: string;
@@ -161,6 +192,8 @@ export interface CapabilityManifest {
 
 export interface CapabilityProfile {
   version: 2;
+  _notice: string;
+  tools?: string[];
   capabilities: CapabilityId[];
   language: {
     britishEnglish: boolean;
@@ -182,6 +215,9 @@ interface StandardModule {
   agents: string;
   files?: CapabilityFile[];
 }
+
+export const FRAMEWORK_MAINTAINED_NOTICE =
+  "This file is maintained by Aircury AI Framework. Do not edit it directly. Add project-specific rules in FRAMEWORK.local.md.";
 
 function createStandardModule(
   manifest: StandardManifest,
@@ -213,11 +249,32 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
       ],
     ),
   },
-  "hexagonal-architecture": {
+  "ddd-hexagonal": {
     ...createStandardModule(
-      hexagonalArchitectureManifest as StandardManifest,
-      hexagonalArchitectureFramework,
-      hexagonalArchitectureAgents,
+      dddHexagonalManifest as StandardManifest,
+      dddHexagonalFramework,
+      dddHexagonalAgents,
+    ),
+  },
+  "clean-architecture": {
+    ...createStandardModule(
+      cleanArchitectureManifest as StandardManifest,
+      cleanArchitectureFramework,
+      cleanArchitectureAgents,
+    ),
+  },
+  "layered-architecture": {
+    ...createStandardModule(
+      layeredArchitectureManifest as StandardManifest,
+      layeredArchitectureFramework,
+      layeredArchitectureAgents,
+    ),
+  },
+  "custom-architecture": {
+    ...createStandardModule(
+      customArchitectureManifest as StandardManifest,
+      customArchitectureFramework,
+      customArchitectureAgents,
     ),
   },
   ddd: {
@@ -232,13 +289,6 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
       codeStyleManifest as StandardManifest,
       codeStyleFramework,
       codeStyleAgents,
-    ),
-  },
-  "airsync-memory": {
-    ...createStandardModule(
-      airsyncMemoryManifest as StandardManifest,
-      airsyncMemoryFramework,
-      airsyncMemoryAgents,
     ),
   },
   "error-handling": {
@@ -281,11 +331,11 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
       testingAgents,
     ),
   },
-  "token-efficiency": {
+  "walking-skeleton": {
     ...createStandardModule(
-      tokenEfficiencyManifest as StandardManifest,
-      tokenEfficiencyFramework,
-      tokenEfficiencyAgents,
+      walkingSkeletonManifest as StandardManifest,
+      walkingSkeletonFramework,
+      walkingSkeletonAgents,
     ),
   },
 };
@@ -302,39 +352,41 @@ function composeModules(
   };
 }
 
-const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
-  "open-spec": {
-    id: "open-spec",
-    label: "OpenSpec",
-    hint: "structured propose/apply/complete workflow",
-    description:
-      "Structured propose/apply/complete workflow for complex changes",
-    category: "workflow",
-    defaultSelected: true,
-    scopes: ["local", "global"],
-    skills: [
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-propose",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-apply",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-complete",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-explore",
-        scopes: ["local", "global"],
-      },
-    ],
-  },
+export function getCapabilityDetailPath(capabilityId: CapabilityId): string {
+  return `docs/aircury/capabilities/${capabilityId}.md`;
+}
+
+export function hasCapabilityDetail(capability: CapabilityManifest): boolean {
+  return !!capability.framework?.trim() || !!capability.agents?.trim();
+}
+
+function createCapabilityDetailFile(
+  capability: CapabilityManifest,
+): CapabilityFile | null {
+  if (!hasCapabilityDetail(capability)) return null;
+
+  const sections = [
+    `# ${capability.label} Capability`,
+    `> ${FRAMEWORK_MAINTAINED_NOTICE}`,
+    capability.description,
+  ];
+
+  if (capability.framework) {
+    sections.push("## Framework Rules", capability.framework.trim());
+  }
+
+  if (capability.agents) {
+    sections.push("## Agent Operating Rules", capability.agents.trim());
+  }
+
+  return {
+    path: getCapabilityDetailPath(capability.id),
+    content: `${sections.join("\n\n")}\n`,
+    description: `${capability.label} capability rules`,
+  };
+}
+
+const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
   "spec-kit": {
     id: "spec-kit",
     label: "Spec Kit",
@@ -362,12 +414,12 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
       {
         source: "aircury/ai-framework",
-        skillName: "spec-kit-analyse",
+        skillName: "spec-kit-tasks",
         scopes: ["local", "global"],
       },
       {
         source: "aircury/ai-framework",
-        skillName: "spec-kit-tasks",
+        skillName: "spec-kit-analyse",
         scopes: ["local", "global"],
       },
       {
@@ -382,19 +434,20 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
     ],
   },
-  airsync: {
-    id: "airsync",
-    label: "Airsync",
-    hint: "collaborative memory workflow and shared memory rules",
-    description: "Collaborative memory workflow with project Airsync rules",
+  "walking-skeleton": {
+    id: "walking-skeleton",
+    label: "Walking Skeleton",
+    hint: "greenfield bootstrap from ADR bundles",
+    description:
+      "Greenfield bootstrap workflow that plans ADRs, specifies a tiny end-to-end slice, and builds a runnable baseline from the external walking-skeleton skill",
     category: "workflow",
-    defaultSelected: true,
+    defaultSelected: false,
     scopes: ["local", "global"],
-    ...composeModules(["airsync-memory"]),
+    ...composeModules(["walking-skeleton"]),
     skills: [
       {
-        source: "aircury/ai-framework",
-        skillName: "airsync",
+        source: "aircury/walking-skeleton",
+        skillName: "walking-skeleton",
         scopes: ["local", "global"],
       },
     ],
@@ -420,20 +473,59 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
     ],
   },
-  architecture: {
-    id: "architecture",
-    label: "Architecture",
-    hint: "DDD, hexagonal architecture, and curated architecture skills",
-    description:
-      "DDD and hexagonal architecture standards with curated architecture skills",
+  "ddd-hexagonal": {
+    id: "ddd-hexagonal",
+    label: "DDD+Hexagonal",
+    hint: "domain modelling, ports and adapters, and curated architecture skills",
+    description: "DDD+Hexagonal standards with curated architecture skills",
     category: "engineering",
-    defaultSelected: true,
+    defaultSelected: false,
     scopes: ["local", "global"],
-    ...composeModules(["hexagonal-architecture", "ddd"]),
+    ...composeModules(["ddd-hexagonal", "ddd"]),
     skills: [
       {
         source: "https://github.com/ccheney/robust-skills",
         skillName: "clean-ddd-hexagonal",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
+  "clean-architecture": {
+    id: "clean-architecture",
+    label: "Clean Architecture",
+    hint: "entities, use cases, adapters, and drivers",
+    description:
+      "Clean Architecture standards that keep business rules independent from frameworks, UI, databases, and external services",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    ...composeModules(["clean-architecture"]),
+  },
+  "layered-architecture": {
+    id: "layered-architecture",
+    label: "Layered Architecture",
+    hint: "controllers, services, and repositories",
+    description:
+      "Simple layered standards for projects that need clear separation without Clean or Hexagonal overhead",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    ...composeModules(["layered-architecture"]),
+  },
+  "custom-architecture": {
+    id: "custom-architecture",
+    label: "Custom Architecture",
+    hint: "discover and document this project's real architecture",
+    description:
+      "Custom architecture discovery that records project-specific boundaries in FRAMEWORK.local.md",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    ...composeModules(["custom-architecture"]),
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "custom-architecture",
         scopes: ["local", "global"],
       },
     ],
@@ -488,8 +580,7 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
     id: "frontend",
     label: "Frontend",
     hint: "design tokens, component tree, style guide, and frontend skills",
-    description:
-      "Frontend standards with layout, experience, and UI generation skills",
+    description: "Frontend standards with a self-contained UI workflow skill",
     category: "frontend",
     defaultSelected: true,
     scopes: ["local", "global"],
@@ -497,35 +588,12 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
     skills: [
       {
         source: "aircury/ai-framework",
-        skillName: "frontend-layout-extractor",
+        skillName: "frontend-ui-workflow",
         scopes: ["local", "global"],
       },
       {
-        source: "aircury/ai-framework",
-        skillName: "frontend-experience-extractor",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "frontend-ui-generator",
-        scopes: ["local", "global"],
-      },
-    ],
-  },
-  "token-efficiency": {
-    id: "token-efficiency",
-    label: "Token Efficiency",
-    hint: "terse default responses through Caveman",
-    description:
-      "Project token-efficiency rules plus the Caveman skill for terse responses",
-    category: "communication",
-    defaultSelected: true,
-    scopes: ["local", "global"],
-    ...composeModules(["token-efficiency"]),
-    skills: [
-      {
-        source: "https://github.com/juliusbrussee/caveman",
-        skillName: "caveman",
+        source: "https://github.com/vercel-labs/agent-skills",
+        skillName: "vercel-react-best-practices",
         scopes: ["local", "global"],
       },
     ],
@@ -573,13 +641,23 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
         skillName: "specs-interpreter",
         scopes: ["local", "global"],
       },
+      {
+        source: "aircury/ai-framework",
+        skillName: "semantic-line-breaks",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
+        skillName: "dbml-database-docs",
+        scopes: ["local", "global"],
+      },
     ],
   },
   language: {
     id: "language",
     label: "Language",
-    hint: "UK business English guidance",
-    description: "UK business English guidance for project communication",
+    hint: "British business English guidance",
+    description: "British business English guidance for project communication",
     category: "communication",
     defaultSelected: false,
     scopes: ["local", "global"],
@@ -591,32 +669,133 @@ const CAPABILITY_REGISTRY: Record<CapabilityId, CapabilityManifest> = {
       },
     ],
   },
+  "ask-question": {
+    id: "ask-question",
+    label: "Ask Question",
+    hint: "use the IDE AskQuestion tool instead of plain chat for choices",
+    description:
+      "Requires agents to use the IDE AskQuestion tool when asking the user to choose between options",
+    category: "communication",
+    defaultSelected: true,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "ask-question",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
+  database: {
+    id: "database",
+    label: "Database",
+    hint: "schema design and blind debugging workflows",
+    description:
+      "Database schema design and blind debugging workflows for relational systems",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "blind-db-debugging",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
+        skillName: "db-schema-design",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
+  "extract-rule": {
+    id: "extract-rule",
+    label: "Extract Rule",
+    hint: "Distil and record coding rules",
+    description:
+      "Distil reusable engineering rules from code changes and record them in the documentation",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "extract-rule",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
 };
 
-const CAPABILITY_ORDER: CapabilityId[] = [
-  "open-spec",
+const CAPABILITY_ORDER: VisibleCapabilityId[] = [
   "spec-kit",
-  "airsync",
+  "walking-skeleton",
   "git",
-  "architecture",
+  "ddd-hexagonal",
+  "clean-architecture",
+  "layered-architecture",
+  "custom-architecture",
   "decision-records",
   "testing",
   "code-style",
   "frontend",
-  "token-efficiency",
   "resilience",
   "specs",
   "language",
+  "ask-question",
+  "database",
+  "extract-rule",
 ];
+
+const LEGACY_CAPABILITY_ALIASES: Partial<
+  Record<CapabilityId, VisibleCapabilityId>
+> = {
+  "blind-db-debugging": "database",
+  "db-schema-design": "database",
+};
+
+function normalizeCapabilityId(
+  capabilityId: CapabilityId,
+): VisibleCapabilityId {
+  return (
+    LEGACY_CAPABILITY_ALIASES[capabilityId] ??
+    (capabilityId as VisibleCapabilityId)
+  );
+}
+
+const EXCLUSIVE_ARCHITECTURE_CAPABILITIES: CapabilityId[] = [
+  "ddd-hexagonal",
+  "clean-architecture",
+  "layered-architecture",
+  "custom-architecture",
+];
+
+function normalizeExclusiveArchitectures(
+  capabilityIds: CapabilityId[],
+): CapabilityId[] {
+  const selectedArchitectures = capabilityIds.filter((capabilityId) =>
+    EXCLUSIVE_ARCHITECTURE_CAPABILITIES.includes(capabilityId),
+  );
+
+  if (selectedArchitectures.length <= 1) return capabilityIds;
+
+  const selectedArchitecture = selectedArchitectures.at(-1);
+  return capabilityIds.filter(
+    (capabilityId) =>
+      !EXCLUSIVE_ARCHITECTURE_CAPABILITIES.includes(capabilityId) ||
+      capabilityId === selectedArchitecture,
+  );
+}
 
 export const CAPABILITIES: CapabilityManifest[] = CAPABILITY_ORDER.map(
   (id) => CAPABILITY_REGISTRY[id],
 );
 
-export const DEFAULT_LOCAL_CAPABILITY_IDS: CapabilityId[] = CAPABILITIES.filter(
-  (capability) =>
-    capability.scopes.includes("local") && capability.defaultSelected,
-).map((capability) => capability.id);
+export const DEFAULT_LOCAL_CAPABILITY_IDS: VisibleCapabilityId[] =
+  CAPABILITIES.filter(
+    (capability) =>
+      capability.scopes.includes("local") && capability.defaultSelected,
+  ).map((capability) => capability.id);
 
 export function getCapabilities(scope: CapabilityScope): CapabilityManifest[] {
   return CAPABILITIES.filter((capability) => capability.scopes.includes(scope));
@@ -625,19 +804,20 @@ export function getCapabilities(scope: CapabilityScope): CapabilityManifest[] {
 export function getCapabilityById(
   capabilityId: CapabilityId,
 ): CapabilityManifest {
-  return CAPABILITY_REGISTRY[capabilityId];
+  return CAPABILITY_REGISTRY[normalizeCapabilityId(capabilityId)];
 }
 
 export function resolveCapabilityIds(
   capabilityIds: CapabilityId[] = DEFAULT_LOCAL_CAPABILITY_IDS,
-): CapabilityId[] {
-  const resolved = new Set<CapabilityId>();
+): VisibleCapabilityId[] {
+  const resolved = new Set<VisibleCapabilityId>();
   const visit = (capabilityId: CapabilityId) => {
-    if (resolved.has(capabilityId)) return;
-    resolved.add(capabilityId);
+    const normalizedCapabilityId = normalizeCapabilityId(capabilityId);
+    if (resolved.has(normalizedCapabilityId)) return;
+    resolved.add(normalizedCapabilityId);
   };
 
-  for (const capabilityId of capabilityIds) {
+  for (const capabilityId of normalizeExclusiveArchitectures(capabilityIds)) {
     visit(capabilityId);
   }
 
@@ -646,20 +826,26 @@ export function resolveCapabilityIds(
 
 export function createCapabilityProfile(
   capabilityIds?: CapabilityId[],
-  options?: { britishEnglish?: boolean },
+  options?: { britishEnglish?: boolean; tools?: string[] },
 ): CapabilityProfile {
-  const selected = new Set(resolveCapabilityIds(capabilityIds));
-  if (options?.britishEnglish) {
+  const britishEnglish = options?.britishEnglish ?? false;
+  const selected = new Set<VisibleCapabilityId>(
+    resolveCapabilityIds(capabilityIds),
+  );
+
+  if (britishEnglish) {
     selected.add("language");
   }
 
   return {
     version: 2,
+    _notice: FRAMEWORK_MAINTAINED_NOTICE,
+    tools: options?.tools,
     capabilities: CAPABILITY_ORDER.filter((capabilityId) =>
       selected.has(capabilityId),
     ),
     language: {
-      britishEnglish: options?.britishEnglish ?? false,
+      britishEnglish,
     },
   };
 }
@@ -676,12 +862,18 @@ export function getSelectedCapabilities(
 
 export function getInitialCapabilityIds(
   scope: CapabilityScope,
-  options?: { britishEnglish?: boolean },
+  options?: {
+    britishEnglish?: boolean;
+    installedCapabilityIds?: CapabilityId[];
+  },
 ): CapabilityId[] {
-  const selected = new Set<CapabilityId>(
+  const initialCapabilityIds =
+    options?.installedCapabilityIds ??
     getCapabilities(scope)
       .filter((capability) => capability.defaultSelected)
-      .map((capability) => capability.id),
+      .map((capability) => capability.id);
+  const selected = new Set<CapabilityId>(
+    resolveCapabilityIds(initialCapabilityIds),
   );
 
   if (options?.britishEnglish) {
@@ -703,6 +895,12 @@ export function getCapabilityFiles(
   const seen = new Set<string>();
 
   for (const capability of getSelectedCapabilities(capabilityIds, scope)) {
+    const detailFile = createCapabilityDetailFile(capability);
+    if (detailFile && !seen.has(detailFile.path)) {
+      seen.add(detailFile.path);
+      files.push(detailFile);
+    }
+
     for (const file of capability.files ?? []) {
       if (seen.has(file.path)) continue;
       seen.add(file.path);

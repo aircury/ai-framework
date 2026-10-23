@@ -1,0 +1,7 @@
+{
+  "id": "clean-architecture",
+  "label": "Clean Architecture",
+  "hint": "entities, use cases, adapters, and drivers",
+  "description": "Requires Clean Architecture boundaries so business rules stay independent from frameworks, UI, databases, and external services.",
+  "defaultEnabled": false
+}

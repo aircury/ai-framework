@@ -1,0 +1,7 @@
+{
+  "id": "custom-architecture",
+  "label": "Custom Architecture",
+  "hint": "discover and document this project's real architecture",
+  "description": "Requires agents to treat FRAMEWORK.local.md as the source of truth for project-specific architecture discovered from the repository itself.",
+  "defaultEnabled": false
+}
