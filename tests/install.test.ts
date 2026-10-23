@@ -187,30 +187,14 @@ describe("getLocalFiles", () => {
     expect(framework.content).not.toContain("## Architecture Decision Records");
     expect(decisions.content).toContain("## Architecture Decision Records");
     expect(decisions.content).toContain(
-      "ADRs are mutable only while their status is `Draft`.",
+      "Keep one ADR for each decision and revise it when the decision evolves.",
     );
     expect(decisions.content).toContain(
-      "An ADR leaves `Draft` only when the user explicitly confirms that the functionality or change is complete and that the ADR should no longer be a draft.",
+      "[Use Redis-backed sessions](specs/decisions/use-redis-backed-sessions.md)",
     );
-    expect(decisions.content).toContain(
-      "After every modification to a draft ADR, ask the user whether they want to publish it now.",
-    );
-    expect(decisions.content).toContain(
-      "`Supersedes: <decision-name>` or `Amends: <decision-name>`",
-    );
-    expect(decisions.content).toContain(
-      "update the prior non-draft ADR only to mark that it was changed and where the new decision lives",
-    );
-    expect(decisions.content).toContain(
-      "Use `Supersedes: <decision-name>` when the new decision completely replaces or invalidates the old one.",
-    );
-    expect(decisions.content).toContain(
-      "Use `Amends: <decision-name>` when the new decision modifies, clarifies, or adds to the old one without completely invalidating it.",
-    );
-    expect(decisions.content).toContain(
-      "- Superseded by: <decision-name> (only when updating a prior ADR marker)",
-    );
-    expect(decisions.content).not.toContain("ADR-XXXX");
+    expect(decisions.content).not.toContain("Status:");
+    expect(decisions.content).not.toContain("Supersedes:");
+    expect(decisions.content).not.toContain("Amends:");
     expect(framework.content).not.toContain("## TDD Workflow");
     expect(framework.content).not.toContain(
       "## Non-Negotiable Architecture Rules",
@@ -267,9 +251,6 @@ describe("getLocalFiles", () => {
     );
     expect(framework.content).toContain(
       "docs/aircury/capabilities/decision-records.md",
-    );
-    expect(framework.content).toContain(
-      "docs/aircury/capabilities/token-efficiency.md",
     );
     expect(framework.content).toContain("## Engineering Non-Negotiables");
     expect(framework.content).not.toContain("## TDD Workflow");
@@ -333,19 +314,6 @@ describe("getLocalFiles", () => {
     );
     expect(frontend.content).toContain("frontend-ui-workflow");
     expect(frontend.content).toContain("implementation-plan.md");
-  });
-
-  it("includes terse-response guidance in the token-efficiency capability doc", () => {
-    const files = getLocalFiles([], ["token-efficiency"]);
-    const tokenEfficiency = getFileByPath(
-      files,
-      "docs/aircury/capabilities/token-efficiency.md",
-    );
-    expect(tokenEfficiency.content).toContain(
-      "Load and apply the `caveman` skill in `full` mode",
-    );
-    expect(tokenEfficiency.content).toContain("ACTIVE EVERY RESPONSE");
-    expect(tokenEfficiency.content).toContain("stop caveman");
   });
 });
 
@@ -423,11 +391,9 @@ describe("getLocalCommands", () => {
   it("installs the skills derived from the default capabilities for universal", () => {
     const commands = getLocalCommands([], getInitialCapabilityIds("local"));
 
-    expect(commands).toHaveLength(6);
+    expect(commands).toHaveLength(5);
     const aircury = getCommandBySource(commands, aircurySkillsSource);
-    expect(aircury.args).toContain("open-spec-propose");
     expect(aircury.args).toContain("spec-kit-specify");
-    expect(aircury.args).toContain("airsync");
     expect(aircury.args).toContain("commit-changes");
     expect(aircury.args).toContain("frontend-ui-workflow");
     expect(aircury.args).toContain("specs-extractor");
@@ -449,10 +415,6 @@ describe("getLocalCommands", () => {
         "https://github.com/currents-dev/playwright-best-practices-skill",
       ).args,
     ).toContain("playwright-best-practices");
-    expect(
-      getCommandBySource(commands, "https://github.com/juliusbrussee/caveman")
-        .args,
-    ).toContain("caveman");
     expect(
       getCommandBySource(commands, "https://github.com/wshobson/agents").args,
     ).toContain("error-handling-patterns");
@@ -525,14 +487,6 @@ describe("getLocalCommands", () => {
     });
   });
 
-  it("installs the caveman skill when token-efficiency capability is selected", () => {
-    const commands = getLocalCommands([], ["token-efficiency"]);
-    expect(
-      getCommandBySource(commands, "https://github.com/juliusbrussee/caveman")
-        .args,
-    ).toContain("caveman");
-  });
-
   it("installs the DDD+Hexagonal skill only for DDD+Hexagonal", () => {
     const hexagonalCommands = getLocalCommands([], ["ddd-hexagonal"]);
     expect(
@@ -579,20 +533,6 @@ describe("getLocalCommands", () => {
         command.args.includes("https://github.com/ccheney/robust-skills"),
       ),
     ).toBe(false);
-  });
-
-  it("installs capability-required skills without a separate skill selection", () => {
-    const commands = getLocalCommands([], ["frontend", "token-efficiency"]);
-
-    expect(commands).toHaveLength(3);
-    expect(commands[0].args).toContain("frontend-ui-workflow");
-    expect(commands[1].args).toContain("caveman");
-    expect(
-      getCommandBySource(
-        commands,
-        "https://github.com/vercel-labs/agent-skills",
-      ).args,
-    ).toContain("vercel-react-best-practices");
   });
 
   it("installs the specs skills from the Aircury source", () => {

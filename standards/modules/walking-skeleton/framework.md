@@ -13,7 +13,7 @@ This installation can use the external `walking-skeleton` skill to bootstrap gre
 - Use `/walking-skeleton build` only after ADRs and the walking-skeleton spec have been reviewed.
 - The bootstrap phase may build without strict TDD when the objective is proving the executable stack. After the walking skeleton is complete, normal framework rules apply, including TDD where automated testing is feasible.
 - Verify the result with a clean rebuild, linting, tests, and smoke checks before treating the skeleton as complete.
-- When the skill reveals a reusable ADR, flavour, failure mode, or company convention, capture it through the normal ADR and Airsync workflows when those capabilities are enabled.
+- When the skill reveals a reusable ADR, flavour, failure mode, or company convention, record it in the relevant project documentation.
 
 ## External Source
 

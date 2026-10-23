@@ -1,7 +1,5 @@
 # Add a testing standards module and default testing skills
 
-- Status: Accepted
-- Date: 2026-04-20
 
 ## Context
 
@@ -25,7 +23,7 @@ The `testing` module defines a practical testing pyramid with these defaults:
 
 Aircury will also install a default `testing` skill group with these external skills:
 
-- `wshobson/agents@e2e-testing-patterns`
+- an external end-to-end testing-patterns skill
 - `currents-dev/playwright-best-practices-skill@playwright-best-practices`
 
 ## Consequences

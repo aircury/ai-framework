@@ -1,12 +1,3 @@
-import airsyncMemoryAgents from "../standards/modules/airsync-memory/agents.md" with {
-  type: "text",
-};
-import airsyncMemoryFramework from "../standards/modules/airsync-memory/framework.md" with {
-  type: "text",
-};
-import airsyncMemoryManifest from "../standards/modules/airsync-memory/module.json" with {
-  type: "json",
-};
 import cleanArchitectureAgents from "../standards/modules/clean-architecture/agents.md" with {
   type: "text",
 };
@@ -106,15 +97,6 @@ import testingFramework from "../standards/modules/testing/framework.md" with {
 import testingManifest from "../standards/modules/testing/module.json" with {
   type: "json",
 };
-import tokenEfficiencyAgents from "../standards/modules/token-efficiency/agents.md" with {
-  type: "text",
-};
-import tokenEfficiencyFramework from "../standards/modules/token-efficiency/framework.md" with {
-  type: "text",
-};
-import tokenEfficiencyManifest from "../standards/modules/token-efficiency/module.json" with {
-  type: "json",
-};
 import walkingSkeletonAgents from "../standards/modules/walking-skeleton/agents.md" with {
   type: "text",
 };
@@ -149,19 +131,15 @@ type StandardModuleId =
   | "custom-architecture"
   | "ddd"
   | "code-style"
-  | "airsync-memory"
   | "error-handling"
   | "structured-logging"
   | "frontend"
   | "testing"
-  | "token-efficiency"
   | "walking-skeleton";
 
 export type CapabilityId =
-  | "open-spec"
   | "spec-kit"
   | "walking-skeleton"
-  | "airsync"
   | "git"
   | "ddd-hexagonal"
   | "clean-architecture"
@@ -171,7 +149,6 @@ export type CapabilityId =
   | "testing"
   | "code-style"
   | "frontend"
-  | "token-efficiency"
   | "resilience"
   | "specs"
   | "language"
@@ -179,7 +156,8 @@ export type CapabilityId =
   | "goal-crafting"
   | "database"
   | "blind-db-debugging"
-  | "db-schema-design";
+  | "db-schema-design"
+  | "extract-rule";
 
 type VisibleCapabilityId = Exclude<
   CapabilityId,
@@ -314,13 +292,6 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
       codeStyleAgents,
     ),
   },
-  "airsync-memory": {
-    ...createStandardModule(
-      airsyncMemoryManifest as StandardManifest,
-      airsyncMemoryFramework,
-      airsyncMemoryAgents,
-    ),
-  },
   "error-handling": {
     ...createStandardModule(
       errorHandlingManifest as StandardManifest,
@@ -359,13 +330,6 @@ const STANDARD_MODULES: Record<StandardModuleId, StandardModule> = {
       testingManifest as StandardManifest,
       testingFramework,
       testingAgents,
-    ),
-  },
-  "token-efficiency": {
-    ...createStandardModule(
-      tokenEfficiencyManifest as StandardManifest,
-      tokenEfficiencyFramework,
-      tokenEfficiencyAgents,
     ),
   },
   "walking-skeleton": {
@@ -424,38 +388,6 @@ function createCapabilityDetailFile(
 }
 
 const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
-  "open-spec": {
-    id: "open-spec",
-    label: "OpenSpec",
-    hint: "structured propose/apply/complete workflow",
-    description:
-      "Structured propose/apply/complete workflow for complex changes",
-    category: "workflow",
-    defaultSelected: true,
-    scopes: ["local", "global"],
-    skills: [
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-propose",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-apply",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-complete",
-        scopes: ["local", "global"],
-      },
-      {
-        source: "aircury/ai-framework",
-        skillName: "open-spec-explore",
-        scopes: ["local", "global"],
-      },
-    ],
-  },
   "spec-kit": {
     id: "spec-kit",
     label: "Spec Kit",
@@ -517,23 +449,6 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       {
         source: "aircury/walking-skeleton",
         skillName: "walking-skeleton",
-        scopes: ["local", "global"],
-      },
-    ],
-  },
-  airsync: {
-    id: "airsync",
-    label: "Airsync",
-    hint: "collaborative memory workflow and shared memory rules",
-    description: "Collaborative memory workflow with project Airsync rules",
-    category: "workflow",
-    defaultSelected: true,
-    scopes: ["local", "global"],
-    ...composeModules(["airsync-memory"]),
-    skills: [
-      {
-        source: "aircury/ai-framework",
-        skillName: "airsync",
         scopes: ["local", "global"],
       },
     ],
@@ -679,24 +594,6 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       },
     ],
   },
-  "token-efficiency": {
-    id: "token-efficiency",
-    label: "Token Efficiency",
-    hint: "terse default responses through Caveman",
-    description:
-      "Project token-efficiency rules plus the Caveman skill for terse responses",
-    category: "communication",
-    defaultSelected: true,
-    scopes: ["local", "global"],
-    ...composeModules(["token-efficiency"]),
-    skills: [
-      {
-        source: "https://github.com/juliusbrussee/caveman",
-        skillName: "caveman",
-        scopes: ["local", "global"],
-      },
-    ],
-  },
   resilience: {
     id: "resilience",
     label: "Resilience",
@@ -824,13 +721,28 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       },
     ],
   },
+  "extract-rule": {
+    id: "extract-rule",
+    label: "Extract Rule",
+    hint: "Distil and record coding rules",
+    description:
+      "Distil reusable engineering rules from code changes and record them in the documentation",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "extract-rule",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
 };
 
 const CAPABILITY_ORDER: VisibleCapabilityId[] = [
-  "open-spec",
   "spec-kit",
   "walking-skeleton",
-  "airsync",
   "git",
   "ddd-hexagonal",
   "clean-architecture",
@@ -840,13 +752,13 @@ const CAPABILITY_ORDER: VisibleCapabilityId[] = [
   "testing",
   "code-style",
   "frontend",
-  "token-efficiency",
   "resilience",
   "specs",
   "language",
   "ask-question",
   "goal-crafting",
   "database",
+  "extract-rule",
 ];
 
 const LEGACY_CAPABILITY_ALIASES: Partial<
