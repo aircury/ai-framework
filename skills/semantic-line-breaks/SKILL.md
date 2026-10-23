@@ -86,6 +86,16 @@ column).
 
 Paragraphs are still separated by a **blank line**, exactly as before.
 
+## Hard line breaks (two trailing spaces)
+
+When a line must break visibly inside one rendered paragraph (for example
+address lines or a label followed by detail on the next line), end that line with
+**exactly two spaces** before the newline.
+Do not use one trailing space, three or more, or a trailing `<br>` tag in
+hand-authored `doc/` prose.
+The reader maps two trailing spaces to a hard line break; `make doc-validate`
+rejects the other forms.
+
 ## Example
 
 Bad — four sentences on one line, every edit rewraps the whole thing:

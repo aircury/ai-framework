@@ -38,7 +38,7 @@ Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and Open
 | `CLAUDE.md` | Claude Code instructions, when Claude Code is selected. Existing non-Aircury content is preserved by appending the framework reference. |
 | `.cursorrules` | Cursor rules, when Cursor is selected. Existing content is preserved by appending Aircury commit rules. |
 | `GEMINI.md` | Gemini CLI instructions, when Gemini CLI is selected. |
-| `.aircury/framework.config.json` | Installed profile with selected capabilities and language settings. |
+| `.aircury/framework.config.json` | Installed profile with selected capabilities, additional tools, and language settings. |
 | `specs/features/README.md` | Starter guide for canonical living specifications. |
 | `specs/decisions/README.md` | Starter ADR guide when `decision-records` is enabled. |
 | `specs/ui/README.md` | Starter frontend design-system guide when `frontend` is enabled. |
@@ -61,9 +61,8 @@ Each content module contains:
 
 The current built-in capabilities are:
 
-- `open-spec`
 - `spec-kit`
-- `airsync`
+- `walking-skeleton`
 - `git`
 - `ddd-hexagonal`
 - `clean-architecture`
@@ -72,22 +71,28 @@ The current built-in capabilities are:
 - `testing`
 - `code-style`
 - `frontend`
-- `token-efficiency`
 - `resilience`
 - `specs`
 - `language`
+- `ask-question`
+- `database`
 
-For example, the architecture capabilities install one selected architecture standard. `ddd-hexagonal` includes the DDD+Hexagonal standard modules plus the curated `clean-ddd-hexagonal` skill. `custom-architecture` installs a discovery skill that analyses the repository and writes the project-specific architecture section to `FRAMEWORK.local.md`. `testing` includes testing rules plus Playwright and E2E skills. `resilience` includes error-handling and structured-logging rules plus related skills. `specs` includes skills for extracting behaviour specs, interpreting specs, applying semantic line breaks, and using DBML as the standard for database schema documentation in `db/schema.dbml`.
+For example, the architecture capabilities install one selected architecture standard. `ddd-hexagonal` includes the DDD+Hexagonal standard modules plus the curated `clean-ddd-hexagonal` skill. `custom-architecture` installs a discovery skill that analyses the repository and writes the project-specific architecture section to `FRAMEWORK.local.md`. `walking-skeleton` installs the external `aircury/walking-skeleton` skill for greenfield bootstrap from ADR bundles and a tiny end-to-end slice. `testing` includes testing rules plus Playwright and E2E skills. `resilience` includes error-handling and structured-logging rules plus related skills. `specs` includes skills for extracting behaviour specs, interpreting specs, applying semantic line breaks, and using DBML as the standard for database schema documentation in `db/schema.dbml`. `database` installs both the blind database debugging workflow for hypothesis-driven SQL diagnosis via row counts and the database schema design workflow for relational schemas and migrations.
 
-The installer stores the selected capability ids in `.aircury/framework.config.json`. Re-run the installer or edit the profile and regenerate files if project standards need to change.
+The installer stores the selected capability ids, additional tools, and language preference in `.aircury/framework.config.json`.
+When a valid local profile exists, the installer uses it to initialise the reconfiguration prompts instead of restoring registry defaults.
+Profiles created before tool selections were persisted remain valid and use the default tool selections on their next run.
+Re-run the installer or edit the profile and regenerate files if project standards need to change.
 
 ## Skill Installation
 
 Installable skills are defined on capabilities in `src/capabilities.ts`. The installer expands selected capabilities into individual skills and groups them by source before running `skills add` through `npx` when available, or `bunx` otherwise.
 
-Local skill commands include the `universal` agent and any selected tool-specific agents. Global skill commands target only selected global tools.
+Local and global skill commands include the `universal` agent and every selected tool-specific agent.
+The installer delegates agent-specific installation paths and links to `skills add`.
 
-When Claude Code is selected for a local install, the installer passes `-a claude-code` to `skills add` and then synchronises available selected skills from `.agents/skills/` into `.claude/skills/` so Claude Code can load them from its project-specific skills directory. If a selected skill was not materialised by `skills add`, the installer reports a warning instead of failing the project installation.
+When Claude Code is selected alongside `universal`, `skills add` materialises the canonical project skills in `.agents/skills/` and links them into `.claude/skills/`.
+The framework installer does not copy or synchronise agent-specific skill directories itself.
 
 The generated command shape is:
 
@@ -105,23 +110,23 @@ Global installs also add `-g`:
 
 Default selected capabilities are:
 
-- `open-spec`
 - `spec-kit`
-- `airsync`
 - `git`
 - `resilience`
 - `testing`
 - `code-style`
 - `frontend`
-- `token-efficiency`
 - `ddd-hexagonal`
 - `specs`
+- `ask-question`
 
 Additional automatic selection:
 
 - `language` is selected when British English is enabled.
 
 Architecture is selected interactively and is not part of the default non-interactive profile.
+
+`walking-skeleton` is intentionally not selected by default because it is a bootstrap workflow for new projects, not an always-on rule for established repositories.
 
 ## How Agents Should Use The Installed Framework
 
@@ -130,7 +135,6 @@ Agents should read `AGENTS.md` first, then `FRAMEWORK.md`. For non-trivial chang
 All workflow modes converge on `specs/features/`:
 
 - `plan-build` can update specs directly after behavior changes.
-- OpenSpec flows use temporary artifacts in `specs/changes/<name>/` and then sync final behavior into `specs/features/`.
 - Spec Kit flows create formal artifacts before implementation and still finish by updating `specs/features/`.
 
 ## Conflict Handling

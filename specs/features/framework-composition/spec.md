@@ -12,6 +12,35 @@ The installer MUST write the selected capabilities to a versioned configuration 
 - **WHEN** the framework is installed locally
 - **THEN** the project contains a machine-readable configuration file that records the enabled capabilities
 
+### Requirement: Local reconfiguration SHALL preserve the installed selection state
+The installer MUST initialise local reconfiguration choices from the project's valid saved configuration when one exists.
+It MUST use registry defaults only when no valid saved configuration is available.
+
+#### Scenario: A project reruns the installer after deselecting default capabilities
+- **GIVEN** the saved project configuration omits capabilities that the registry selects by default
+- **WHEN** the user starts a local reconfiguration
+- **THEN** those omitted capabilities are initially unticked
+- **AND** the capabilities recorded in the saved configuration are initially ticked
+
+#### Scenario: A project reruns the installer with a saved architecture
+- **GIVEN** the saved project configuration records one architecture capability
+- **WHEN** the user starts a local reconfiguration
+- **THEN** the recorded architecture is the initially focused architecture choice
+
+#### Scenario: A project reruns the installer after selecting additional tools
+- **GIVEN** the saved project configuration records the selected additional tools
+- **WHEN** the user starts a local reconfiguration
+- **THEN** only the recorded additional tools are initially ticked
+
+#### Scenario: A legacy saved configuration does not record additional tools
+- **GIVEN** a valid saved project configuration created before tool selections were persisted
+- **WHEN** the user starts a local reconfiguration
+- **THEN** the installer uses the default additional-tool selections
+
+#### Scenario: The saved project configuration is missing or invalid
+- **WHEN** the user starts a local reconfiguration without a valid saved project configuration
+- **THEN** the installer initialises capabilities and additional tools from their registry defaults
+
 ### Requirement: The capability system SHALL be extensible
 The framework MUST represent capabilities as a registry so that new capabilities can be added without redesigning the installer or template generation flow.
 
