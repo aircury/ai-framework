@@ -48,7 +48,7 @@ When `specs/ui/DESIGN.md` or `specs/ui/design-system.md` exists, the project use
 - Match the existing product structure, behaviour, and visual language before introducing new patterns.
 - Use `frontend-ui-workflow` to search the codebase for reusable design tokens, shared primitives, and repeated composition patterns before writing new UI code.
 - Prefer project tokens and existing component primitives over hardcoded values.
-- Treat `layout.md` as the structural source of truth and `experience.md` as the behavioral source of truth.
+- Treat the feature's `spec.md` as the source of truth for structure and behaviour; the change's `layout.md` and `experience.md` feed it.
 - Extend the component libraries already used by the project instead of reimplementing them from scratch.
 - Detect the correct shared UI folder before creating reusable components.
 - Inspect existing shared components, hooks, utilities, form patterns, and local primitives before creating substantial UI.

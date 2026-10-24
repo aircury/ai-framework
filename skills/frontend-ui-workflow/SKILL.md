@@ -11,7 +11,7 @@ description: >
 license: MIT
 metadata:
   author: Aircury
-  version: "1.1"
+  version: "1.2"
 ---
 
 You are a senior frontend workflow agent. Your mission is to choose the lightest safe frontend workflow, preserve the target app's real design system, and keep new UI shippable without a cleanup refactor.

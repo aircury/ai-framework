@@ -8,8 +8,9 @@ Build a high-fidelity UI that follows `layout.md`, `experience.md`, `implementat
 
 ## Inputs
 
-- `specs/changes/<name>/layout.md`: structural source of truth.
-- `specs/changes/<name>/experience.md`: behavioral and UX source of truth.
+- `specs/features/<feature-name>/spec.md`: the source of truth for structure and behaviour.
+- `specs/changes/<name>/layout.md`: what must render; it feeds the feature's `spec.md`.
+- `specs/changes/<name>/experience.md`: how it behaves and when it renders; it feeds the feature's `spec.md`.
 - `specs/changes/<name>/implementation-plan.md`: component boundaries, file organization, state ownership, JSX structure, primitive reuse, and conditional rendering strategy.
 - `specs/ui/style-guide.md`: canonical design tokens, primitives, variants, and composition patterns.
 - The target frontend codebase.
