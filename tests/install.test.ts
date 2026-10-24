@@ -1000,6 +1000,9 @@ describe("commit-changes skill", () => {
   it("follows the project's own commit convention on top of the format", () => {
     expect(skill).toContain(
       "The project's own convention comes on top of this format.",
+    );
+  });
+});
 
 describe("module rules", () => {
   const LOCAL_SOURCE_OF_TRUTH =
