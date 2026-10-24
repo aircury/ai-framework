@@ -21,6 +21,7 @@ interface InstalledCapabilityView {
 interface RendererViewModel {
   installedCapabilities: InstalledCapabilityView[];
   includesCapabilityDetails: boolean;
+  includesSpecKit: boolean;
   includesDecisionRecords: boolean;
   includesTesting: boolean;
   includesDddHexagonalArchitecture: boolean;
@@ -58,6 +59,7 @@ function createViewModel(
         : undefined,
     })),
     includesCapabilityDetails: selectedCapabilities.some(hasCapabilityDetail),
+    includesSpecKit: selectedIds.has("spec-kit"),
     includesDecisionRecords: selectedIds.has("decision-records"),
     includesTesting: selectedIds.has("testing"),
     includesDddHexagonalArchitecture: selectedIds.has("ddd-hexagonal"),
