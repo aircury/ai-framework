@@ -184,9 +184,6 @@ describe("runInstaller", () => {
     await answerPrompt(output, input, "Architecture capability");
     await answerPrompt(output, input, "Other capabilities");
     await answerPrompt(output, input, "Proceed with installation?", "y", "y");
-    await output.waitFor("Some files already exist");
-    input.press("down");
-    input.press("return");
     await installation;
 
     const installedProfile = JSON.parse(
@@ -212,5 +209,62 @@ describe("runInstaller", () => {
       "commit-changes",
     );
     expect(output.text).toContain("Aircury AI Framework ready.");
+  });
+
+  it("updates an installed project without asking: framework files refreshed, the project's kept, dropped ones removed", async () => {
+    const cwd = createTemporaryDirectory("ai-framework-update");
+    const savedProfile = createCapabilityProfile(["git"], {
+      britishEnglish: true,
+      tools: ["claude-code"],
+    });
+    mkdirSync(join(cwd, ".aircury"), { recursive: true });
+    writeFileSync(
+      join(cwd, ".aircury", "framework.config.json"),
+      `${JSON.stringify(savedProfile, null, 2)}\n`,
+      "utf-8",
+    );
+    writeFileSync(join(cwd, "FRAMEWORK.md"), "# FRAMEWORK.md\n\nOld.\n");
+    mkdirSync(join(cwd, "specs", "features"), { recursive: true });
+    writeFileSync(join(cwd, "specs", "features", "README.md"), "# Ours\n");
+    mkdirSync(join(cwd, "docs", "aircury", "capabilities"), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(cwd, "docs", "aircury", "capabilities", "airsync.md"),
+      "# Airsync\n\n> This file is maintained by Aircury AI Framework.\n> Do not edit it directly.\n",
+    );
+
+    const input = new InstallerInput();
+    const output = new InstallerOutput();
+    const installation = runInstaller({
+      cwd,
+      input,
+      output,
+      executeCommand: () => ({ success: true, stdout: "", stderr: "" }),
+    });
+
+    await answerPrompt(output, input, "What do you want to configure?");
+    await answerPrompt(output, input, "Additional tools");
+    await answerPrompt(output, input, "Use British English");
+    await answerPrompt(output, input, "Architecture capability");
+    await answerPrompt(output, input, "Other capabilities");
+    await answerPrompt(output, input, "Proceed with installation?", "y", "y");
+    await installation;
+
+    expect(output.text).not.toContain("Some files already exist");
+    expect(readFileSync(join(cwd, "FRAMEWORK.md"), "utf-8")).not.toContain(
+      "Old.",
+    );
+    expect(
+      readFileSync(join(cwd, "specs", "features", "README.md"), "utf-8"),
+    ).toBe("# Ours\n");
+    expect(
+      existsSync(join(cwd, "docs", "aircury", "capabilities", "airsync.md")),
+    ).toBe(false);
+    expect(output.text).toContain("refresh FRAMEWORK.md");
+    expect(output.text).toContain("keep specs/features/README.md");
+    expect(output.text).toContain(
+      "remove docs/aircury/capabilities/airsync.md",
+    );
   });
 });

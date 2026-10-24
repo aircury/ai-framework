@@ -4,6 +4,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
@@ -13,6 +14,7 @@ import {
   type CapabilityProfile,
   type CapabilityScope,
   createCapabilityProfile,
+  FRAMEWORK_MAINTAINED_NOTICE,
   getCapabilityFiles,
   getCapabilitySkills,
 } from "./capabilities";
@@ -38,6 +40,28 @@ export interface InstallCommand {
 
 export interface InstallOptions {
   britishEnglish?: boolean;
+  /** The framework version recorded in the profile; read from the published package by default. */
+  frameworkVersion?: string;
+}
+
+/**
+ * The version of the installed package, from the `package.json` npm publishes beside `dist/`.
+ * A source checkout's `package.json` carries none (semantic-release sets it at publish time).
+ */
+export function getFrameworkVersion(): string | undefined {
+  try {
+    const packageJson = join(
+      dirname(fileURLToPath(import.meta.url)),
+      "..",
+      "package.json",
+    );
+    const version: unknown = JSON.parse(
+      readFileSync(packageJson, "utf-8"),
+    ).version;
+    return typeof version === "string" ? version : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 type SkillsRunner = "npx" | "bunx";
@@ -132,7 +156,7 @@ export function getLocalFiles(
     },
     {
       path: PROJECT_PROFILE_PATH,
-      content: `${JSON.stringify(profile, null, 2)}\n`,
+      content: `${JSON.stringify(withFrameworkVersion(profile, options?.frameworkVersion ?? getFrameworkVersion()), null, 2)}\n`,
       description: "Installed capability profile",
     },
     ...getBaseFiles(),
@@ -142,7 +166,10 @@ export function getLocalFiles(
   if (tools.includes("claude-code")) {
     files.push({
       path: "CLAUDE.md",
-      content: generateAgents(profile.capabilities, options),
+      content: titled(
+        generateAgents(profile.capabilities, options),
+        "CLAUDE.md",
+      ),
       description: "Agent instructions for Claude Code",
     });
   }
@@ -150,12 +177,29 @@ export function getLocalFiles(
   if (tools.includes("gemini-cli")) {
     files.push({
       path: "GEMINI.md",
-      content: generateAgents(profile.capabilities, options),
+      content: titled(
+        generateAgents(profile.capabilities, options),
+        "GEMINI.md",
+      ),
       description: "Agent instructions for Gemini CLI",
     });
   }
 
   return files;
+}
+
+function withFrameworkVersion(
+  profile: CapabilityProfile,
+  frameworkVersion: string | undefined,
+): CapabilityProfile & { frameworkVersion?: string } {
+  if (!frameworkVersion) return profile;
+  const { version, ...rest } = profile;
+  return { version, frameworkVersion, ...rest };
+}
+
+/** The agent entrypoints share one template, titled `# AGENTS.md`; each copy carries its own file name. */
+function titled(agentsContent: string, fileName: string): string {
+  return agentsContent.replace(/^# AGENTS\.md\n/, `# ${fileName}\n`);
 }
 
 export function readProjectProfile(cwd: string): CapabilityProfile | null {
@@ -426,6 +470,83 @@ export function writeFile(
 
   mkdirSync(dirname(fullPath), { recursive: true });
   writeFileSync(fullPath, file.content, "utf-8");
+}
+
+const FRAMEWORK_CAPABILITY_DOCS_DIR = "docs/aircury/capabilities";
+
+export type FileAction =
+  | "create"
+  | "refresh"
+  | "unchanged"
+  | "merge"
+  | "keep"
+  | "remove";
+
+export interface FileWrite {
+  path: string;
+  action: FileAction;
+  file?: InstallFile;
+}
+
+// The notice's opening sentence; older installs (and Markdown formatters) split the rest over lines.
+const FRAMEWORK_MAINTAINED_MARK = FRAMEWORK_MAINTAINED_NOTICE.slice(
+  0,
+  FRAMEWORK_MAINTAINED_NOTICE.indexOf(".") + 1,
+);
+
+function isFrameworkMaintained(content: string): boolean {
+  return content.includes(FRAMEWORK_MAINTAINED_MARK);
+}
+
+/**
+ * What an install does to each local file, decided by who owns it:
+ * - a file carrying the framework-maintained notice belongs to the framework, so it is
+ *   always brought to the current version (refresh), whatever was there;
+ * - `AGENTS.md`, `CLAUDE.md` and `GEMINI.md` get the framework section merged in;
+ * - every other file (`FRAMEWORK.local.md`, the `specs/` guides) is a starter that
+ *   belongs to the project once it exists, and is never overwritten (keep);
+ * - a framework-maintained capability document the profile no longer installs is removed,
+ *   so a dropped capability leaves no rules behind.
+ */
+export function planFileWrites(files: InstallFile[], cwd: string): FileWrite[] {
+  const plan: FileWrite[] = files.map((file) => {
+    const fullPath = join(cwd, file.path);
+    if (!existsSync(fullPath))
+      return { path: file.path, action: "create", file };
+    if (isMergeableFrameworkEntrypoint(file.path))
+      return { path: file.path, action: "merge", file };
+    if (!isFrameworkMaintained(file.content))
+      return { path: file.path, action: "keep", file };
+    const current = readFileSync(fullPath, "utf-8");
+    return {
+      path: file.path,
+      action: current === file.content ? "unchanged" : "refresh",
+      file,
+    };
+  });
+
+  const installed = new Set(files.map((file) => file.path));
+  const docsDir = join(cwd, FRAMEWORK_CAPABILITY_DOCS_DIR);
+  if (existsSync(docsDir)) {
+    for (const entry of readdirSync(docsDir, { withFileTypes: true })) {
+      const path = `${FRAMEWORK_CAPABILITY_DOCS_DIR}/${entry.name}`;
+      if (!entry.isFile() || installed.has(path)) continue;
+      if (isFrameworkMaintained(readFileSync(join(cwd, path), "utf-8")))
+        plan.push({ path, action: "remove" });
+    }
+  }
+
+  return plan;
+}
+
+export function applyFileWrites(plan: FileWrite[], cwd: string): void {
+  for (const { path, action, file } of plan) {
+    if (action === "remove") {
+      rmSync(join(cwd, path));
+    } else if (file && action !== "keep" && action !== "unchanged") {
+      writeFile(file, cwd, false);
+    }
+  }
 }
 
 export function mergeFrameworkReferenceIntoAgents(

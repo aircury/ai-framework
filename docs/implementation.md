@@ -24,8 +24,7 @@ The TUI performs this sequence:
 4. Select capabilities.
 5. Review files and `npx skills add` commands.
 6. Confirm installation.
-7. Choose whether to skip or overwrite existing generated files.
-8. Write files, install skills, and update `.gitignore` with `specs/changes/`.
+7. Write files, install skills, and update `.gitignore` with `specs/changes/`.
 
 Universal agents such as Amp, Codex, Cursor, GitHub Copilot, Kilo Code, and OpenCode are supported through `AGENTS.md` and selected skills. Tool-specific files are added only when selected.
 
@@ -139,12 +138,14 @@ All workflow modes converge on `specs/features/`:
 
 ## Conflict Handling
 
-Before writing files, the installer checks whether generated files already exist.
+A local install decides what to do with each existing file by who owns it, and lists the plan before asking to proceed:
 
-If conflicts are found, the user chooses:
+- `refresh`: a file carrying the framework-maintained notice (`FRAMEWORK.md`, `.aircury/framework.config.json`, `docs/aircury/capabilities/*`) is replaced by the current version. Project rules belong in `FRAMEWORK.local.md`, not in these files.
+- `merge`: `AGENTS.md`, `CLAUDE.md` and `GEMINI.md` keep their content and gain the framework section.
+- `keep`: every other generated file (`FRAMEWORK.local.md`, the `specs/` guides) is a starter; once it exists it belongs to the project and is never overwritten.
+- `remove`: a framework-maintained document under `docs/aircury/capabilities/` that the profile no longer installs.
 
-- `Skip existing`: only write files that do not exist. `AGENTS.md` and `CLAUDE.md` are still safely merged with the framework reference.
-- `Overwrite all`: replace generated files with the new rendered content.
+When `.agents/skills` is a git submodule, no skills are installed into it (its repository owns them). A global install still asks whether to skip or overwrite existing files.
 
 The installer never deletes project code.
 

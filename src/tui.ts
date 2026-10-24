@@ -11,12 +11,16 @@ import {
 } from "./capabilities";
 import type { InstallCommand, Scope, Tool } from "./install";
 import {
+  applyFileWrites,
   checkConflicts,
+  type FileWrite,
+  getFrameworkVersion,
   getGlobalCommands,
   getGlobalFiles,
   getLocalFiles,
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
+  planFileWrites,
   planLocalSkills,
   readProjectProfile,
   runCommand,
@@ -266,6 +270,7 @@ export async function runInstaller({
     ? getGlobalFiles(selectedTools)
     : getLocalFiles(selectedTools, resolvedCapabilities, {
         britishEnglish: enforceBritishEnglish,
+        frameworkVersion: getFrameworkVersion(),
       });
   const localSkills = isGlobal
     ? null
@@ -327,8 +332,32 @@ export async function runInstaller({
 
   const conflicts = checkConflicts(files, cwd, isGlobal);
   const existingCount = conflicts.filter((conflict) => conflict.exists).length;
+  const filePlan: FileWrite[] | null = isGlobal
+    ? null
+    : planFileWrites(files, cwd);
 
-  if (files.length > 0) {
+  if (filePlan) {
+    const changing = filePlan.filter((entry) => entry.action !== "unchanged");
+    p.log.step(
+      `${changing.length} file${changing.length === 1 ? "" : "s"} to change, ${filePlan.length - changing.length} already current`,
+      outputOptions,
+    );
+    for (const { path, action } of changing) {
+      p.log.info(`${action} ${path}`, outputOptions);
+    }
+    if (filePlan.some((entry) => entry.action === "refresh")) {
+      p.log.info(
+        "refresh: framework-maintained files are replaced by this version; keep project rules in FRAMEWORK.local.md.",
+        outputOptions,
+      );
+    }
+    if (filePlan.some((entry) => entry.action === "keep")) {
+      p.log.info(
+        "keep: the project's own files (FRAMEWORK.local.md, the specs/ guides) are never overwritten.",
+        outputOptions,
+      );
+    }
+  } else if (files.length > 0) {
     p.log.step(
       `${files.length} files to install${existingCount > 0 ? `, ${existingCount} already exist` : ""}`,
       outputOptions,
@@ -369,7 +398,7 @@ export async function runInstaller({
     return p.cancel("Cancelled.", promptOptions);
 
   let overwrite: "skip" | "overwrite" = "skip";
-  if (existingCount > 0) {
+  if (isGlobal && existingCount > 0) {
     const choice = await p.select<"skip" | "overwrite">({
       ...promptOptions,
       message: "Some files already exist. What do you want to do?",
@@ -392,6 +421,7 @@ export async function runInstaller({
 
   let written = 0;
   let skipped = 0;
+  let removed = 0;
   let executed = 0;
 
   for (const command of commands) {
@@ -416,7 +446,15 @@ export async function runInstaller({
     executed++;
   }
 
-  for (const { file, exists } of conflicts) {
+  if (filePlan) {
+    applyFileWrites(filePlan, cwd);
+    written = filePlan.filter(({ action }) =>
+      ["create", "refresh", "merge"].includes(action),
+    ).length;
+    removed = filePlan.filter(({ action }) => action === "remove").length;
+  }
+
+  for (const { file, exists } of filePlan ? [] : conflicts) {
     if (!isGlobal && exists && isProtectedLocalCompanion(file.path)) {
       skipped++;
       continue;
@@ -444,6 +482,11 @@ export async function runInstaller({
   if (skipped > 0)
     p.log.warn(
       `${skipped} file${skipped > 1 ? "s" : ""} skipped (already exist)`,
+      outputOptions,
+    );
+  if (removed > 0)
+    p.log.success(
+      `${removed} framework file${removed > 1 ? "s" : ""} removed (no longer installed)`,
       outputOptions,
     );
   if (executed > 0)

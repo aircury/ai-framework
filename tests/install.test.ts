@@ -13,6 +13,7 @@ import {
   getInitialCapabilityIds,
 } from "../src/capabilities";
 import {
+  applyFileWrites,
   checkConflicts,
   getAircurySkillsSource,
   getGlobalCommands,
@@ -24,6 +25,7 @@ import {
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
   mergeFrameworkReferenceIntoAgents,
+  planFileWrites,
   planLocalSkills,
   readProjectProfile,
   runCommand,
@@ -1080,5 +1082,125 @@ describe("unattended runs and port fakes", () => {
     expect(testing).toContain(
       "passes the same contract tests as the real adapter",
     );
+  });
+});
+
+describe("updating an installed project", () => {
+  const NOTICE = "This file is maintained by Aircury AI Framework.";
+
+  function makeProject(name: string): string {
+    const dir = `${tmpdir()}/ai-framework-update-${name}-${Date.now()}`;
+    mkdirSync(dir, { recursive: true });
+    return dir;
+  }
+
+  function put(dir: string, path: string, content: string): void {
+    mkdirSync(join(dir, path, ".."), { recursive: true });
+    writeFileSync(join(dir, path), content);
+  }
+
+  function actionFor(plan: ReturnType<typeof planFileWrites>, path: string) {
+    return plan.find((entry) => entry.path === path)?.action;
+  }
+
+  it("refreshes framework-maintained files and keeps the project's own", () => {
+    const dir = makeProject("ownership");
+    try {
+      const files = getLocalFiles(["claude-code"], ["frontend"]);
+      put(dir, "FRAMEWORK.md", "# FRAMEWORK.md\n\nAn older version.\n");
+      put(dir, "FRAMEWORK.local.md", "# Project rules\n");
+      put(dir, "specs/features/README.md", "# Our own rules for specs\n");
+      put(dir, "AGENTS.md", "# AGENTS.md\n\nProject notes.\n");
+      const frontend = getFileByPath(
+        files,
+        "docs/aircury/capabilities/frontend.md",
+      );
+      put(dir, frontend.path, frontend.content);
+
+      const plan = planFileWrites(files, dir);
+
+      expect(actionFor(plan, "FRAMEWORK.md")).toBe("refresh");
+      expect(actionFor(plan, "FRAMEWORK.local.md")).toBe("keep");
+      expect(actionFor(plan, "specs/features/README.md")).toBe("keep");
+      expect(actionFor(plan, "AGENTS.md")).toBe("merge");
+      expect(actionFor(plan, frontend.path)).toBe("unchanged");
+      expect(actionFor(plan, "specs/ui/README.md")).toBe("create");
+
+      applyFileWrites(plan, dir);
+
+      expect(readFileSync(join(dir, "FRAMEWORK.md"), "utf8")).toBe(
+        getFileByPath(files, "FRAMEWORK.md").content,
+      );
+      expect(readFileSync(join(dir, "FRAMEWORK.local.md"), "utf8")).toBe(
+        "# Project rules\n",
+      );
+      expect(readFileSync(join(dir, "specs/features/README.md"), "utf8")).toBe(
+        "# Our own rules for specs\n",
+      );
+      expect(readFileSync(join(dir, "AGENTS.md"), "utf8")).toContain(
+        "Project notes.",
+      );
+      expect(existsSync(join(dir, "specs/ui/README.md"))).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true });
+    }
+  });
+
+  it("removes framework capability files the profile no longer installs", () => {
+    const dir = makeProject("stale");
+    try {
+      const files = getLocalFiles([], ["frontend"]);
+      put(
+        dir,
+        "docs/aircury/capabilities/airsync.md",
+        `# Airsync\n\n> ${NOTICE} Do not edit it directly.\n`,
+      );
+      put(
+        dir,
+        "docs/aircury/capabilities/our-notes.md",
+        "# Written by the project\n",
+      );
+
+      const plan = planFileWrites(files, dir);
+
+      expect(actionFor(plan, "docs/aircury/capabilities/airsync.md")).toBe(
+        "remove",
+      );
+      expect(
+        actionFor(plan, "docs/aircury/capabilities/our-notes.md"),
+      ).toBeUndefined();
+
+      applyFileWrites(plan, dir);
+
+      expect(
+        existsSync(join(dir, "docs/aircury/capabilities/airsync.md")),
+      ).toBe(false);
+      expect(
+        existsSync(join(dir, "docs/aircury/capabilities/our-notes.md")),
+      ).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true });
+    }
+  });
+
+  it("titles each agent entrypoint after its own file", () => {
+    const files = getLocalFiles(["claude-code", "gemini-cli"], []);
+    expect(getFileByPath(files, "AGENTS.md").content).toStartWith(
+      "# AGENTS.md\n",
+    );
+    expect(getFileByPath(files, "CLAUDE.md").content).toStartWith(
+      "# CLAUDE.md\n",
+    );
+    expect(getFileByPath(files, "GEMINI.md").content).toStartWith(
+      "# GEMINI.md\n",
+    );
+  });
+
+  it("records the framework version that wrote the profile", () => {
+    const files = getLocalFiles([], [], { frameworkVersion: "9.8.7" });
+    const profile = JSON.parse(
+      getFileByPath(files, ".aircury/framework.config.json").content,
+    );
+    expect(profile.frameworkVersion).toBe("9.8.7");
   });
 });
