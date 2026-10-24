@@ -77,6 +77,7 @@ describe("capabilities", () => {
       "goal-crafting",
       "database",
       "extract-rule",
+      "uat-scenarios",
     ]);
   });
 

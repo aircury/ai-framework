@@ -10,7 +10,7 @@ repeatable set of UAT artifacts that a tester can run end to end.
 
 ## 1. Input contract
 
-All three are required. If the intent or changes is missing, 
+All three are required. If any of them is missing,
 **ask for it before doing anything else** and stop:
 
 | Input | What it is | Example |
@@ -19,7 +19,7 @@ All three are required. If the intent or changes is missing,
 | **Pseudo-specification** | The rules in plain language: triggers, conditions, outputs, systems involved | "When status X is set in system A and the record is in state Y, call API Z; then write the result back to A" |
 | **Changes** | The branch (default: current branch vs the main branch) or an explicit list of commits/files | `feature/x` vs `main` |
 
-If an example of an **existing UAT artifact to use as a style example** is given, 
+If an example of an **existing UAT artifact to use as a style example** is given,
 match its columns, tone and level of detail.
 
 ## 2. Understand before writing
@@ -87,14 +87,14 @@ stated reason.
    code path before this change still works.
 4. **Edge cases**, checking at least, if they apply:
    - **Duplication / repetition**: if the same action could happen twice, a test
-     checking that a full cycle repeated on the same record (A -> B -> A -> B) 
+     checking that a full cycle repeated on the same record (A -> B -> A -> B)
      still works and the second cycle uses its own data.
    - **Missing or unmappable data**: lookups that resolve to nothing, empty
      mappings, NULL vs empty string.
-   - **Time windows**: if the code relates to some timing (data only after a date, 
+   - **Time windows**: if the code relates to some timing (data only after a date,
      updated in the last N minutes, ...), some test that edges that timing.
-   - **External failures**: if deemed necessary for syncronisation or continuity
-     reasons, a test when an external system fails (the API rejects the call); is 
+   - **External failures**: if deemed necessary for synchronisation or continuity
+     reasons, a test when an external system fails (the API rejects the call); is
      the failure stored, and is it retried or not?
 
 Each scenario starts with an action a tester can perform and ends with a state
@@ -131,7 +131,7 @@ Columns, in this order:
 | `ID / link columns` | Any number, one per object the tester needs (record links, object IDs). Fill with `fill from query N` or the mock ID.                                |
 | `EXPECTED RESULTS` | Left as `Same as outcome` for the tester to overwrite with what actually happened.                                                                   |
 
-Scenarios that build on each other (e.g. R.1 continues D.1) should be mentioned 
+Scenarios that build on each other (e.g. R.1 continues D.1) should be mentioned
 in the relevant row.
 
 ### 4.2 `fixtures.sql` (required)
@@ -169,7 +169,7 @@ the scenarios are linked to the SQL file, the commands and the jobs.
 
 Structure:
 
-1. Prerequisites for the testing session: migrations, data loads, config, 
+1. Prerequisites for the testing session: migrations, data loads, config,
    access, ...
 2. One section per scenario, in execution order from top to bottom (chained
    scenarios placed after the ones they continue). Each section is
@@ -194,7 +194,7 @@ outcome. **Do not fix it.** For each one:
    proposed fix (smallest diff).
 2. List it in the playbook under "Known issues" (or at the top of the SQL file if
    there is no playbook);
-3. Write the scenario for the **intended** behaviour, marked as "Internal test", so 
+3. Write the scenario for the **intended** behaviour, marked as "Internal test", so
    it fails until the bug is fixed, and say so in its Description.
 
 Then ask whether to apply the fixes.
