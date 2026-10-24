@@ -7,8 +7,8 @@ This playbook shows how to use Aircury after installation. If you are unsure whi
 | Need | Recommended mode | Expected result |
 |---|---|---|
 | Small, well-understood change | `plan-build` | Short plan, implementation, verification, and spec update if behavior changes. |
-| Complex or cross-cutting change | `spec-kit` | Specification, clarification, plan, tasks, analysis, implementation, and optional checklist. |
-| New feature or formal requirements | `spec-kit` | Specification, clarification, plan, tasks, analysis, implementation, and optional checklist. |
+| Complex or cross-cutting change | `spec-kit` | Specification, clarification, plan, tasks, analysis, implementation, convergence, and optional checklist. |
+| New feature or formal requirements | `spec-kit` | Specification, clarification, plan, tasks, analysis, implementation, convergence, and optional checklist. |
 | New project bootstrap | `walking-skeleton` | ADR selection, first end-to-end spec, runnable baseline, and clean rebuild verification. |
 | Understand existing behavior | `specs-extractor` | Behavior-first specs extracted from the current codebase. |
 | Rewrite from frozen specs | `specs-interpreter` | New implementation direction constrained by `specs/features/`. |
@@ -51,6 +51,7 @@ Skills involved:
 - `spec-kit-tasks`
 - `spec-kit-analyse`
 - `spec-kit-implement`
+- `spec-kit-converge`
 - `spec-kit-checklist`
 
 ### Start A New Project

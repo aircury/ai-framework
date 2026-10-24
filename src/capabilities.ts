@@ -431,6 +431,11 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       },
       {
         source: "aircury/ai-framework",
+        skillName: "spec-kit-converge",
+        scopes: ["local", "global"],
+      },
+      {
+        source: "aircury/ai-framework",
         skillName: "spec-kit-checklist",
         scopes: ["local", "global"],
       },
