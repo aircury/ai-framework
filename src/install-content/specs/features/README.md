@@ -10,9 +10,9 @@
 
 For new UI, high-fidelity rebuilds, non-trivial forms, role-gated UI, or substantial frontend behaviour changes, use `frontend-ui-workflow` to write the change's design documents under `specs/changes/<name>/`, beside the change's plan; they end with the change, and `specs/features/<feature-name>/spec.md` is the only feature-level document frontend work maintains:
 
-- `layout.md`: structural source of truth for fields, labels, sections, actions, and static content.
-- `experience.md`: behavioral source of truth for flows, micro-interactions, validation, loading/error/empty states, and visibility rules.
-- `implementation-plan.md`: clean implementation source of truth for component responsibilities, file organization, state ownership, JSX structure, local primitive reuse, and conditional rendering strategy.
+- `layout.md`: what must render — fields, labels, sections, actions, and static content.
+- `experience.md`: how it behaves and when it renders — flows, micro-interactions, validation, loading/error/empty states, and visibility rules.
+- `implementation-plan.md`: the clean implementation plan for component responsibilities, file organization, state ownership, JSX structure, local primitive reuse, and conditional rendering strategy.
 
 These files complement `spec.md`. They do not replace the canonical behaviour spec.
 

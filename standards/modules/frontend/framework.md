@@ -40,9 +40,9 @@ Adopting, replacing, or removing an external design system is a material decisio
 
 For new UI, rebuilds, non-trivial forms, role-gated UI, restyles, or substantial behaviour changes, maintain these files:
 
-- `specs/changes/<name>/layout.md`: structural source of truth for fields, labels, sections, actions, and static content.
-- `specs/changes/<name>/experience.md`: behavioral source of truth for flows, micro-interactions, validation, loading/error/empty states, and visibility rules.
-- `specs/changes/<name>/implementation-plan.md`: clean implementation source of truth for component responsibilities, file organization, state ownership, JSX structure, local primitive reuse, and conditional rendering strategy.
+- `specs/changes/<name>/layout.md`: what must render — fields, labels, sections, actions, and static content. It feeds the feature's `specs/features/<feature-name>/spec.md`, the source of truth for structure and behaviour.
+- `specs/changes/<name>/experience.md`: how it behaves and when it renders — flows, micro-interactions, validation, loading/error/empty states, and visibility rules. It feeds the feature's `spec.md`.
+- `specs/changes/<name>/implementation-plan.md`: the clean implementation plan for component responsibilities, file organization, state ownership, JSX structure, local primitive reuse, and conditional rendering strategy.
 - `specs/ui/style-guide.md`: canonical source of truth for design tokens, reusable primitives, variants, states, responsive conventions, accessibility-related visual conventions, gaps, and strict reuse rules.
 
 The first three are the change's artefacts: write them under `specs/changes/<name>/` beside the change's plan, creating the directory when it does not exist, one set per change, and let them end with the change. `specs/features/<feature-name>/spec.md` is the only feature-level document frontend work maintains. Record only material architectural decisions that must outlive the change in `specs/decisions/`. Existing feature-level `layout.md`, `experience.md` and `implementation-plan.md` files stay as history: the next change to that feature writes its own set under `specs/changes/<name>/`.

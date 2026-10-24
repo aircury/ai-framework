@@ -1003,3 +1003,58 @@ describe("commit-changes skill", () => {
     );
   });
 });
+
+describe("module rules", () => {
+  const LOCAL_SOURCE_OF_TRUTH =
+    /(structural|behavioral|behavioural|clean implementation)( and UX)? source of truth/;
+
+  it("lets contexts meet only through a shared contract or an event", () => {
+    const ddd = getFileByPath(
+      getLocalFiles([], ["ddd-hexagonal"]),
+      "docs/aircury/capabilities/ddd-hexagonal.md",
+    ).content;
+    expect(ddd).toContain("never by importing each other");
+    expect(ddd).not.toContain("explicit application services or domain events");
+    const plan = readFileSync(
+      join(import.meta.dir, "..", "skills", "spec-kit-plan", "SKILL.md"),
+      "utf8",
+    );
+    expect(plan).not.toContain("domain events or application services only");
+  });
+
+  it("allows one deliberate answer for not allowed and not there, with its reason", () => {
+    const resilience = getFileByPath(
+      getLocalFiles([], ["resilience"]),
+      "docs/aircury/capabilities/resilience.md",
+    ).content;
+    expect(resilience).toContain("would reveal that it exists");
+  });
+
+  it("keeps the feature spec as the source of truth the change's design documents feed", () => {
+    const files = getLocalFiles([], ["frontend"]);
+    for (const path of [
+      "docs/aircury/capabilities/frontend.md",
+      "specs/features/README.md",
+      "specs/ui/frontend-workflow.md",
+    ]) {
+      expect(getFileByPath(files, path).content).not.toMatch(
+        LOCAL_SOURCE_OF_TRUTH,
+      );
+    }
+    const generation = readFileSync(
+      join(
+        import.meta.dir,
+        "..",
+        "skills",
+        "frontend-ui-workflow",
+        "references",
+        "ui-generation.md",
+      ),
+      "utf8",
+    );
+    expect(generation).not.toMatch(LOCAL_SOURCE_OF_TRUTH);
+    expect(generation).toContain(
+      "the source of truth for structure and behaviour",
+    );
+  });
+});

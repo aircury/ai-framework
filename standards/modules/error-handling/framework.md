@@ -29,5 +29,5 @@ Use recovery only when the failure mode is expected and the operation semantics 
 - Silent catch blocks.
 - Returning generic success when a meaningful failure occurred.
 - Converting programmer errors into normal control flow.
-- Mixing validation, authorisation, and system failures into the same vague error response.
+- Mixing validation, authorisation, and system failures into the same vague error response. The one deliberate exception is a refusal that would otherwise leak: when telling a caller "not allowed" apart from "not there" would reveal that it exists to someone not entitled to know, answer both identically on purpose so the resource cannot be enumerated, keep system failures distinct from that answer, and state the rule in the spec so nobody later "fixes" it.
 - Retrying without limits or without understanding failure semantics.
