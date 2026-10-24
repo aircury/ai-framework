@@ -157,7 +157,8 @@ export type CapabilityId =
   | "database"
   | "blind-db-debugging"
   | "db-schema-design"
-  | "extract-rule";
+  | "extract-rule"
+  | "uat-scenarios";
 
 type VisibleCapabilityId = Exclude<
   CapabilityId,
@@ -738,6 +739,23 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       },
     ],
   },
+  "uat-scenarios": {
+    id: "uat-scenarios",
+    label: "UAT Scenarios",
+    hint: "prepare UAT scenarios, fixtures and playbooks",
+    description:
+      "Turns a change's intent, pseudo-specification and branch diff into UAT scenarios, SQL fixtures and an optional testing playbook",
+    category: "engineering",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "uat-scenarios",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
 };
 
 const CAPABILITY_ORDER: VisibleCapabilityId[] = [
@@ -759,6 +777,7 @@ const CAPABILITY_ORDER: VisibleCapabilityId[] = [
   "goal-crafting",
   "database",
   "extract-rule",
+  "uat-scenarios",
 ];
 
 const LEGACY_CAPABILITY_ALIASES: Partial<
