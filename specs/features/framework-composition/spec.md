@@ -89,3 +89,41 @@ When it is installed, its sequence MUST end with `spec-kit-converge` after `spec
 - **WHEN** the selected capabilities do not include `spec-kit`
 - **THEN** the generated `FRAMEWORK.md` does not mention spec-kit
 - **AND** `plan-build` is the mode it offers
+
+### Requirement: Updating an installed project SHALL refresh the framework's files and keep the project's
+The installer MUST decide what it does to each existing local file by who owns it, without asking.
+A file carrying the framework-maintained notice MUST be replaced by the current version.
+`AGENTS.md`, `CLAUDE.md` and `GEMINI.md` MUST keep their content and gain the framework section.
+Every other generated file (`FRAMEWORK.local.md`, the `specs/` guides) MUST be written only when it does not exist.
+
+#### Scenario: A project reruns the installer after a framework release
+- **GIVEN** a project with an older `FRAMEWORK.md` and its own edited `specs/features/README.md`
+- **WHEN** the user runs a local installation
+- **THEN** `FRAMEWORK.md` is the current version
+- **AND** `specs/features/README.md` is unchanged
+
+### Requirement: The installer SHALL remove framework capability documents it no longer installs
+A framework-maintained document under `docs/aircury/capabilities/` that the selected profile does not install MUST be removed.
+A file there without the framework-maintained notice MUST be left alone.
+
+#### Scenario: A capability was dropped from the framework
+- **GIVEN** a project still holding `docs/aircury/capabilities/airsync.md` from an older install
+- **WHEN** the user runs a local installation
+- **THEN** that file is removed and the installer reports it
+
+### Requirement: The installer SHALL leave a skills submodule to its own repository
+When `.agents/skills` is a git submodule, the installer MUST NOT install skills into it.
+It MUST report which selected skills the submodule already provides and which it lacks.
+
+#### Scenario: A project keeps its skills in a shared submodule
+- **GIVEN** `.gitmodules` declares a submodule at `.agents/skills`
+- **WHEN** the user runs a local installation
+- **THEN** no skill install command runs
+- **AND** the installer lists the selected skills found in the submodule and those missing from it
+
+### Requirement: The project configuration SHALL record the framework version that wrote it
+The installer MUST write the version of the installed framework package to the project configuration, when the package carries one.
+
+#### Scenario: A project is installed from a published release
+- **WHEN** the framework is installed locally from a published package
+- **THEN** the project configuration records that package's version as `frameworkVersion`

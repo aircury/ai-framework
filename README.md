@@ -33,7 +33,7 @@ The TUI asks for:
 3. **Language preference** — for local installs, optionally enforce British English and include the language capability.
 4. **Capabilities** — choose the workflows and standards this installation should include.
 
-If files already exist, the installer asks whether to skip or overwrite them. Skills are installed through the skills ecosystem with `npx` or `bunx`, so they can be updated later. When a project keeps `.agents/skills` as a git submodule (a shared skills repository), the installer installs no skills there: that repository owns them, and the installer lists the selected skills it already provides and the ones to add to it.
+Rerunning the installer updates a project without asking: files carrying the framework-maintained notice are replaced by the current version, `AGENTS.md` and `CLAUDE.md` keep their content and gain the framework section, the project's own files (`FRAMEWORK.local.md`, the `specs/` guides) are never overwritten, and framework capability documents the profile no longer installs are removed. The installed version is recorded as `frameworkVersion` in `.aircury/framework.config.json`. Skills are installed through the skills ecosystem with `npx` or `bunx`, so they can be updated later. When a project keeps `.agents/skills` as a git submodule (a shared skills repository), the installer installs no skills there: that repository owns them, and the installer lists the selected skills it already provides and the ones to add to it.
 
 Every local installation includes non-negotiable engineering rules in `FRAMEWORK.md`: TDD where automated testing is feasible, SOLID design constraints, Clean Code, explicit architecture boundaries, and justified tradeoffs for any exception.
 
