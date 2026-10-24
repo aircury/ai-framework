@@ -239,6 +239,13 @@ describe("templates", () => {
       );
     });
 
+    it("defines the external design system contract only in the frontend module", () => {
+      expect(generateFramework(["frontend"])).toContain(
+        "and with `specs/ui/DESIGN.md` when an external design system provides it",
+      );
+      expect(generateFramework([])).not.toContain("specs/ui/DESIGN.md");
+    });
+
     it("adds code style header to FRAMEWORK.md when enabled", () => {
       expect(generateFramework(["code-style"])).toContain(
         "docs/aircury/capabilities/code-style.md",

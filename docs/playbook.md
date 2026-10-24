@@ -153,6 +153,24 @@ Expected artifacts:
 - `specs/ui/style-guide.md` from the target project.
 - Restyled UI code that preserves existing behavior but follows the current design system.
 
+### Adopt An External Design System
+
+Use this when a project should follow a design system maintained outside the project, such as a shared component registry or a themed package.
+
+The framework does not install or configure the library. The design system provides its own installer, usually a skill or a CLI command. It also delivers two files that the `frontend` rules recognise:
+
+- `specs/ui/DESIGN.md`: the brand and token rules. It takes precedence over conventions extracted from the code.
+- `specs/ui/design-system.md`: how to install, update, and override the library's components and tokens.
+
+Expected flow:
+
+1. Record the adoption in an ADR.
+2. Install the design system with its own installer so both files land in `specs/ui/`.
+3. Use `frontend-ui-workflow` to update `specs/ui/style-guide.md`, marking what comes from the design system and recording gaps against `DESIGN.md`.
+4. Migrate local primitives to the library's components one at a time.
+
+Do not edit `DESIGN.md` or `design-system.md` in the project; change them in the design system's source.
+
 ### Record An Architectural Decision
 
 Use this when a decision affects architecture, workflow, dependencies, or long-term project direction.

@@ -3,6 +3,7 @@
 `specs/ui/` stores the project's living style guide and UI design tokens. Use `frontend-ui-workflow` to keep these files aligned with the real frontend design system.
 
 - `style-guide.md`: The canonical source of truth for design tokens and UI patterns.
+- `DESIGN.md` and `design-system.md`: present only when the project adopts an external design system. That design system delivers and owns both files: `DESIGN.md` holds its brand and token rules, and `design-system.md` explains how to use the library. `DESIGN.md` takes precedence over conventions extracted from code.
 - Update the style guide whenever new tokens or patterns are identified.
 
 ## Relationship To Feature Specs
