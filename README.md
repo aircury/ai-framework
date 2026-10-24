@@ -33,7 +33,7 @@ The TUI asks for:
 3. **Language preference** — for local installs, optionally enforce British English and include the language capability.
 4. **Capabilities** — choose the workflows and standards this installation should include.
 
-If files already exist, the installer asks whether to skip or overwrite them. Skills are installed through the skills ecosystem with `npx` or `bunx`, so they can be updated later.
+If files already exist, the installer asks whether to skip or overwrite them. Skills are installed through the skills ecosystem with `npx` or `bunx`, so they can be updated later. When a project keeps `.agents/skills` as a git submodule (a shared skills repository), the installer installs no skills there: that repository owns them, and the installer lists the selected skills it already provides and the ones to add to it.
 
 Every local installation includes non-negotiable engineering rules in `FRAMEWORK.md`: TDD where automated testing is feasible, SOLID design constraints, Clean Code, explicit architecture boundaries, and justified tradeoffs for any exception.
 

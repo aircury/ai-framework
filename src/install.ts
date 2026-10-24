@@ -1,5 +1,11 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -288,6 +294,76 @@ export function getLocalCommands(
     "local",
     false,
   );
+}
+
+const PROJECT_SKILLS_PATH = ".agents/skills";
+
+export interface SkillsSubmodule {
+  path: string;
+  provided: string[];
+  missing: string[];
+}
+
+export interface LocalSkillsPlan {
+  commands: InstallCommand[];
+  submodule: SkillsSubmodule | null;
+}
+
+function isGitSubmodulePath(cwd: string, path: string): boolean {
+  const gitmodules = join(cwd, ".gitmodules");
+  if (!existsSync(gitmodules)) return false;
+  return readFileSync(gitmodules, "utf-8")
+    .split("\n")
+    .some((line) => /^\s*path\s*=\s*(.+?)\s*$/.exec(line)?.[1] === path);
+}
+
+function listSkillNames(dir: string): Set<string> {
+  if (!existsSync(dir)) return new Set();
+  return new Set(
+    readdirSync(dir, { withFileTypes: true })
+      .filter(
+        (entry) =>
+          entry.isDirectory() && existsSync(join(dir, entry.name, "SKILL.md")),
+      )
+      .map((entry) => entry.name),
+  );
+}
+
+/**
+ * Skills install into `.agents/skills`. When a project keeps that directory as a
+ * git submodule, the submodule's repository owns every skill in it: writing there
+ * would leave the submodule dirty and replace its versions with ours. So nothing
+ * is installed, and the plan says which selected skills the submodule lacks.
+ */
+export function planLocalSkills(
+  tools: Tool[],
+  capabilityIds: CapabilityId[],
+  cwd: string,
+): LocalSkillsPlan {
+  if (!isGitSubmodulePath(cwd, PROJECT_SKILLS_PATH)) {
+    return {
+      commands: getLocalCommands(tools, capabilityIds),
+      submodule: null,
+    };
+  }
+
+  const present = listSkillNames(join(cwd, PROJECT_SKILLS_PATH));
+  const selected = [
+    ...new Set(
+      getCapabilitySkills(capabilityIds, "local").map(
+        (skill) => skill.skillName,
+      ),
+    ),
+  ].sort();
+
+  return {
+    commands: [],
+    submodule: {
+      path: PROJECT_SKILLS_PATH,
+      provided: selected.filter((name) => present.has(name)),
+      missing: selected.filter((name) => !present.has(name)),
+    },
+  };
 }
 
 export function getGlobalCommands(

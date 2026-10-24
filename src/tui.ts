@@ -14,10 +14,10 @@ import {
   checkConflicts,
   getGlobalCommands,
   getGlobalFiles,
-  getLocalCommands,
   getLocalFiles,
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
+  planLocalSkills,
   readProjectProfile,
   runCommand,
   updateGitignore,
@@ -267,9 +267,12 @@ export async function runInstaller({
     : getLocalFiles(selectedTools, resolvedCapabilities, {
         britishEnglish: enforceBritishEnglish,
       });
-  const commands = isGlobal
-    ? getGlobalCommands(selectedTools, resolvedCapabilities)
-    : getLocalCommands(selectedTools, resolvedCapabilities);
+  const localSkills = isGlobal
+    ? null
+    : planLocalSkills(selectedTools, resolvedCapabilities, cwd);
+  const commands = localSkills
+    ? localSkills.commands
+    : getGlobalCommands(selectedTools, resolvedCapabilities);
   const selectedSkills = getCapabilitySkills(resolvedCapabilities, scope);
   const selectedCapabilityEntries = CAPABILITIES.filter((capability) =>
     resolvedCapabilities.includes(capability.id),
@@ -301,6 +304,25 @@ export async function runInstaller({
       );
       if (capability) p.log.info(`+ ${capability.label}`, outputOptions);
     }
+  }
+
+  const skillsSubmodule = localSkills?.submodule;
+  if (skillsSubmodule) {
+    p.note(
+      [
+        `${skillsSubmodule.path} is a git submodule, so its own repository owns the skills in it and none are installed there.`,
+        skillsSubmodule.provided.length > 0
+          ? `Already provided: ${skillsSubmodule.provided.join(", ")}.`
+          : "",
+        skillsSubmodule.missing.length > 0
+          ? `Not in the submodule (add them to its repository): ${skillsSubmodule.missing.join(", ")}.`
+          : "",
+      ]
+        .filter(Boolean)
+        .join("\n"),
+      "Skills",
+      promptOptions,
+    );
   }
 
   const conflicts = checkConflicts(files, cwd, isGlobal);
