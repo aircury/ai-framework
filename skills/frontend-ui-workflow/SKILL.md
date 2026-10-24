@@ -103,7 +103,7 @@ For substantial frontend work, keep these artifacts current:
 - `specs/ui/style-guide.md`: canonical design tokens, primitives, variants, and composition patterns.
 - `specs/features/<feature-name>/spec.md`: canonical observable behavior when behavior changes.
 
-The first three are the change's artefacts, not the feature's: write them under `specs/changes/<name>/`, creating the change's directory when it does not exist, one set per change so that two changes on one feature never overwrite each other's, and let them end with the change. `specs/features/<feature-name>/spec.md` is the only feature-level document frontend work maintains.
+The first three are the change's artefacts, not the feature's: write them under `specs/changes/<name>/`, creating the change's directory when it does not exist, one set per change so that two changes on one feature never overwrite each other's, and let them end with the change. `specs/features/<feature-name>/spec.md` is the only feature-level document frontend work maintains. Record only material architectural decisions that must outlive the change in `specs/decisions/`. Existing feature-level `layout.md`, `experience.md` and `implementation-plan.md` files stay as history: the next change to that feature writes its own set under `specs/changes/<name>/`.
 
 ## Quality Gates
 

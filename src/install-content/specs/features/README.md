@@ -16,4 +16,6 @@ For new UI, high-fidelity rebuilds, non-trivial forms, role-gated UI, or substan
 
 These files complement `spec.md`. They do not replace the canonical behaviour spec.
 
+Existing feature-level `layout.md`, `experience.md` and `implementation-plan.md` files stay as history: the next change to that feature writes its own set under `specs/changes/<name>/`.
+
 Visual tokens, reusable primitives, and composition patterns live in `specs/ui/style-guide.md`.

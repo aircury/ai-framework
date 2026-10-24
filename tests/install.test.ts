@@ -322,6 +322,17 @@ describe("getLocalFiles", () => {
       expect(file.content).toContain("the only feature-level document");
       expect(file.content).not.toMatch(FEATURE_FOLDER_DESIGN_DOCUMENT);
     }
+    expect(getFileByPath(files, "specs/features/README.md").content).toContain(
+      "stay as history",
+    );
+    const frontendRules = getFileByPath(
+      files,
+      "docs/aircury/capabilities/frontend.md",
+    ).content;
+    expect(frontendRules).toContain(
+      "decisions that must outlive the change in `specs/decisions/`",
+    );
+    expect(frontendRules).toContain("stay as history");
   });
 
   it("ships a frontend workflow skill that writes the design documents with the change", () => {
@@ -343,6 +354,12 @@ describe("getLocalFiles", () => {
     }
     expect(readFileSync(join(skillDir, "SKILL.md"), "utf8")).toContain(
       "specs/changes/<name>/layout.md",
+    );
+    expect(readFileSync(join(skillDir, "SKILL.md"), "utf8")).toContain(
+      "decisions that must outlive the change in `specs/decisions/`",
+    );
+    expect(readFileSync(join(skillDir, "SKILL.md"), "utf8")).toContain(
+      "stay as history",
     );
   });
 

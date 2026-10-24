@@ -45,7 +45,7 @@ For new UI, rebuilds, non-trivial forms, role-gated UI, restyles, or substantial
 - `specs/changes/<name>/implementation-plan.md`: clean implementation source of truth for component responsibilities, file organization, state ownership, JSX structure, local primitive reuse, and conditional rendering strategy.
 - `specs/ui/style-guide.md`: canonical source of truth for design tokens, reusable primitives, variants, states, responsive conventions, accessibility-related visual conventions, gaps, and strict reuse rules.
 
-The first three are the change's artefacts: write them under `specs/changes/<name>/` beside the change's plan, creating the directory when it does not exist, one set per change, and let them end with the change. `specs/features/<feature-name>/spec.md` is the only feature-level document frontend work maintains.
+The first three are the change's artefacts: write them under `specs/changes/<name>/` beside the change's plan, creating the directory when it does not exist, one set per change, and let them end with the change. `specs/features/<feature-name>/spec.md` is the only feature-level document frontend work maintains. Record only material architectural decisions that must outlive the change in `specs/decisions/`. Existing feature-level `layout.md`, `experience.md` and `implementation-plan.md` files stay as history: the next change to that feature writes its own set under `specs/changes/<name>/`.
 
 Small safe UI edits may skip the full artefact pipeline when nearby code and `specs/ui/style-guide.md` are sufficient.
 
