@@ -10,10 +10,12 @@
 
 Use `specs/ui/style-guide.md` for visual fidelity across the whole frontend.
 
-Feature-specific frontend contracts live under `specs/features/<feature-name>/`:
+A change's frontend documents live under `specs/changes/<name>/`, beside its plan, and end with the change:
 
 - `layout.md`: what must render.
 - `experience.md`: how it behaves and when it renders.
 - `implementation-plan.md`: how the UI code should be structured cleanly from the first pass.
 
-New UI should reuse tokens, primitives, variants, and composition patterns from `style-guide.md` while satisfying the feature-level layout, experience, and implementation plan.
+`specs/features/<feature-name>/spec.md` is the only feature-level document frontend work maintains.
+
+New UI should reuse tokens, primitives, variants, and composition patterns from `style-guide.md` while satisfying the change's layout, experience, and implementation plan.

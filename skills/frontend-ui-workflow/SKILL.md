@@ -11,7 +11,7 @@ description: >
 license: MIT
 metadata:
   author: Aircury
-  version: "1.0"
+  version: "1.1"
 ---
 
 You are a senior frontend workflow agent. Your mission is to choose the lightest safe frontend workflow, preserve the target app's real design system, and keep new UI shippable without a cleanup refactor.
@@ -43,7 +43,7 @@ For substantial frontend work, explicitly decide which behavior belongs in hooks
 - A frontend task from the user.
 - The target frontend codebase or relevant path when available.
 - Existing requirements, specs, designs, screenshots, or source code when provided.
-- Existing `specs/features/<feature-name>/spec.md`, `layout.md`, `experience.md`, `implementation-plan.md`, and `specs/ui/style-guide.md` when present.
+- Existing `specs/features/<feature-name>/spec.md`, the change's `specs/changes/<name>/layout.md`, `experience.md` and `implementation-plan.md`, and `specs/ui/style-guide.md` when present.
 
 ## Workflow Router
 
@@ -63,20 +63,20 @@ Do not run the full pipeline unless the change exposes ambiguity, affects multip
 ### Existing UI Rebuild Or Restyle
 Use this path when existing UI structure or behavior must be preserved while implementation or visual language changes.
 
-1. Read `references/layout-extraction.md` and produce or update `specs/features/<feature-name>/layout.md` from the source UI.
-2. Read `references/experience-extraction.md` and produce or update `specs/features/<feature-name>/experience.md` from the source UI.
+1. Read `references/layout-extraction.md` and produce or update `specs/changes/<name>/layout.md` from the source UI.
+2. Read `references/experience-extraction.md` and produce or update `specs/changes/<name>/experience.md` from the source UI.
 3. Read `references/style-extraction.md` and produce or update `specs/ui/style-guide.md` from the target frontend design system.
-4. Read `references/clean-implementation.md` and produce or update `specs/features/<feature-name>/implementation-plan.md`.
+4. Read `references/clean-implementation.md` and produce or update `specs/changes/<name>/implementation-plan.md`.
 5. Read `references/ui-generation.md` and implement the UI using `layout.md`, `experience.md`, `implementation-plan.md`, and `specs/ui/style-guide.md`.
 6. Update the canonical feature spec in `specs/features/` when observable behavior changes.
 
 ### New UI Or Substantial Behavior Change
 Use this path for new screens/components, non-trivial forms, role-gated UI, changed flows, or substantial frontend behavior changes.
 
-1. Derive `specs/features/<feature-name>/layout.md` from the feature spec, requirements, design, and nearby product conventions. Use `references/layout-extraction.md` for the required output structure and field-parity rules.
-2. Derive `specs/features/<feature-name>/experience.md` from the feature spec, requirements, access rules, validation, loading/error/empty states, and expected flows. Use `references/experience-extraction.md` for the required output structure and behavioral-parity rules.
+1. Derive `specs/changes/<name>/layout.md` from the feature spec, requirements, design, and nearby product conventions. Use `references/layout-extraction.md` for the required output structure and field-parity rules.
+2. Derive `specs/changes/<name>/experience.md` from the feature spec, requirements, access rules, validation, loading/error/empty states, and expected flows. Use `references/experience-extraction.md` for the required output structure and behavioral-parity rules.
 3. Read `references/style-extraction.md` and produce or update `specs/ui/style-guide.md` from the existing frontend codebase before writing UI code.
-4. Read `references/clean-implementation.md` and produce or update `specs/features/<feature-name>/implementation-plan.md`.
+4. Read `references/clean-implementation.md` and produce or update `specs/changes/<name>/implementation-plan.md`.
 5. Read `references/ui-generation.md` and implement the UI using the generated artifacts.
 6. Update the canonical feature spec in `specs/features/` before finishing when behavior is added or changed.
 
@@ -97,11 +97,13 @@ Read only the references needed for the selected path:
 
 For substantial frontend work, keep these artifacts current:
 
-- `specs/features/<feature-name>/layout.md`: what must render.
-- `specs/features/<feature-name>/experience.md`: how it behaves and when it renders.
-- `specs/features/<feature-name>/implementation-plan.md`: how the UI code stays clean from the first pass.
+- `specs/changes/<name>/layout.md`: what must render.
+- `specs/changes/<name>/experience.md`: how it behaves and when it renders.
+- `specs/changes/<name>/implementation-plan.md`: how the UI code stays clean from the first pass.
 - `specs/ui/style-guide.md`: canonical design tokens, primitives, variants, and composition patterns.
 - `specs/features/<feature-name>/spec.md`: canonical observable behavior when behavior changes.
+
+The first three are the change's artefacts, not the feature's: write them under `specs/changes/<name>/`, creating the change's directory when it does not exist, one set per change so that two changes on one feature never overwrite each other's, and let them end with the change. `specs/features/<feature-name>/spec.md` is the only feature-level document frontend work maintains. Record only material architectural decisions that must outlive the change in `specs/decisions/`. Existing feature-level `layout.md`, `experience.md` and `implementation-plan.md` files stay as history: the next change to that feature writes its own set under `specs/changes/<name>/`.
 
 ## Quality Gates
 

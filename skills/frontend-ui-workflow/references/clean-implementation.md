@@ -4,14 +4,14 @@ Use this reference before substantial frontend code is written.
 
 ## Goal
 
-Produce `specs/features/<feature-name>/implementation-plan.md` so new frontend work is shippable from the first implementation pass without a cleanup refactor unless requirements change.
+Produce `specs/changes/<name>/implementation-plan.md` so new frontend work is shippable from the first implementation pass without a cleanup refactor unless requirements change.
 
 This is a structure and maintainability step, not a visual design step and not a React performance step.
 
 ## Inputs
 
-- `specs/features/<feature-name>/layout.md`: structural requirements and field parity.
-- `specs/features/<feature-name>/experience.md`: behavior, flows, validation, state transitions, and visibility rules.
+- `specs/changes/<name>/layout.md`: structural requirements and field parity.
+- `specs/changes/<name>/experience.md`: behavior, flows, validation, state transitions, and visibility rules.
 - `specs/ui/style-guide.md`: project tokens, reusable primitives, variants, and composition patterns.
 - The target frontend codebase, including nearby features and shared UI folders.
 
@@ -21,7 +21,7 @@ This planning step is frontend-only. Do not plan backend edits, API changes, ser
 
 ## Output File
 
-Save the result to `specs/features/<feature-name>/implementation-plan.md`. Create the directory if needed.
+Save the result to `specs/changes/<name>/implementation-plan.md`. Create the directory if needed.
 
 Use this structure:
 
