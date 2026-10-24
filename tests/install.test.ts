@@ -1227,3 +1227,34 @@ describe("updating an installed project", () => {
     expect(profile.frameworkVersion).toBe("9.8.7");
   });
 });
+
+describe("skills submodule detection", () => {
+  it("recognises a skills submodule declared by a parent repository", () => {
+    const repo = `${tmpdir()}/ai-framework-monorepo-${Date.now()}`;
+    const project = join(repo, "projects", "app");
+    mkdirSync(project, { recursive: true });
+    try {
+      const git = (...args: string[]) =>
+        Bun.spawnSync(["git", "-C", repo, ...args], { stderr: "pipe" });
+      git("init", "-q");
+      git(
+        "update-index",
+        "--add",
+        "--cacheinfo",
+        "160000,0123456789abcdef0123456789abcdef01234567,projects/app/.agents/skills",
+      );
+
+      const plan = planLocalSkills(
+        ["claude-code"],
+        getInitialCapabilityIds("local"),
+        project,
+      );
+
+      expect(plan.commands).toEqual([]);
+      expect(plan.submodule?.path).toBe(".agents/skills");
+      expect(plan.submodule?.initialised).toBe(false);
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+});

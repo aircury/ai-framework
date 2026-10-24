@@ -356,6 +356,23 @@ export interface LocalSkillsPlan {
 }
 
 function isGitSubmodulePath(cwd: string, path: string): boolean {
+  // Ask git first: a submodule may be declared by a parent repository's .gitmodules
+  // (a project in a subdirectory of a monorepo), and its gitlink is in the index
+  // whether or not it has been checked out.
+  const lsFiles = spawnSync(
+    "git",
+    ["-C", cwd, "ls-files", "--stage", "--", path],
+    {
+      encoding: "utf-8",
+    },
+  );
+  if (
+    lsFiles.status === 0 &&
+    lsFiles.stdout.split("\n").some((line) => line.startsWith("160000 "))
+  ) {
+    return true;
+  }
+
   const gitmodules = join(cwd, ".gitmodules");
   if (!existsSync(gitmodules)) return false;
   return readFileSync(gitmodules, "utf-8")
