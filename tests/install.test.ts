@@ -1058,3 +1058,27 @@ describe("module rules", () => {
     );
   });
 });
+
+describe("unattended runs and port fakes", () => {
+  it("lets an unattended run's launching instructions stand in for the user", () => {
+    const framework = getFileByPath(getLocalFiles([]), "FRAMEWORK.md").content;
+    expect(framework).toContain("### Unattended runs");
+    expect(framework).toContain(
+      "those instructions stand in for the user's answers",
+    );
+    expect(framework).toContain("`FRAMEWORK.md § Unattended runs`");
+  });
+
+  it("allows in-memory port fakes held to the real adapter by a shared contract test", () => {
+    const testing = getFileByPath(
+      getLocalFiles([], ["testing"]),
+      "docs/aircury/capabilities/testing.md",
+    ).content;
+    expect(testing).not.toContain(
+      "Write integration tests for application use cases",
+    );
+    expect(testing).toContain(
+      "passes the same contract tests as the real adapter",
+    );
+  });
+});
