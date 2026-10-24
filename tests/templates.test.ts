@@ -50,7 +50,7 @@ describe("templates", () => {
 
     it("enforces analysis after Spec Kit task generation", () => {
       expect(FRAMEWORK).toContain(
-        "Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-tasks` → `spec-kit-analyse` → `spec-kit-implement`.",
+        "Follow the Spec Kit sequence strictly: `spec-kit-specify` → `spec-kit-clarify` → `spec-kit-plan` → `spec-kit-tasks` → `spec-kit-analyse` → `spec-kit-implement` → `spec-kit-converge`.",
       );
       expect(FRAMEWORK).toContain(
         "`spec-kit-analyse` MUST run after tasks to validate consistency across all artefacts and user-story coverage.",
@@ -277,6 +277,19 @@ describe("templates", () => {
       );
       expect(generateFramework([])).not.toContain(
         "Use British English spelling",
+      );
+    });
+  });
+
+  describe("spec-kit mode", () => {
+    it("is not offered when the spec-kit capability is not installed", () => {
+      expect(generateFramework(["git"])).not.toContain("spec-kit");
+      expect(generateFramework(["git"])).toContain("- `plan-build`:");
+    });
+
+    it("runs converge after implement when spec-kit is installed", () => {
+      expect(generateFramework(["spec-kit"])).toContain(
+        "`spec-kit-implement` → `spec-kit-converge`",
       );
     });
   });

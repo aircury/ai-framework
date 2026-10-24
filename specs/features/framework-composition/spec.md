@@ -80,3 +80,12 @@ The framework MUST render generated files from dedicated template files instead 
 #### Scenario: A maintainer changes the document shell
 - **WHEN** a maintainer changes the shared structure of `FRAMEWORK.md` or `AGENTS.md`
 - **THEN** the change is made in a dedicated template file and capability content is injected through the renderer
+
+### Requirement: FRAMEWORK.md SHALL offer only the workflow modes whose capability is installed
+The generated `FRAMEWORK.md` MUST describe, route to and give execution rules for the `spec-kit` mode only when the `spec-kit` capability is installed.
+When it is installed, its sequence MUST end with `spec-kit-converge` after `spec-kit-implement`.
+
+#### Scenario: A project installs without spec-kit
+- **WHEN** the selected capabilities do not include `spec-kit`
+- **THEN** the generated `FRAMEWORK.md` does not mention spec-kit
+- **AND** `plan-build` is the mode it offers
