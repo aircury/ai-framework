@@ -24,6 +24,7 @@ import {
   isMergeableFrameworkEntrypoint,
   isProtectedLocalCompanion,
   mergeFrameworkReferenceIntoAgents,
+  planLocalSkills,
   readProjectProfile,
   runCommand,
   writeFile,
@@ -908,6 +909,97 @@ describe("mergeFrameworkReferenceIntoAgents", () => {
     );
     expect(merged).toContain(
       "This project follows the Aircury engineering framework",
+    );
+  });
+});
+
+describe("planLocalSkills", () => {
+  const capabilities = getInitialCapabilityIds("local");
+
+  function makeProject(name: string): string {
+    const dir = `${tmpdir()}/ai-framework-skills-${name}-${Date.now()}`;
+    mkdirSync(dir, { recursive: true });
+    return dir;
+  }
+
+  function addSkill(dir: string, skillName: string): void {
+    mkdirSync(join(dir, ".agents", "skills", skillName), { recursive: true });
+    writeFileSync(
+      join(dir, ".agents", "skills", skillName, "SKILL.md"),
+      `---\nname: ${skillName}\n---\n`,
+    );
+  }
+
+  it("installs the skills as usual when the project has no skills submodule", () => {
+    const dir = makeProject("plain");
+    try {
+      const plan = planLocalSkills(["claude-code"], capabilities, dir);
+      expect(plan.submodule).toBeNull();
+      expect(plan.commands).toEqual(
+        getLocalCommands(["claude-code"], capabilities),
+      );
+    } finally {
+      rmSync(dir, { recursive: true });
+    }
+  });
+
+  it("installs nothing into .agents/skills when it is a git submodule, and says which skills it lacks", () => {
+    const dir = makeProject("submodule");
+    try {
+      writeFileSync(
+        join(dir, ".gitmodules"),
+        '[submodule ".agents/skills"]\n\tpath = .agents/skills\n\turl = git@github.com:example/skills.git\n',
+      );
+      addSkill(dir, "commit-changes");
+      addSkill(dir, "spec-kit-specify");
+      addSkill(dir, "unrelated-skill");
+
+      const plan = planLocalSkills(["claude-code"], capabilities, dir);
+
+      expect(plan.commands).toEqual([]);
+      expect(plan.submodule?.path).toBe(".agents/skills");
+      expect(plan.submodule?.provided).toEqual([
+        "commit-changes",
+        "spec-kit-specify",
+      ]);
+      expect(plan.submodule?.missing).toContain("frontend-ui-workflow");
+      expect(plan.submodule?.missing).not.toContain("commit-changes");
+      expect(plan.submodule?.missing).not.toContain("unrelated-skill");
+    } finally {
+      rmSync(dir, { recursive: true });
+    }
+  });
+
+  it("ignores a submodule at another path", () => {
+    const dir = makeProject("other-submodule");
+    try {
+      writeFileSync(
+        join(dir, ".gitmodules"),
+        '[submodule "vendor/lib"]\n\tpath = vendor/lib\n\turl = git@github.com:example/lib.git\n',
+      );
+      const plan = planLocalSkills(["claude-code"], capabilities, dir);
+      expect(plan.submodule).toBeNull();
+      expect(plan.commands.length).toBeGreaterThan(0);
+    } finally {
+      rmSync(dir, { recursive: true });
+    }
+  });
+});
+
+describe("commit-changes skill", () => {
+  const skill = readFileSync(
+    join(import.meta.dir, "..", "skills", "commit-changes", "SKILL.md"),
+    "utf8",
+  );
+
+  it("allows a body when the subject cannot carry the context", () => {
+    expect(skill).not.toContain("never use a commit body");
+    expect(skill).toContain("Add a body when the change needs");
+  });
+
+  it("follows the project's own commit convention on top of the format", () => {
+    expect(skill).toContain(
+      "The project's own convention comes on top of this format.",
     );
   });
 });
