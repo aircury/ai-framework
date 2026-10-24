@@ -37,6 +37,18 @@ Rerunning the installer updates a project without asking: files carrying the fra
 
 Every local installation includes non-negotiable engineering rules in `FRAMEWORK.md`: TDD where automated testing is feasible, SOLID design constraints, Clean Code, explicit architecture boundaries, and justified tradeoffs for any exception.
 
+## Update A Project
+
+To bring an installed project to the latest framework without prompts (for example from an automated agent), run from the project root:
+
+```bash
+npx @aircury/ai-framework@latest --update
+# or preview the plan without writing anything
+npx @aircury/ai-framework@latest --update --dry-run
+```
+
+It reads the saved `.aircury/framework.config.json` and applies the same plan as the interactive installer: framework-maintained files refreshed, the project's own files kept, `AGENTS.md`/`CLAUDE.md` merged, dropped capability documents removed, skills installed (none into a `.agents/skills` submodule).
+
 ## Install From A Local Branch
 
 To test an unpublished branch, build the CLI from your local checkout:
