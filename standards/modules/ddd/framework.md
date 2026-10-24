@@ -6,7 +6,7 @@ Model behaviour, not tables or screens.
 - Use entities when identity matters.
 - Use value objects when equality is structural and data must remain valid and immutable.
 - Repositories are per aggregate root, not per table.
-- Cross-context communication should happen through explicit application services or domain events, not hidden imports.
+- Contexts meet through a contract in a shared kernel or through a domain event, never by importing each other. Calling another context's application service is such an import: a change inside one context then breaks the other, and the boundary can no longer be checked mechanically.
 
 ## Domain Modelling Rules
 

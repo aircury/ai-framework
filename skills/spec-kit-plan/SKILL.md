@@ -5,7 +5,7 @@ license: MIT
 compatibility: No external workflow CLI required.
 metadata:
   author: Aircury
-  version: "1.0"
+  version: "1.1"
 ---
 
 Create a technical implementation plan from a feature specification.
@@ -57,7 +57,7 @@ Create a technical implementation plan from a feature specification.
    - External dependencies affecting business behavior must sit behind ports.
    - Repositories are per aggregate root, not per table.
    - No framework names in domain or application layer design.
-   - Cross-context communication via domain events or application services only.
+   - Contexts meet through a contract in a shared kernel or through a domain event, never by importing each other (not even another context's application services).
 
 4. **Constitution check**
 
