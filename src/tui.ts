@@ -319,9 +319,11 @@ export async function runInstaller({
         skillsSubmodule.provided.length > 0
           ? `Already provided: ${skillsSubmodule.provided.join(", ")}.`
           : "",
-        skillsSubmodule.missing.length > 0
-          ? `Not in the submodule (add them to its repository): ${skillsSubmodule.missing.join(", ")}.`
-          : "",
+        !skillsSubmodule.initialised
+          ? "It is not initialised, so which skills it provides is unknown: run `git submodule update --init` first."
+          : skillsSubmodule.missing.length > 0
+            ? `Not in the submodule (add them to its repository): ${skillsSubmodule.missing.join(", ")}.`
+            : "",
       ]
         .filter(Boolean)
         .join("\n"),

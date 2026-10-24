@@ -127,3 +127,13 @@ The installer MUST write the version of the installed framework package to the p
 #### Scenario: A project is installed from a published release
 - **WHEN** the framework is installed locally from a published package
 - **THEN** the project configuration records that package's version as `frameworkVersion`
+
+### Requirement: An installed project SHALL be updatable without prompts
+The CLI MUST offer an update mode that reinstalls a project from its saved configuration without asking anything, applying the same file and skill plan as the interactive installer, and a dry run that only reports that plan.
+It MUST refuse to run in a directory without a valid saved configuration.
+
+#### Scenario: An agent updates a project unattended
+- **GIVEN** a project with a saved `.aircury/framework.config.json`
+- **WHEN** `ai-framework --update` runs in its root
+- **THEN** the project is updated from the saved profile without any prompt
+- **AND** `--update --dry-run` reports the same plan and writes nothing

@@ -344,6 +344,8 @@ const PROJECT_SKILLS_PATH = ".agents/skills";
 
 export interface SkillsSubmodule {
   path: string;
+  /** False when the submodule is declared but not checked out: what it provides is unknown. */
+  initialised: boolean;
   provided: string[];
   missing: string[];
 }
@@ -404,6 +406,7 @@ export function planLocalSkills(
     commands: [],
     submodule: {
       path: PROJECT_SKILLS_PATH,
+      initialised: present.size > 0,
       provided: selected.filter((name) => present.has(name)),
       missing: selected.filter((name) => !present.has(name)),
     },
