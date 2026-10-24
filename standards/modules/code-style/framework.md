@@ -1,13 +1,12 @@
 ## Code Style
 
-### Linting and Parsing
+### Linting, Formatting and Static Analysis
 
+Ensure code consistency by adhering to the project's configured tools, whatever the language.
 
-Ensure code consistency by adhering to the project's configured tools.
-
-- Analyse `package.json` to identify the linter and parser used (e.g., Biome, ESLint, Prettier, Oxlint).
-- Check `devDependencies` and `dependencies` for tool-specific packages.
-- Locate configuration files (`.eslintrc.*`, `prettier.config.js`, `biome.json`, `oxlint.json`).
-- If a tool is detected, follow its specific rules and formatting conventions.
-- If multiple tools are present (e.g., ESLint and Prettier), prioritise the one that handles the relevant concern (e.g., Prettier for formatting, ESLint for logic).
-- If no tool is explicitly configured, default to industry standards for the project's language (e.g., StandardJS or AirBnB for JS/TS).
+- Find the tools for every language the change touches, in each sub-project, not only the root. Read each one's manifests and their scripts (`package.json`, `composer.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`…) and its tool config files (e.g. `biome.json`, `eslint.config.*`, `.prettierrc*`, `.php-cs-fixer*.php`, `phpstan.neon`, `phpcs.xml`, `ruff.toml`, `mypy.ini`, `.golangci.yml`, `rustfmt.toml`, `.shellcheckrc`, `.markdownlint*`, `.yamllint*`), plus `.editorconfig`.
+- Prefer the project's own entry point over calling tools directly: a `Makefile` or `justfile` target (e.g. `make lint`), a package or Composer script, a command documented in the README or contributing guide, or the lint job in CI. Run it on the changed files when it accepts them.
+- When there is no entry point, run the configured tools with the project's config, as CI does.
+- Follow each tool's rules and the conventions of the surrounding code. When several tools cover one concern, let each handle its own (e.g. Prettier formats while ESLint checks logic; php-cs-fixer formats while PHPStan checks types).
+- Never introduce a new tool, configuration or style the project does not already use, unless the user asks for it.
+- If a language has no configured tool, match the existing code and `.editorconfig`, and use the language's standard formatter only where it is the norm (e.g. `gofmt`, `rustfmt`).

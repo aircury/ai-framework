@@ -268,6 +268,20 @@ describe("templates", () => {
       );
     });
 
+    it("tells agents to discover code style tools for every language", () => {
+      const framework = generateFramework(["code-style"]);
+      expect(framework).not.toContain(
+        "Analyse `package.json` and local config files",
+      );
+      expect(framework).toContain(
+        "every language and sub-project the change touches",
+      );
+      expect(framework).toContain("the project's own lint entry point");
+      expect(generateFramework([])).not.toContain(
+        "the project's own lint entry point",
+      );
+    });
+
     it("adds British English guidance when enabled", () => {
       expect(generateFramework([], { britishEnglish: true })).toContain(
         "Use British English spelling",

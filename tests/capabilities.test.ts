@@ -57,6 +57,13 @@ describe("capabilities", () => {
     ).toEqual(["git", "language"]);
   });
 
+  it("describes code style without tying it to one language", () => {
+    const codeStyle = getCapabilityById("code-style");
+    expect(codeStyle?.description).not.toContain("package.json");
+    expect(codeStyle?.description).toContain("any language");
+    expect(codeStyle?.hint).not.toBe("ESLint, Prettier, Biome, Oxlint");
+  });
+
   it("lists the visible global capabilities", () => {
     expect(
       getCapabilities("global").map((capability) => capability.id),
