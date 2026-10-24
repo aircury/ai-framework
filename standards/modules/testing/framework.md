@@ -18,7 +18,8 @@ Do not batch all tests first. Do not batch all implementation first.
 ### Coverage Model
 
 - Write unit tests for domain logic, pure functions, transformations, policies, and other isolated behaviour with meaningful branching.
-- Write integration tests for application use cases, persistence adapters, HTTP handlers, messaging flows, and other boundary-crossing behaviour.
+- Write integration tests for persistence adapters, HTTP handlers, messaging flows, and other boundary-crossing behaviour.
+- Test application use cases through their ports. In-memory fakes of those ports are allowed when each fake passes the same contract tests as the real adapter; the wiring is then covered end to end through the transport layer.
 - Write end-to-end tests only for critical user journeys, production wiring, and regressions that cannot be trusted at lower levels alone.
 - Prefer a balanced test pyramid over a top-heavy suite of slow UI tests.
 
@@ -59,6 +60,7 @@ Language and framework-specific tools may vary by repository, but these expectat
 - Structure tests with a clear Given-When-Then or Arrange-Act-Assert flow.
 - Name tests by observable outcome, ideally in a `should ... when ...` style.
 - Prefer real collaborators inside the boundary under test and mock only true external systems or uncontrollable side effects.
+- A port may be replaced by an in-memory fake when one shared contract test suite runs against both the fake and the real adapter: the fake then cannot drift from what the adapter does. Never mock the project's own code without that guarantee: a mock that returns what the test expects proves nothing about the real collaborator.
 - Keep each test isolated and independent. No test may depend on another test's execution order or data.
 - Keep fixtures small and intention-revealing.
 - Prefer deterministic tests with controlled inputs, clocks, randomness, and network boundaries.
