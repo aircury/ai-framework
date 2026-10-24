@@ -985,3 +985,21 @@ describe("planLocalSkills", () => {
     }
   });
 });
+
+describe("commit-changes skill", () => {
+  const skill = readFileSync(
+    join(import.meta.dir, "..", "skills", "commit-changes", "SKILL.md"),
+    "utf8",
+  );
+
+  it("allows a body when the subject cannot carry the context", () => {
+    expect(skill).not.toContain("never use a commit body");
+    expect(skill).toContain("Add a body when the change needs");
+  });
+
+  it("follows the project's own commit convention on top of the format", () => {
+    expect(skill).toContain(
+      "The project's own convention comes on top of this format.",
+    );
+  });
+});
