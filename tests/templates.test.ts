@@ -37,7 +37,7 @@ describe("templates", () => {
 
     it("does not require commits as part of completion", () => {
       expect(FRAMEWORK).toContain(
-        "Create git commits only when the user explicitly asks, using [Conventional Commits](https://www.conventionalcommits.org/) format.",
+        "Create git commits only when the user explicitly asks (in an unattended run, when its launching instructions do), using [Conventional Commits](https://www.conventionalcommits.org/) format.",
       );
       expect(FRAMEWORK).toContain(
         "When committing, organise changes into atomic Conventional Commits",

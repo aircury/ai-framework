@@ -21,8 +21,8 @@ The following rules apply to every installation profile:
 - `specs/features/` is canonical and versioned.
 - `specs/changes/` is optional working state and is not versioned.
 - Any workflow mode that changes observable system behaviour MUST end with an update to `specs/features/`.
-- Prepare working tree changes as atomic, functional, and semantic units. Create git commits only when the user explicitly asks, using [Conventional Commits](https://www.conventionalcommits.org/) format.
-- Before starting any non-trivial change, the agent MUST act as a routing meta-agent and ask the user how to proceed.
+- Prepare working tree changes as atomic, functional, and semantic units. Create git commits only when the user explicitly asks (in an unattended run, when its launching instructions do), using [Conventional Commits](https://www.conventionalcommits.org/) format.
+- Before starting any non-trivial change, the agent MUST act as a routing meta-agent and ask the user how to proceed; an unattended run follows `FRAMEWORK.md § Unattended runs` instead.
 - Optional standards are enabled through `.aircury/framework.config.json`.
 
 ## Engineering Non-Negotiables
@@ -100,7 +100,7 @@ Before starting any task:
 {{#if includesCodeStyle}}
 - Analyse `package.json` and local config files to identify the project's linting and formatting strategy.
 {{/if}}
-- Act as a routing meta-agent: analyse the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`.
+- Act as a routing meta-agent: analyse the request, recommend a workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`; an unattended run follows `FRAMEWORK.md § Unattended runs` instead.
 
 While executing work:
 
@@ -111,7 +111,7 @@ While executing work:
 - All observable behaviour changes MUST update `specs/features/` before the work is done.
 - Follow TDD for observable behaviour changes when automated testing is feasible: failing test, minimum implementation, refactor.
 - Preserve SOLID design, Clean Code, and explicit architecture boundaries in every change.
-- Use the `commit-changes` skill only when the user asks you to create commits. When committing, organise changes into atomic Conventional Commits; until then, keep changes organised in the working tree for review.
+- Use the `commit-changes` skill only when the user (or an unattended run's launching instructions) asks you to create commits. When committing, organise changes into atomic Conventional Commits; until then, keep changes organised in the working tree for review.
 - After the user selects a workflow mode, follow `FRAMEWORK.md § Mode execution rules` exactly.
 - Selecting `plan-build` authorises planning first, not automatic implementation.
 - Selecting `spec-kit` requires following the full Spec Kit sequence in order unless the user explicitly changes modes.
@@ -152,6 +152,13 @@ Once the user selects a mode, the agent MUST follow that mode strictly. Do not m
   3. CRITICAL findings from `spec-kit-analyse` block implementation. Stop the workflow and fix them before continuing to `spec-kit-implement`.
   4. `spec-kit-checklist` may be used as a review or quality gate, but it does not replace required sequence steps.
   5. Do not skip ahead when an earlier required Spec Kit step has not been completed.
+
+### Unattended runs
+
+When an automated pipeline launches the agent with its own delivery instructions and no person follows the session, those instructions stand in for the user's answers: they choose the workflow mode, approve the plan, and say whether and how to commit.
+Do not stop to ask a question nobody will read: the run would end with nothing done.
+A decision that genuinely needs a person goes through the pipeline's own escalation path, never a guess.
+Every other rule in this framework still applies.
 
 ## Definition of Done
 
