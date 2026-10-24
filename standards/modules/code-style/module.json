@@ -1,7 +1,7 @@
 {
   "id": "code-style",
   "label": "Code Style",
-  "hint": "ESLint, Prettier, Biome, Oxlint",
-  "description": "Automatically detects and follows project-specific linting and parsing rules by analysing package.json and config files.",
+  "hint": "linters, formatters and type checkers for any language",
+  "description": "Detects and follows the project's configured linters, formatters and type checkers for any language, preferring the project's own lint entry point.",
   "defaultEnabled": true
 }

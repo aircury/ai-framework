@@ -570,9 +570,9 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
   "code-style": {
     id: "code-style",
     label: "Code Style",
-    hint: "ESLint, Prettier, Biome, Oxlint",
+    hint: "linters, formatters and type checkers for any language",
     description:
-      "Automatically detects and follows project-specific linting and parsing rules by analysing package.json and config files.",
+      "Detects and follows the project's configured linters, formatters and type checkers for any language, preferring the project's own lint entry point.",
     category: "engineering",
     defaultSelected: true,
     scopes: ["local"],

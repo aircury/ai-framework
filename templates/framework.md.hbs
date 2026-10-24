@@ -98,7 +98,7 @@ Before starting any task:
 - Read the relevant ADRs in `specs/decisions/` when the area is governed by prior decisions.
 {{/if}}
 {{#if includesCodeStyle}}
-- Analyse `package.json` and local config files to identify the project's linting and formatting strategy.
+- Identify the linters, formatters and type checkers configured for every language and sub-project the change touches (manifests such as `package.json`, `composer.json`, `pyproject.toml`, `go.mod` or `Cargo.toml`, tool config files and `.editorconfig`), and run them through the project's own lint entry point when there is one.
 {{/if}}
 - Act as a routing meta-agent: analyse the request, recommend an available workflow mode, and ask the user how they want to proceed before implementing anything. Follow the routing protocol defined in `FRAMEWORK.md § Meta-agent routing`; an unattended run follows `FRAMEWORK.md § Unattended runs` instead.
 

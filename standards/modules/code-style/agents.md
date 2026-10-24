@@ -1,2 +1,2 @@
-- Always check `package.json` and local config files to determine the linting/parsing strategy before making code changes.
-- Ensure all generated code passes the project's linting checks.
+- Before changing code, identify the linters, formatters and type checkers configured for every language and sub-project the change touches, and the project's own lint entry point (e.g. a `Makefile` target, package script or CI job).
+- Ensure all changed code passes the project's checks, run through that entry point when there is one.

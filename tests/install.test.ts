@@ -140,6 +140,29 @@ describe("getLocalFiles", () => {
     ).toContain("## Layered Architecture Rules");
   });
 
+  it("generates language-agnostic code style guidance", () => {
+    const codeStyle = getFileByPath(
+      getLocalFiles([], ["code-style"]),
+      "docs/aircury/capabilities/code-style.md",
+    ).content;
+    expect(codeStyle).not.toContain("Analyse `package.json` to identify");
+    expect(codeStyle).not.toContain("by analysing package.json");
+    for (const manifest of [
+      "package.json",
+      "composer.json",
+      "pyproject.toml",
+      "go.mod",
+      "Cargo.toml",
+      ".editorconfig",
+    ]) {
+      expect(codeStyle).toContain(manifest);
+    }
+    expect(codeStyle).toContain("in each sub-project, not only the root");
+    expect(codeStyle).toContain("Makefile");
+    expect(codeStyle).toContain("CI");
+    expect(codeStyle).toContain("Never introduce a new tool");
+  });
+
   it("includes CLAUDE.md when Claude Code is selected", () => {
     const files = getLocalFiles(["claude-code"]);
     expect(files.map((file) => file.path)).toContain("CLAUDE.md");
