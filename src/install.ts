@@ -68,6 +68,12 @@ type SkillsRunner = "npx" | "bunx";
 let cachedSkillsRunner: SkillsRunner | null = null;
 
 const AIRCURY_SKILLS_SOURCE = "aircury/ai-framework";
+
+/**
+ * The `skills` CLI every install runs, at the version the tests exercise: the `skills` devDependency.
+ * A test holds the two equal, so moving the devDependency moves what projects run.
+ */
+export const SKILLS_CLI = "skills@1.5.22";
 const PROJECT_PROFILE_PATH = ".aircury/framework.config.json";
 
 function getLocalAircurySkillsSource(): string | null {
@@ -266,7 +272,7 @@ function buildSkillsAddCommand(
 
   const command = getSkillsRunner();
   const resolvedSource = resolveSkillSource(source);
-  const args = ["-y", "skills", "add", resolvedSource];
+  const args = ["-y", SKILLS_CLI, "add", resolvedSource];
   for (const skillName of skillNames) {
     args.push("--skill", skillName);
   }

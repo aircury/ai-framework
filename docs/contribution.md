@@ -128,6 +128,7 @@ To add an external skill:
 ## Wire Download And Installation
 
 The installer downloads skills by running generated `skills add` commands through `npx` or `bunx`. The wiring lives in `src/capabilities.ts` and `src/install.ts`.
+The `skills` CLI runs at the version the `skills` devDependency pins (`SKILLS_CLI` in `src/install.ts`, held equal by a test), so projects run the version the tests exercise: move both together.
 
 Add or update a `CapabilityManifest` when users should be able to select a capability in the TUI:
 
@@ -155,7 +156,7 @@ Add concrete skills through the capability's `skills` array:
 The install command is built automatically:
 
 ```bash
-<npx|bunx> -y skills add aircury/ai-framework --skill example-skill -a universal -y
+<npx|bunx> -y skills@1.5.22 add aircury/ai-framework --skill example-skill -a universal -y
 ```
 
 If multiple selected skills share a source, the installer groups them into one command with repeated `--skill` flags.

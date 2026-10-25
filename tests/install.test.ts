@@ -29,6 +29,7 @@ import {
   planLocalSkills,
   readProjectProfile,
   runCommand,
+  SKILLS_CLI,
   writeFile,
 } from "../src/install";
 
@@ -517,7 +518,7 @@ describe("getLocalCommands", () => {
     expect(commands).toHaveLength(1);
     expect(commands[0].args).toEqual([
       "-y",
-      "skills",
+      SKILLS_CLI,
       "add",
       aircurySkillsSource,
       "--skill",
@@ -557,7 +558,7 @@ describe("getLocalCommands", () => {
       command: skillsRunner,
       args: [
         "-y",
-        "skills",
+        SKILLS_CLI,
         "add",
         "aircury/walking-skeleton",
         "--skill",
@@ -641,7 +642,7 @@ describe("getLocalCommands", () => {
       command: skillsRunner,
       args: [
         "-y",
-        "skills",
+        SKILLS_CLI,
         "add",
         aircurySkillsSource,
         "--skill",
@@ -661,7 +662,7 @@ describe("getLocalCommands", () => {
       command: skillsRunner,
       args: [
         "-y",
-        "skills",
+        SKILLS_CLI,
         "add",
         "https://github.com/vercel-labs/agent-skills",
         "--skill",
@@ -720,7 +721,7 @@ describe("runCommand", () => {
       command: skillsRunner,
       args: [
         "-y",
-        "skills",
+        SKILLS_CLI,
         "add",
         aircurySkillsSource,
         "--skill",
@@ -741,7 +742,7 @@ describe("runCommand", () => {
       command: skillsRunner,
       args: [
         "-y",
-        "skills",
+        SKILLS_CLI,
         "add",
         "https://github.com/vercel-labs/agent-skills",
         "--skill",
@@ -1256,5 +1257,14 @@ describe("skills submodule detection", () => {
     } finally {
       rmSync(repo, { recursive: true, force: true });
     }
+  });
+});
+
+describe("skills CLI version", () => {
+  it("runs the skills CLI at the version the skills devDependency pins", () => {
+    const packageJson = JSON.parse(
+      readFileSync(join(import.meta.dir, "..", "package.json"), "utf-8"),
+    );
+    expect(SKILLS_CLI).toBe(`skills@${packageJson.devDependencies.skills}`);
   });
 });
