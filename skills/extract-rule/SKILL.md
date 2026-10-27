@@ -4,7 +4,7 @@ description: Distil reusable engineering rules from code changes and record them
 license: MIT
 metadata:
   author: "@alejandrohernandez-aircury"
-  version: "1.0"
+  version: "1.1"
 ---
 
 Code changes often encode a decision that was made once but should guide every future change:
@@ -40,7 +40,13 @@ Extract the rule or rules that explain the changes.
 A rule is the general principle you would tell an agent so it makes the same choice next time,
 not a description of this particular diff.
 
-Each rule must belong to one subcategory from this tree:
+Each rule must belong to one subcategory.
+
+List the existing rule files first (`docs/rules/*/*.md`): the subcategories already in the repository
+take precedence. File a rule in an existing subcategory whenever one fits, even when its name
+differs from the tree below — renaming a file would change the identifier of every rule in it.
+
+Use this tree when the repository has no rules yet, or to name a subcategory that does not exist:
 
 - Infrastructure
   - Deployment
@@ -49,15 +55,19 @@ Each rule must belong to one subcategory from this tree:
   - Docker
   - Folders
 - Application
-  - Framework
+  - Backend
+  - Frontend
   - Security
+  - Debugging
 - Domain
   - Common
 - Test
-  - E2E
   - Unit
-  - Performance
   - Integration
+  - E2E
+  - Performance
+  - Environment
+  - Verification
 - Database
   - Persistence
 - Documentation
@@ -108,7 +118,7 @@ Write each rule using this exact template:
 ```
 
 The heading opens with the rule's identifier: the lowercase category and subcategory joined by
-hyphens, then a four-digit number — `domain-common-0001`, `application-framework-0003`.
+hyphens, then a four-digit number — `domain-common-0001`, `application-backend-0003`.
 Numbering is per file and starts at `0001`; a new rule takes the next number after the highest
 already in that file. Identifiers are permanent: never renumber existing rules, and never reuse
 the number of a deleted one — a gap in the sequence is expected, since these identifiers are how
