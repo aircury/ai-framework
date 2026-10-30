@@ -96,7 +96,11 @@ describe("capabilities", () => {
         ["blind-db-debugging", "db-schema-design"],
         "local",
       ).map((skill) => skill.skillName),
-    ).toEqual(["blind-db-debugging", "db-schema-design"]);
+    ).toEqual([
+      "blind-db-debugging",
+      "supervised-db-debugging",
+      "db-schema-design",
+    ]);
   });
 
   it("expands selected capabilities into unique installable skills", () => {
