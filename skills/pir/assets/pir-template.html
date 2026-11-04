@@ -171,7 +171,8 @@ pre.code { margin: 0; font-family: var(--font-mono); font-size: 0.78rem; line-he
   body { background: #fff; padding: 0; font-size: 10.5pt; }
   .page { max-width: none; gap: 22px; }
   .sev, .tech { background: #fff; }
-  header, tr, .tl li, .steps li, .sign, .sev { break-inside: avoid; }
+  header, tr, .tl li, .steps li, .sign, .sev, .clock { break-inside: avoid; }
+  .clock { break-after: avoid; }
   section > h2, .tech h3 { break-after: avoid; }
   pre.code { white-space: pre-wrap; word-break: break-all; }
   a { color: var(--brand); text-decoration: underline; }
@@ -331,7 +332,7 @@ pre.code { margin: 0; font-family: var(--font-mono); font-size: 0.78rem; line-he
       bar += "</div>";
       var ticks = [], hours = Math.round(span / 3600000), step = hours > 8 ? Math.ceil(hours / 6) : 1;
       for (var i = 0; i <= hours; i += step) { var tk = new Date(+a0 + i * 3600000); ticks.push("<span>" + String(tk.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "UTC", hour12: false })) + "</span>"); }
-      h.push("<div>" + bar + '<div class="axis">' + ticks.join("").replace(/<span>(\d\d:\d\d)<\/span>/g, function (_, x) { return "<span>" + shift(x, tz) + "</span>"; }) + "</div></div>");
+      h.push('<div class="clock">' + bar + '<div class="axis">' + ticks.join("").replace(/<span>(\d\d:\d\d)<\/span>/g, function (_, x) { return "<span>" + shift(x, tz) + "</span>"; }) + "</div></div>");
     }
     h.push('<div class="legend">' + Object.keys(STAGES).map(function (s) { return "<span>" + icon(s) + esc(STAGES[s]) + "</span>"; }).join("") + "</div>");
     h.push('<ol class="tl">');
