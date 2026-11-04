@@ -72,14 +72,17 @@ welcome but never required.
 
 ## Step 2: draft and show
 
-1. `pir.js new <report.html>`.
-2. Write `data.json` with everything the evidence supports. Leave unknown
+1. Read `references/sections.md`: what each section is for and how to write
+   it well. `assets/example.json` is a complete report for a made-up
+   incident; it shows the depth and tone expected, not wording to copy.
+2. `pir.js new <report.html>`.
+3. Write `data.json` with everything the evidence supports. Leave unknown
    fields `null` or empty: the template shows them as "Not recorded". Never
    guess a time, owner, cause or number. Leave the judgement calls empty too
    (category, risk, impact and urgency), even when you have a view: see
    step 3.
-3. `pir.js set <report.html> data.json`.
-4. Show the draft: publish it as a private artifact if the Artifact tool is
+4. `pir.js set <report.html> data.json`.
+5. Show the draft: publish it as a private artifact if the Artifact tool is
    available, otherwise give the file path. Tell the person it is a draft.
 
 ## Step 3: build it together
@@ -176,6 +179,9 @@ it yourself with a headless Chromium:
 
 All text fields take plain text with `` `code` `` and `**bold**` only. British
 English. Write for a manager first: explain terms like "minify" the first time.
+
+How to write each section well is in `references/sections.md`; this table
+is what each field holds.
 
 | Field | What goes in it |
 |---|---|
