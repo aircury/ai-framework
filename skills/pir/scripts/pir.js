@@ -254,6 +254,7 @@ function check(d) {
   if (!d.timezone || !/^[+-]\d{2}:\d{2}$/.test(d.timezone.offset || ""))
     err('timezone.offset must look like "+01:00"');
 
+  need(d.pirId, "PIR ID from the post-incident reports board");
   need(d.id, "Incident ID (ticket or card)");
   need(d.title, "Title");
   need(d.service, "Service");
@@ -368,6 +369,7 @@ function check(d) {
   if (d.status === "confirmed") {
     for (const k of ["approvedBy", "approvedOn", "closedBy", "closedOn"])
       if (!so[k]) err(`a confirmed report needs signoff.${k}`);
+    if (!d.pirId) err("a confirmed report needs its pirId");
     if (!d.severity?.impact?.level || !d.severity?.urgency?.level)
       err("a confirmed report needs both severity levels");
   }

@@ -14,6 +14,7 @@
 {
   "schema": 1,
   "status": "draft",
+  "pirId": null,
   "id": null,
   "title": null,
   "service": null,
@@ -279,6 +280,7 @@ pre.code { margin: 0; font-family: var(--font-mono); font-size: 0.78rem; line-he
     h.push("<h1>" + val(d.title) + "</h1>");
     if (draft) h.push('<div class="banner">Draft: AI-drafted, pending review. Do not file or forward as final.</div>');
     h.push('<div class="facts"><div class="tbl-wrap"><table><tbody>' +
+      '<tr><th scope="row">PIR</th><td class="mono">' + val(d.pirId) + "</td></tr>" +
       '<tr><th scope="row">Incident</th><td class="mono">' + val(d.id) + "</td></tr>" +
       '<tr><th scope="row">Date</th><td>' + longDate(d.date) + "</td></tr>" +
       '<tr><th scope="row">Service</th><td>' + val(d.service) + "</td></tr>" +

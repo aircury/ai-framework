@@ -55,6 +55,10 @@ Collect evidence before asking anything:
 Ask once, before drafting:
 
 - the incident ID, if you cannot find it;
+- the PIR ID: every PIR gets an entry on the post-incident reports board
+  (https://boards.aircury.net/b/post-incident-reports), and the ID comes from
+  that entry. Ask whether it has been opened and for its ID. If not yet, draft
+  without it and ask again before confirming;
 - who the report is for: internal, or which client. Confirm it even when the
   evidence suggests one;
 - where to save the report (suggest the current directory,
@@ -152,8 +156,8 @@ Stop when the person is happy, even if some fields stay
 
 ## Step 4: confirm
 
-Only when the recurrence check has been asked (step 3), the person says the
-report is confirmed, and gives the names:
+Only when the recurrence check has been asked (step 3), the report has its
+`pirId`, the person says the report is confirmed, and gives the names:
 
 - `status: "confirmed"`;
 - `signoff.approvedBy`/`approvedOn` and `closedBy`/`closedOn` (the closure
@@ -177,6 +181,7 @@ English. Write for a manager first: explain terms like "minify" the first time.
 |---|---|
 | `schema` | Always `1`. |
 | `status` | `"draft"` until the person confirms, then `"confirmed"`. |
+| `pirId` | The PIR's ID from its entry on the post-incident reports board, exactly as given by the person. Required to confirm. |
 | `id` | The incident's ticket or card, e.g. `"SHOP-412"`. |
 | `title` | What broke, in one line, e.g. "Checkout outage on the production web shop". |
 | `service` | The product or system, e.g. `"Shop"`. |
