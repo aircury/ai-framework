@@ -1,0 +1,414 @@
+<title>Post-incident review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<!--
+  PIR template, schema 1.
+  The agent edits ONLY the JSON in <script id="pir-data">. Everything else is fixed:
+  layout, order, labels, durations, T+ times, severity level and PS16 codes are
+  all derived from that data by the script at the bottom.
+-->
+<script type="application/json" id="pir-data">
+{
+  "schema": 1,
+  "status": "draft",
+  "id": null,
+  "title": null,
+  "service": null,
+  "audience": null,
+  "date": null,
+  "timezone": { "label": "UTC", "offset": "+00:00" },
+  "classification": { "category": null, "risk": [], "handledBy": null },
+  "severity": null,
+  "facts": { "affected": null, "data": null },
+  "summary": [],
+  "timeline": [],
+  "impact": { "affected": [], "notAffected": [] },
+  "rootCause": { "plain": null, "steps": [] },
+  "gaps": [],
+  "actions": [],
+  "signoff": { "preparedBy": null, "preparedOn": null, "approvedBy": null, "approvedOn": null, "closedBy": null, "closedOn": null },
+  "sources": []
+}
+</script>
+
+<style>
+/* Layout: one reading column; record table under the title, facts and severity side by side, then fixed sections in a fixed order. */
+:root {
+  --ink: #12222c;
+  --ink-soft: #4a5d69;
+  --ground: #f6f8f9;
+  --paper: #ffffff;
+  --rule: #d8e1e6;
+  --brand: #006591;
+  --brand-soft: #e3f0f6;
+  --down: #b42318;
+  --down-soft: #fbe9e7;
+  --ok: #1f7a58;
+  --ok-soft: #e4f3ec;
+  --wait: #8a5a00;
+  --wait-soft: #fbf1dc;
+  --font-body: "Figtree", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ink: #e4ecf0; --ink-soft: #9fb2bd; --ground: #0e171c; --paper: #142028; --rule: #263842;
+    --brand: #5cb6de; --brand-soft: #14303d; --down: #f2877b; --down-soft: #3a1a17;
+    --ok: #6fcfa5; --ok-soft: #12302a; --wait: #e8b75a; --wait-soft: #33280f;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #e4ecf0; --ink-soft: #9fb2bd; --ground: #0e171c; --paper: #142028; --rule: #263842;
+  --brand: #5cb6de; --brand-soft: #14303d; --down: #f2877b; --down-soft: #3a1a17;
+  --ok: #6fcfa5; --ok-soft: #12302a; --wait: #e8b75a; --wait-soft: #33280f;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--ground); color: var(--ink);
+  font-family: var(--font-body); font-size: 1rem; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 72px;
+}
+.page { max-width: 50rem; margin-inline: auto; display: flex; flex-direction: column; gap: 36px; }
+h1, h2, h3 { margin: 0; line-height: 1.2; text-wrap: balance; }
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.25rem; }
+p { margin: 0; }
+code { font-family: var(--font-mono); font-size: 0.86em; background: var(--brand-soft); padding: 0 4px; border-radius: 3px; }
+a { color: var(--brand); text-underline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 2px; }
+.muted { color: var(--ink-soft); }
+.small { font-size: 0.85rem; }
+.eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-soft); font-weight: 600; }
+.miss { color: var(--wait); font-weight: 600; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.prose { display: flex; flex-direction: column; gap: 12px; max-width: 42rem; }
+
+.chip { display: inline-flex; align-items: center; padding: 1px 9px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; border: 1px solid transparent; }
+.c-draft { background: var(--wait-soft); color: var(--wait); border-color: var(--wait); }
+.c-ok { background: var(--ok-soft); color: var(--ok); }
+.c-plan { background: var(--brand-soft); color: var(--brand); }
+.c-open { background: var(--wait-soft); color: var(--wait); }
+.c-sev { background: var(--down-soft); color: var(--down); font-size: 0.85rem; padding: 3px 12px; }
+.banner { background: var(--wait-soft); color: var(--wait); border: 1px solid var(--wait); border-radius: 8px; padding: 8px 12px; font-size: 0.88rem; font-weight: 600; }
+
+section { display: flex; flex-direction: column; gap: 14px; }
+section > h2 { border-top: 2px solid var(--ink); padding-top: 12px; }
+
+/* one table style for every table and label/value list */
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); font-weight: 600; }
+tbody th { padding-top: 9px; white-space: nowrap; width: 1%; }
+td.mono, .mono { font-family: var(--font-mono); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.gid { font-family: var(--font-mono); font-size: 0.8rem; font-weight: 600; color: var(--brand); white-space: nowrap; }
+
+.head { display: flex; flex-direction: column; gap: 14px; }
+.facts { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 640px) { .facts { grid-template-columns: 1fr; } }
+.sev { display: flex; flex-direction: column; gap: 10px; background: var(--paper); border: 1px solid var(--rule); border-radius: 10px; padding: 14px; min-width: 0; }
+
+/* timeline */
+.bar { position: relative; height: 46px; }
+.bar .track { position: absolute; inset: 14px 0 auto; height: 6px; background: var(--rule); border-radius: 3px; }
+.bar .out { position: absolute; top: 12px; height: 10px; background: var(--down); border-radius: 3px; }
+.bar .mk { position: absolute; top: 0; transform: translateX(-50%); line-height: 0; }
+.bar .mk svg { width: 16px; height: 16px; }
+.bar .tag { position: absolute; top: 28px; font-family: var(--font-mono); font-size: 0.68rem; color: var(--down); font-weight: 600; white-space: nowrap; }
+.axis { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-soft); }
+.tl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.tl li { display: grid; grid-template-columns: 3rem 4rem 20px minmax(0, 1fr); gap: 10px; padding: 9px 4px; border-bottom: 1px dashed var(--rule); align-items: start; }
+.tl .t { font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-soft); padding-top: 2px; }
+.tl .rel { font-family: var(--font-mono); font-size: 0.78rem; color: var(--down); padding-top: 3px; font-variant-numeric: tabular-nums; }
+.tl .rel.pre { color: var(--ink-soft); }
+.tl .ico { width: 18px; height: 18px; margin-top: 3px; }
+.tl .txt { display: flex; flex-direction: column; gap: 3px; }
+.tl .stage { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); font-weight: 600; }
+.tl .ev { font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.tl li.dec { background: var(--brand-soft); border-radius: 8px; border-bottom-color: transparent; }
+.tl li.pend { opacity: 0.7; }
+.reason { font-size: 0.88rem; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.78rem; color: var(--ink-soft); }
+.legend span { display: inline-flex; gap: 5px; align-items: center; }
+.legend svg { width: 14px; height: 14px; }
+
+/* impact */
+.cells { display: flex; flex-wrap: wrap; gap: 6px; }
+.cell { border: 1px solid var(--rule); background: var(--paper); border-radius: 6px; padding: 4px 9px; font-size: 0.86rem; }
+.nowrap { white-space: nowrap; }
+th.k-aff { color: var(--down); }
+th.k-not { color: var(--ok); }
+
+/* root cause */
+.tech { border: 1px solid var(--rule); border-radius: 10px; background: var(--paper); }
+.tech h3 { padding: 10px 14px; font-size: 0.92rem; }
+.steps { list-style: none; margin: 0; padding: 4px 14px 14px; display: flex; flex-direction: column; gap: 14px; counter-reset: s; }
+.steps li { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr); gap: 8px; counter-increment: s; }
+.steps li::before { content: counter(s); font-family: var(--font-mono); font-size: 0.8rem; font-weight: 600; color: var(--brand); padding-top: 2px; }
+.steps .body { display: flex; flex-direction: column; gap: 6px; }
+.steps p { font-size: 0.9rem; color: var(--ink-soft); }
+pre.code { margin: 0; font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.55; background: var(--ground); border: 1px solid var(--rule); border-left: 3px solid var(--down); border-radius: 6px; padding: 8px 10px; overflow-x: auto; white-space: pre; }
+
+/* sign-off */
+.sign { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 18px; padding-top: 6px; }
+.sign div { border-top: 1px solid var(--ink); padding-top: 6px; font-size: 0.8rem; color: var(--ink-soft); display: flex; flex-direction: column; gap: 2px; }
+.sign b { color: var(--ink); font-size: 0.95rem; min-height: 1.4em; }
+.foot { font-size: 0.82rem; color: var(--ink-soft); border-top: 1px solid var(--rule); padding-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+
+.err { background: var(--down-soft); color: var(--down); border: 1px solid var(--down); border-radius: 8px; padding: 12px; font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-wrap; }
+
+@media print {
+  :root { color-scheme: light; }
+  /* keep timeline and chip colours even when "Background graphics" is off */
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { background: #fff; padding: 0; font-size: 10.5pt; }
+  .page { max-width: none; gap: 22px; }
+  .sev, .tech { background: #fff; }
+  header, tr, .tl li, .steps li, .sign, .sev { break-inside: avoid; }
+  section > h2, .tech h3 { break-after: avoid; }
+  pre.code { white-space: pre-wrap; word-break: break-all; }
+  a { color: var(--brand); text-decoration: underline; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-trigger" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="var(--ink-soft)" stroke-width="2"/><path d="M10 5v5l3 2" fill="none" stroke="var(--ink-soft)" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-impact_start" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="var(--down)"/><path d="M10 5v6M10 14v1" stroke="var(--paper)" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-detected" viewBox="0 0 20 20"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" fill="none" stroke="var(--wait)" stroke-width="2"/><circle cx="10" cy="10" r="2.5" fill="var(--wait)"/></symbol>
+    <symbol id="i-acknowledged" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" fill="var(--wait)"/><path d="M6 10.5l2.5 2.5L14 7.5" fill="none" stroke="var(--paper)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-diagnosed" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="var(--brand)" stroke-width="2.2"/><path d="M12.5 12.5L17 17" stroke="var(--brand)" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-fixed" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="var(--ok)"/><path d="M6 10.5l2.5 2.5L14 7.5" fill="none" stroke="var(--paper)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-verified" viewBox="0 0 20 20"><path d="M10 2l7 3v5c0 4-3 7-7 8-4-1-7-4-7-8V5z" fill="var(--ok)"/><path d="M6.5 10l2.5 2.5 4.5-5" fill="none" stroke="var(--paper)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-closed" viewBox="0 0 20 20"><path d="M4 2v16" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/><path d="M4 3h11l-2.5 3.5L15 10H4z" fill="var(--ink)"/></symbol>
+    <symbol id="i-decision" viewBox="0 0 20 20"><path d="M10 3v14M5 17h10M3 7h14" stroke="var(--brand)" stroke-width="2" stroke-linecap="round"/><path d="M3 7l-2 5h4zM17 7l-2 5h4z" fill="var(--brand)"/></symbol>
+    <symbol id="i-note" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3" fill="var(--ink-soft)"/></symbol>
+  </defs>
+</svg>
+
+<main class="page" id="pir"></main>
+
+<script>
+(function () {
+  "use strict";
+  var root = document.getElementById("pir");
+
+  // Fixed vocabularies. Changing these changes every report, so they live in the template, not the data.
+  var STAGES = {
+    trigger: "Trigger", impact_start: "Impact starts", detected: "Detected", acknowledged: "Acknowledged",
+    diagnosed: "Diagnosed", fixed: "Fixed", verified: "Verified", closed: "Closed", decision: "Decision", note: "Note"
+  };
+  var BAR_STAGES = ["trigger", "impact_start", "detected", "fixed", "verified"];
+  var CATEGORIES = {
+    "CAT-01": "Malware", "CAT-02": "Unauthorised access", "CAT-03": "Information leak",
+    "CAT-04": "Denial of service", "CAT-05": "Social engineering", "CAT-06": "Technical failure", "CAT-07": "Physical incident"
+  };
+  // Impact × urgency → PS16 level (0 trivial … 4 critical)
+  // Must match the matrix in scripts/pir.js (`pir.js questions`).
+  var MATRIX = { high: { high: 4, medium: 3, low: 2 }, medium: { high: 3, medium: 2, low: 1 }, low: { high: 2, medium: 1, low: 0 } };
+  var LEVELS = [
+    { name: "Trivial", p: "P2", rank: "Lowest", target: "respond within 5 working days; no fix deadline" },
+    { name: "Low", p: "P2", rank: "Second-lowest", target: "respond within 24 hours, fix within 48 hours" },
+    { name: "Medium", p: "P1", rank: "Middle", target: "respond within 4 hours, fix within 12 hours" },
+    { name: "High", p: "P0", rank: "Second-highest", target: "respond within 1 hour, fix within 4 hours" },
+    { name: "Critical", p: "P0", rank: "Highest", target: "respond within 30 minutes, fix within 2 hours" }
+  ];
+  var STATUS = { done: ["Done", "c-ok"], planned: ["Planned", "c-plan"], open: ["Open", "c-open"] };
+  var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
+  }
+  // Inline text: escaped, then `code` and **bold** only.
+  function md(s) {
+    return esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+  }
+  function miss(label) { return '<span class="miss">' + esc(label || "Not recorded") + "</span>"; }
+  function val(s) { return s ? md(s) : miss(); }
+  function link(l) {
+    if (!l) return '<span class="muted">none</span>';
+    return l.url ? '<a href="' + esc(l.url) + '">' + esc(l.label) + "</a>" : esc(l.label);
+  }
+  function longDate(iso) {
+    if (!iso) return miss();
+    var p = iso.split("-");
+    return Number(p[2]) + " " + MONTHS[Number(p[1]) - 1] + " " + p[0];
+  }
+  function hhmm(t) { return t ? t.slice(11, 16) : "Later"; }
+  function at(t, tz) { return new Date(t + ":00" + tz.offset); }
+  function mins(a, b) { return Math.round((b - a) / 60000); }
+  function dur(m) {
+    if (m == null || isNaN(m)) return null;
+    var h = Math.floor(m / 60), r = m % 60;
+    return h ? h + " h " + r + " min" : r + " min";
+  }
+  function rel(m) {
+    if (m === 0) return "T+0";
+    var a = Math.abs(m), h = Math.floor(a / 60), r = a % 60;
+    var s = h ? h + "h" + String(r).padStart(2, "0") : r + "m";
+    return (m < 0 ? "T−" : "T+") + s;
+  }
+  function icon(stage) { return '<svg class="ico" aria-hidden="true"><use href="#i-' + stage + '"/></svg>'; }
+
+  function render(d) {
+    var tz = d.timezone;
+    var draft = d.status !== "confirmed";
+    var timed = d.timeline.filter(function (e) { return e.time; });
+    function first(stage) { var e = d.timeline.find(function (x) { return x.stage === stage && x.time; }); return e ? at(e.time, tz) : null; }
+    var tStart = first("impact_start"), tFixed = first("fixed"), tAck = first("acknowledged");
+
+    var sv = d.severity || {};
+    var lvl = sv.impact && sv.urgency && MATRIX[sv.impact.level] ? LEVELS[MATRIX[sv.impact.level][sv.urgency.level]] : null;
+    var cat = d.classification.category;
+    var h = [];
+
+    // 01 Header: title, then the PS16 record and key facts in one table, severity beside it
+    var win = tStart && tFixed ? hhmm(d.timeline.find(function (x) { return x.stage === "impact_start"; }).time) + "–" + hhmm(d.timeline.find(function (x) { return x.stage === "fixed"; }).time) + " " + esc(tz.label) : null;
+    h.push('<header class="head">');
+    h.push('<div class="row" style="justify-content:space-between"><span class="eyebrow">Post-incident review</span>' +
+      (draft ? '<span class="chip c-draft">Draft</span>' : "") + "</div>");
+    h.push("<h1>" + val(d.title) + "</h1>");
+    if (draft) h.push('<div class="banner">Draft: AI-drafted, pending review. Do not file or forward as final.</div>');
+    h.push('<div class="facts"><div class="tbl-wrap"><table><tbody>' +
+      '<tr><th scope="row">Incident</th><td class="mono">' + val(d.id) + "</td></tr>" +
+      '<tr><th scope="row">Date</th><td>' + longDate(d.date) + "</td></tr>" +
+      '<tr><th scope="row">Service</th><td>' + val(d.service) + "</td></tr>" +
+      '<tr><th scope="row">Prepared for</th><td>' + val(d.audience) + "</td></tr>" +
+      '<tr><th scope="row">Category</th><td>' + (cat ? esc(cat) + " · " + esc(CATEGORIES[cat] || "unknown code") : miss()) + "</td></tr>" +
+      '<tr><th scope="row">Criticality</th><td>' + (lvl ? "Level " + LEVELS.indexOf(lvl) + " · " + lvl.p + ' <span class="muted small">(' + lvl.name + ")</span>" : miss()) + "</td></tr>" +
+      '<tr><th scope="row">Associated risk</th><td>' + (d.classification.risk && d.classification.risk.length ? esc(d.classification.risk.join(", ")) : miss()) + "</td></tr>" +
+      '<tr><th scope="row">Handled by</th><td>' + val(d.classification.handledBy) + "</td></tr>" +
+      '<tr><th scope="row">Window</th><td class="mono">' + (win || miss()) + "</td></tr>" +
+      '<tr><th scope="row">Duration</th><td><b>' + (dur(tStart && tFixed ? mins(tStart, tFixed) : null) || miss()) + "</b></td></tr>" +
+      '<tr><th scope="row">Time to fix</th><td>' + (tAck && tFixed ? dur(mins(tAck, tFixed)) + ' <span class="muted small">acknowledged → fixed</span>' : miss()) + "</td></tr>" +
+      '<tr><th scope="row">Affected</th><td>' + val(d.facts.affected) + "</td></tr>" +
+      '<tr><th scope="row">Data</th><td>' + val(d.facts.data) + "</td></tr>" +
+      "</tbody></table></div>");
+    h.push('<div class="sev">');
+    function rated(s) { return s && s.level ? "<b>" + esc(cap(s.level)) + '</b> <span class="muted small">· ' + val(s.reason) + "</span>" : miss(); }
+    if (lvl) {
+      h.push('<div class="row"><span class="chip c-sev">' + lvl.name + " severity</span></div>");
+      h.push('<p class="small">' + lvl.rank + " of five levels. Our target for this level: " + lvl.target + ".</p>");
+    } else {
+      h.push('<span class="eyebrow">Severity</span>' + miss("Not rated until impact and urgency are both answered"));
+    }
+    h.push('<table><tbody>' +
+      '<tr><th scope="row">Impact</th><td>' + rated(sv.impact) + "</td></tr>" +
+      '<tr><th scope="row">Urgency</th><td>' + rated(sv.urgency) + "</td></tr>" +
+      "</tbody></table>");
+    h.push("</div></div></header>");
+
+    // Summary
+    h.push('<section><h2>Summary</h2><div class="prose">' + (d.summary && d.summary.length ? d.summary.map(function (p) { return "<p>" + md(p) + "</p>"; }).join("") : miss()) + "</div></section>");
+
+    // 04 Timeline: clock bar with T+ tags, then the list
+    h.push("<section><h2>Timeline</h2>");
+    if (timed.length > 1) {
+      var t0 = at(timed[0].time, tz), t1 = at(timed[timed.length - 1].time, tz);
+      var a0 = new Date(t0); a0.setMinutes(0, 0, 0);
+      var a1 = new Date(t1); if (a1.getMinutes() || a1.getSeconds()) { a1.setMinutes(0, 0, 0); a1 = new Date(+a1 + 3600000); }
+      var span = a1 - a0;
+      var pct = function (t) { return ((t - a0) / span * 100).toFixed(2) + "%"; };
+      var bar = '<div class="bar" role="img" aria-label="Users affected from ' + (win || "unknown") + '"><div class="track"></div>';
+      if (tStart && tFixed) bar += '<div class="out" style="left:' + pct(tStart) + ";width:" + ((tFixed - tStart) / span * 100).toFixed(2) + '%"></div>';
+      BAR_STAGES.forEach(function (s) {
+        var t = first(s); if (t) bar += '<span class="mk" style="left:' + pct(t) + '">' + icon(s) + "</span>";
+      });
+      if (tStart) {
+        bar += '<span class="tag" style="left:' + pct(tStart) + ';transform:translateX(-50%)">T+0</span>';
+        var tDet = first("detected");
+        if (tDet) bar += '<span class="tag" style="left:' + pct(tDet) + ';transform:translateX(-100%)">' + rel(mins(tStart, tDet)) + "</span>";
+        if (tFixed) bar += '<span class="tag" style="left:' + pct(tFixed) + ';transform:translateX(4px)">' + rel(mins(tStart, tFixed)) + "</span>";
+      }
+      bar += "</div>";
+      var ticks = [], hours = Math.round(span / 3600000), step = hours > 8 ? Math.ceil(hours / 6) : 1;
+      for (var i = 0; i <= hours; i += step) { var tk = new Date(+a0 + i * 3600000); ticks.push("<span>" + String(tk.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "UTC", hour12: false })) + "</span>"); }
+      h.push("<div>" + bar + '<div class="axis">' + ticks.join("").replace(/<span>(\d\d:\d\d)<\/span>/g, function (_, x) { return "<span>" + shift(x, tz) + "</span>"; }) + "</div></div>");
+    }
+    h.push('<div class="legend">' + Object.keys(STAGES).map(function (s) { return "<span>" + icon(s) + esc(STAGES[s]) + "</span>"; }).join("") + "</div>");
+    h.push('<ol class="tl">');
+    d.timeline.forEach(function (e) {
+      var m = e.time && tStart ? mins(tStart, at(e.time, tz)) : null;
+      var ev = e.evidence && e.evidence.length ? '<span class="ev">' + e.evidence.map(link).join("") + "</span>" : "";
+      h.push('<li class="' + (e.stage === "decision" ? "dec" : "") + '"><span class="t">' + hhmm(e.time) + "</span>" +
+        '<span class="rel' + (m == null || m < 0 ? " pre" : "") + '">' + (m == null ? "" : rel(m)) + "</span>" + icon(e.stage) +
+        '<span class="txt"><span class="stage">' + esc(STAGES[e.stage] || e.stage) + "</span><span>" + md(e.text) + "</span>" +
+        (e.stage === "decision" ? '<span class="reason"><b>Why:</b> ' + val(e.reason) + "</span>" : "") + ev + "</span></li>");
+    });
+    if (draft || !d.signoff.closedOn) {
+      h.push('<li class="pend"><span class="t">—</span><span class="rel pre"></span>' + icon("closed") + '<span class="txt"><span class="stage">Closed</span>' + miss("Pending confirmation") + "</span></li>");
+    } else {
+      h.push('<li><span class="t">' + longDate(d.signoff.closedOn) + '</span><span class="rel pre"></span>' + icon("closed") + '<span class="txt"><span class="stage">Closed</span><span>Closure confirmed by ' + val(d.signoff.closedBy) + ".</span></span></li>");
+    }
+    h.push("</ol>");
+    if (tz) h.push('<p class="small muted">All times ' + esc(tz.label) + " (UTC" + esc(tz.offset) + "). T+ counts from when users were first affected.</p>");
+    h.push("</section>");
+
+    // 05 Impact
+    function cells(list) { return list && list.length ? '<div class="cells">' + list.map(function (x) { return '<span class="cell">' + md(x) + "</span>"; }).join("") + "</div>" : '<span class="muted">None</span>'; }
+    h.push('<section><h2>Impact</h2><div class="tbl-wrap"><table><tbody>' +
+      '<tr><th scope="row" class="k-aff">Affected</th><td>' + cells(d.impact.affected) + "</td></tr>" +
+      '<tr><th scope="row" class="k-not">Not affected</th><td>' + cells(d.impact.notAffected) + "</td></tr>" +
+      "</tbody></table></div></section>");
+
+    // 06 Root cause
+    h.push('<section><h2>Root cause</h2><div class="prose"><p>' + val(d.rootCause.plain) + "</p></div>");
+    if (d.rootCause.steps && d.rootCause.steps.length) {
+      h.push('<div class="tech"><h3>Technical detail</h3><ol class="steps">' + d.rootCause.steps.map(function (s) {
+        return '<li><div class="body"><b>' + md(s.title) + "</b>" + (s.detail ? "<p>" + md(s.detail) + "</p>" : "") +
+          (s.code ? '<pre class="code">' + esc(s.code) + "</pre>" : "") + "</div></li>";
+      }).join("") + "</ol></div>");
+    }
+    h.push("</section>");
+
+    // 07 Gaps
+    h.push('<section><h2>Gaps</h2><div class="tbl-wrap"><table><thead><tr><th></th><th>Summary</th><th>Detail</th></tr></thead><tbody>' +
+      (d.gaps && d.gaps.length ? "" : '<tr><td></td><td colspan="2">' + miss("None recorded") + "</td></tr>") + (d.gaps || []).map(function (g) { return '<tr><td class="gid">' + esc(g.id) + "</td><td><b>" + md(g.summary) + '</b></td><td class="small">' + val(g.detail) + "</td></tr>"; }).join("") +
+      "</tbody></table></div></section>");
+
+    // 08 Actions
+    var order = { done: 0, planned: 1, open: 2 };
+    var acts = (d.actions || []).slice().sort(function (a, b) { return (order[a.status] ?? 3) - (order[b.status] ?? 3); });
+    h.push('<section><h2>Actions</h2><div class="tbl-wrap"><table><thead><tr><th>Closes</th><th>Action</th><th>Status</th><th>Owner</th><th>Card</th></tr></thead><tbody>' +
+      (acts.length ? "" : '<tr><td></td><td colspan="4">' + miss("None recorded") + "</td></tr>") + acts.map(function (a) {
+        var st = STATUS[a.status];
+        return '<tr><td class="gid">' + (a.closes && a.closes.length ? esc(a.closes.join(", ")) : '<span class="muted">—</span>') + "</td><td>" + md(a.action) +
+          "</td><td>" + (st ? '<span class="chip ' + st[1] + '">' + st[0] + "</span>" : miss()) + "</td><td>" + (a.owner ? esc(a.owner) : miss("Unassigned")) + "</td><td class=\"nowrap\">" + link(a.card) + "</td></tr>";
+      }).join("") + "</tbody></table></div></section>");
+
+    // 09 Sign-off
+    var so = d.signoff;
+    h.push('<section><h2>Sign-off</h2><div class="sign">' +
+      "<div><b>" + val(so.preparedBy) + "</b>Prepared by, with AI assistance · " + longDate(so.preparedOn) + "</div>" +
+      "<div><b>" + (so.approvedBy ? esc(so.approvedBy) : miss("Pending")) + "</b>Approved by" + (so.approvedOn ? " · " + longDate(so.approvedOn) : "") + "</div>" +
+      "<div><b>" + (so.closedBy ? esc(so.closedBy) : miss("Pending")) + "</b>Closure confirmed by" + (so.closedOn ? " · " + longDate(so.closedOn) : "") + "</div>" +
+      "</div>");
+    h.push('<div class="foot"><span>' + (draft ? "AI-drafted, pending review." : "Prepared by " + esc(so.preparedBy) + ", with AI assistance.") + "</span>" +
+      "<span>Sources: " + (d.sources && d.sources.length ? d.sources.map(link).join(", ") : miss()) + "</span></div></section>");
+
+    root.innerHTML = h.join("");
+    document.title = (d.title || "Post-incident review") + (draft ? " (draft)" : "");
+  }
+  function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ""; }
+  // Axis ticks are built in UTC; shift them back into the report's timezone label.
+  function shift(x, tz) {
+    var sign = tz.offset[0] === "-" ? -1 : 1, oh = Number(tz.offset.slice(1, 3)), om = Number(tz.offset.slice(4, 6));
+    var m = (Number(x.slice(0, 2)) * 60 + Number(x.slice(3, 5)) + sign * (oh * 60 + om) + 1440) % 1440;
+    return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+  }
+
+  try {
+    render(JSON.parse(document.getElementById("pir-data").textContent));
+  } catch (e) {
+    root.innerHTML = '<div class="err">This report could not be drawn: ' + esc(e.message) + "\nCheck the JSON in the pir-data block.</div>";
+  }
+})();
+</script>
