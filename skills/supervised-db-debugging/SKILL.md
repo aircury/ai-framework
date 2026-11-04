@@ -125,10 +125,18 @@ Before submitting any write (declared `write`, or any SQL that changes data, sch
 
 - `description` and `sql` must be byte-for-byte what you pass to `pgsql submit`. If the reviewer asks for a revision, print a new block before resubmitting.
 - Never put a password, token or other secret in the block.
-- When the proxy answers, print a second block with the outcome, without row data:
+- When the proxy answers, print a second block with the outcome, without row data. Put the exact SQL that ran in `sql`, above the result fields, so each outcome stands on its own in the log:
 
 ```json
-{ "type": "proxydiablo.write.outcome", "tabId": "<tabId>", "status": "<released|cancelled|revision_requested|error>", "command": "<e.g. UPDATE>", "rowCount": <n>, "completedAt": "<ISO 8601 timestamp, UTC>" }
+{
+  "type": "proxydiablo.write.outcome",
+  "tabId": "<tabId>",
+  "sql": "<the exact SQL that ran>",
+  "status": "<released|cancelled|revision_requested|error>",
+  "command": "<e.g. UPDATE>",
+  "rowCount": <n>,
+  "completedAt": "<ISO 8601 timestamp, UTC>"
+}
 ```
 
 ## Phase 4 -- Fix and verify
