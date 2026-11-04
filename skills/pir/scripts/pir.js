@@ -343,7 +343,18 @@ function check(d) {
     }
     if (!a.owner) missing.push(`Owner of the action "${a.action}"`);
   });
-  const unclosed = [...ids].filter((g) => !closed.has(g));
+  // One line per gap with the actions meant to close it, for the recurrence check
+  const recurrence = (d.gaps || []).map((g) => {
+    const by = (d.actions || []).filter((a) => (a.closes || []).includes(g.id));
+    const what = by.length
+      ? `closed by ${by.map((a) => `"${a.action}" (${a.status || "status not recorded"})`).join(", ")}. Does that fully close it?`
+      : "no action closes it. Should one?";
+    return `${g.id} ${g.summary || ""}: ${what}`;
+  });
+  if (recurrence.length || (d.actions || []).length)
+    recurrence.push(
+      "With every action done, could this incident, or one like it elsewhere, happen again?",
+    );
 
   const so = d.signoff || {};
   need(so.preparedBy, "Who prepared the report");
@@ -366,7 +377,7 @@ function check(d) {
       if (re.test(text)) sensitive.push(`${kind} in ${at}`);
   }
 
-  return { errors, missing: [...new Set(missing)], unclosed, sensitive };
+  return { errors, missing: [...new Set(missing)], recurrence, sensitive };
 }
 
 function report(r) {
@@ -380,7 +391,10 @@ function report(r) {
     r.sensitive,
   );
   list("NOT RECORDED (ask the person)", r.missing);
-  list("GAPS NO ACTION CLOSES (raise in the chat)", r.unclosed);
+  list(
+    "RECURRENCE CHECK (ask the person before confirming; never in the report)",
+    r.recurrence,
+  );
   if (!out.length) out.push("OK: nothing missing.");
   process.stdout.write(`${out.join("\n")}\n`);
 }

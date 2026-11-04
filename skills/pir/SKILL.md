@@ -35,8 +35,9 @@ sensitive values:
 - **SENSITIVE**: a value looks like a secret or personal data. Remove it or
   describe it without the value ("an API token ending …XB8").
 - **NOT RECORDED**: fields still empty. These are your questions for the person.
-- **GAPS NO ACTION CLOSES**: raise each one in the chat. Never print a warning
-  about it in the report.
+- **RECURRENCE CHECK**: each gap with the actions meant to close it, and
+  whether the incident could happen again. Ask these before confirming (see
+  "Check the actions prevent it happening again"). Never put them in the report.
 
 `set` also puts the timeline in time order, untimed steps last.
 
@@ -79,7 +80,7 @@ welcome but never required.
 
 ## Step 3: build it together
 
-Turn the NOT RECORDED list and the unclosed gaps into questions. Ask with the
+Turn the NOT RECORDED list into questions. Ask with the
 question tool when the answer is a choice (category, risk, impact and urgency
 levels, action status); ask in plain chat when it is free text (owner names,
 times). Ask a few at a time, most important first: severity, timeline stages,
@@ -111,6 +112,36 @@ anyone tested that refunds still work?" Then, from the answer:
 
 The report never lists unchecked things.
 
+### Check the actions prevent it happening again
+
+This is the most important question in the review: a PIR whose actions
+would not stop the incident happening again has failed, however well it
+reads. Once the gaps and actions are drafted, and again before confirming,
+go through the RECURRENCE CHECK from `set` with the person:
+
+- for each gap: once its actions are done, is it fully closed? If not, what
+  is missing?
+- overall: with every action done, could this incident happen again, or the
+  same cause hit another part?
+
+Give your own view first, as the recommended answer, with the reason. Be
+sceptical; these are common ways an action falls short:
+
+- it fixes this occurrence, not the cause: "Pin the library to 1.2.3" stops
+  this release, but the next update can break the same way; a check that
+  runs the production build before deploy closes the gap;
+- it is a step towards a fix, not the fix: "Investigate alerting on failed
+  emails" does not close "nobody was alerted"; "Alert the on-call when an
+  email fails to send" does;
+- it depends on people remembering: "Remind the team to test the build"
+  rarely holds; an automated check does;
+- it is only wanted: an `open` action with no owner or date closes nothing
+  yet.
+
+From the answer: add or change actions, or, if the person accepts the
+remaining risk, leave it and say so in the chat. Do not confirm the report
+until this has been asked.
+
 After each round, update `data.json`, run `set`, and republish. Then list in
 the chat the questions still open, each with who can answer it (the person, or
 a colleague they named, such as whoever handled the incident), so the person
@@ -121,7 +152,8 @@ Stop when the person is happy, even if some fields stay
 
 ## Step 4: confirm
 
-Only when the person says the report is confirmed, and gives the names:
+Only when the recurrence check has been asked (step 3), the person says the
+report is confirmed, and gives the names:
 
 - `status: "confirmed"`;
 - `signoff.approvedBy`/`approvedOn` and `closedBy`/`closedOn` (the closure
