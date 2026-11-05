@@ -1,0 +1,205 @@
+{
+  "schema": 1,
+  "status": "confirmed",
+  "pirId": "PIR-7",
+  "id": "SHOP-518",
+  "title": "Order confirmation emails not sent from the production web shop",
+  "service": "Shop",
+  "audience": "Internal",
+  "date": "2026-03-10",
+  "timezone": { "label": "CET", "offset": "+01:00" },
+  "classification": {
+    "category": "CAT-06",
+    "risk": ["Availability"],
+    "handledBy": "Alex Morgan"
+  },
+  "severity": {
+    "impact": {
+      "level": "medium",
+      "reason": "Ordering and payment worked for everyone; a secondary function, the confirmation email, failed for every order."
+    },
+    "urgency": {
+      "level": "high",
+      "reason": "Guest customers had no other way to confirm their order, and the number of unconfirmed orders grew with every sale."
+    }
+  },
+  "facts": {
+    "affected": "Customers who ordered overnight: 212 orders without a confirmation email",
+    "data": "None lost, altered or exposed"
+  },
+  "summary": [
+    "From 23:04 on 10 March the Shop stopped sending order confirmation emails. The company that sends our emails changed the Shop's API key (the password the Shop uses to send through them) on its regular schedule, and the Shop kept using the old one, so every email was refused.",
+    "212 orders received no confirmation over almost 12 hours. Ordering and payment worked normally, and customers with an account could still see their orders, but about 70 guest customers had no confirmation at all. Support handled 9 contacts about it.",
+    "A customer reported it at 09:20 the next morning. The cause was found at 10:31, and emails were sending again at 10:49. The 212 missing confirmations were re-sent by 11:30; 209 were delivered and 3 bounced because the addresses were mistyped at checkout.",
+    "To stop it happening again, the Shop will pick up a new key by itself when the provider changes it, an alert will tell the on-call developer when emails start failing, and support will be able to re-send a confirmation from the order page."
+  ],
+  "timeline": [
+    {
+      "time": "2026-03-10T23:00",
+      "stage": "trigger",
+      "text": "The email provider replaced the Shop's API key on its quarterly schedule. The Shop kept the old key in its configuration."
+    },
+    {
+      "time": "2026-03-10T23:04",
+      "stage": "impact_start",
+      "text": "The first order confirmation after the change is refused by the provider with error `401` (not authorised). Every confirmation after it fails the same way."
+    },
+    {
+      "time": "2026-03-11T09:20",
+      "stage": "detected",
+      "text": "A customer tells support their confirmation never arrived. After two more contacts, support raises SHOP-518.",
+      "evidence": [{ "label": "SHOP-518", "url": "https://example.com/cards/SHOP-518" }]
+    },
+    {
+      "time": "2026-03-11T10:12",
+      "stage": "acknowledged",
+      "text": "The on-call developer takes SHOP-518."
+    },
+    {
+      "time": "2026-03-11T10:31",
+      "stage": "diagnosed",
+      "text": "The logs show every send since 23:04 refused with `401`, and the provider's dashboard shows the key was changed at 23:00."
+    },
+    {
+      "time": "2026-03-11T10:35",
+      "stage": "decision",
+      "text": "Make the Shop read the key from the secrets store (the protected place for passwords and keys) instead of pasting the new key into its configuration.",
+      "reason": "Pasting the key would have taken five minutes but would break again at the next quarterly change; the secrets store took about fifteen minutes longer and also covers future changes."
+    },
+    {
+      "time": "2026-03-11T10:47",
+      "stage": "note",
+      "text": "The change is deployed and the Shop restarts with the new key.",
+      "evidence": [
+        { "label": "commit 4f2a9c1", "url": "https://example.com/shop/commit/4f2a9c1" },
+        { "label": "deploy run 9002", "url": "https://example.com/shop/actions/runs/9002" }
+      ]
+    },
+    {
+      "time": "2026-03-11T10:49",
+      "stage": "fixed",
+      "text": "A test order's confirmation arrives, and new orders' emails are sent normally again."
+    },
+    {
+      "time": "2026-03-11T11:30",
+      "stage": "note",
+      "text": "The 212 missing confirmations are re-sent with a one-off script. 209 are delivered; 3 bounce because the addresses were mistyped at checkout, and support contacts those customers by phone.",
+      "evidence": [{ "label": "commit 8b71d0e", "url": "https://example.com/shop/commit/8b71d0e" }]
+    },
+    {
+      "time": "2026-03-11T11:40",
+      "stage": "verified",
+      "text": "No failed sends in the 50 minutes since the fix, and the provider's dashboard confirms the re-sent emails were delivered."
+    }
+  ],
+  "impact": {
+    "affected": [
+      "Order confirmation emails: all 212 orders between 23:04 and 10:49, re-sent at 11:30",
+      "Guest customers, about 70 of those orders: no confirmation at all, as they have no account page",
+      "Support: 9 customer contacts, answered by hand"
+    ],
+    "notAffected": [
+      "Ordering and payment: every order was recorded and charged once",
+      "Customers with an account: could see their orders under \"My orders\"",
+      "Password reset emails: sent with a different key, checked in the provider's logs",
+      "Data: none lost, altered or exposed"
+    ]
+  },
+  "rootCause": {
+    "plain": "Our email provider changes the Shop's API key every three months for security, and tells us by a notification nobody was listening to. The Shop only knew the key written into its configuration, so when the key changed, every email was refused. The failures were logged, but nothing alerted anyone, so it went unnoticed overnight.",
+    "steps": [
+      {
+        "title": "The provider changes keys every quarter",
+        "detail": "The provider's security policy replaces each customer's API key every three months and sends a notification (a webhook) to an address we give it. Our account had no address set, so the notification went nowhere."
+      },
+      {
+        "title": "The Shop read the key only from its configuration",
+        "detail": "The key was set in the Shop's configuration when the Shop was deployed in October and had not changed since: this was the first quarterly change after launch."
+      },
+      {
+        "title": "Every send was refused",
+        "detail": "With the old key, the provider refused each email. The Shop logged the error and carried on, so orders completed normally without an email.",
+        "code": "EmailSendError: 401 Unauthorized (invalid API key) at Mailer.send (src/email/mailer.ts:58)"
+      },
+      {
+        "title": "Customers received no confirmation",
+        "detail": "Customers with an account could still see the order on their account page; guest customers had nothing to show for their order until the re-send."
+      }
+    ]
+  },
+  "gaps": [
+    {
+      "id": "G1",
+      "summary": "The Shop could not follow a key change",
+      "detail": "The provider changes keys on a known schedule and announces it, but the Shop only read a key fixed at deploy time and nobody received the announcement. A routine security change stopped all confirmation emails."
+    },
+    {
+      "id": "G2",
+      "summary": "No alert when emails fail",
+      "detail": "Every send failed from 23:04 and each failure was logged, but nothing alerted the on-call developer. It was found 10 hours later, when customers contacted support."
+    },
+    {
+      "id": "G3",
+      "summary": "Support could not re-send a confirmation",
+      "detail": "Support had no way to re-send a confirmation from the order, so the 9 customers who asked had to wait for the developers' re-send at 11:30."
+    }
+  ],
+  "actions": [
+    {
+      "closes": [],
+      "action": "Read the API key from the secrets store and deploy",
+      "status": "done",
+      "owner": "Alex Morgan",
+      "card": { "label": "SHOP-518", "url": "https://example.com/cards/SHOP-518" }
+    },
+    {
+      "closes": [],
+      "action": "Re-send the 212 missing confirmations, and phone the 3 customers whose addresses bounced",
+      "status": "done",
+      "owner": "Alex Morgan",
+      "card": { "label": "SHOP-518", "url": "https://example.com/cards/SHOP-518" }
+    },
+    {
+      "closes": ["G1"],
+      "action": "Receive the provider's key-change notification and update the key in the secrets store without a restart",
+      "status": "planned",
+      "owner": "Alex Morgan",
+      "card": { "label": "SHOP-521", "url": "https://example.com/cards/SHOP-521" }
+    },
+    {
+      "closes": ["G1"],
+      "action": "Test a key change on staging before each quarterly change, and confirm emails still send",
+      "status": "planned",
+      "owner": "Sam Patel",
+      "card": { "label": "SHOP-522", "url": "https://example.com/cards/SHOP-522" }
+    },
+    {
+      "closes": ["G2"],
+      "action": "Alert the on-call developer when more than 5% of emails fail over 10 minutes",
+      "status": "planned",
+      "owner": "Sam Patel",
+      "card": { "label": "SHOP-523", "url": "https://example.com/cards/SHOP-523" }
+    },
+    {
+      "closes": ["G3"],
+      "action": "Add a \"Re-send confirmation\" button to the order page in the support tool",
+      "status": "planned",
+      "owner": "Jordan Lee",
+      "card": { "label": "SHOP-524", "url": "https://example.com/cards/SHOP-524" }
+    }
+  ],
+  "signoff": {
+    "preparedBy": "Sam Patel",
+    "preparedOn": "2026-03-12",
+    "approvedBy": "Jordan Lee",
+    "approvedOn": "2026-03-16",
+    "closedBy": "Jordan Lee",
+    "closedOn": "2026-03-16"
+  },
+  "sources": [
+    { "label": "SHOP-518, the incident card", "url": "https://example.com/cards/SHOP-518" },
+    { "label": "Shop repository commits of 11 March", "url": "https://example.com/shop/commits" },
+    { "label": "Deploy run 9002", "url": "https://example.com/shop/actions/runs/9002" },
+    { "label": "Email provider dashboard, sending logs", "url": "https://example.com/email/logs" }
+  ]
+}

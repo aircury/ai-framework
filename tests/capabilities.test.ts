@@ -85,6 +85,7 @@ describe("capabilities", () => {
       "database",
       "extract-rule",
       "uat-scenarios",
+      "pir",
     ]);
   });
 

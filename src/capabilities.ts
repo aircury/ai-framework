@@ -158,7 +158,8 @@ export type CapabilityId =
   | "blind-db-debugging"
   | "db-schema-design"
   | "extract-rule"
-  | "uat-scenarios";
+  | "uat-scenarios"
+  | "pir";
 
 type VisibleCapabilityId = Exclude<
   CapabilityId,
@@ -761,6 +762,23 @@ const CAPABILITY_REGISTRY: Record<VisibleCapabilityId, CapabilityManifest> = {
       },
     ],
   },
+  pir: {
+    id: "pir",
+    label: "PIR",
+    hint: "post-incident review in a fixed, printable format",
+    description:
+      "Writes a post-incident review as a fixed-format HTML report with the PS16 record, built iteratively with the person and printed to PDF once confirmed",
+    category: "workflow",
+    defaultSelected: false,
+    scopes: ["local", "global"],
+    skills: [
+      {
+        source: "aircury/ai-framework",
+        skillName: "pir",
+        scopes: ["local", "global"],
+      },
+    ],
+  },
 };
 
 const CAPABILITY_ORDER: VisibleCapabilityId[] = [
@@ -783,6 +801,7 @@ const CAPABILITY_ORDER: VisibleCapabilityId[] = [
   "database",
   "extract-rule",
   "uat-scenarios",
+  "pir",
 ];
 
 const LEGACY_CAPABILITY_ALIASES: Partial<
