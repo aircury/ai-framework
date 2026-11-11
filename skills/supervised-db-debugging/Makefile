@@ -10,10 +10,11 @@ RUNTIME   := $(SKILL_DIR)/.runtime
 APP       := $(RUNTIME)/app
 DIABLO    := $(SKILL_DIR)/scripts/diablo
 
-# Pinned to the head of amoserlu/proxydiablo#4 (environments.json, UI password prompt, rds-iam).
+# Pinned to the head of amoserlu/proxydiablo#5 (MySQL environments, column hide toggle, Send error,
+# notifications), stacked on #4 (environments.json, UI password prompt, rds-iam).
 # Move to the merge commit once that PR lands.
 PROXYDIABLO_REPO ?= https://github.com/amoserlu/proxydiablo.git
-PROXYDIABLO_REF  ?= c9fa953964d6c623f754c152a6efae58c572160d
+PROXYDIABLO_REF  ?= 6860bedae53f39934247ebbcfdc685b6e270258f
 
 .PHONY: install update stop doctor ui env-add env-list env-remove env-import-phpstorm clean help
 
@@ -23,7 +24,7 @@ help:
 	@echo "stop         stop the Proxy Diablo server started from this skill"
 	@echo "doctor       check Node, the build, environments and the server"
 	@echo "ui           start the server and open the approval UI"
-	@echo "env-add      NAME= HOST= DBUSER= [PORT= DB= PASSWORD_ENV= SSLMODE=]"
+	@echo "env-add      NAME= HOST= DBUSER= [ENGINE=mysql PORT= DB= PASSWORD_ENV= SSLMODE=]"
 	@echo "             IAM: add AUTH=rds-iam AWSPROFILE=<profile> [REGION=]"
 	@echo "env-import-phpstorm  PROJECT=<dir> [DBUSER= NAMEHINT=1 AWSPROFILE=]"
 	@echo "env-list     list configured environments"
@@ -61,7 +62,7 @@ ui:
 env-add:
 	@node "$(SKILL_DIR)/scripts/envs.mjs" add "$(RUNTIME)/environments.json" \
 	  --name "$(NAME)" --host "$(HOST)" --user "$(DBUSER)" \
-	  $(if $(PORT),--port "$(PORT)") $(if $(DB),--database "$(DB)") \
+	  $(if $(ENGINE),--engine "$(ENGINE)") $(if $(PORT),--port "$(PORT)") $(if $(DB),--database "$(DB)") \
 	  $(if $(PASSWORD_ENV),--password-env "$(PASSWORD_ENV)") $(if $(SSLMODE),--sslmode "$(SSLMODE)") \
 	  $(if $(AUTH),--auth "$(AUTH)") $(if $(AWSPROFILE),--aws-profile "$(AWSPROFILE)") $(if $(REGION),--region "$(REGION)")
 

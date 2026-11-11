@@ -147,14 +147,18 @@ describe("supervised-db-debugging environments manager", () => {
   it("imports PostgreSQL data sources from a PhpStorm project", () => {
     const project = writeProject(
       source("Dev", "u1", "jdbc:postgresql://localhost:5433/shop") +
-        source("Reports", "u2", "jdbc:mysql://localhost:3306/x") +
+        source(
+          "Reports",
+          "u2",
+          "jdbc:sqlserver://localhost:1433;databaseName=x",
+        ) +
         source("NoUser", "u3", "jdbc:postgresql://other:5432/y"),
       `<data-source name="Dev" uuid="u1"><user-name>app</user-name><password>do-not-read</password></data-source>`,
     );
     const result = run("import-phpstorm", "--project", project);
     expect(result.status).toBe(0);
     expect(result.stdout).toContain(
-      "skip: shop/Reports (not a PostgreSQL data source)",
+      "skip: shop/Reports (not a PostgreSQL, MySQL or MariaDB data source)",
     );
     expect(result.stdout).toContain("skip: shop/NoUser (no user found");
     expect(readEnvironments()).toEqual([
@@ -206,6 +210,80 @@ describe("supervised-db-debugging environments manager", () => {
     expect(result.stderr).toContain(
       "/mnt/c/Users/me/missing/.idea/dataSources.xml",
     );
+  });
+});
+
+describe("MySQL environments", () => {
+  it("adds a MySQL environment and lists it with the MySQL default port", () => {
+    expect(
+      run(
+        "add",
+        "--name",
+        "m",
+        "--host",
+        "h",
+        "--user",
+        "u",
+        "--engine",
+        "mysql",
+      ).status,
+    ).toBe(0);
+    expect(readEnvironments()[0]).toEqual({
+      name: "m",
+      host: "h",
+      user: "u",
+      engine: "mysql",
+    });
+    expect(run("list").stdout).toContain(
+      "m -> mysql u@h:3306/ (password via UI prompt)",
+    );
+    const bad = run(
+      "add",
+      "--name",
+      "o",
+      "--host",
+      "h",
+      "--user",
+      "u",
+      "--engine",
+      "oracle",
+    );
+    expect(bad.status).toBe(1);
+    expect(bad.stderr).toContain("--engine must be postgresql or mysql");
+  });
+
+  it("imports MySQL and MariaDB data sources from a PhpStorm project", () => {
+    const project = writeProject(
+      source(
+        "Shop",
+        "m1",
+        "jdbc:mysql://db.example.com:3307/shop?useSSL=true",
+      ) + source("Legacy", "m2", "jdbc:mariadb://legacy.example.com/old"),
+      `<data-source name="Shop" uuid="m1"><user-name>app</user-name></data-source>` +
+        `<data-source name="Legacy" uuid="m2"><user-name>ro</user-name></data-source>`,
+    );
+    const result = run("import-phpstorm", "--project", project);
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain(
+      "add: shop/Legacy -> mysql ro@legacy.example.com:3306/old",
+    );
+    expect(readEnvironments()).toEqual([
+      {
+        name: "shop/Shop",
+        host: "db.example.com",
+        user: "app",
+        engine: "mysql",
+        port: 3307,
+        database: "shop",
+      },
+      {
+        name: "shop/Legacy",
+        host: "legacy.example.com",
+        user: "ro",
+        engine: "mysql",
+        database: "old",
+      },
+    ]);
   });
 });
 

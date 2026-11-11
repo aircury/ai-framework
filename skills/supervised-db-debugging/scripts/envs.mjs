@@ -59,10 +59,17 @@ function tagText(body, tag) {
   return body.match(new RegExp(`<${tag}>([^<]*)</${tag}>`))?.[1].trim();
 }
 
-function parsePostgresUrl(url) {
-  const match = url?.match(/^jdbc:postgresql:\/\/([^/:?]+)(?::(\d+))?(?:\/([^?]*))?/);
+const DEFAULT_PORTS = { postgresql: 5432, mysql: 3306 };
+
+function parseJdbcUrl(url) {
+  const match = url?.match(/^jdbc:(postgresql|mysql|mariadb):\/\/([^/:?,]+)(?::(\d+))?(?:\/([^?]*))?/);
   if (!match) return undefined;
-  return { host: match[1], port: match[2] ? Number(match[2]) : undefined, database: match[3] || undefined };
+  return {
+    engine: match[1] === 'postgresql' ? 'postgresql' : 'mysql',
+    host: match[2],
+    port: match[3] ? Number(match[3]) : undefined,
+    database: match[4] || undefined,
+  };
 }
 
 if (!command || !file) fail('Usage: envs.mjs <add|list|remove|import-phpstorm> <environments.json> [--flag value ...]');
@@ -71,8 +78,10 @@ if (command === 'list') {
   const { environments } = load();
   if (!environments.length) console.log('environments: none configured (make env-add NAME=... HOST=... DBUSER=...)');
   for (const e of environments) {
-    const auth = e.auth === 'rds-iam' ? `AWS IAM${e.awsProfile ? `, profile ${e.awsProfile}` : ''}` : e.passwordEnv ? `password from $${e.passwordEnv}` : e.password ? 'password in file' : 'password via UI prompt or .pgpass';
-    console.log(`environment: ${e.name} -> ${e.user}@${e.host}:${e.port ?? 5432}/${e.database ?? ''} (${auth})`);
+    const engine = e.engine ?? 'postgresql';
+    const prompt = engine === 'mysql' ? 'password via UI prompt' : 'password via UI prompt or .pgpass';
+    const auth = e.auth === 'rds-iam' ? `AWS IAM${e.awsProfile ? `, profile ${e.awsProfile}` : ''}` : e.passwordEnv ? `password from $${e.passwordEnv}` : e.password ? 'password in file' : prompt;
+    console.log(`environment: ${e.name} -> ${engine} ${e.user}@${e.host}:${e.port ?? DEFAULT_PORTS[engine]}/${e.database ?? ''} (${auth})`);
   }
 } else if (command === 'add') {
   for (const key of ['name', 'host', 'user']) if (!flags[key]) fail(`--${key} is required.`);
@@ -80,6 +89,10 @@ if (command === 'list') {
   const data = load();
   if (data.environments.some((e) => e.name === flags.name)) fail(`Environment "${flags.name}" already exists; remove it first.`);
   const entry = { name: flags.name, host: flags.host, user: flags.user };
+  if (flags.engine) {
+    if (!['postgresql', 'mysql'].includes(flags.engine)) fail('--engine must be postgresql or mysql.');
+    if (flags.engine === 'mysql') entry.engine = 'mysql';
+  }
   if (flags.port) {
     entry.port = Number(flags.port);
     if (!Number.isInteger(entry.port) || entry.port < 1 || entry.port > 65535) fail('--port must be 1-65535.');
@@ -118,9 +131,9 @@ if (command === 'list') {
   let added = 0;
   for (const source of dataSourceBlocks(fs.readFileSync(sourcesFile, 'utf8'))) {
     const label = `${prefix}/${source.name}`;
-    const url = parsePostgresUrl(tagText(source.body, 'jdbc-url'));
+    const url = parseJdbcUrl(tagText(source.body, 'jdbc-url'));
     if (!url) {
-      console.log(`skip: ${label} (not a PostgreSQL data source)`);
+      console.log(`skip: ${label} (not a PostgreSQL, MySQL or MariaDB data source)`);
       continue;
     }
     if (data.environments.some((e) => e.name === label)) {
@@ -136,6 +149,7 @@ if (command === 'list') {
       continue;
     }
     const entry = { name: label, host: url.host, user };
+    if (url.engine === 'mysql') entry.engine = 'mysql';
     if (url.port) entry.port = url.port;
     if (url.database) entry.database = url.database;
     if (details.iam) {
@@ -152,7 +166,7 @@ if (command === 'list') {
     added += 1;
     const note = ['localhost', '127.0.0.1'].includes(url.host) ? ' (localhost: reachable from WSL only if the port is forwarded/tunnelled there)' : '';
     const iamNote = entry.auth === 'rds-iam' && !entry.awsProfile ? ' (IAM: set awsProfile or pass --aws-profile)' : '';
-    console.log(`add: ${label} -> ${user}@${url.host}:${url.port ?? 5432}/${url.database ?? ''}${note}${iamNote}`);
+    console.log(`add: ${label} -> ${url.engine} ${user}@${url.host}:${url.port ?? DEFAULT_PORTS[url.engine]}/${url.database ?? ''}${note}${iamNote}`);
   }
   if (added) save(data);
   console.log(`Imported ${added} environment(s) from ${sourcesFile}.`);
